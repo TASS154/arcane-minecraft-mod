@@ -1,0 +1,1 @@
+{"category":"effect","behavior":{"handler":"arcane:heal","magnitude_keys":["amount"]},"cost":{"mana":3}}

@@ -1,0 +1,1 @@
+{"category":"modifier","behavior":{"handler":"arcane:delay"},"modifier_scope":{"target":"next_segment","wrap":true,"delay_param":"seconds"},"parameters":{"seconds":{"type":"float","default":2.0}},"cost":{"mana":1}}

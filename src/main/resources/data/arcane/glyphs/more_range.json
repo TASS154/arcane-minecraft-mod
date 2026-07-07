@@ -1,0 +1,1 @@
+{"category":"modifier","behavior":{"handler":"arcane:more_range"},"modifier_scope":{"target":"delivery","mutate":{"range":{"op":"multiply","value":1.5}}},"cost":{"mana":1}}

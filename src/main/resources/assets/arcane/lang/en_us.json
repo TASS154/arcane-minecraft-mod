@@ -1,0 +1,14 @@
+{
+  "itemGroup.arcane": "Arcane",
+  "block.arcane.arcane_workbench": "Arcane Workbench",
+  "block.arcane.mana_crystal": "Mana Crystal",
+  "item.arcane.arcane_pen": "Arcane Pen",
+  "item.arcane.common_ink": "Common Ink",
+  "item.arcane.blood_ink": "Blood Ink",
+  "item.arcane.invisible_ink": "Invisible Ink",
+  "item.arcane.glyph_note": "Glyph Note",
+  "key.arcane.cast": "Cast Spell",
+  "key.categories.arcane": "Arcane",
+  "gui.arcane.workbench": "Arcane Workbench",
+  "gui.arcane.save": "Save"
+}

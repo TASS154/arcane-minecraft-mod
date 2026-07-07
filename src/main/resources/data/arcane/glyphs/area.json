@@ -1,0 +1,1 @@
+{"category":"modifier","behavior":{"handler":"arcane:area"},"modifier_scope":{"target":"previous_effect","kind":"effect","mutate":{"radius":{"op":"multiply","value":2.0}}},"cost":{"mana":2}}

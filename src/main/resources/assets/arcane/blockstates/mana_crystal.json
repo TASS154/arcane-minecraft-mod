@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "arcane:block/mana_crystal" }
+  }
+}

@@ -1,0 +1,1 @@
+{"category":"condition","behavior":{"handler":"arcane:after_seconds"},"parameters":{"seconds":{"type":"float","default":2.0}},"cost":{"mana":0}}

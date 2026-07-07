@@ -1,0 +1,1 @@
+{"category":"form","behavior":{"handler":"arcane:projectile","magnitude_keys":["range","speed"]},"composition":{"max_per_inscription":1,"position":"start"},"cost":{"mana":3}}

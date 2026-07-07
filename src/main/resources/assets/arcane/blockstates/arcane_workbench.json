@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "arcane:block/arcane_workbench" }
+  }
+}

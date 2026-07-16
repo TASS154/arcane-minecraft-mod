@@ -2,6 +2,8 @@
 
 Modular glyph-based magic system for Minecraft 1.20.1 (NeoForge/Forge).
 
+**Documentação completa do sistema:** [docs/DOCUMENTACAO_COMPLETA.md](docs/DOCUMENTACAO_COMPLETA.md) — filosofia, glifos, grimórios, rituais, cristais, progressão e o que está no MVP.
+
 **Guia completo em português:** [docs/COMO_INSTALAR_E_USAR.md](docs/COMO_INSTALAR_E_USAR.md) — instalação, bancada arcana, primeiros passos no jogo.
 
 **Checklist de trabalho manual (arte, sons, design):** [docs/TRABALHO_MANUAL.md](docs/TRABALHO_MANUAL.md)

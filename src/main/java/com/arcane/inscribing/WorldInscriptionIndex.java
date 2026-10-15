@@ -1,22 +1,27 @@
 package com.arcane.inscribing;
 
-import com.arcane.inscription.GlyphInstance;
 import com.arcane.inscription.Inscription;
-import com.arcane.inscription.InscriptionMetadata;
-import com.arcane.inscription.InscriptionSourceKind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class WorldInscriptionIndex extends SavedData {
   private static final String DATA_NAME = "arcane_inscriptions";
   private final Map<BlockPos, InscriptionAnchor> anchors = new HashMap<>();
+  private final Map<Long, Set<BlockPos>> byChunk = new HashMap<>();
 
   public static WorldInscriptionIndex get(ServerLevel level) {
     return level.getDataStorage().computeIfAbsent(WorldInscriptionIndex::load, WorldInscriptionIndex::new, DATA_NAME);
@@ -31,10 +36,12 @@ public class WorldInscriptionIndex extends SavedData {
       for (Tag element : list) {
         CompoundTag anchorTag = (CompoundTag) element;
         BlockPos pos = BlockPos.of(anchorTag.getLong("pos"));
-        Inscription.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, anchorTag.get("inscription"))
-            .result().ifPresent(inscription -> index.anchors.put(pos,
-                new InscriptionAnchor(pos, inscription, anchorTag.getString("trigger"),
-                    new ResourceLocation(anchorTag.getString("ink")))));
+        Inscription.CODEC.parse(NbtOps.INSTANCE, anchorTag.get("inscription"))
+            .result().ifPresent(inscription -> {
+              index.anchors.put(pos, new InscriptionAnchor(pos, inscription, anchorTag.getString("trigger"),
+                  new ResourceLocation(anchorTag.getString("ink"))));
+              index.indexChunk(pos);
+            });
       }
     }
     return index;
@@ -48,7 +55,7 @@ public class WorldInscriptionIndex extends SavedData {
       anchorTag.putLong("pos", pos.asLong());
       anchorTag.putString("trigger", anchor.triggerType());
       anchorTag.putString("ink", anchor.ink().toString());
-      Inscription.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, anchor.inscription())
+      Inscription.CODEC.encodeStart(NbtOps.INSTANCE, anchor.inscription())
           .result().ifPresent(encoded -> anchorTag.put("inscription", encoded));
       list.add(anchorTag);
     });
@@ -61,7 +68,18 @@ public class WorldInscriptionIndex extends SavedData {
   }
 
   public void put(InscriptionAnchor anchor) {
-    anchors.put(anchor.pos(), anchor);
+    BlockPos pos = anchor.pos();
+    anchors.put(pos, anchor);
+    indexChunk(pos);
     setDirty();
+  }
+
+  public Set<BlockPos> getInChunk(int chunkX, int chunkZ) {
+    Set<BlockPos> positions = byChunk.get(ChunkPos.asLong(chunkX, chunkZ));
+    return positions == null ? Set.of() : Collections.unmodifiableSet(positions);
+  }
+
+  private void indexChunk(BlockPos pos) {
+    byChunk.computeIfAbsent(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4), key -> new HashSet<>()).add(pos);
   }
 }

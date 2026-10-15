@@ -13,10 +13,11 @@ public final class ManaPoisoningService {
     float protection = getProtection(player);
     float exposure = (float) (environment.poisoningExposureRate() * (1.0 - protection));
     if (exposure <= 0) return;
-    if (player.tickCount % 40 == 0) {
+    // Invoked on a 20-tick cadence; keep confusion ~every 40 ticks and damage every call.
+    if ((player.tickCount / 20) % 2 == 0) {
       player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 100, 0));
     }
-    if (exposure > 0.2f && player.tickCount % 20 == 0) {
+    if (exposure > 0.2f) {
       player.hurt(player.damageSources().magic(), exposure * 2f);
     }
   }

@@ -1,7 +1,6 @@
 package com.arcane.execution;
 
 import com.arcane.ambient.AmbientFieldResolver;
-import com.arcane.execution.ManaState;
 import com.arcane.grimoire.GrimoireAttachments;
 import com.arcane.grimoire.GrimoireState;
 import com.arcane.inscribing.InkRegistry;
@@ -18,8 +17,6 @@ import net.minecraft.world.entity.LivingEntity;
 import java.util.Optional;
 
 public final class CastingService {
-    private static final SpellPipeline PIPELINE = new SpellPipeline();
-
     private CastingService() {}
 
     public static ExecutionResult tryCast(ServerPlayer player, Inscription inscription, PrecisionSnapshot precision) {
@@ -50,7 +47,7 @@ public final class CastingService {
                 ExecutionContext.TriggerEvent.cast()
         );
 
-        ExecutionResult result = PIPELINE.execute(context);
+        ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
             ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint()));
         }
@@ -69,6 +66,6 @@ public final class CastingService {
                 PrecisionSnapshot.WORKBENCH,
                 ExecutionContext.TriggerEvent.cast()
         );
-        return PIPELINE.execute(context);
+        return SpellPipeline.INSTANCE.execute(context);
     }
 }

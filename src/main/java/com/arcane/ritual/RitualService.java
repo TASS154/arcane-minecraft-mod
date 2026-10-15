@@ -1,20 +1,19 @@
 package com.arcane.ritual;
 
-import com.arcane.execution.CastingService;
+import com.arcane.ambient.AmbientFieldResolver;
 import com.arcane.execution.EnvironmentalSnapshot;
 import com.arcane.execution.ExecutionContext;
 import com.arcane.execution.PrecisionSnapshot;
+import com.arcane.execution.SpellPipeline;
 import com.arcane.inscription.CompiledExecutionPlan;
 import com.arcane.inscription.CompiledPlanCache;
 import com.arcane.inscription.Inscription;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.phys.AABB;
 
 import java.util.*;
 
@@ -30,13 +29,13 @@ public class RitualService {
       if (site.state() != RitualSite.State.DORMANT) return;
       Inscription inscription = site.inscription();
       CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
-      EnvironmentalSnapshot environment = com.arcane.ambient.AmbientFieldResolver.resolve(level, site.origin());
+      EnvironmentalSnapshot environment = AmbientFieldResolver.resolve(level, site.origin());
       ExecutionContext context = new ExecutionContext(level, activator, inscription, plan, environment,
           PrecisionSnapshot.WORKBENCH, ExecutionContext.TriggerEvent.cast());
       context.setGeometryBonus(site.geometryScore());
       context.setScaleFactor(site.scaleFactor());
       context.setRitualSiteId(ritualId);
-      new com.arcane.execution.SpellPipeline().execute(context);
+      SpellPipeline.INSTANCE.execute(context);
       site.setState(RitualSite.State.ARMED);
     });
   }

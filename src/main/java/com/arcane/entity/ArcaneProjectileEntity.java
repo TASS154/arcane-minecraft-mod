@@ -1,6 +1,5 @@
 package com.arcane.entity;
 
-import com.arcane.execution.CastingService;
 import com.arcane.execution.EnvironmentalSnapshot;
 import com.arcane.execution.ExecutionContext;
 import com.arcane.execution.PrecisionSnapshot;
@@ -55,9 +54,8 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
       if (result instanceof EntityHitResult entityHit && entityHit.getEntity() != null) {
         context.setResolvedTargets(TargetList.ofEntities(entityHit.getEntity()));
       }
-      SpellPipeline pipeline = new SpellPipeline();
       for (CompiledExecutionPlan.ExecutionSegment segment : plan.segments()) {
-        pipeline.executeSegment(context, segment);
+        SpellPipeline.INSTANCE.executeSegment(context, segment);
       }
       discard();
     }

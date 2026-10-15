@@ -1,13 +1,13 @@
 package com.arcane.execution.handlers;
 
+import com.arcane.api.activator.ActivatorHandler;
 import com.arcane.execution.ExecutionContext;
-import com.arcane.glyph.GlyphHandlerRegistry;
 import com.arcane.inscription.GlyphInstance;
 import com.arcane.ritual.RitualService;
 
 import java.util.UUID;
 
-public class ActivateHandler implements GlyphHandlerRegistry.ActivatorHandler {
+public class ActivateHandler implements ActivatorHandler {
   @Override
   public void activate(ExecutionContext context, GlyphInstance instance) {
     UUID ritualId = context.ritualSiteId().orElse(null);

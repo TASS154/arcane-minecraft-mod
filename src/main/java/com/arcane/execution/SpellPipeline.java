@@ -3,10 +3,22 @@ package com.arcane.execution;
 import com.arcane.api.effect.EffectHandler;
 import com.arcane.api.filter.FilterResolver;
 import com.arcane.api.form.FormHandler;
+import com.arcane.execution.scheduler.SpellTickScheduler;
+import com.arcane.glyph.ArcaneIds;
 import com.arcane.glyph.GlyphHandlerRegistry;
 import com.arcane.inscription.CompiledExecutionPlan;
+import com.arcane.inscription.CompiledExecutionPlan.ChainRule;
+import com.arcane.inscription.CompiledExecutionPlan.ConditionGate;
+import com.arcane.inscription.CompiledExecutionPlan.EffectCallCompiled;
+import com.arcane.inscription.CompiledExecutionPlan.ExecutionSegment;
+import com.arcane.inscription.CompiledExecutionPlan.FilterSpec;
+import com.arcane.inscription.GlyphInstance;
+
+import java.util.Map;
 
 public final class SpellPipeline {
+    public static final SpellPipeline INSTANCE = new SpellPipeline();
+
     public ExecutionResult execute(ExecutionContext context) {
         CompiledExecutionPlan plan = context.plan();
         DeliverySpec deliverySpec = DeliverySpec.fromPlan(plan.delivery());
@@ -24,10 +36,9 @@ public final class SpellPipeline {
             return ExecutionResult.ok(0);
         }
 
-        for (int i = 0; i < plan.segments().size(); i++) {
-            CompiledExecutionPlan.ExecutionSegment segment = plan.segments().get(i);
+        for (ExecutionSegment segment : plan.segments()) {
             if (segment.delayTicks() > 0) {
-                com.arcane.execution.scheduler.SpellTickScheduler.schedule(context, segment, segment.delayTicks());
+                SpellTickScheduler.schedule(context, segment, segment.delayTicks());
                 continue;
             }
             executeSegment(context, segment);
@@ -36,38 +47,54 @@ public final class SpellPipeline {
         return ExecutionResult.ok(0);
     }
 
-    public void executeSegment(ExecutionContext context, CompiledExecutionPlan.ExecutionSegment segment) {
-        if (segment.condition().isPresent()) {
-            CompiledExecutionPlan.ConditionGate gate = segment.condition().get();
-            boolean pass = GlyphHandlerRegistry.getCondition(gate.handler())
-                    .map(h -> h.test(context, new com.arcane.inscription.GlyphInstance(gate.conditionId(), gate.parameters())))
-                    .orElse(true);
-            if (!pass) {
-                return;
-            }
+    public void executeSegment(ExecutionContext context, ExecutionSegment segment) {
+        if (!passesCondition(context, segment)) {
+            return;
         }
+        TargetList targets = applyFilters(context, segment, context.resolvedTargets());
+        applyEffects(context, segment, targets);
+        applyChainRules(context, segment);
+    }
 
-        TargetList targets = context.resolvedTargets();
-        for (CompiledExecutionPlan.FilterSpec filter : segment.filters()) {
+    private boolean passesCondition(ExecutionContext context, ExecutionSegment segment) {
+        if (segment.condition().isEmpty()) {
+            return true;
+        }
+        ConditionGate gate = segment.condition().get();
+        GlyphInstance instance = new GlyphInstance(gate.conditionId(), gate.parameters());
+        return GlyphHandlerRegistry.getCondition(gate.handler())
+                .map(handler -> handler.test(context, instance))
+                .orElse(true);
+    }
+
+    private TargetList applyFilters(ExecutionContext context, ExecutionSegment segment, TargetList targets) {
+        TargetList current = targets;
+        for (FilterSpec filter : segment.filters()) {
             FilterResolver resolver = GlyphHandlerRegistry.getFilter(filter.handler()).orElse(null);
             if (resolver != null) {
-                targets = resolver.filter(context, targets);
+                current = resolver.filter(context, current);
             }
         }
+        return current;
+    }
 
-        for (CompiledExecutionPlan.EffectCallCompiled effectCompiled : segment.effects()) {
+    private void applyEffects(ExecutionContext context, ExecutionSegment segment, TargetList targets) {
+        for (EffectCallCompiled effectCompiled : segment.effects()) {
             EffectHandler handler = GlyphHandlerRegistry.getEffect(effectCompiled.handler()).orElse(null);
             if (handler != null) {
                 handler.apply(context, EffectCall.fromCompiled(effectCompiled), targets);
             }
         }
+    }
 
-        for (CompiledExecutionPlan.ChainRule rule : segment.chainRules()) {
-            if ("activate".equals(rule.event())) {
-                GlyphHandlerRegistry.getActivator(new net.minecraft.resources.ResourceLocation("arcane", "activate"))
-                        .ifPresent(h -> h.activate(context, new com.arcane.inscription.GlyphInstance(
-                                new net.minecraft.resources.ResourceLocation("arcane", "activate"), java.util.Map.of())));
+    private void applyChainRules(ExecutionContext context, ExecutionSegment segment) {
+        for (ChainRule rule : segment.chainRules()) {
+            if (!"activate".equals(rule.event())) {
+                continue;
             }
+            GlyphInstance instance = new GlyphInstance(ArcaneIds.ACTIVATE, Map.of());
+            GlyphHandlerRegistry.getActivator(ArcaneIds.ACTIVATE)
+                    .ifPresent(handler -> handler.activate(context, instance));
         }
     }
 }

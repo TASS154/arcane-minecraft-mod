@@ -13,9 +13,10 @@
 
 | Package | Role |
 |---|---|
-| `glyph` | Definitions, registry, handler binding |
+| `api` | Handler contracts: form, effect, filter, condition, activator |
+| `glyph` | Definitions, `GlyphHandlerRegistry` map store, `GlyphBootstrap`, `ArcaneIds` |
 | `inscription` | Composition, validation, compilation |
-| `execution` | Runtime pipeline and handlers |
+| `execution` | Runtime pipeline, handlers, and `SpellTickScheduler` |
 | `grimoire` | Player grimório state and lifecycle |
 | `inscribing` | World/item inscription anchors |
 | `ritual` | Large-scale stored inscriptions |
@@ -24,4 +25,4 @@
 
 ## Extension
 
-Add a JSON glyph + register a handler in `GlyphHandlerRegistry.bootstrap()`.
+Add a JSON glyph + register a handler in `GlyphBootstrap.registerDefaults()` (or any `GlyphHandlerRegistry.register*` call).

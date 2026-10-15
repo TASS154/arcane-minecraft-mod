@@ -1,6 +1,6 @@
 package com.arcane;
 
-import com.arcane.glyph.GlyphHandlerRegistry;
+import com.arcane.glyph.GlyphBootstrap;
 import com.arcane.glyph.GlyphRegistry;
 import com.arcane.grimoire.GrimoireLifecycleHandler;
 import com.arcane.inscribing.InscribingHandler;
@@ -53,7 +53,7 @@ public class ArcaneMod {
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             ModNetwork.register();
-            GlyphHandlerRegistry.bootstrap();
+            GlyphBootstrap.registerDefaults();
             LOGGER.info("Arcane mod initialized — modular glyph magic system ready.");
         });
     }

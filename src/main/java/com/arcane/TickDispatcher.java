@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public final class TickDispatcher {
     private static final int AMBIENT_INTERVAL_TICKS = 20;
+    private static final int INSCRIPTION_INTERVAL_TICKS = 10;
 
     private TickDispatcher() {}
 
@@ -16,6 +17,12 @@ public final class TickDispatcher {
         SpellTickScheduler.tick(server);
         if (server.getTickCount() % AMBIENT_INTERVAL_TICKS == 0) {
             tickAmbient(server);
+        }
+        if (server.getTickCount() % INSCRIPTION_INTERVAL_TICKS == 0) {
+            boolean particles = server.getTickCount() % AMBIENT_INTERVAL_TICKS == 0;
+            for (net.minecraft.server.level.ServerLevel level : server.getAllLevels()) {
+                com.arcane.inscribing.InscribingService.tickWorld(level, particles);
+            }
         }
     }
 

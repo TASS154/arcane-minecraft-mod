@@ -1,13 +1,11 @@
 {
   "itemGroup.arcane": "Arcane",
-
   "block.arcane.arcane_workbench": "Bancada Arcana",
   "block.arcane.arcane_workbench.desc": "Mesa de escriba onde glifos viram feitiços.\nA ordem dos glifos muda o resultado.",
   "block.arcane.mana_crystal": "Cristal de Mana",
   "block.arcane.mana_crystal.desc": "Pulsa com mana bruta. Perto dele a magia fica\nmais forte, mas a exposição longa envenena.",
-
   "item.arcane.arcane_pen": "Pena Arcana",
-  "item.arcane.arcane_pen.desc": "Escreve glifos no mundo: blocos, baús, chão.\nPrecisa de tinta na outra mão.",
+  "item.arcane.arcane_pen.desc": "Escreve a magia ativa em blocos e baús.\nTinta na outra mão. Agachado: apaga.",
   "item.arcane.common_ink": "Tinta Comum",
   "item.arcane.common_ink.desc": "Tinta estável, sem efeitos colaterais.",
   "item.arcane.blood_ink": "Tinta de Sangue",
@@ -25,17 +23,13 @@
   "item.arcane.symmetry_mirror": "Espelho de Simetria",
   "item.arcane.symmetry_mirror.desc": "Ferramenta de ritual (ainda sem uso).",
   "item.arcane.npc_mage_spawn_egg": "Ovo Gerador de Mago",
-
   "entity.arcane.grimoire": "Grimório",
   "entity.arcane.arcane_projectile": "Projétil Arcano",
   "entity.arcane.npc_mage": "Mago",
-
   "tooltip.arcane.glyph_note.glyph": "Contém: %s",
-
   "key.arcane.cast": "Conjurar magia ativa",
   "key.arcane.cycle": "Trocar magia ativa",
   "key.categories.arcane": "Arcane",
-
   "gui.arcane.workbench": "Bancada Arcana",
   "gui.arcane.save": "Salvar",
   "gui.arcane.cast": "Conjurar",
@@ -54,13 +48,11 @@
   "gui.arcane.ready": "Pronta para salvar",
   "gui.arcane.active": "Ativa: %s",
   "gui.arcane.glyph_unknown_hint": "Ainda não identificado. Use-o em composições para aprender.",
-
   "hud.arcane.no_spell": "Nenhuma magia ativa",
   "hud.arcane.no_grimoire": "Sem grimório: mana pela metade",
   "hud.arcane.zone": "Zona de mana x%s",
   "hud.arcane.poisoning": "Mana Poisoning!",
   "hud.arcane.selected": "Magia ativa: %s",
-
   "category.arcane.form": "Forma",
   "category.arcane.effect": "Efeito",
   "category.arcane.filter": "Filtro",
@@ -68,13 +60,11 @@
   "category.arcane.condition": "Condição",
   "category.arcane.activator": "Ativador",
   "category.arcane.unknown": "Desconhecida",
-
   "knowledge.arcane.unknown": "Desconhecido",
   "knowledge.arcane.suspected": "Suspeito",
   "knowledge.arcane.partial": "Parcial",
   "knowledge.arcane.identified": "Identificado",
   "knowledge.arcane.mastered": "Dominado",
-
   "glyph.arcane.self": "Eu",
   "glyph.arcane.self.desc": "Forma: o feitiço acontece em você.",
   "glyph.arcane.projectile": "Projétil",
@@ -107,7 +97,6 @@
   "glyph.arcane.on_hit_entity.desc": "Condição: o que vem depois só acontece ao atingir uma criatura.",
   "glyph.arcane.activate": "Ativar",
   "glyph.arcane.activate.desc": "Ativador: dispara um ritual armazenado.",
-
   "subtitles.arcane.spell_cast": "Magia conjurada",
   "subtitles.arcane.spell_hit": "Magia atinge",
   "subtitles.arcane.workbench_save": "Inscrição salva",
@@ -116,7 +105,6 @@
   "subtitles.arcane.ritual_activate": "Ritual desperta",
   "subtitles.arcane.mana_poison": "Mana envenena",
   "subtitles.arcane.grimoire_summon": "Grimório surge",
-
   "message.arcane.mana.insufficient": "Mana insuficiente",
   "message.arcane.discovery.glyph": "Glifo descoberto: %s",
   "message.arcane.discovery.hint": "Você sente que %s pode existir...",
@@ -131,5 +119,10 @@
   "message.arcane.inscription.form_not_first": "A Forma deve ser o primeiro glifo",
   "message.arcane.inscription.invalid_order": "Ordem de glifos inválida",
   "message.arcane.inscription.too_many_glyph": "Glifo repetido além do permitido",
-  "message.arcane.inscription.unknown_knowledge": "Você ainda não identificou um destes glifos"
+  "message.arcane.inscription.unknown_knowledge": "Você ainda não identificou um destes glifos",
+  "message.arcane.pen.need_ink": "Segure uma tinta na outra mão para escrever",
+  "message.arcane.pen.written.on_open": "Inscrição gravada: dispara ao abrir o baú",
+  "message.arcane.pen.written.on_touch": "Inscrição gravada: dispara ao pisar no bloco",
+  "message.arcane.pen.erased": "Inscrição apagada",
+  "message.arcane.pen.nothing": "Não há inscrição aqui"
 }

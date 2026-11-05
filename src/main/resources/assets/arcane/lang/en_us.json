@@ -1,13 +1,11 @@
 {
   "itemGroup.arcane": "Arcane",
-
   "block.arcane.arcane_workbench": "Arcane Workbench",
   "block.arcane.arcane_workbench.desc": "A scribe's desk where glyphs become spells.\nGlyph order changes the outcome.",
   "block.arcane.mana_crystal": "Mana Crystal",
   "block.arcane.mana_crystal.desc": "Pulses with raw mana. Magic grows stronger nearby,\nbut long exposure is poisonous.",
-
   "item.arcane.arcane_pen": "Arcane Pen",
-  "item.arcane.arcane_pen.desc": "Writes glyphs into the world: blocks, chests, floors.\nNeeds ink in the other hand.",
+  "item.arcane.arcane_pen.desc": "Writes the active spell onto blocks and chests.\nInk in the other hand. Sneak to erase.",
   "item.arcane.common_ink": "Common Ink",
   "item.arcane.common_ink.desc": "Stable ink with no side effects.",
   "item.arcane.blood_ink": "Blood Ink",
@@ -25,17 +23,13 @@
   "item.arcane.symmetry_mirror": "Symmetry Mirror",
   "item.arcane.symmetry_mirror.desc": "Ritual tool (not functional yet).",
   "item.arcane.npc_mage_spawn_egg": "Mage Spawn Egg",
-
   "entity.arcane.grimoire": "Grimoire",
   "entity.arcane.arcane_projectile": "Arcane Projectile",
   "entity.arcane.npc_mage": "Mage",
-
   "tooltip.arcane.glyph_note.glyph": "Contains: %s",
-
   "key.arcane.cast": "Cast active spell",
   "key.arcane.cycle": "Cycle active spell",
   "key.categories.arcane": "Arcane",
-
   "gui.arcane.workbench": "Arcane Workbench",
   "gui.arcane.save": "Save",
   "gui.arcane.cast": "Cast",
@@ -54,13 +48,11 @@
   "gui.arcane.ready": "Ready to save",
   "gui.arcane.active": "Active: %s",
   "gui.arcane.glyph_unknown_hint": "Not identified yet. Use it in compositions to learn.",
-
   "hud.arcane.no_spell": "No active spell",
   "hud.arcane.no_grimoire": "No grimoire: half mana",
   "hud.arcane.zone": "Mana zone x%s",
   "hud.arcane.poisoning": "Mana Poisoning!",
   "hud.arcane.selected": "Active spell: %s",
-
   "category.arcane.form": "Form",
   "category.arcane.effect": "Effect",
   "category.arcane.filter": "Filter",
@@ -68,13 +60,11 @@
   "category.arcane.condition": "Condition",
   "category.arcane.activator": "Activator",
   "category.arcane.unknown": "Unknown",
-
   "knowledge.arcane.unknown": "Unknown",
   "knowledge.arcane.suspected": "Suspected",
   "knowledge.arcane.partial": "Partial",
   "knowledge.arcane.identified": "Identified",
   "knowledge.arcane.mastered": "Mastered",
-
   "glyph.arcane.self": "Self",
   "glyph.arcane.self.desc": "Form: the spell happens on you.",
   "glyph.arcane.projectile": "Projectile",
@@ -107,7 +97,6 @@
   "glyph.arcane.on_hit_entity.desc": "Condition: what follows only happens when a creature is hit.",
   "glyph.arcane.activate": "Activate",
   "glyph.arcane.activate.desc": "Activator: triggers a stored ritual.",
-
   "subtitles.arcane.spell_cast": "Spell cast",
   "subtitles.arcane.spell_hit": "Spell hits",
   "subtitles.arcane.workbench_save": "Inscription saved",
@@ -116,7 +105,6 @@
   "subtitles.arcane.ritual_activate": "Ritual awakens",
   "subtitles.arcane.mana_poison": "Mana poisons",
   "subtitles.arcane.grimoire_summon": "Grimoire appears",
-
   "message.arcane.mana.insufficient": "Not enough mana",
   "message.arcane.discovery.glyph": "Glyph discovered: %s",
   "message.arcane.discovery.hint": "You sense that %s might exist...",
@@ -131,5 +119,10 @@
   "message.arcane.inscription.form_not_first": "The Form must be the first glyph",
   "message.arcane.inscription.invalid_order": "Invalid glyph order",
   "message.arcane.inscription.too_many_glyph": "Glyph repeated more than allowed",
-  "message.arcane.inscription.unknown_knowledge": "You haven't identified one of these glyphs yet"
+  "message.arcane.inscription.unknown_knowledge": "You haven't identified one of these glyphs yet",
+  "message.arcane.pen.need_ink": "Hold ink in your other hand to write",
+  "message.arcane.pen.written.on_open": "Inscription written: triggers when the chest is opened",
+  "message.arcane.pen.written.on_touch": "Inscription written: triggers when stepped on",
+  "message.arcane.pen.erased": "Inscription erased",
+  "message.arcane.pen.nothing": "No inscription here"
 }

@@ -37,6 +37,9 @@ Tudo abaixo está no repositório. As artes e sons são **provisórios de qualid
 - O pacote de salvar aceitava qualquer id e qualquer tamanho. Agora limita a 24 glifos, valida antes de salvar e informa o motivo da recusa. Ids inexistentes não entram mais no grimório.
 - Falhas de conjuração (mana insuficiente etc.) agora aparecem na barra de ação.
 - O projétil some depois de 10 s se não acertar nada (antes ficava no mundo para sempre).
+- **Zona do Cristal de Mana**: a busca pulava de 8 em 8 blocos e quase nunca achava o cristal. Agora varre seção por seção (pulando pela paleta as que não têm cristal) até 32 blocos, o raio da maior zona.
+- **Pena Arcana**: o código de escrita existia, mas nada o chamava. Agora a pena grava a magia ativa (gatilho "ao abrir" em baús e "ao pisar" nos demais blocos), apaga agachada e ao quebrar o bloco, e mostra faíscas nas inscrições visíveis.
+- GameTests em `gametest/ArcaneGameTests.java` (cristal em qualquer posição, armadilha por toque, apagar). Eles acharam um crash que acontecia ao quebrar qualquer bloco, já corrigido.
 
 ### Decisões que tomei e precisam da sua aprovação
 
@@ -46,10 +49,13 @@ Tudo abaixo está no repositório. As artes e sons são **provisórios de qualid
 - **Armadura**: defesa baixa de propósito (1 na máscara, 2 no manto). O valor delas é a proteção contra Mana Poisoning.
 - **Nomes dos glifos** são descritivos (Eu, Projétil, Dano...). Os nomes de fantasia continuam sendo decisão de design.
 - **Tecla B** troca a magia ativa.
+- **Inscrição por toque**: dispara para qualquer criatura que pise no bloco, sem custo de mana, com intervalo de 2 s. Quem pisa é a origem e o alvo da forma Eu. O baú manteve a regra original (quem abre paga a mana).
+- **Superfícies da pena**: `pens/arcane_pen.json` lista pedra, terra e grama, e a documentação diz que a Pena Arcana escreve em grimórios e cajados. Hoje ela escreve em qualquer bloco, porque baús precisam funcionar. Falta decidir.
 
 ### Ainda pendente
 
 - Função do **Projetor de Glifos** e do **Espelho de Simetria** (depende do design de rituais).
+- **Rituais e análise** não são acionados por nenhum código (`RitualService.register` e `AnalysisService` nunca são chamados). O glifo Ativar ainda não tem ritual para disparar.
 - Estágios visuais do grimório (a entidade não sincroniza o estágio com o cliente).
 - Arte final de artista, sons gravados, modelo 3D próprio da bancada.
 - Spawn natural do Mago NPC, estruturas, livros de lore, balanceamento e playtest (seções 5 a 9).

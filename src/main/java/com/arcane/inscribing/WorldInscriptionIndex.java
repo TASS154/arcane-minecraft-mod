@@ -74,6 +74,24 @@ public class WorldInscriptionIndex extends SavedData {
     setDirty();
   }
 
+  public Optional<InscriptionAnchor> remove(BlockPos pos) {
+    InscriptionAnchor removed = anchors.remove(pos);
+    if (removed != null) {
+      Set<BlockPos> chunk = byChunk.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
+      if (chunk != null) chunk.remove(pos);
+      setDirty();
+    }
+    return Optional.ofNullable(removed);
+  }
+
+  public java.util.Collection<InscriptionAnchor> all() {
+    return Collections.unmodifiableCollection(anchors.values());
+  }
+
+  public boolean isEmpty() {
+    return anchors.isEmpty();
+  }
+
   public Set<BlockPos> getInChunk(int chunkX, int chunkZ) {
     Set<BlockPos> positions = byChunk.get(ChunkPos.asLong(chunkX, chunkZ));
     return positions == null ? Set.of() : Collections.unmodifiableSet(positions);

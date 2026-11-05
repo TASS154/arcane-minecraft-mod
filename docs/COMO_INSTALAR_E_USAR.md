@@ -192,10 +192,19 @@ A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fo
 |---------|-----------|
 | **Cristal de Mana** | Magias ficam mais fortes perto dele (até ×32). Ficar muito tempo perto causa Mana Poisoning |
 | **Máscara Arcana / Manto Isolante** | Armaduras (cabeça / peito) que reduzem o Mana Poisoning em 30% / 40% |
-| **Pena Arcana** | Escreve inscrições em blocos do mundo |
+| **Pena Arcana** | Pena na mão principal e tinta na secundária, clique direito num bloco: grava a magia ativa. Em baú dispara **ao abrir**; em qualquer outro bloco dispara **quando uma criatura pisa** (ex.: Eu + Dano vira armadilha). Agachado apaga. Quebrar o bloco também apaga. Consome 1 tinta (fora do criativo); tinta de sangue custa 2 de vida; com tinta invisível a inscrição não solta faíscas |
 | **Nota de Glifo** | Clique direito para aprender o glifo indicado na dica do item |
 | **Mago NPC** | Inimigo que conjura magias e dropa notas. Use o ovo gerador na aba Arcane |
 | **Projetor de Glifos / Espelho de Simetria** | Registrados e com arte, mas **ainda sem função** (dependem de design de rituais) |
+
+---
+
+## Testes automáticos
+
+```bash
+./gradlew test               # testes unitários e integridade de assets
+./gradlew runGameTestServer  # testes dentro de um mundo (cristal, inscrição por toque, apagar)
+```
 
 ---
 

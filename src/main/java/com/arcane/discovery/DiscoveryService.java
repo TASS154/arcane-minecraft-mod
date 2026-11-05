@@ -26,11 +26,22 @@ public final class DiscoveryService {
   public static void onExperiment(ServerPlayer player, List<ResourceLocation> glyphs) {
     GrimoireAttachments.get(player).ifPresent(grimoire -> {
       for (ResourceLocation glyph : glyphs) {
+        // Ignora ids inexistentes enviados pelo cliente, para nao poluir o grimorio.
+        if (com.arcane.glyph.GlyphRegistry.get(glyph).isEmpty()) continue;
+        GlyphKnowledge before = grimoire.knowledge().getOrDefault(glyph, GlyphKnowledge.UNKNOWN);
         GlyphKnowledge next = step(grimoire, glyph);
         grimoire.learnGlyph(glyph, next);
         grimoire.logDiscovery("experiment:" + glyph);
+        if (next != before) {
+          player.displayClientMessage(Component.translatable("message.arcane.discovery.progress",
+              Component.translatable(glyphKey(glyph)), Component.translatable("knowledge.arcane." + next.name().toLowerCase())), false);
+          if (next == GlyphKnowledge.IDENTIFIED) {
+            playLearned(player);
+          }
+        }
       }
     });
+    com.arcane.network.ArcaneSync.sync(player, true);
   }
 
   private static void learn(ServerPlayer player, ResourceLocation glyph, GlyphKnowledge level, String source) {
@@ -38,8 +49,20 @@ public final class DiscoveryService {
       grimoire.learnGlyph(glyph, level);
       grimoire.logDiscovery(source + ":" + glyph);
       player.displayClientMessage(Component.translatable(
-          "message.arcane.discovery.learn", glyph.toString(), level.name()), false);
+          "message.arcane.discovery.learn", Component.translatable(glyphKey(glyph)),
+          Component.translatable("knowledge.arcane." + level.name().toLowerCase())), false);
+      playLearned(player);
     });
+    com.arcane.network.ArcaneSync.sync(player, true);
+  }
+
+  public static String glyphKey(ResourceLocation glyph) {
+    return "glyph." + glyph.getNamespace() + "." + glyph.getPath();
+  }
+
+  private static void playLearned(ServerPlayer player) {
+    player.level().playSound(null, player.blockPosition(), com.arcane.registry.ModSounds.GLYPH_LEARNED.get(),
+        net.minecraft.sounds.SoundSource.PLAYERS, 0.9f, 1.0f);
   }
 
   private static GlyphKnowledge step(GrimoireState grimoire, ResourceLocation glyph) {

@@ -1,0 +1,10 @@
+{
+  "spell_cast":      { "subtitle": "subtitles.arcane.spell_cast",      "sounds": ["arcane:spell_cast"] },
+  "spell_hit":       { "subtitle": "subtitles.arcane.spell_hit",       "sounds": ["arcane:spell_hit"] },
+  "workbench_save":  { "subtitle": "subtitles.arcane.workbench_save",  "sounds": ["arcane:workbench_save"] },
+  "glyph_learned":   { "subtitle": "subtitles.arcane.glyph_learned",   "sounds": ["arcane:glyph_learned"] },
+  "pen_stroke":      { "subtitle": "subtitles.arcane.pen_stroke",      "sounds": ["arcane:pen_stroke"] },
+  "ritual_activate": { "subtitle": "subtitles.arcane.ritual_activate", "sounds": ["arcane:ritual_activate"] },
+  "mana_poison":     { "subtitle": "subtitles.arcane.mana_poison",     "sounds": ["arcane:mana_poison"] },
+  "grimoire_summon": { "subtitle": "subtitles.arcane.grimoire_summon", "sounds": ["arcane:grimoire_summon"] }
+}

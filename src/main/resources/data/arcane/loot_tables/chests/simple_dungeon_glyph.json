@@ -2,17 +2,144 @@
   "type": "minecraft:chest",
   "pools": [
     {
-      "rolls": 1,
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 1
+      },
       "entries": [
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
+          "weight": 3,
           "functions": [
             {
               "function": "minecraft:set_nbt",
               "tag": "{glyph:\"arcane:fire\"}"
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:push\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:touch\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:heal\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:hostile\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:on_hit_entity\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:area\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:more_range\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:activate\"}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "arcane:common_ink",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:amethyst_shard",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:blood_ink",
+          "weight": 1
         }
       ]
     }

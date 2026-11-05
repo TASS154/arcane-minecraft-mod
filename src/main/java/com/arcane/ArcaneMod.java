@@ -11,6 +11,8 @@ import com.arcane.registry.ModCreativeTabs;
 import com.arcane.registry.ModEntities;
 import com.arcane.registry.ModItems;
 import com.arcane.registry.ModMenuTypes;
+import com.arcane.registry.ModParticles;
+import com.arcane.registry.ModSounds;
 import com.arcane.config.ArcaneConfig;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
@@ -39,15 +41,18 @@ public class ArcaneMod {
         ModMenuTypes.register(modBus);
         ModCreativeTabs.register(modBus);
         ModAttachments.register(modBus);
+        ModSounds.register(modBus);
+        ModParticles.register(modBus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ArcaneConfig.SPEC);
 
         modBus.addListener(this::commonSetup);
-        modBus.addListener(this::onAddReloadListeners);
+        MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListeners);
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new GrimoireLifecycleHandler());
         MinecraftForge.EVENT_BUS.register(new InscribingHandler());
+        MinecraftForge.EVENT_BUS.register(new com.arcane.world.ArcaneLootInjector());
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

@@ -12,11 +12,11 @@ import java.util.function.Supplier;
 public record S2CSpellFxPacket(UUID inscriptionId, String fingerprint) {
   public static void encode(S2CSpellFxPacket packet, FriendlyByteBuf buf) {
     buf.writeUUID(packet.inscriptionId);
-    buf.writeUTF(packet.fingerprint);
+    buf.writeUtf(packet.fingerprint);
   }
 
   public static S2CSpellFxPacket decode(FriendlyByteBuf buf) {
-    return new S2CSpellFxPacket(buf.readUUID(), buf.readUTF());
+    return new S2CSpellFxPacket(buf.readUUID(), buf.readUtf());
   }
 
   public static void handle(S2CSpellFxPacket packet, Supplier<NetworkEvent.Context> ctx) {

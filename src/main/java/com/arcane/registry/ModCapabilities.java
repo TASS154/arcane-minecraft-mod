@@ -17,8 +17,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class ModCapabilities {
     public static final Capability<ManaState> MANA = CapabilityManager.get(new CapabilityToken<>() {});
@@ -83,7 +83,7 @@ public final class ModCapabilities {
         private final LazyOptional<ManaState> optional = LazyOptional.of(() -> mana);
 
         @Override
-        public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        public @Nonnull <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
             return cap == MANA ? optional.cast() : LazyOptional.empty();
         }
 
@@ -105,7 +105,7 @@ public final class ModCapabilities {
         private final LazyOptional<GrimoireState> optional = LazyOptional.of(() -> grimoire);
 
         @Override
-        public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        public @Nonnull <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
             return cap == GRIMOIRE ? optional.cast() : LazyOptional.empty();
         }
 

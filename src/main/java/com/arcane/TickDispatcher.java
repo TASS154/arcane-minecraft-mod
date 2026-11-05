@@ -22,6 +22,7 @@ public final class TickDispatcher {
     private static void tickAmbient(MinecraftServer server) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             EnvironmentalSnapshot environment = AmbientFieldResolver.resolve(player.serverLevel(), player.blockPosition());
+            com.arcane.network.ArcaneSync.setEnvironment(player, environment);
             ManaPoisoningService.tick(player, environment);
         }
     }

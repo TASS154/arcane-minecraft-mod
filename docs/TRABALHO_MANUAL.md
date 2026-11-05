@@ -6,6 +6,57 @@ Use como checklist de produção. Itens marcados com **(P0)** são os mais urgen
 
 ---
 
+## Estado em 4 nov 2026: o que já foi feito
+
+Tudo abaixo está no repositório. As artes e sons são **provisórios de qualidade**, gerados por `tools/gen_textures.py` e `tools/gen_sounds.py`; um artista pode trocar qualquer arquivo mantendo nome e tamanho.
+
+| Área | Feito |
+|------|-------|
+| Texturas de bloco | Bancada (topo/lado/base), Cristal de Mana (cristal + base) |
+| Texturas de item | Pena, 3 tintas, Nota de Glifo, Máscara, Manto, Projetor, Espelho |
+| Modelos JSON | Todos os itens; bancada `cube_bottom_top`; cristal com modelo 3D de pontas (não é mais cubo), com hitbox ajustada |
+| GUI | Fundo da Bancada (240×222), 16 ícones de glifo + ícone "desconhecido", barra de mana |
+| Bancada | Lista só glifos conhecidos, ordem editável (↑ ↓ ✕), custo, prévia de validade, Conjurar da bancada, troca de magia ativa |
+| HUD | Barra de mana, magia ativa, aviso sem grimório, zona de mana, aviso de Mana Poisoning |
+| Grimório | Visível: livro flutuante que gira e folheia (modelo de livro vanilla + textura própria) |
+| Projétil | Orbe brilhante com rastro de partículas e explosão de faíscas no impacto |
+| Mago NPC | Skin própria (manto, capuz, olhos ciano) e ovo gerador |
+| Armadura | Máscara (cabeça) e Manto (peito) agora são equipáveis; antes eram itens comuns e a proteção contra Mana Poisoning nunca funcionava |
+| Partículas | `arcane:arcane_spark` (4 quadros): projétil, cristal, conjuração, escrita com pena |
+| Sons | 8 sons em `sounds.json` com legendas: conjurar, impacto, salvar, aprender glifo, pena, ritual, Mana Poisoning, grimório |
+| Worldgen | Cristais de mana nas cavernas do Overworld (Y -56 a 24, raro) |
+| Loot | Notas de glifo e tintas injetadas em 7 baús vanilla; drops dos blocos; tags de ferramenta |
+| Receitas | Bancada, Pena, 3 tintas, Nota, Máscara, Manto, Projetor, Espelho |
+| Textos | `pt_br` e `en_us` completos: lore de itens, nomes e descrições de glifos, categorias, níveis de conhecimento, HUD, legendas |
+| Ícone do mod | `arcane_logo.png` no `mods.toml` |
+
+### Correções de código feitas junto
+
+- A tecla **V** usava o grimório do lado do cliente, que nunca era sincronizado, e enviava um id de inscrição que não existia no servidor. Agora o servidor sincroniza mana, glifos e magias (`ArcaneSync` → `ClientArcaneData`).
+- A precisão de bancada era confiada ao cliente. Agora o servidor só a concede se a Bancada estiver aberta.
+- O pacote de salvar aceitava qualquer id e qualquer tamanho. Agora limita a 24 glifos, valida antes de salvar e informa o motivo da recusa. Ids inexistentes não entram mais no grimório.
+- Falhas de conjuração (mana insuficiente etc.) agora aparecem na barra de ação.
+- O projétil some depois de 10 s se não acertar nada (antes ficava no mundo para sempre).
+
+### Decisões que tomei e precisam da sua aprovação
+
+- **Composição inválida não é salva**, mas continua contando como experimento de descoberta. Antes salvava e falhava só na hora de conjurar.
+- **Receitas e loot**: ingredientes e pesos escolhidos por mim (ametista como base arcana). Ajuste em `tools/gen_data.py`.
+- **Drop do Cristal**: sem Toque de Seda dá 2 a 4 fragmentos de ametista; com Toque de Seda dá o cristal.
+- **Armadura**: defesa baixa de propósito (1 na máscara, 2 no manto). O valor delas é a proteção contra Mana Poisoning.
+- **Nomes dos glifos** são descritivos (Eu, Projétil, Dano...). Os nomes de fantasia continuam sendo decisão de design.
+- **Tecla B** troca a magia ativa.
+
+### Ainda pendente
+
+- Função do **Projetor de Glifos** e do **Espelho de Simetria** (depende do design de rituais).
+- Estágios visuais do grimório (a entidade não sincroniza o estágio com o cliente).
+- Arte final de artista, sons gravados, modelo 3D próprio da bancada.
+- Spawn natural do Mago NPC, estruturas, livros de lore, balanceamento e playtest (seções 5 a 9).
+- Brecha de descoberta: o cliente pode mandar qualquer glifo existente em "experimentos" para aprendê-lo após 3 salvamentos. Corrigir exige decidir a regra de descoberta.
+
+---
+
 ## 1. Arte visual — texturas
 
 Hoje **não existe a pasta** `assets/arcane/textures/`. Quase tudo usa textura vanilla emprestada ou aparece sem modelo próprio.

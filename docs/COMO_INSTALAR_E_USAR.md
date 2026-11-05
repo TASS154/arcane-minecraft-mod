@@ -4,19 +4,18 @@ Este guia explica como colocar o mod no jogo, o que é a **Bancada Arcana** e o 
 
 ---
 
-## Sobre as texturas (blocos roxo/preto)
+## Texturas, sons e arte
 
-Sim: na versão atual **não existem texturas artísticas próprias** para todos os itens. Alguns blocos e itens usam **placeholders** (texturas vanilla reaproveitadas) para o mod funcionar sem erro visual grave.
+Todos os blocos, itens, a GUI da bancada, o grimório, o projétil, o Mago NPC, a armadura e as partículas têm **arte própria** em pixel art (paleta roxa/ciano). Os sons também são próprios (sintetizados).
 
-| Item / bloco        | Aparência atual (placeholder)      |
-|---------------------|------------------------------------|
-| Bancada Arcana      | Bloco roxo escuro (crying obsidian) |
-| Cristal de Mana     | Bloco de ametista                  |
-| Pena Arcana         | Pena vanilla                       |
-| Tintas              | Saco de tinta vanilla              |
-| GUI da bancada      | Fundo roxo escuro simples (sem arte)|
+São artes **provisórias de qualidade**: coerentes entre si e no formato exato do Minecraft. Para trocar qualquer uma, substitua o PNG/OGG mantendo o mesmo caminho e tamanho. Os geradores ficam em `tools/`:
 
-Isso é **normal em desenvolvimento**. O sistema de magia funciona; as artes podem ser adicionadas depois em `assets/arcane/textures/`.
+```bash
+pip install pillow numpy soundfile
+python tools/gen_textures.py   # texturas em assets/arcane/textures
+python tools/gen_sounds.py     # sons em assets/arcane/sounds
+python tools/gen_data.py       # receitas, loot, tags e worldgen
+```
 
 ---
 
@@ -50,7 +49,16 @@ Isso é **normal em desenvolvimento**. O sistema de magia funciona; as artes pod
 
 ### Se der erro de SSL ao compilar
 
-Alguns antivírus ou redes corporativas bloqueiam downloads do `maven.neoforged.net`. Tente outra rede, desative inspeção HTTPS do antivírus temporariamente, ou importe o certificado no Java.
+Erro `PKIX path building failed` significa que o Java não confia no certificado da rede (antivírus ou proxy com inspeção HTTPS). Faça o Java usar os certificados do Windows antes de compilar:
+
+```powershell
+$env:JAVA_TOOL_OPTIONS = "-Djavax.net.ssl.trustStoreType=Windows-ROOT"
+.\gradlew.bat build
+```
+
+### Se der `Failed setting boot class path`
+
+O JDK apontado está corrompido (falta `lib/modules`). Reinstale o JDK 17 ou aponte `JAVA_HOME` para outro. O caminho em `gradle.properties` (`org.gradle.java.home`) precisa existir na sua máquina; se não existir, apague a linha ou passe `-Dorg.gradle.java.home=<caminho do JDK 17>`.
 
 ---
 
@@ -94,6 +102,8 @@ Abra o inventário criativo e vá na aba **Arcane**, ou use comandos:
 /give @s arcane:mana_crystal
 ```
 
+No sobrevivência, tudo tem receita (veja o livro de receitas). Os **Cristais de Mana** aparecem nas cavernas (entre Y -56 e Y 24); minerar com picareta de ferro dá fragmentos de ametista, com Toque de Seda dá o cristal. **Notas de Glifo** aparecem em baús de masmorras, minas abandonadas, bibliotecas de fortaleza, templos, mansões e cidades antigas.
+
 ### 2. Desbloquear glifos para teste
 
 O mod não dá feitiços prontos. Você precisa **conhecer glifos** antes de usá-los. Para testar, use:
@@ -117,37 +127,39 @@ A **Bancada Arcana** (`arcane:arcane_workbench`) é o local onde você **monta s
 
 ### Como abrir
 
-1. Coloque o bloco no chão (aparece como um cubo roxo escuro por enquanto).
+1. Coloque o bloco no chão.
 2. **Clique com o botão direito** no bloco.
-3. Abre a interface de construção de magias.
 
 ### O que fazer na interface
 
-| Elemento | Função |
-|----------|--------|
-| Campo de texto no topo | Nome da sua magia (ex: `Bola de Fogo`) |
-| **+ Self** | Adiciona glifo de forma “em si mesmo” |
-| **+ Projectile** | Adiciona forma de projétil |
-| **+ Damage** | Adiciona efeito de dano |
-| **+ Fire** | Adiciona efeito de fogo |
-| **Clear** | Limpa a lista de glifos |
-| **Salvar** | Grava a inscrição no seu grimório |
+| Área | Função |
+|------|--------|
+| Campo no topo | Nome da magia (ex: `Bola de Fogo`) |
+| **Glifos conhecidos** (esquerda) | Só aparecem os glifos que você conhece. Clique para adicionar. Role com a roda do mouse. Passe o mouse para ver categoria, custo e descrição. Glifos com **?** ainda não foram identificados |
+| **Composição** (direita) | A inscrição em ordem. Clique numa linha para selecioná-la |
+| **↑ ↓** | Move o glifo selecionado (a ordem muda o resultado) |
+| **✕** ou Delete | Remove o glifo selecionado |
+| **Limpar** | Esvazia a composição |
+| Custo e prévia | Soma de mana e aviso de erro (ex: Forma fora do início). A validação final é do servidor |
+| **Salvar** | Valida e grava no grimório. A magia salva vira a ativa |
+| **Conjurar** | Conjura a magia ativa com a precisão da bancada |
+| **◀ ▶** (rodapé) | Troca a magia ativa entre as salvas |
+
+Composições com glifos ainda não identificados **não são salvas**, mas contam como experimento: cada tentativa aumenta seu entendimento (Suspeito → Parcial → Identificado).
 
 ### Exemplo: montar uma bola de fogo
 
-1. Clique **+ Projectile**
-2. Clique **+ Damage**
-3. Clique **+ Fire**
-4. Digite o nome: `Bola de Fogo`
-5. Clique **Salvar**
+1. Clique em **Projétil**, depois **Dano**, depois **Fogo**.
+2. Digite o nome `Bola de Fogo`.
+3. Clique **Salvar**.
 
 A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fogo → Dano`.
 
 ### Depois de salvar
 
-1. Pressione a tecla **V** (conjurar magia ativa).
-2. A magia salva mais recentemente vira a **inscrição ativa**.
-3. Gasta **mana** ao conjurar.
+1. Pressione **V** para conjurar a magia ativa.
+2. Pressione **B** para trocar entre as magias salvas.
+3. Cada conjuração gasta **mana** (barra ciano à direita da hotbar).
 
 ### Por que usar a bancada em vez de conjurar no mundo?
 
@@ -164,9 +176,13 @@ A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fo
 
 ## Grimório, mana e morte
 
-- Você começa com um **grimório flutuante** ao lado do personagem (entidade invisível/simples por enquanto).
-- Ao **morrer**, o grimório cai no chão como item. **Recolha-o** — sem ele sua mana máxima cai para **50%**.
+- Você começa com um **grimório flutuante** (livro roxo que gira e folheia) ao lado do personagem.
+- Ao **morrer**, o grimório cai no chão como item. **Recolha-o**: sem ele sua mana máxima cai para **50%** (o HUD avisa).
 - A mana **regenera sozinha** com o tempo.
+
+### HUD
+
+À direita da hotbar ficam a barra de mana, o nome da magia ativa e avisos de zona: **Zona de mana ×N** perto de cristais e **Mana Poisoning!** quando a exposição está te ferindo. A barra fica azul durante o envenenamento.
 
 ---
 
@@ -174,10 +190,12 @@ A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fo
 
 | Sistema | Como usar |
 |---------|-----------|
-| **Cristal de Mana** | Coloque perto de você; magias ficam mais fortes (até ×32 perto do bloco) |
-| **Pena Arcana** | Escrever inscrições em blocos do mundo (em desenvolvimento) |
-| **Nota de Glifo** | Item de loot; clique direito para aprender um glifo |
-| **NPC Mago** | Inimigo que conjura magias; dropa notas ao morrer |
+| **Cristal de Mana** | Magias ficam mais fortes perto dele (até ×32). Ficar muito tempo perto causa Mana Poisoning |
+| **Máscara Arcana / Manto Isolante** | Armaduras (cabeça / peito) que reduzem o Mana Poisoning em 30% / 40% |
+| **Pena Arcana** | Escreve inscrições em blocos do mundo |
+| **Nota de Glifo** | Clique direito para aprender o glifo indicado na dica do item |
+| **Mago NPC** | Inimigo que conjura magias e dropa notas. Use o ovo gerador na aba Arcane |
+| **Projetor de Glifos / Espelho de Simetria** | Registrados e com arte, mas **ainda sem função** (dependem de design de rituais) |
 
 ---
 
@@ -198,10 +216,7 @@ src/main/java/com/arcane/               → código Java
 assets/arcane/lang/pt_br.json           → textos em português
 ```
 
-Para adicionar textura da bancada no futuro:
-
-1. Crie `assets/arcane/textures/block/arcane_workbench.png` (16×16 ou múltiplos de 16)
-2. Atualize `assets/arcane/models/block/arcane_workbench.json` para apontar para `arcane:block/arcane_workbench`
+Os geradores de texturas, sons e dados ficam em `tools/`. Para trocar uma textura, substitua o PNG em `assets/arcane/textures/` mantendo o nome e o tamanho. Novos glifos via datapack precisam de um ícone em `textures/gui/glyphs/<nome>.png` e das chaves `glyph.<ns>.<nome>` e `glyph.<ns>.<nome>.desc` no arquivo de idioma.
 
 ---
 
@@ -209,8 +224,8 @@ Para adicionar textura da bancada no futuro:
 
 | Problema | Solução |
 |----------|---------|
-| Bloco roxo e preto listrado | Textura faltando; use a versão atual com placeholder ou adicione PNG |
-| Tecla V não faz nada | Salve uma inscrição na bancada antes; verifique conflito de teclas em Opções → Controles |
+| Bloco roxo e preto listrado | Textura faltando: confira o caminho do PNG (glifos novos precisam de ícone próprio) |
+| Tecla V diz "Nenhuma magia ativa" | Salve uma inscrição na bancada ou troque com **B**; verifique conflito de teclas em Opções → Controles |
 | “Mana insuficiente” | Espere regenerar ou reduza glifos na inscrição |
 | “Glifo desconhecido” | Use `/arcane know arcane:nome_do_glifo` |
 | Mod não aparece no jogo | Confirme Forge 1.20.1 e que o `.jar` está em `.minecraft/mods` |
@@ -219,9 +234,6 @@ Para adicionar textura da bancada no futuro:
 
 ## Próximos passos de desenvolvimento
 
-- Texturas e modelos 3D para bancada, grimório e glifos
-- GUI da bancada com lista de glifos **conhecidos** (não só botões fixos)
-- Rituais grandes desenhados no chão
-- Dungeons com notas de pesquisa
+Veja [TRABALHO_MANUAL.md](TRABALHO_MANUAL.md): o que já foi feito e o que ainda depende de decisão humana (balanceamento, rituais, estruturas, arte final).
 
 Para detalhes técnicos da arquitetura, veja [ARCHITECTURE.md](ARCHITECTURE.md).

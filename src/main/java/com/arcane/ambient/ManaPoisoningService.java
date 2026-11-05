@@ -19,6 +19,8 @@ public final class ManaPoisoningService {
     }
     if (exposure > 0.2f) {
       player.hurt(player.damageSources().magic(), exposure * 2f);
+      player.playNotifySound(com.arcane.registry.ModSounds.MANA_POISON.get(),
+          net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 0.8f + player.getRandom().nextFloat() * 0.3f);
     }
   }
 

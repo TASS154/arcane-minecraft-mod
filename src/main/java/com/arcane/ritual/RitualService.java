@@ -37,6 +37,8 @@ public class RitualService {
       context.setRitualSiteId(ritualId);
       SpellPipeline.INSTANCE.execute(context);
       site.setState(RitualSite.State.ARMED);
+      level.playSound(null, site.origin(), com.arcane.registry.ModSounds.RITUAL_ACTIVATE.get(),
+          net.minecraft.sounds.SoundSource.BLOCKS, 1.2f, 1.0f);
     });
   }
 

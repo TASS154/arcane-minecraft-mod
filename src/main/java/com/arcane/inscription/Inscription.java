@@ -42,7 +42,7 @@ public record Inscription(
         return Integer.toHexString(Objects.hash(sb.toString()));
     }
 
-    public int totalManaCost(com.arcane.glyph.GlyphRegistryAccessor registry) {
+    public int totalManaCost(GlyphRegistryAccessor registry) {
         int total = 0;
         for (GlyphInstance instance : glyphs) {
             total += registry.get(instance.glyphId()).map(g -> g.cost().mana()).orElse(0);

@@ -29,7 +29,9 @@ public class InscribingHandler {
     if ("on_open".equals(trigger)) {
       BlockEntity be = event.getLevel().getBlockEntity(pos);
       if (be instanceof ChestBlockEntity) {
-        CastingService.tryCast(player, inscription, PrecisionSnapshot.WORKBENCH);
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+          CastingService.tryCast(serverPlayer, inscription, PrecisionSnapshot.WORKBENCH);
+        }
       }
     }
   }

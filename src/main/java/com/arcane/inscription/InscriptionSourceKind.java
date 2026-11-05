@@ -2,14 +2,14 @@ package com.arcane.inscription;
 
 import com.mojang.serialization.Codec;
 
-public enum InscriptionSourceKind implements com.mojang.serialization.StringRepresentable {
+public enum InscriptionSourceKind implements net.minecraft.util.StringRepresentable {
     GRIMOIRE("grimoire"),
     WORKBENCH("workbench"),
     WORLD("world"),
     ITEM("item"),
     SCROLL("scroll");
 
-    public static final Codec<InscriptionSourceKind> CODEC = com.mojang.serialization.StringRepresentable.fromEnum(InscriptionSourceKind::values);
+    public static final Codec<InscriptionSourceKind> CODEC = net.minecraft.util.StringRepresentable.fromEnum(InscriptionSourceKind::values);
 
     private final String name;
 

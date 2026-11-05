@@ -21,6 +21,14 @@ public class GrimoireLifecycleHandler {
     if (event.getEntity() instanceof ServerPlayer player) {
       spawnGrimoire(player);
       GrimoireAttachments.updateManaMultiplier(player);
+      com.arcane.network.ArcaneSync.sync(player, true);
+    }
+  }
+
+  @SubscribeEvent
+  public void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+    if (event.getEntity() instanceof ServerPlayer player) {
+      com.arcane.network.ArcaneSync.forget(player);
     }
   }
 
@@ -44,6 +52,9 @@ public class GrimoireLifecycleHandler {
           GrimoireAttachments.updateManaMultiplier(serverPlayer);
         }
       });
+      if (serverPlayer.tickCount % 5 == 0) {
+        com.arcane.network.ArcaneSync.sync(serverPlayer, false);
+      }
     }
   }
 
@@ -100,5 +111,7 @@ public class GrimoireLifecycleHandler {
     grimoire.bind(player, stage);
     grimoire.getPersistentData().putUUID("owner", player.getUUID());
     level.addFreshEntity(grimoire);
+    level.playSound(null, player.blockPosition(), com.arcane.registry.ModSounds.GRIMOIRE_SUMMON.get(),
+        net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, 1.0f);
   }
 }

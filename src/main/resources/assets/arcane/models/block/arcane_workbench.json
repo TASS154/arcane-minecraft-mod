@@ -1,6 +1,9 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube_bottom_top",
   "textures": {
-    "all": "minecraft:block/crying_obsidian"
+    "top": "arcane:block/arcane_workbench_top",
+    "side": "arcane:block/arcane_workbench_side",
+    "bottom": "arcane:block/arcane_workbench_bottom",
+    "particle": "arcane:block/arcane_workbench_side"
   }
 }

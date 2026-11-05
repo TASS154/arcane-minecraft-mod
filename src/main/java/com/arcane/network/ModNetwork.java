@@ -3,6 +3,7 @@ package com.arcane.network;
 import com.arcane.ArcaneMod;
 import com.arcane.network.packet.C2SCastRequestPacket;
 import com.arcane.network.packet.C2SSaveInscriptionPacket;
+import com.arcane.network.packet.C2SSelectInscriptionPacket;
 import com.arcane.network.packet.S2CGrimoireSyncPacket;
 import com.arcane.network.packet.S2CSpellFxPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -13,7 +14,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-  private static final String PROTOCOL = "1";
+  private static final String PROTOCOL = "2";
   public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       new ResourceLocation(ArcaneMod.MODID, "main"),
       () -> PROTOCOL,
@@ -37,6 +38,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(C2SSaveInscriptionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SSaveInscriptionPacket::encode).decoder(C2SSaveInscriptionPacket::decode)
         .consumerMainThread(C2SSaveInscriptionPacket::handle).add();
+    CHANNEL.messageBuilder(C2SSelectInscriptionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(C2SSelectInscriptionPacket::encode).decoder(C2SSelectInscriptionPacket::decode)
+        .consumerMainThread(C2SSelectInscriptionPacket::handle).add();
   }
 
   public static void sendToPlayer(ServerPlayer player, Object packet) {

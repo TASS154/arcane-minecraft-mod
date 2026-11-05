@@ -26,6 +26,10 @@ public final class InscribingService {
     if (InkRegistry.isBloodInk(ink)) {
       player.hurt(player.damageSources().magic(), 2f);
     }
+    level.playSound(null, pos, com.arcane.registry.ModSounds.PEN_STROKE.get(),
+        net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 1.0f);
+    level.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(),
+        pos.getX() + 0.5, pos.getY() + 1.02, pos.getZ() + 0.5, 10, 0.3, 0.02, 0.3, 0.0);
     return true;
   }
 }

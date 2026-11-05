@@ -27,6 +27,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.INSULATING_CLOAK.get());
                 output.accept(ModItems.GLYPH_PROJECTOR.get());
                 output.accept(ModItems.SYMMETRY_MIRROR.get());
+                output.accept(ModItems.NPC_MAGE_SPAWN_EGG.get());
             }).build());
 
     private ModCreativeTabs() {}

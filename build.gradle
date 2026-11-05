@@ -206,6 +206,13 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
+// Testes unitarios usam classes do Minecraft (ResourceLocation, codecs) sem iniciar o jogo.
+legacyForge.addModdingDependenciesTo(sourceSets.test)
+
+dependencies {
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
 tasks.named('test', Test).configure {
     useJUnitPlatform()
 }

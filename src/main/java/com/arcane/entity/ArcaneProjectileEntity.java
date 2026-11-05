@@ -37,6 +37,20 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
   protected void defineSynchedData() {}
 
   @Override
+  public void tick() {
+    super.tick();
+    if (level().isClientSide) {
+      for (int i = 0; i < 2; i++) {
+        level().addParticle(com.arcane.registry.ModParticles.ARCANE_SPARK.get(),
+            getX() + (random.nextDouble() - 0.5) * 0.2, getY() + (random.nextDouble() - 0.5) * 0.2,
+            getZ() + (random.nextDouble() - 0.5) * 0.2, 0.0, 0.0, 0.0);
+      }
+    } else if (tickCount > 200) {
+      discard();
+    }
+  }
+
+  @Override
   protected void onHit(HitResult result) {
     super.onHit(result);
     if (!level().isClientSide && getOwner() instanceof LivingEntity caster && plan != null) {
@@ -54,6 +68,11 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
       if (result instanceof EntityHitResult entityHit && entityHit.getEntity() != null) {
         context.setResolvedTargets(TargetList.ofEntities(entityHit.getEntity()));
       }
+      var server = (net.minecraft.server.level.ServerLevel) level();
+      server.playSound(null, getX(), getY(), getZ(), com.arcane.registry.ModSounds.SPELL_HIT.get(),
+          net.minecraft.sounds.SoundSource.PLAYERS, 0.9f, 1.0f);
+      server.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(), getX(), getY(), getZ(),
+          16, 0.25, 0.25, 0.25, 0.08);
       for (CompiledExecutionPlan.ExecutionSegment segment : plan.segments()) {
         SpellPipeline.INSTANCE.executeSegment(context, segment);
       }

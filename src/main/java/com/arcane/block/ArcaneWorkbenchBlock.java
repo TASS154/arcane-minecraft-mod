@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public class ArcaneWorkbenchBlock extends Block {
   public ArcaneWorkbenchBlock(Properties properties) {

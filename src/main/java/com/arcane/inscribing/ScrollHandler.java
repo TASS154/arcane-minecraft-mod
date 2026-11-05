@@ -19,7 +19,9 @@ public class ScrollHandler {
     if (!ItemInscriptionHelper.isScroll(stack)) return;
     Inscription inscription = ItemInscriptionHelper.read(stack);
     if (inscription == null || event.getLevel().isClientSide) return;
-    CastingService.tryCast(event.getEntity(), inscription, PrecisionSnapshot.FIELD);
+    if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+      CastingService.tryCast(serverPlayer, inscription, PrecisionSnapshot.FIELD);
+    }
     event.setCanceled(true);
   }
 

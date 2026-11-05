@@ -13,7 +13,8 @@ public class PushEffectHandler implements EffectHandler {
         double strength = context.amplify(call.parameters().getOrDefault("strength", 1.0), call.magnitudeKeys(), "strength");
         Vec3 push = context.look().scale(strength);
         for (Entity entity : targets.entities()) {
-            entity.push(push);
+            entity.push(push.x, push.y, push.z);
+            entity.hurtMarked = true;
         }
     }
 }

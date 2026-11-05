@@ -64,15 +64,26 @@ public final class GlyphRegistry {
 
             try (var reader = new InputStreamReader(entry.getValue().open(), StandardCharsets.UTF_8)) {
                 JsonObject json = GsonHelper.fromJson(GSON, reader, JsonObject.class);
-                json.addProperty("id", glyphId.toString());
-                GlyphDefinition def = GlyphDefinition.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, json)
-                        .getOrThrow(false, msg -> new IllegalStateException("Failed to parse glyph " + glyphId + ": " + msg));
-                loaded.put(glyphId, def);
+                loaded.put(glyphId, parse(glyphId, json));
             } catch (IOException | RuntimeException ex) {
                 LOGGER.error("Invalid glyph definition {}: {}", glyphId, ex.getMessage());
             }
         }
         return loaded;
+    }
+
+    /** Converte o JSON de um glifo (formato de data/<ns>/glyphs/*.json) em definicao. */
+    public static GlyphDefinition parse(ResourceLocation glyphId, JsonObject json) {
+        JsonObject copy = json.deepCopy();
+        copy.addProperty("id", glyphId.toString());
+        return GlyphDefinition.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, copy)
+                .getOrThrow(false, msg -> new IllegalStateException("Failed to parse glyph " + glyphId + ": " + msg));
+    }
+
+    /** Substitui todas as definicoes. Usado por testes unitarios, fora do ciclo de reload do jogo. */
+    public static void replaceAll(Map<ResourceLocation, GlyphDefinition> definitions) {
+        GLYPHS.clear();
+        GLYPHS.putAll(definitions);
     }
 
     public static Optional<GlyphDefinition> get(ResourceLocation id) {

@@ -1,0 +1,51 @@
+package com.arcane.client.render;
+
+import com.arcane.entity.GrimoireEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import net.minecraft.client.model.BookModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+
+/** Grimorio flutuante: usa o modelo de livro vanilla com textura propria, girando e folheando. */
+public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
+  private static final ResourceLocation TEXTURE = new ResourceLocation("arcane", "textures/entity/grimoire.png");
+  private final BookModel book;
+
+  public GrimoireRenderer(EntityRendererProvider.Context context) {
+    super(context);
+    this.book = new BookModel(context.bakeLayer(ModelLayers.BOOK));
+    this.shadowRadius = 0.15f;
+  }
+
+  @Override
+  public void render(GrimoireEntity entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+    float time = entity.tickCount + partialTick;
+    pose.pushPose();
+    pose.translate(0.0, 0.4 + Mth.sin(time * 0.08f) * 0.08, 0.0);
+    pose.mulPose(Axis.YP.rotationDegrees(-time * 1.5f));
+    pose.mulPose(Axis.ZP.rotationDegrees(80.0f));
+    pose.scale(0.8f, 0.8f, 0.8f);
+
+    float flipA = Mth.frac(time * 0.015f + 0.25f) * 1.6f - 0.3f;
+    float flipB = Mth.frac(time * 0.015f + 0.75f) * 1.6f - 0.3f;
+    float open = 0.9f + Mth.sin(time * 0.05f) * 0.08f;
+    book.setupAnim(time, Mth.clamp(flipA, 0f, 1f), Mth.clamp(flipB, 0f, 1f), open);
+
+    VertexConsumer consumer = buffers.getBuffer(book.renderType(TEXTURE));
+    book.renderToBuffer(pose, consumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+    pose.popPose();
+    super.render(entity, yaw, partialTick, pose, buffers, light);
+  }
+
+  @Override
+  public ResourceLocation getTextureLocation(GrimoireEntity entity) {
+    return TEXTURE;
+  }
+}

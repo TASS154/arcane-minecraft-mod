@@ -38,7 +38,7 @@ Data: 6 nov 2026. Tudo aqui foi conferido no código e, onde indicado, em teste 
 - **Projétil animado** (4 quadros) e **variante de tempestade** com arcos em zigue-zague, tingido pela cor do elemento.
 - **Mago**: brilho animado nos olhos, mãos e peito na cor do elemento; braços sobem ao conjurar; balanço leve parado.
 - **Grimório flutuante**: capa com brilho que varre e runas que pulsam (8 quadros por estágio), cresce e solta faíscas nos estágios altos.
-- **Feixe 3D do Raio** (forma Raio): fita volumétrica de dois planos cruzados, saindo da altura da mão, com núcleo branco, brilho na cor do elemento, tremor em zigue-zague na tempestade e esmaecimento em 8 ticks. Visto no jogo (laranja para fogo, amarelo para raio).
+- **Feixe 3D do Raio** (forma Raio): barra retangular sólida em 3D saindo da altura da mão (núcleo branco e casca na cor do elemento) que surge inteira e encolhe até sumir em 12 ticks. Visto no jogo (laranja para fogo, amarelo para raio).
 - **Grimório em 3D**: além do livro aberto, páginas soltas orbitam em volta (4 no estágio 1, até 10 no 4), com um anel de runas luminoso que gira; do estágio 3 em diante há um segundo anel inclinado. Vistas no jogo. Em primeira pessoa só o livro aparece, para as páginas não taparem a tela.
 - Bancada com modelo 3D, altar com modelo, cristal animado, traços acesos, GUIs redesenhadas.
 

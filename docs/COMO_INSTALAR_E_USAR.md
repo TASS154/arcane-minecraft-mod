@@ -332,3 +332,8 @@ Restrições por promessa: Quietude exige ficar parado (promessa-1) segundos; Sa
 3. **Circularidade**: o círculo precisa de 85% dos traços (config). Espelho de Simetria completa o que faltar.
 4. **Magia**: ative no grimório uma magia. Glifos de ritual exigem nível e componentes: Invocar Lobos (menor, 6 ossos), Invocar Golem (médio, 2 blocos de ferro e 1 abóbora esculpida), Dobrar (maior, 4 pérolas do Ender e 1 obsidiana chorosa), Clima (lendário, 1 para-raios e 1 Estrela do Nether).
 5. **Conjurar**: botão direito no altar. Poder = multiplicador do nível (1,5 / 3 / 10) × completude do círculo. Agachado + direito guarda a magia no altar; o glifo Ativar a dispara de até 48 blocos.
+
+## Juramento Personalizado (você escolhe o castigo e o tempo)
+Glifo `vow_oath` com dois parâmetros: **tipo** (1 imobilidade, 2 silêncio, 3 mana selada, 4 fragilidade +50% de dano recebido, 5 cegueira) e **segundos** (3 a 600). O castigo começa depois da magia, fica salvo no jogador (sobrevive a relogar; morrer encerra).
+Fórmula: `bônus = min(1,5; k × ln(1 + segundos/5))`, k = 0,30 / 0,22 / 0,35 / 0,25 / 0,20. Exemplo: imobilidade por 30 s = +58%; mana selada por 120 s = +111%.
+Conta no limite de 2 juramentos por magia. Rituais no altar não são bloqueados pelo silêncio.

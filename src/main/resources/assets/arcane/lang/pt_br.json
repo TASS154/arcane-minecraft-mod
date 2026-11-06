@@ -213,6 +213,14 @@
   "element.arcane.void": "Vazio",
   "element.arcane.life": "Vida",
   "message.arcane.inscription.too_many_vows": "No máximo 2 juramentos diferentes por magia",
+  "message.arcane.oath.applied": "Juramento cumprido: %s por %s s",
+  "message.arcane.oath.ended": "O castigo acabou: %s",
+  "message.arcane.oath.silenced": "Silenciado pelo seu juramento: nenhuma magia por enquanto",
+  "oath.arcane.kind.1": "Imobilidade",
+  "oath.arcane.kind.2": "Silêncio",
+  "oath.arcane.kind.3": "Mana selada",
+  "oath.arcane.kind.4": "Fragilidade",
+  "oath.arcane.kind.5": "Cegueira",
   "glyph.arcane.self": "Eu",
   "glyph.arcane.self.desc": "Forma: o feitiço acontece em você.",
   "glyph.arcane.touch": "Toque",
@@ -355,6 +363,8 @@
   "glyph.arcane.vow_blood.desc": "Juramento personalizável (Promessa 1 a 5): bônus = 30% x promessa^0,85 (promessa 2 = +54%). Custa 2 x promessa de vida e recusa se sobrar pouco.",
   "glyph.arcane.vow_daylight": "Juramento da Luz",
   "glyph.arcane.vow_daylight.desc": "Juramento personalizável (Promessa 1 a 5): bônus = 25% x promessa^0,85 (promessa 2 = +45%). 1 dia; 2 céu aberto; 3 sem chuva; 4 manhã a tarde; 5 perto do meio-dia.",
+  "glyph.arcane.vow_oath": "Juramento Personalizado",
+  "glyph.arcane.vow_oath.desc": "Você escolhe o castigo e quanto tempo ele dura, DEPOIS de conjurar. Tipo: 1 imobilidade, 2 silêncio (nenhuma outra magia), 3 mana selada, 4 fragilidade (+50% de dano recebido), 5 cegueira. Bônus = k x ln(1 + segundos/5), com k 0,30 / 0,22 / 0,35 / 0,25 / 0,20 e teto de +150%. Ex.: imobilidade por 30 s = +58%.",
   "glyph.arcane.on_death": "Ao Morrer",
   "glyph.arcane.on_death.desc": "Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s)."
 }

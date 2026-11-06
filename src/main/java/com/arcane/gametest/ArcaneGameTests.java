@@ -1048,4 +1048,39 @@ public class ArcaneGameTests {
     h.assertTrue(after > before, "a completude deveria subir: " + before + " -> " + after);
     h.succeed();
   }
+
+  private static GlyphInstance oath(int kind, double seconds) {
+    return g("vow_oath").withParameter("kind", kind).withParameter("seconds", seconds);
+  }
+
+  @GameTest(template = "empty")
+  public static void oathOfSilenceBlocksFurtherCastsUntilItEnds(GameTestHelper h) {
+    var player = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
+    com.arcane.execution.OathPenalties.clear(player);
+    player.removeAllEffects();
+    cast(h, player, g("self"), oath(2, 10), g("speed"));
+    h.assertTrue(com.arcane.execution.OathPenalties.active(player, com.arcane.execution.OathPenalties.SILENCE), "silencio ativo");
+    var second = CastingService.tryCast(player, new Inscription(List.of(g("self"), g("speed"))), h.getLevel());
+    h.assertTrue(!second.success(), "silenciado nao pode conjurar");
+    com.arcane.execution.OathPenalties.clear(player);
+    var third = CastingService.tryCast(player, new Inscription(List.of(g("self"), g("speed"))), h.getLevel());
+    h.assertTrue(third.success(), "sem o castigo volta a conjurar");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void oathOfImmobilityRootsAndSealedManaDrains(GameTestHelper h) {
+    var player = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
+    com.arcane.execution.OathPenalties.clear(player);
+    player.removeAllEffects();
+    cast(h, player, g("self"), oath(1, 20), g("speed"));
+    com.arcane.execution.OathPenalties.enforce(player);
+    h.assertTrue(player.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && player.hasEffect(MobEffects.JUMP), "deve estar imobilizado");
+    com.arcane.execution.OathPenalties.apply(player, com.arcane.execution.OathPenalties.SEALED_MANA, 10);
+    com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(player);
+    com.arcane.execution.OathPenalties.enforce(player);
+    h.assertTrue(com.arcane.grimoire.GrimoireAttachments.getMana(player).map(m -> m.current() == 0f).orElse(true), "mana selada zera a mana");
+    com.arcane.execution.OathPenalties.clear(player);
+    h.succeed();
+  }
 }

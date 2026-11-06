@@ -391,6 +391,11 @@ glyph("vow_daylight", "modifier", 1,
       ("Vow of Daylight", "Customizable vow (Pledge 1-5): bonus = 25% x pledge^0.85 (pledge 2 = +45%). 1 day; 2 open sky; 3 no rain; 4 morning to afternoon; 5 near noon."),
       ["#..##..#", ".#.##.#.", "..####..", "########", "########", "..####..", ".#.##.#.", "#..##..#"],
       params=VOW_PARAMS, scope=VOW_MUT(1.5))
+glyph("vow_oath", "modifier", 1,
+      ("Juramento Personalizado", "Você escolhe o castigo e quanto tempo ele dura, DEPOIS de conjurar. Tipo: 1 imobilidade, 2 silêncio (nenhuma outra magia), 3 mana selada, 4 fragilidade (+50% de dano recebido), 5 cegueira. Bônus = k x ln(1 + segundos/5), com k 0,30 / 0,22 / 0,35 / 0,25 / 0,20 e teto de +150%. Ex.: imobilidade por 30 s = +58%."),
+      ("Custom Oath", "You choose the penalty and how long it lasts, AFTER casting. Kind: 1 immobile, 2 silence (no other spell), 3 sealed mana, 4 fragile (+50% damage taken), 5 blind. Bonus = k x ln(1 + seconds/5), with k 0.30 / 0.22 / 0.35 / 0.25 / 0.20, capped at +150%. E.g. immobile for 30 s = +58%."),
+      ["..#..#..", ".######.", "#..##..#", "#.####.#", "#..##..#", ".######.", "..#..#..", "...##..."],
+      params={"kind": (1.0, 1.0, 5.0, "int"), "seconds": (15.0, 3.0, 600.0, "float")}, scope=VOW_MUT(1.0))
 glyph("on_death", "condition", 0,
       ("Ao Morrer", "Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s)."),
       ("On Death", "Condition: arms the spell on you: what follows only happens when you die (once, for up to 60 s)."),
@@ -404,7 +409,7 @@ TIERS = {
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
         "ray", "dig", "shield", "standing_still", "low_mana", "wave"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate", "vow_blood", "on_death"],
+        "activate", "vow_blood", "on_death", "vow_oath"],
     4: ["thunder", "gravity", "invisible"],
 }
 FAMILIES = {
@@ -416,7 +421,7 @@ FAMILIES = {
     "force": ["push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight"],
-    "void": ["vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
+    "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
     "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():

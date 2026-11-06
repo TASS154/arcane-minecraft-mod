@@ -29,6 +29,11 @@ public class ManaState {
         return true;
     }
 
+    /** Zera a mana (Juramento: Mana selada). */
+    public void drain() {
+        current = 0f;
+    }
+
     public void tick() {
         if (current < max()) {
             current = Math.min(max(), current + regenPerTick);

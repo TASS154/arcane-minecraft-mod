@@ -29,12 +29,19 @@ public final class VowFormula {
   public static final ResourceLocation BLOOD = new ResourceLocation("arcane", "vow_blood");
   public static final ResourceLocation DAYLIGHT = new ResourceLocation("arcane", "vow_daylight");
 
+  public static final ResourceLocation OATH = new ResourceLocation("arcane", "vow_oath");
+  public static final int MIN_OATH_SECONDS = 3;
+  public static final int MAX_OATH_SECONDS = 600;
+  public static final double OATH_CAP = 1.5;
+  /** k por tipo de castigo: 1 Imobilidade, 2 Silencio, 3 Mana selada, 4 Fragilidade, 5 Cegueira. */
+  private static final double[] OATH_K = {0.0, 0.30, 0.22, 0.35, 0.25, 0.20};
+
   private static final Map<ResourceLocation, Double> K = Map.of(STILLNESS, 0.28, BLOOD, 0.30, DAYLIGHT, 0.25);
 
   private VowFormula() {}
 
   public static boolean isVow(ResourceLocation id) {
-    return K.containsKey(id);
+    return K.containsKey(id) || OATH.equals(id);
   }
 
   /** Promessa dentro de 1 a 5, arredondada (valores absurdos vindos do cliente nunca passam). */
@@ -51,7 +58,27 @@ public final class VowFormula {
     return k * Math.pow(n, EXPONENT);
   }
 
+  public static int oathKind(GlyphInstance vow) {
+    double raw = vow.param("kind", 1);
+    if (Double.isNaN(raw)) raw = 1;
+    return (int) Math.max(1, Math.min(5, Math.round(raw)));
+  }
+
+  public static double oathSeconds(GlyphInstance vow) {
+    double raw = vow.param("seconds", 15);
+    if (Double.isNaN(raw)) raw = 15;
+    return Math.max(MIN_OATH_SECONDS, Math.min(MAX_OATH_SECONDS, raw));
+  }
+
+  /** Bonus do juramento personalizado: min(1,5; k x ln(1 + segundos/5)). */
+  public static double oathBonus(int kind, double seconds) {
+    int k = Math.max(1, Math.min(5, kind));
+    double s = Math.max(MIN_OATH_SECONDS, Math.min(MAX_OATH_SECONDS, seconds));
+    return Math.min(OATH_CAP, OATH_K[k] * Math.log(1.0 + s / 5.0));
+  }
+
   public static double multiplier(GlyphInstance vow) {
+    if (OATH.equals(vow.glyphId())) return 1.0 + oathBonus(oathKind(vow), oathSeconds(vow));
     return 1.0 + bonus(vow.glyphId(), pledge(vow));
   }
 

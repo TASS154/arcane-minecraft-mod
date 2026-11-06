@@ -213,6 +213,14 @@
   "element.arcane.void": "Void",
   "element.arcane.life": "Life",
   "message.arcane.inscription.too_many_vows": "At most 2 different vows per spell",
+  "message.arcane.oath.applied": "Oath sworn: %s for %s s",
+  "message.arcane.oath.ended": "The penalty is over: %s",
+  "message.arcane.oath.silenced": "Silenced by your oath: no spells for now",
+  "oath.arcane.kind.1": "Immobility",
+  "oath.arcane.kind.2": "Silence",
+  "oath.arcane.kind.3": "Sealed mana",
+  "oath.arcane.kind.4": "Fragility",
+  "oath.arcane.kind.5": "Blindness",
   "glyph.arcane.self": "Self",
   "glyph.arcane.self.desc": "Form: the spell happens on you.",
   "glyph.arcane.touch": "Touch",
@@ -355,6 +363,8 @@
   "glyph.arcane.vow_blood.desc": "Customizable vow (Pledge 1-5): bonus = 30% x pledge^0.85 (pledge 2 = +54%). Costs 2 x pledge health and refuses if too little is left.",
   "glyph.arcane.vow_daylight": "Vow of Daylight",
   "glyph.arcane.vow_daylight.desc": "Customizable vow (Pledge 1-5): bonus = 25% x pledge^0.85 (pledge 2 = +45%). 1 day; 2 open sky; 3 no rain; 4 morning to afternoon; 5 near noon.",
+  "glyph.arcane.vow_oath": "Custom Oath",
+  "glyph.arcane.vow_oath.desc": "You choose the penalty and how long it lasts, AFTER casting. Kind: 1 immobile, 2 silence (no other spell), 3 sealed mana, 4 fragile (+50% damage taken), 5 blind. Bonus = k x ln(1 + seconds/5), with k 0.30 / 0.22 / 0.35 / 0.25 / 0.20, capped at +150%. E.g. immobile for 30 s = +58%.",
   "glyph.arcane.on_death": "On Death",
   "glyph.arcane.on_death.desc": "Condition: arms the spell on you: what follows only happens when you die (once, for up to 60 s)."
 }

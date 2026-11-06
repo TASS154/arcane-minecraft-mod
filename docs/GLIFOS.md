@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **72 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **73 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -101,7 +101,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Dobrar** | `arcane:warp` | 8 | 4 | Vazio | `range` 32 (8–64) | Efeito de RITUAL (maior): leva todas as criaturas alvo para o ponto que você mira (até 48). Com Aura ou Pilar e um círculo grande, desloca uma região inteira. |
 | **Clima** | `arcane:weather` | 10 | 4 | Vazio | `mode` 1 (0–2) | Efeito de RITUAL (lendário): muda o clima do mundo (0 limpo, 1 chuva, 2 tempestade). Exige a oferenda de uma Estrela do Nether no círculo maior. |
 
-## Modificadores (13)
+## Modificadores (14)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -120,6 +120,7 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Juramento da Quietude** | `arcane:vow_stillness` | 1 | 1 | Conhecimento | `pledge` 2 (1–5) | Juramento personalizável (Promessa 1 a 5): bônus = 28% x promessa^0,85 (promessa 2 = +50%). Exige ficar parado no chão por (promessa-1) x 1 s antes de conjurar. |
 | **Juramento de Sangue** | `arcane:vow_blood` | 1 | 3 | Vazio | `pledge` 2 (1–5) | Juramento personalizável (Promessa 1 a 5): bônus = 30% x promessa^0,85 (promessa 2 = +54%). Custa 2 x promessa de vida e recusa se sobrar pouco. |
 | **Juramento da Luz** | `arcane:vow_daylight` | 1 | 1 | Conhecimento | `pledge` 2 (1–5) | Juramento personalizável (Promessa 1 a 5): bônus = 25% x promessa^0,85 (promessa 2 = +45%). 1 dia; 2 céu aberto; 3 sem chuva; 4 manhã a tarde; 5 perto do meio-dia. |
+| **Juramento Personalizado** | `arcane:vow_oath` | 1 | 3 | Vazio | `kind` 1 (1–5), `seconds` 15 (3–600) | Você escolhe o castigo e quanto tempo ele dura, DEPOIS de conjurar. Tipo: 1 imobilidade, 2 silêncio (nenhuma outra magia), 3 mana selada, 4 fragilidade (+50% de dano recebido), 5 cegueira. Bônus = k x ln(1 + segundos/5), com k 0,30 / 0,22 / 0,35 / 0,25 / 0,20 e teto de +150%. Ex.: imobilidade por 30 s = +58%. |
 
 ## Condições (11)
 

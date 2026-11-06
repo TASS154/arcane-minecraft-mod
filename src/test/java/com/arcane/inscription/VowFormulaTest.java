@@ -43,4 +43,17 @@ class VowFormulaTest {
     double top = (1 + VowFormula.bonus(VowFormula.BLOOD, 5)) * (1 + VowFormula.bonus(VowFormula.STILLNESS, 5));
     assertTrue(top < 5.0, "teto com 2 juramentos: " + top);
   }
+
+  @Test
+  void oathBonusFollowsTheFormulaAndIsCapped() {
+    assertEquals(0.30 * Math.log(1 + 30 / 5.0), VowFormula.oathBonus(1, 30), 1e-9);
+    assertEquals(58, (int) Math.round(VowFormula.oathBonus(1, 30) * 100));
+    assertTrue(VowFormula.oathBonus(3, 600) <= VowFormula.OATH_CAP + 1e-9);
+    assertTrue(VowFormula.oathBonus(2, 300) > VowFormula.oathBonus(2, 30), "mais tempo, mais bonus");
+    assertTrue(VowFormula.oathBonus(3, 30) > VowFormula.oathBonus(5, 30), "mana selada rende mais que cegueira");
+    var wild = new GlyphInstance(VowFormula.OATH).withParameter("kind", 77).withParameter("seconds", 1e9);
+    assertEquals(5, VowFormula.oathKind(wild));
+    assertEquals(600.0, VowFormula.oathSeconds(wild));
+    assertEquals(1.0 + VowFormula.oathBonus(5, 600), VowFormula.multiplier(wild), 1e-9);
+  }
 }

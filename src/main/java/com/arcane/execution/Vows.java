@@ -53,6 +53,9 @@ public final class Vows {
 
   /** Chave de mensagem da restricao quebrada, ou null se todos os juramentos da magia foram cumpridos. */
   public static String violation(LivingEntity caster, Inscription inscription) {
+    if (caster instanceof ServerPlayer silenced && OathPenalties.active(silenced, OathPenalties.SILENCE)) {
+      return "message.arcane.oath.silenced";
+    }
     GlyphInstance still = find(inscription, VowFormula.STILLNESS);
     if (still != null) {
       double dx = caster.getX() - caster.xo, dz = caster.getZ() - caster.zo;
@@ -81,6 +84,10 @@ public final class Vows {
   /** Cobra o preco dos juramentos depois de a magia ter sido conjurada com sucesso. */
   public static void pay(LivingEntity caster, Inscription inscription) {
     GlyphInstance blood = find(inscription, VowFormula.BLOOD);
+    GlyphInstance oath = find(inscription, VowFormula.OATH);
+    if (oath != null && caster instanceof ServerPlayer sp) {
+      OathPenalties.apply(sp, VowFormula.oathKind(oath), VowFormula.oathSeconds(oath));
+    }
     if (blood != null) caster.hurt(caster.damageSources().magic(), bloodCost(VowFormula.pledge(blood)));
   }
 }

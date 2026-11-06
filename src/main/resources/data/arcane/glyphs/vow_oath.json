@@ -1,0 +1,45 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:vow_oath"
+  },
+  "parameters": {
+    "kind": {
+      "type": "int",
+      "default": 1.0,
+      "min": 1.0,
+      "max": 5.0
+    },
+    "seconds": {
+      "type": "float",
+      "default": 15.0,
+      "min": 3.0,
+      "max": 600.0
+    }
+  },
+  "modifier_scope": {
+    "target": "all",
+    "kind": "effect",
+    "mutate": {
+      "amount": {
+        "op": "vow",
+        "value": 1.0
+      },
+      "strength": {
+        "op": "vow",
+        "value": 1.0
+      },
+      "power": {
+        "op": "vow",
+        "value": 1.0
+      }
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 3,
+  "families": [
+    "void"
+  ]
+}

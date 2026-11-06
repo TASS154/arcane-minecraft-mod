@@ -77,7 +77,7 @@ class SyncTest {
     assertEquals("duration", ClientArcaneData.glyph(new ResourceLocation("arcane", "slow")).orElseThrow().primary().orElseThrow().key(),
         "duracao e o parametro principal do Lentidao");
     assertEquals(7.0, ClientArcaneData.spells().get(0).glyphs().get(1).params().get("amount"), 1e-9);
-    assertEquals(72, ClientArcaneData.totalGlyphs());
+    assertEquals(73, ClientArcaneData.totalGlyphs());
   }
 
   @Test

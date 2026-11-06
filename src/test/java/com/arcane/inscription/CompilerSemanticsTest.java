@@ -112,4 +112,86 @@ class CompilerSemanticsTest {
   void activatorAloneStillProducesASegment() {
     assertEquals(1, plan(g("activate")).segments().size());
   }
+
+  // ---------------------------------------------------------------- design v2
+  @Test
+  void aModifierAfterEndGroupAffectsEveryEffectInTheGroup() {
+    CompiledExecutionPlan p = plan(g("self"), g("group"), g("damage", "amount", 4.0), g("heal", "amount", 4.0),
+        g("end_group"), g("power"), g("fire"));
+    assertEquals(6.0, param(p, 0, "amount"), 1e-9, "Dano dentro do grupo");
+    assertEquals(6.0, param(p, 1, "amount"), 1e-9, "Cura dentro do grupo");
+    assertEquals(60.0, param(p, 2, "duration"), 1e-9, "Fogo, fora do grupo, nao muda");
+  }
+
+  @Test
+  void withoutAGroupAModifierOnlyAffectsTheImmediatelyPreviousEffect() {
+    CompiledExecutionPlan p = plan(g("self"), g("damage", "amount", 4.0), g("heal", "amount", 4.0), g("power"));
+    assertEquals(4.0, param(p, 0, "amount"), 1e-9);
+    assertEquals(6.0, param(p, 1, "amount"), 1e-9);
+  }
+
+  @Test
+  void modifiersInsideAnOpenGroupStillApplyToTheirOwnPreviousEffect() {
+    CompiledExecutionPlan p = plan(g("self"), g("group"), g("damage", "amount", 4.0), g("power"), g("heal", "amount", 4.0), g("end_group"));
+    assertEquals(6.0, param(p, 0, "amount"), 1e-9);
+    assertEquals(4.0, param(p, 1, "amount"), 1e-9);
+  }
+
+  @Test
+  void weakenHalvesAndCheapensNothingElse() {
+    assertEquals(2.0, param(plan(g("self"), g("damage", "amount", 4.0), g("weaken")), 0, "amount"), 1e-9);
+    assertEquals(1.0, param(plan(g("self"), g("speed"), g("weaken")), 0, "level"), 1e-9, "Enfraquecer nao mexe em nivel");
+  }
+
+  @Test
+  void repeatDuplicatesThePreviousEffectAndChargesForEachCopy() {
+    CompiledExecutionPlan once = plan(g("self"), g("gravity"));
+    CompiledExecutionPlan thrice = plan(g("self"), g("gravity"), g("repeat", "times", 3.0));
+    assertEquals(1, once.allEffectsInOrder().size());
+    assertEquals(3, thrice.allEffectsInOrder().size());
+    assertTrue(thrice.baseManaCost() > once.baseManaCost() * 2, "cada copia custa de novo");
+  }
+
+  @Test
+  void costGrowsExponentiallyWithGlyphCount() {
+    com.arcane.inscription.SpellLimits.reset();
+    assertEquals(1.0, com.arcane.inscription.SpellLimits.multiplier(1), 1e-9);
+    assertEquals(1.0, com.arcane.inscription.SpellLimits.multiplier(3), 1e-9, "os 3 primeiros nao pagam sobretaxa");
+    assertEquals(1.3, com.arcane.inscription.SpellLimits.multiplier(4), 1e-9);
+    assertEquals(Math.pow(1.3, 7), com.arcane.inscription.SpellLimits.multiplier(10), 1e-9);
+    double ratio = com.arcane.inscription.SpellLimits.multiplier(10) / com.arcane.inscription.SpellLimits.multiplier(9);
+    assertEquals(1.3, ratio, 1e-9, "cada glifo a mais multiplica o custo (exponencial, nao linear)");
+  }
+
+  @Test
+  void aTenGlyphSpellCostsMuchMoreThanTheSumOfItsParts() {
+    com.arcane.inscription.SpellLimits.reset();
+    CompiledExecutionPlan small = plan(g("self"), g("heal"), g("shield"));
+    CompiledExecutionPlan big = plan(g("self"), g("heal"), g("shield"), g("speed"), g("heal"), g("shield"), g("speed"), g("heal"), g("shield"), g("speed"));
+    int sum = 1 + 3 + 3 + 2 + 3 + 3 + 2 + 3 + 3 + 2;
+    assertTrue(big.baseManaCost() > sum * 3, "custo " + big.baseManaCost() + " deveria passar muito de " + sum + " (soma simples)");
+    assertTrue(small.baseManaCost() <= 8);
+  }
+
+  @Test
+  void validatorRejectsSpellsOverTheLimit() {
+    com.arcane.inscription.SpellLimits.reset();
+    GlyphInstance[] ok = new GlyphInstance[10];
+    ok[0] = g("self");
+    for (int i = 1; i < 10; i++) ok[i] = g("heal");
+    assertTrue(InscriptionValidator.validate(new Inscription(List.of(ok))).valid());
+    GlyphInstance[] tooMany = new GlyphInstance[11];
+    tooMany[0] = g("self");
+    for (int i = 1; i < 11; i++) tooMany[i] = g("heal");
+    var result = InscriptionValidator.validate(new Inscription(List.of(tooMany)));
+    assertFalse(result.valid());
+  }
+
+  @Test
+  void everyGlyphHasATierAndAFamily() {
+    for (var def : com.arcane.glyph.GlyphRegistry.all().values()) {
+      assertTrue(def.tier() >= 1 && def.tier() <= 4, def.id() + " tier");
+      assertFalse(def.families().isEmpty(), def.id() + " familias");
+    }
+  }
 }

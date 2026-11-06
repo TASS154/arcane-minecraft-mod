@@ -34,6 +34,10 @@ public final class InscriptionValidator {
             return ValidationResult.fail("message.arcane.inscription.empty");
         }
 
+        if (inscription.glyphs().size() > SpellLimits.maxGlyphs()) {
+            return ValidationResult.fail("message.arcane.inscription.too_long");
+        }
+
         boolean hasForm = false;
         Map<ResourceLocation, Integer> counts = new HashMap<>();
         GlyphCategory previousCategory = null;

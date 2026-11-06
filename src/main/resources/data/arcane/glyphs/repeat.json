@@ -1,0 +1,26 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:repeat"
+  },
+  "parameters": {
+    "times": {
+      "type": "int",
+      "default": 2.0,
+      "min": 2.0,
+      "max": 4.0
+    }
+  },
+  "modifier_scope": {
+    "target": "repeat",
+    "kind": "effect",
+    "repeat_param": "times"
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 3,
+  "families": [
+    "force"
+  ]
+}

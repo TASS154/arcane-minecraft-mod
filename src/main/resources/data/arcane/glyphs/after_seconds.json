@@ -13,5 +13,9 @@
   },
   "cost": {
     "mana": 0
-  }
+  },
+  "tier": 2,
+  "families": [
+    "knowledge"
+  ]
 }

@@ -1,0 +1,30 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:wither",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 80.0,
+      "min": 20.0,
+      "max": 300.0
+    },
+    "level": {
+      "type": "int",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 2.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "blood"
+  ]
+}

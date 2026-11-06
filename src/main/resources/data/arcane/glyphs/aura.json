@@ -17,5 +17,9 @@
   },
   "cost": {
     "mana": 4
-  }
+  },
+  "tier": 3,
+  "families": [
+    "force"
+  ]
 }

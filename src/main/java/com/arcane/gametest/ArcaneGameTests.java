@@ -455,4 +455,214 @@ public class ArcaneGameTests {
     helper.assertTrue(index.get(abs).isEmpty(), "inscricao nao foi apagada");
     helper.succeed();
   }
+
+  // ------------------------------------------------------------------ design v2
+  /** Marcar + filtro Marcados / Nao Marcados: o combo "Onda -> Marcar -> Gravidade" do design. */
+  @GameTest(template = "empty")
+  public static void markedAndUnmarkedFiltersSplitTheTargets(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    Pig a = pig(h, 3, 3);
+    Pig b = pig(h, 3, 4);
+    cast(h, caster, g("ray"), g("mark"));
+    h.assertTrue(com.arcane.execution.Marks.isMarked(a), "o primeiro alvo deveria estar marcado");
+    h.assertTrue(!com.arcane.execution.Marks.isMarked(b), "o segundo nao");
+    float ha = a.getHealth(), hb = b.getHealth();
+    cast(h, caster, g("aura", "radius", 6.0), g("marked"), g("damage", "amount", 3.0));
+    assertHurt(h, a, ha, "o marcado");
+    assertUnhurt(h, b, hb, "o nao marcado");
+    a.invulnerableTime = 0;
+    float ha2 = a.getHealth();
+    cast(h, caster, g("aura", "radius", 6.0), g("unmarked"), g("damage", "amount", 3.0));
+    assertHurt(h, b, hb, "o nao marcado, agora com o outro filtro");
+    assertUnhurt(h, a, ha2, "o marcado");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void gravitySlamsCreaturesAndStacks(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    Pig target = pig(h, 3, 4);
+    cast(h, caster, g("ray"), g("gravity"));
+    double one = target.getDeltaMovement().y;
+    h.assertTrue(one < -0.5, "deveria ser jogado para baixo, vy=" + one);
+    h.assertTrue(target.fallDistance > 0, "deveria acumular queda");
+    target.setDeltaMovement(0, 0, 0);
+    cast(h, caster, g("ray"), g("gravity"), g("gravity"), g("gravity"));
+    h.assertTrue(target.getDeltaMovement().y < one * 2, "tres Gravidade empurram bem mais que um (vy=" + target.getDeltaMovement().y + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void gravityDropsSand(GameTestHelper h) {
+    floor(h);
+    h.setBlock(new BlockPos(3, 0, 4), Blocks.AIR);
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.SAND);
+    Pig caster = pig(h, 3, 1);
+    cast(h, caster, g("ray"), g("gravity"));
+    h.assertTrue(h.getBlockState(new BlockPos(3, 1, 4)).getBlock() != Blocks.SAND, "a areia deveria ter caido");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void attractPullsTowardTheCaster(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    Pig target = pig(h, 3, 5);
+    cast(h, caster, g("ray"), g("attract"));
+    h.assertTrue(target.getDeltaMovement().z < -0.3, "deveria ser puxado para o conjurador, vz=" + target.getDeltaMovement().z);
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void cutHurtsAndClearsLeaves(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    Pig target = pig(h, 3, 3);
+    float before = target.getHealth();
+    cast(h, caster, g("ray"), g("cut", "amount", 3.0));
+    assertHurt(h, target, before, "o alvo do corte");
+    target.discard();
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.OAK_LEAVES.defaultBlockState().setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true));
+    cast(h, caster, g("ray"), g("cut"));
+    h.assertBlockNotPresent(Blocks.OAK_LEAVES, new BlockPos(3, 1, 4));
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void freezeTurnsWaterToIceAndLavaToObsidian(GameTestHelper h) {
+    floor(h);
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.WATER);
+    h.setBlock(new BlockPos(4, 1, 3), Blocks.LAVA);
+    Pig caster = pig(h, 3, 3);
+    cast(h, caster, g("self"), g("freeze"));
+    h.assertBlockPresent(Blocks.ICE, new BlockPos(3, 1, 4));
+    h.assertBlockPresent(Blocks.OBSIDIAN, new BlockPos(4, 1, 3));
+    h.assertTrue(caster.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "o proprio conjurador (Eu) tambem congela");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void fireLightsTntMeltsIceAndLightsCampfires(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.TNT);
+    cast(h, caster, g("ray"), g("fire"));
+    h.assertBlockNotPresent(Blocks.TNT, new BlockPos(3, 1, 4));
+    h.assertTrue(!h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.PrimedTnt.class,
+        new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(3, 1, 4))).inflate(3)).isEmpty(), "o TNT deveria ter sido aceso");
+    // o TNT aceso (entidade) ficaria no caminho do raio
+    h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.PrimedTnt.class,
+        new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(3, 1, 4))).inflate(3)).forEach(e -> e.discard());
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.ICE);
+    cast(h, caster, g("ray"), g("fire"));
+    h.assertBlockNotPresent(Blocks.ICE, new BlockPos(3, 1, 4));
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void waveOnlyAffectsTheConeInFront(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    Pig front = pig(h, 3, 5);
+    Pig side = pig(h, 6, 3);
+    Pig behind = pig(h, 3, 0);
+    float f = front.getHealth(), s = side.getHealth(), b = behind.getHealth();
+    cast(h, caster, g("wave"), g("damage", "amount", 3.0));
+    assertHurt(h, front, f, "o alvo a frente");
+    assertUnhurt(h, side, s, "o alvo ao lado");
+    assertUnhurt(h, behind, b, "o alvo atras");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void pillarHitsTheColumnAroundTheAimedPoint(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 0);
+    Pig aimed = pig(h, 3, 4);
+    Pig neighbor = pig(h, 3, 5);
+    Pig faraway = pig(h, 0, 6);
+    float a = aimed.getHealth(), n = neighbor.getHealth(), f = faraway.getHealth();
+    cast(h, caster, g("pillar", "radius", 2.0), g("damage", "amount", 3.0));
+    assertHurt(h, aimed, a, "o alvo mirado");
+    assertHurt(h, neighbor, n, "o vizinho dentro da coluna");
+    assertUnhurt(h, faraway, f, "o alvo fora da coluna");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 160)
+  public static void barrierRaisesAWallThatFadesAway(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    cast(h, caster, g("barrier", "duration", 40.0));
+    for (int x = 2; x <= 4; x++) {
+      for (int y = 1; y <= 3; y++) {
+        h.assertBlockPresent(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get(), new BlockPos(x, y, 4));
+      }
+    }
+    h.succeedWhen(() -> h.assertBlockNotPresent(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get(), new BlockPos(3, 2, 4)));
+  }
+
+  @GameTest(template = "empty")
+  public static void alliesFilterPicksVillagersAndSparesAnimals(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    Pig animal = pig(h, 3, 4);
+    var villager = h.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(4, 1, 4));
+    float a = animal.getHealth(), v = villager.getHealth();
+    cast(h, caster, g("aura", "radius", 5.0), g("allies"), g("damage", "amount", 3.0));
+    assertHurt(h, villager, v, "o aldeao (aliado)");
+    assertUnhurt(h, animal, a, "o animal comum");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void woodFilterOnlyDigsWood(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.STONE);
+    cast(h, caster, g("ray"), g("wood"), g("dig"));
+    h.assertBlockPresent(Blocks.STONE, new BlockPos(3, 1, 4));
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.OAK_PLANKS);
+    cast(h, caster, g("ray"), g("wood"), g("dig"));
+    h.assertBlockNotPresent(Blocks.OAK_PLANKS, new BlockPos(3, 1, 4));
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void standingStillConditionGatesTheSegment(GameTestHelper h) {
+    floor(h);
+    Pig still = pig(h, 3, 3);
+    // espera o porco assentar no chao (recem-criado ainda nao esta "onGround")
+    h.runAfterDelay(10, () -> {
+      cast(h, still, g("self"), g("standing_still"), g("speed"));
+      h.assertTrue(still.hasEffect(MobEffects.MOVEMENT_SPEED), "parado deveria ativar");
+      h.succeed();
+    });
+  }
+
+  /** Magia reativa: "Eu -> Ao Sofrer Dano -> Escudo" fica armada e so dispara quando o conjurador leva dano. */
+  @GameTest(template = "empty")
+  public static void onHurtArmsTheSpellAndFiresOnce(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    cast(h, p, g("self"), g("on_hurt"), g("shield"));
+    h.assertTrue(!p.hasEffect(MobEffects.ABSORPTION), "nao deve disparar ao conjurar");
+    h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(p.getUUID()) == 1, "deveria haver 1 magia armada");
+    p.hurt(h.getLevel().damageSources().generic(), 1.0f);
+    h.assertTrue(p.hasEffect(MobEffects.ABSORPTION), "deveria disparar ao levar dano");
+    h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(p.getUUID()) == 0, "dispara uma unica vez");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void armedSpellsAreCappedAtThree(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    for (int i = 0; i < 5; i++) cast(h, p, g("self"), g("on_hurt"), g("shield"));
+    h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(p.getUUID()) == 3, "maximo de 3 armadas");
+    com.arcane.execution.ArmedSpells.clear(p.getUUID());
+    h.succeed();
+  }
 }

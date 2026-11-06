@@ -1,0 +1,13 @@
+{
+  "category": "condition",
+  "behavior": {
+    "handler": "arcane:low_mana"
+  },
+  "cost": {
+    "mana": 0
+  },
+  "tier": 2,
+  "families": [
+    "knowledge"
+  ]
+}

@@ -47,12 +47,20 @@ public class ArcaneMod {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ArcaneConfig.SPEC);
 
         modBus.addListener(this::commonSetup);
+        modBus.addListener(this::onConfig);
         MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListeners);
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new GrimoireLifecycleHandler());
         MinecraftForge.EVENT_BUS.register(new InscribingHandler());
         MinecraftForge.EVENT_BUS.register(new com.arcane.world.ArcaneLootInjector());
+    }
+
+    private void onConfig(final net.minecraftforge.fml.event.config.ModConfigEvent event) {
+        if (event.getConfig().getSpec() == ArcaneConfig.SPEC) {
+            com.arcane.inscription.SpellLimits.set(ArcaneConfig.MAX_GLYPHS.get(), ArcaneConfig.COST_GROWTH.get(),
+                    ArcaneConfig.COST_FREE_GLYPHS.get());
+        }
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

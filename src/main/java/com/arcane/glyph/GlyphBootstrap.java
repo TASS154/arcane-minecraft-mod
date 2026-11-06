@@ -1,6 +1,15 @@
 package com.arcane.glyph;
 
 import com.arcane.execution.handlers.ActivateHandler;
+import com.arcane.execution.handlers.AttractEffectHandler;
+import com.arcane.execution.handlers.BarrierFormHandler;
+import com.arcane.execution.handlers.BlockPredicateFilter;
+import com.arcane.execution.handlers.CutEffectHandler;
+import com.arcane.execution.handlers.FreezeEffectHandler;
+import com.arcane.execution.handlers.GravityEffectHandler;
+import com.arcane.execution.handlers.MarkEffectHandler;
+import com.arcane.execution.handlers.PillarFormHandler;
+import com.arcane.execution.handlers.WaveFormHandler;
 import com.arcane.execution.handlers.AfterSecondsCondition;
 import com.arcane.execution.handlers.AuraFormHandler;
 import com.arcane.execution.handlers.BlinkEffectHandler;
@@ -40,6 +49,9 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerForm(ArcaneIds.PROJECTILE, new ProjectileFormHandler());
         GlyphHandlerRegistry.registerForm(ArcaneIds.of("ray"), new RayFormHandler(true));
         GlyphHandlerRegistry.registerForm(ArcaneIds.of("aura"), new AuraFormHandler());
+        GlyphHandlerRegistry.registerForm(ArcaneIds.of("wave"), new WaveFormHandler());
+        GlyphHandlerRegistry.registerForm(ArcaneIds.of("pillar"), new PillarFormHandler());
+        GlyphHandlerRegistry.registerForm(ArcaneIds.of("barrier"), new BarrierFormHandler());
 
         // Efeitos
         GlyphHandlerRegistry.registerEffect(ArcaneIds.DAMAGE, new DamageEffectHandler());
@@ -56,6 +68,14 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("blink"), new BlinkEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("ignite"), new IgniteEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("dig"), new DigEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("mark"), new MarkEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("gravity"), new GravityEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("attract"), new AttractEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("cut"), new CutEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("freeze"), new FreezeEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("blind"), new PotionEffectHandler(MobEffects.BLINDNESS, 400));
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("wither"), new PotionEffectHandler(MobEffects.WITHER, 300));
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("invisible"), new PotionEffectHandler(MobEffects.INVISIBILITY, 2400));
 
         // Filtros
         GlyphHandlerRegistry.registerFilter(ArcaneIds.HOSTILE, new HostileFilterResolver());
@@ -70,6 +90,15 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("wounded"),
             new PredicateFilter((c, e) -> e instanceof LivingEntity l && l.getHealth() < l.getMaxHealth() * 0.5f));
 
+        GlyphHandlerRegistry.registerFilter(ArcaneIds.of("marked"), new PredicateFilter((c, e) -> com.arcane.execution.Marks.isMarked(e)));
+        GlyphHandlerRegistry.registerFilter(ArcaneIds.of("unmarked"), new PredicateFilter((c, e) -> !com.arcane.execution.Marks.isMarked(e)));
+        GlyphHandlerRegistry.registerFilter(ArcaneIds.of("allies"), new PredicateFilter((c, e) ->
+            e instanceof Player || e instanceof net.minecraft.world.entity.npc.AbstractVillager
+                || e instanceof net.minecraft.world.entity.animal.IronGolem
+                || (e instanceof net.minecraft.world.entity.TamableAnimal t && t.isTame())));
+        GlyphHandlerRegistry.registerFilter(ArcaneIds.of("wood"), new BlockPredicateFilter(state ->
+            state.is(net.minecraft.tags.BlockTags.LOGS) || state.is(net.minecraft.tags.BlockTags.PLANKS)));
+
         // Condicoes
         GlyphHandlerRegistry.registerCondition(ArcaneIds.ON_HIT_ENTITY, new OnHitEntityCondition());
         GlyphHandlerRegistry.registerCondition(ArcaneIds.AFTER_SECONDS, new AfterSecondsCondition());
@@ -80,6 +109,16 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("sneaking"), new PredicateCondition(c -> c.caster().isShiftKeyDown()));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("night"), new PredicateCondition(c -> c.level().isNight()));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("in_water"), new PredicateCondition(c -> c.caster().isInWater()));
+
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_hurt"), new PredicateCondition(c -> "hurt".equals(c.trigger().type())));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("low_mana"), new PredicateCondition(c ->
+            c.caster() instanceof Player p && com.arcane.grimoire.GrimoireAttachments.getMana(p)
+                .map(m -> m.current() < m.max() * 0.2f).orElse(false)));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("standing_still"), new PredicateCondition(c -> {
+            LivingEntity e = c.caster();
+            double dx = e.getX() - e.xo, dz = e.getZ() - e.zo;
+            return e.onGround() && dx * dx + dz * dz < 1.0e-4;
+        }));
 
         // Ativador
         GlyphHandlerRegistry.registerActivator(ArcaneIds.ACTIVATE, new ActivateHandler());

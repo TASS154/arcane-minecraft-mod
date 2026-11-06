@@ -43,6 +43,11 @@ public final class SpellPipeline {
     /** Roda os segmentos do plano; os que tem atraso vao para o agendador. */
     public void runSegments(ExecutionContext context) {
         for (ExecutionSegment segment : context.plan().segments()) {
+            // Trechos com gatilho (Ao Sofrer Dano) ficam armados no conjurador em vez de rodar agora.
+            if ("cast".equals(context.trigger().type()) && ArmedSpells.isTriggerSegment(segment)) {
+                ArmedSpells.arm(context, segment);
+                continue;
+            }
             if (segment.delayTicks() > 0) {
                 SpellTickScheduler.schedule(context, segment, segment.delayTicks());
                 continue;

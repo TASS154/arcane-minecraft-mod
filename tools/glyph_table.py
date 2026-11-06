@@ -231,6 +231,150 @@ glyph("activate", "activator", 1,
       ("Activate", "Activator: triggers a stored ritual (rituals are not available yet)."),
       ["...##...", ".#.##.#.", "#..##..#", "#..##..#", "#......#", "#......#", ".#....#.", "..####.."])
 
+# ================================================================== DESIGN v2 (chat de design): novos glifos
+glyph("wave", "form", 3,
+      ("Onda", "Forma: uma onda em cone a sua frente, afetando todas as criaturas que ela alcança."),
+      ("Wave", "Form: a cone-shaped wave in front of you, affecting every creature it reaches."),
+      ["..#..#..", ".#....#.", "#..##..#", "........", "#..##..#", ".#....#.", "..#..#..", "........"],
+      params={"range": (8.0, 2.0, 16.0, "float")}, comp=FORM_COMP)
+glyph("pillar", "form", 4,
+      ("Pilar", "Forma: uma coluna vertical no ponto que você mira (criaturas e o bloco atingido)."),
+      ("Pillar", "Form: a vertical column at the point you aim at (creatures and the block hit)."),
+      ["..####..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", ".######."],
+      params={"range": (24.0, 4.0, 48.0, "float"), "radius": (2.0, 1.0, 6.0, "float")}, comp=FORM_COMP)
+glyph("barrier", "form", 4,
+      ("Barreira", "Forma: ergue uma parede de 3x3 blocos de energia a sua frente, que some sozinha."),
+      ("Barrier", "Form: raises a 3x3 wall of energy in front of you that fades on its own."),
+      ["#.#.#.#.", "########", "#.#.#.#.", "########", "#.#.#.#.", "########", "#.#.#.#.", "########"],
+      params={"duration": (200.0, 40.0, 600.0, "int")}, magnitude=["duration"], comp=FORM_COMP)
+
+glyph("mark", "effect", 1,
+      ("Marcar", "Efeito: marca o alvo (ele brilha). Os Marcados podem ser escolhidos depois pelo filtro Marcados."),
+      ("Mark", "Effect: marks the target (it glows). The Marked can be picked later with the Marked filter."),
+      ["...##...", "..#..#..", ".#.##.#.", "#.#..#.#", "#.#..#.#", ".#.##.#.", "..#..#..", "...##..."],
+      params={"duration": (200.0, 20.0, 1200.0, "int")}, magnitude=["duration"])
+glyph("gravity", "effect", 3,
+      ("Gravidade", "Efeito: o alvo fica pesado e é puxado para baixo (cai com força). Derruba areia, cascalho e bigornas. Vários Gravidade somam."),
+      ("Gravity", "Effect: the target gets heavy and is slammed down (hard landing). Drops sand, gravel and anvils. Several Gravity glyphs add up."),
+      ["...##...", "...##...", "...##...", "...##...", "#######.", ".#####..", "..###...", "...#...."],
+      params={"strength": (1.0, 0.3, 4.0, "float")}, magnitude=["strength"])
+glyph("attract", "effect", 2,
+      ("Atrair", "Efeito: puxa o alvo na sua direção."),
+      ("Attract", "Effect: pulls the target toward you."),
+      ["#......#", ".#....#.", "..#..#..", "...##...", "..####..", "..#..#..", ".#....#.", "#......#"],
+      params={"strength": (1.0, 0.3, 3.0, "float")}, magnitude=["strength"])
+glyph("blind", "effect", 2,
+      ("Cegar", "Efeito: o alvo fica cego por um tempo."),
+      ("Blind", "Effect: the target is blinded for a while."),
+      ["........", ".######.", "#......#", "#..##..#", "#..##..#", "#......#", ".######.", "#......#"],
+      params={"duration": (100.0, 20.0, 400.0, "int")}, magnitude=["duration"])
+glyph("wither", "effect", 3,
+      ("Definhar", "Efeito: o alvo definha (dano contínuo do Wither)."),
+      ("Wither", "Effect: the target withers (continuous Wither damage)."),
+      ["..####..", ".######.", "##.##.##", "########", ".######.", "..#..#..", "..####..", "...##..."],
+      params={"duration": (80.0, 20.0, 300.0, "int"), "level": (0.0, 0.0, 2.0, "int")}, magnitude=["duration"])
+glyph("invisible", "effect", 3,
+      ("Invisibilidade", "Efeito: o alvo fica invisível por um tempo."),
+      ("Invisibility", "Effect: the target turns invisible for a while."),
+      ["..####..", ".#....#.", "#.#..#.#", "#......#", "#.#..#.#", "#..##..#", ".#....#.", "..####.."],
+      params={"duration": (600.0, 100.0, 2400.0, "int")}, magnitude=["duration"])
+glyph("cut", "effect", 2,
+      ("Corte", "Efeito: dano físico (a armadura reduz). Tosquia ovelhas e, em blocos, corta folhas na hora."),
+      ("Cut", "Effect: physical damage (armor reduces it). Shears sheep and, on blocks, instantly cuts leaves."),
+      ["#.......", ".#......", "..#..#..", "...##...", "..##....", ".##.....", "##......", "#......."],
+      params={"amount": (3.0, 1.0, 16.0, "float")}, magnitude=["amount"])
+glyph("freeze", "effect", 3,
+      ("Congelar", "Efeito: congela criaturas (lentidão e frio) e, nos blocos, transforma água em gelo e lava em obsidiana."),
+      ("Freeze", "Effect: freezes creatures (slowness and cold) and, on blocks, turns water to ice and lava to obsidian."),
+      ["...##...", "#..##..#", ".#.##.#.", "..####..", "########", "..####..", ".#.##.#.", "#..##..#"],
+      params={"duration": (100.0, 20.0, 400.0, "int"), "radius": (1.0, 0.5, 5.0, "float")}, magnitude=["duration"])
+
+glyph("marked", "filter", 1,
+      ("Marcados", "Filtro: só criaturas que foram Marcadas."),
+      ("Marked", "Filter: only creatures that have been Marked."),
+      ["...##...", "..#..#..", ".#.##.#.", "#.####.#", "#.####.#", ".#.##.#.", "..#..#..", "...##..."])
+glyph("unmarked", "filter", 1,
+      ("Não Marcados", "Filtro: só criaturas que NÃO foram Marcadas."),
+      ("Unmarked", "Filter: only creatures that have NOT been Marked."),
+      ["...##...", "..#..#..", ".#....#.", "#......#", "#......#", ".#....#.", "..#..#..", "...##..."])
+glyph("allies", "filter", 1,
+      ("Aliados", "Filtro: jogadores, animais domesticados, aldeões e golens de ferro."),
+      ("Allies", "Filter: players, tamed animals, villagers and iron golems."),
+      ["..####..", ".#....#.", "#..##..#", "#.####.#", "#..##..#", "#......#", ".#....#.", "..####.."])
+glyph("wood", "filter", 1,
+      ("Madeira", "Filtro: só blocos de madeira (troncos e tábuas)."),
+      ("Wood", "Filter: only wooden blocks (logs and planks)."),
+      ["########", "#.####.#", "##....##", "#.####.#", "##....##", "#.####.#", "##....##", "########"])
+
+glyph("group", "modifier", 0,
+      ("Grupo", "Modificador: abre um grupo. Um modificador depois de Fim do Grupo afeta todos os efeitos do grupo."),
+      ("Group", "Modifier: opens a group. A modifier after End Group affects every effect in the group."),
+      ["###.....", "#.......", "#.......", "#.......", "#.......", "#.......", "#.......", "###....."],
+      scope={"target": "group_start", "kind": "structure"})
+glyph("end_group", "modifier", 0,
+      ("Fim do Grupo", "Modificador: fecha o grupo aberto por Grupo."),
+      ("End Group", "Modifier: closes the group opened by Group."),
+      [".....###", ".......#", ".......#", ".......#", ".......#", ".......#", ".......#", ".....###"],
+      scope={"target": "group_end", "kind": "structure"})
+glyph("weaken", "modifier", 1,
+      ("Enfraquecer", "Modificador: metade da força do efeito anterior (dano, cura, empurrão, nível). Barateia a magia."),
+      ("Weaken", "Modifier: half the strength of the previous effect (damage, heal, push, level). Makes the spell cheaper."),
+      ["........", "........", "...##...", "..####..", ".######.", "...##...", "...##...", "........"],
+      scope={"target": "previous_effect", "kind": "effect",
+             "mutate": {"amount": {"op": "multiply", "value": 0.5}, "strength": {"op": "multiply", "value": 0.5},
+                        "power": {"op": "multiply", "value": 0.5}}})
+glyph("repeat", "modifier", 2,
+      ("Repetição", "Modificador: repete o efeito anterior (no total, o número de vezes do parâmetro). Cada repetição custa o efeito de novo."),
+      ("Repeat", "Modifier: repeats the previous effect (the parameter is the total number of times). Each repeat costs the effect again."),
+      ["..####..", ".#....#.", "#.....##", "#....###", "#......#", "#.#....#", ".#....#.", "..####.."],
+      params={"times": (2.0, 2.0, 4.0, "int")},
+      scope={"target": "repeat", "kind": "effect", "repeat_param": "times"})
+
+glyph("on_hurt", "condition", 0,
+      ("Ao Sofrer Dano", "Condição: arma a magia em você: o que vem depois só acontece quando você levar dano (uma vez, por até 60 s)."),
+      ("When Hurt", "Condition: arms the spell on you: what follows only happens when you take damage (once, for up to 60 s)."),
+      ["...##...", "..#..#..", ".#.##.#.", "#..##..#", "#..##..#", ".#....#.", "..#..#..", "...##..."])
+glyph("low_mana", "condition", 0,
+      ("Mana Baixa", "Condição: o que vem depois só acontece se sua mana estiver abaixo de 20%."),
+      ("Low Mana", "Condition: what follows only happens if your mana is below 20%."),
+      ["...##...", "..####..", ".######.", ".######.", ".######.", "..####..", "...##...", "........"])
+glyph("standing_still", "condition", 0,
+      ("Parado", "Condição: o que vem depois só acontece se você estiver parado no chão."),
+      ("Standing Still", "Condition: what follows only happens while you stand still on the ground."),
+      ["..####..", "..####..", "..####..", ".######.", ".######.", "..#..#..", "..#..#..", ".##..##."])
+
+# ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
+TIERS = {
+    1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
+        "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group"],
+    2: ["slow", "poison", "speed", "players", "animals", "undead", "nearest", "wounded", "allies", "delay", "lengthen",
+        "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
+        "ray", "dig", "shield", "standing_still", "low_mana", "wave"],
+    3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
+        "activate"],
+    4: ["thunder", "gravity", "invisible"],
+}
+FAMILIES = {
+    "fire": ["fire", "ignite", "explode"],
+    "ice": ["slow", "freeze", "shield"],
+    "storm": ["thunder", "ray", "pillar"],
+    "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead"],
+    "life": ["heal", "shield", "speed", "allies", "players", "animals"],
+    "force": ["push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
+    "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
+                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana"],
+    "void": ["blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
+    "earth": ["dig", "barrier", "blocks", "wood", "more_range", "swift", "touch", "projectile", "self"],
+}
+for _tier, _ids in TIERS.items():
+    for _gid in _ids:
+        G[_gid]["tier"] = _tier
+for _fam, _ids in FAMILIES.items():
+    for _gid in _ids:
+        G[_gid].setdefault("families", []).append(_fam)
+for _gid, _g in G.items():
+    _g.setdefault("families", ["arcane"])
+
 ORDER = list(G.keys())
 CATEGORY_ORDER = ["form", "filter", "effect", "modifier", "condition", "activator"]
 

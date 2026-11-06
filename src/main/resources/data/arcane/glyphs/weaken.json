@@ -1,0 +1,31 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:weaken"
+  },
+  "modifier_scope": {
+    "target": "previous_effect",
+    "kind": "effect",
+    "mutate": {
+      "amount": {
+        "op": "multiply",
+        "value": 0.5
+      },
+      "strength": {
+        "op": "multiply",
+        "value": 0.5
+      },
+      "power": {
+        "op": "multiply",
+        "value": 0.5
+      }
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 2,
+  "families": [
+    "knowledge"
+  ]
+}

@@ -19,6 +19,12 @@ public final class ModBlocks {
     public static final RegistryObject<Block> MANA_CRYSTAL = BLOCKS.register("mana_crystal",
             () -> new ManaCrystalBlock(BlockBehaviour.Properties.of().mapColor(MapColor.DIAMOND).strength(5.0f).lightLevel(s -> 12).noOcclusion()));
 
+    public static final RegistryObject<Block> ARCANE_BARRIER = BLOCKS.register("arcane_barrier",
+            () -> new com.arcane.block.ArcaneBarrierBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+                    .strength(0.8f).noLootTable().noOcclusion().lightLevel(s -> 6)
+                    .sound(net.minecraft.world.level.block.SoundType.AMETHYST)
+                    .isRedstoneConductor((s, l, p) -> false).isSuffocating((s, l, p) -> false).isViewBlocking((s, l, p) -> false)));
+
     private ModBlocks() {}
 
     public static void register(IEventBus bus) {

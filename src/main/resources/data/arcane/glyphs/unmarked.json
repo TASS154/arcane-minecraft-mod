@@ -1,0 +1,13 @@
+{
+  "category": "filter",
+  "behavior": {
+    "handler": "arcane:unmarked"
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 1,
+  "families": [
+    "knowledge"
+  ]
+}

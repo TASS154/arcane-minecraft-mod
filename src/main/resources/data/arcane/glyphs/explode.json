@@ -13,5 +13,9 @@
   },
   "cost": {
     "mana": 6
-  }
+  },
+  "tier": 3,
+  "families": [
+    "fire"
+  ]
 }

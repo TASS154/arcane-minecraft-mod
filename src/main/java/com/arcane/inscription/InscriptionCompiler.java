@@ -17,10 +17,13 @@ import java.util.Optional;
  *  - Forma: entrega do feitico (parametros do glifo, limitados ao intervalo da definicao).
  *  - Efeito: entra no segmento aberto. Modificadores "previous_effect" valem para o efeito imediatamente
  *    anterior; se ainda nao houve efeito, valem para o proximo (as ordens Area,Dano e Dano,Area funcionam).
+ *  - Grupo / Fim do Grupo: um modificador logo depois de Fim do Grupo vale para TODOS os efeitos do grupo.
+ *  - Repeticao: duplica o efeito anterior (cada copia custa mana de novo).
  *  - Filtro: vale para o segmento aberto e para os seguintes.
  *  - Condicao: abre um segmento novo que so roda se a condicao passar; "Apos Segundos" tambem o atrasa.
  *  - Atraso (modificador next_segment): abre um segmento novo que roda alguns segundos depois.
  *  - Modificador "delivery": altera a forma; "all": efeito anterior e forma.
+ *  - O custo total cresce exponencialmente com o numero de glifos (SpellLimits).
  */
 public final class InscriptionCompiler {
     private InscriptionCompiler() {}
@@ -37,12 +40,21 @@ public final class InscriptionCompiler {
         }
     }
 
+    /** Referencia estavel a um efeito ja compilado (segmento + posicao), para modificadores e grupos. */
+    private record Slot(SegmentBuilder segment, int index) {
+        CompiledExecutionPlan.EffectCallCompiled get() { return segment.effects.get(index); }
+        void set(CompiledExecutionPlan.EffectCallCompiled effect) { segment.effects.set(index, effect); }
+    }
+
     public static CompiledExecutionPlan compile(Inscription inscription) {
         List<SegmentBuilder> built = new ArrayList<>();
         SegmentBuilder current = new SegmentBuilder();
         List<CompiledExecutionPlan.FilterSpec> filters = new ArrayList<>();
         List<GlyphInstance> queuedEffectModifiers = new ArrayList<>();
         List<GlyphInstance> deliveryModifiers = new ArrayList<>();
+        List<Slot> allEffects = new ArrayList<>();
+        List<Integer> groupStarts = new ArrayList<>();
+        int[] lastGroup = null; // [inicio, fim) em allEffects, valido ate o proximo efeito/forma/condicao
         ModifierApplicator.DeliverySpecCompiled delivery = null;
         double mana = 0;
 
@@ -52,11 +64,13 @@ public final class InscriptionCompiler {
 
             switch (def.category()) {
                 case FORM -> {
+                    lastGroup = null;
                     Map<String, Double> params = def.resolveParams(instance.parameters());
                     delivery = new ModifierApplicator.DeliverySpecCompiled(instance.glyphId(), def.behavior().handler(),
                             params, params.getOrDefault("range", 16.0));
                 }
                 case EFFECT -> {
+                    lastGroup = null;
                     CompiledExecutionPlan.EffectCallCompiled effect = new CompiledExecutionPlan.EffectCallCompiled(
                             instance.glyphId(), def.behavior().handler(), Map.copyOf(def.resolveParams(instance.parameters())),
                             def.behavior().magnitudeKeys());
@@ -65,6 +79,7 @@ public final class InscriptionCompiler {
                     }
                     queuedEffectModifiers.clear();
                     current.effects.add(effect);
+                    allEffects.add(new Slot(current, current.effects.size() - 1));
                 }
                 case FILTER -> {
                     CompiledExecutionPlan.FilterSpec spec = new CompiledExecutionPlan.FilterSpec(instance.glyphId(), def.behavior().handler());
@@ -74,11 +89,30 @@ public final class InscriptionCompiler {
                     ModifierScope scope = def.modifierScope().orElse(null);
                     if (scope == null) break;
                     switch (scope.target()) {
-                        case "previous", "previous_effect" -> applyToLastEffect(built, current, queuedEffectModifiers, instance);
+                        case "group_start" -> groupStarts.add(allEffects.size());
+                        case "group_end" -> {
+                            if (!groupStarts.isEmpty()) {
+                                int start = groupStarts.remove(groupStarts.size() - 1);
+                                lastGroup = start < allEffects.size() ? new int[] {start, allEffects.size()} : null;
+                            }
+                        }
+                        case "previous", "previous_effect" -> applyToPrevious(allEffects, lastGroup, queuedEffectModifiers, instance);
                         case "delivery" -> deliveryModifiers.add(instance);
                         case "all" -> {
-                            applyToLastEffect(built, current, queuedEffectModifiers, instance);
+                            applyToPrevious(allEffects, lastGroup, queuedEffectModifiers, instance);
                             deliveryModifiers.add(instance);
+                        }
+                        case "repeat" -> {
+                            if (!allEffects.isEmpty()) {
+                                Slot last = allEffects.get(allEffects.size() - 1);
+                                int times = (int) Math.round(def.resolveParam("times", instance.parameters()));
+                                GlyphDefinition effectDef = GlyphRegistry.get(last.get().glyphId()).orElse(null);
+                                for (int i = 1; i < times; i++) {
+                                    last.segment().effects.add(last.get());
+                                    allEffects.add(new Slot(last.segment(), last.segment().effects.size() - 1));
+                                    if (effectDef != null) mana += effectDef.manaCost(last.get().parameters());
+                                }
+                            }
                         }
                         case "next_segment" -> {
                             double seconds = def.resolveParam(scope.delayParam().orElse("seconds"), instance.parameters());
@@ -91,6 +125,7 @@ public final class InscriptionCompiler {
                     }
                 }
                 case CONDITION -> {
+                    lastGroup = null;
                     flush(built, current, filters);
                     current = new SegmentBuilder();
                     current.condition = Optional.of(new CompiledExecutionPlan.ConditionGate(
@@ -117,6 +152,7 @@ public final class InscriptionCompiler {
         }
         CompiledExecutionPlan.DeliverySpec spec = new CompiledExecutionPlan.DeliverySpec(
                 delivery.formId(), delivery.handler(), delivery.parameters(), delivery.range());
+        mana *= SpellLimits.multiplier(inscription.glyphs().size());
         return new CompiledExecutionPlan(spec, List.copyOf(segments), (int) Math.ceil(mana), inscription.fingerprint());
     }
 
@@ -134,22 +170,20 @@ public final class InscriptionCompiler {
                 .orElse(effect);
     }
 
-    /** Aplica ao efeito imediatamente anterior (no segmento aberto ou nos ja fechados); sem efeito ainda, enfileira. */
-    private static void applyToLastEffect(List<SegmentBuilder> built, SegmentBuilder current,
-                                          List<GlyphInstance> queue, GlyphInstance modifier) {
-        if (!current.effects.isEmpty()) {
-            int last = current.effects.size() - 1;
-            current.effects.set(last, applyToEffect(current.effects.get(last), modifier));
+    /**
+     * Aplica ao efeito imediatamente anterior, ou a todos os efeitos do ultimo grupo fechado; sem efeito
+     * nenhum ainda, enfileira para o proximo.
+     */
+    private static void applyToPrevious(List<Slot> allEffects, int[] lastGroup, List<GlyphInstance> queue, GlyphInstance modifier) {
+        if (allEffects.isEmpty()) {
+            queue.add(modifier);
             return;
         }
-        for (int i = built.size() - 1; i >= 0; i--) {
-            List<CompiledExecutionPlan.EffectCallCompiled> effects = built.get(i).effects;
-            if (!effects.isEmpty()) {
-                int last = effects.size() - 1;
-                effects.set(last, applyToEffect(effects.get(last), modifier));
-                return;
-            }
+        int from = lastGroup != null ? lastGroup[0] : allEffects.size() - 1;
+        int to = lastGroup != null ? lastGroup[1] : allEffects.size();
+        for (int i = from; i < to; i++) {
+            Slot slot = allEffects.get(i);
+            slot.set(applyToEffect(slot.get(), modifier));
         }
-        queue.add(modifier);
     }
 }

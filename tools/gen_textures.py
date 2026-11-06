@@ -537,6 +537,24 @@ def mod_logo():
     return img
 
 
+def barrier_block():
+    """Barreira arcana (16x16, translucida): vidro roxo com moldura e runas ciano."""
+    img = Image.new("RGBA", (16, 16), (150, 90, 210, 70))
+    d = ImageDraw.Draw(img)
+    d.rectangle((0, 0, 15, 15), outline=(205, 165, 245, 230))
+    d.rectangle((1, 1, 14, 14), outline=(150, 90, 210, 150))
+    rnd = random.Random(31)
+    for _ in range(24):
+        x, y = rnd.randint(2, 13), rnd.randint(2, 13)
+        img.putpixel((x, y), (90, 220, 240, 170))
+    for x in range(3, 13):
+        img.putpixel((x, 8), (205, 165, 245, 120))
+    for y in range(3, 13):
+        img.putpixel((8, y), (205, 165, 245, 120))
+    img.putpixel((8, 8), (225, 250, 255, 255))
+    return img
+
+
 def grimoire_item():
     """Item do Grimorio (16x16)."""
     return sprite([
@@ -608,6 +626,7 @@ def main():
     save(workbench_bottom(), "block/arcane_workbench_bottom.png")
     save(mana_crystal(), "block/mana_crystal.png")
     save(mana_crystal_base(), "block/mana_crystal_base.png")
+    save(barrier_block(), "block/arcane_barrier.png")
 
     save(workbench_gui(), "gui/arcane_workbench.png")
     save(mana_bar(), "gui/mana_bar.png")

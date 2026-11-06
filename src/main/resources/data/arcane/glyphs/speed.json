@@ -22,5 +22,9 @@
   },
   "cost": {
     "mana": 2
-  }
+  },
+  "tier": 2,
+  "families": [
+    "life"
+  ]
 }

@@ -1,0 +1,17 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:end_group"
+  },
+  "modifier_scope": {
+    "target": "group_end",
+    "kind": "structure"
+  },
+  "cost": {
+    "mana": 0
+  },
+  "tier": 1,
+  "families": [
+    "knowledge"
+  ]
+}

@@ -5,5 +5,9 @@
   },
   "cost": {
     "mana": 1
-  }
+  },
+  "tier": 2,
+  "families": [
+    "blood"
+  ]
 }

@@ -5,5 +5,9 @@
   },
   "cost": {
     "mana": 0
-  }
+  },
+  "tier": 3,
+  "families": [
+    "void"
+  ]
 }

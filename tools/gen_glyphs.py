@@ -26,8 +26,8 @@ def definition(gid, g):
     if g["scope"]:
         d["modifier_scope"] = g["scope"]
     d["cost"] = {"mana": g["cost"]}
-    if g["tier"] != 1:
-        d["tier"] = g["tier"]
+    d["tier"] = g["tier"]
+    d["families"] = g["families"]
     return d
 
 

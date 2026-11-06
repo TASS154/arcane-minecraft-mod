@@ -1,0 +1,31 @@
+{
+  "category": "form",
+  "behavior": {
+    "handler": "arcane:pillar"
+  },
+  "composition": {
+    "max_per_inscription": 1,
+    "position": "start"
+  },
+  "parameters": {
+    "range": {
+      "type": "float",
+      "default": 24.0,
+      "min": 4.0,
+      "max": 48.0
+    },
+    "radius": {
+      "type": "float",
+      "default": 2.0,
+      "min": 1.0,
+      "max": 6.0
+    }
+  },
+  "cost": {
+    "mana": 4
+  },
+  "tier": 3,
+  "families": [
+    "storm"
+  ]
+}

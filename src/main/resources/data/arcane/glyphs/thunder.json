@@ -5,5 +5,9 @@
   },
   "cost": {
     "mana": 6
-  }
+  },
+  "tier": 4,
+  "families": [
+    "storm"
+  ]
 }

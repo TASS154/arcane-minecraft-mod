@@ -1,0 +1,28 @@
+{
+  "category": "form",
+  "behavior": {
+    "handler": "arcane:barrier",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "composition": {
+    "max_per_inscription": 1,
+    "position": "start"
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 200.0,
+      "min": 40.0,
+      "max": 600.0
+    }
+  },
+  "cost": {
+    "mana": 4
+  },
+  "tier": 3,
+  "families": [
+    "earth"
+  ]
+}

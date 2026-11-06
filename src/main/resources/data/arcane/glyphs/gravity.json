@@ -1,0 +1,24 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:gravity",
+    "magnitude_keys": [
+      "strength"
+    ]
+  },
+  "parameters": {
+    "strength": {
+      "type": "float",
+      "default": 1.0,
+      "min": 0.3,
+      "max": 4.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 4,
+  "families": [
+    "force"
+  ]
+}

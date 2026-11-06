@@ -45,7 +45,6 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
   private static final int LIST_Y = 33;
   private static final int LIST_ROW = 12;
   private static final int LIST_ROWS = 8;
-  private static final int MAX_GLYPHS = 24;
 
   /** Glifo na composicao, com os parametros escolhidos (so os alterados). */
   private static final class Slot {
@@ -160,7 +159,7 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
   public boolean mouseClicked(double mouseX, double mouseY, int button) {
     if (button == 0) {
       KnownGlyph glyph = glyphAt(mouseX, mouseY);
-      if (glyph != null && composition.size() < MAX_GLYPHS) {
+      if (glyph != null && composition.size() < ClientArcaneData.maxGlyphs()) {
         composition.add(new Slot(glyph.id()));
         selected = composition.size() - 1;
         ensureVisible();
@@ -345,7 +344,10 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
     }
     int cost = (int) ClientArcaneData.costOf(entries());
     g.drawString(font, Component.translatable("gui.arcane.cost", cost, (int) ClientArcaneData.mana()),
-        leftPos + 124, topPos + 143, cost > ClientArcaneData.mana() ? 0xFF8060 : 0x5ADCF0, false);
+        leftPos + 124, topPos + 142, cost > ClientArcaneData.mana() ? 0xFF8060 : 0x5ADCF0, false);
+    boolean full = composition.size() >= ClientArcaneData.maxGlyphs();
+    String count = composition.size() + "/" + ClientArcaneData.maxGlyphs();
+    g.drawString(font, count, leftPos + 228 - font.width(count), topPos + 153, full ? 0xFFB060 : 0x6A5A8A, false);
 
     Component status;
     int color;
@@ -362,7 +364,7 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
       status = Component.translatable("gui.arcane.ready");
       color = 0x80E080;
     }
-    g.drawString(font, font.plainSubstrByWidth(status.getString(), 106), leftPos + 124, topPos + 153, color, false);
+    g.drawString(font, font.plainSubstrByWidth(status.getString(), 80), leftPos + 124, topPos + 153, color, false);
   }
 
   private void renderActiveSpell(GuiGraphics g) {

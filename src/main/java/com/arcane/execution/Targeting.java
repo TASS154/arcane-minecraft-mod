@@ -54,7 +54,7 @@ public final class Targeting {
       right = right.lengthSqr() < 1.0e-4 ? Vec3.ZERO : right.normalize();
       Vec3 beamStart = start.add(ctx.look().scale(0.6)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
       SpellElement element = SpellElement.of(ctx.plan());
-      com.arcane.network.ModNetwork.sendBeam(level, beamStart, hitPoint, element.color(), element == SpellElement.STORM, 8);
+        com.arcane.network.ModNetwork.sendBeam(level, beamStart, hitPoint, element.color(), element == SpellElement.STORM, 8);
     }
     return new RayResult(targets, hitPoint);
   }

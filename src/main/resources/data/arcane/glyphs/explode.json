@@ -1,0 +1,17 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:explode"
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 2.0,
+      "min": 1.0,
+      "max": 6.0
+    }
+  },
+  "cost": {
+    "mana": 6
+  }
+}

@@ -36,15 +36,19 @@ public final class SpellPipeline {
             return ExecutionResult.ok(0);
         }
 
-        for (ExecutionSegment segment : plan.segments()) {
+        runSegments(context);
+        return ExecutionResult.ok(0);
+    }
+
+    /** Roda os segmentos do plano; os que tem atraso vao para o agendador. */
+    public void runSegments(ExecutionContext context) {
+        for (ExecutionSegment segment : context.plan().segments()) {
             if (segment.delayTicks() > 0) {
                 SpellTickScheduler.schedule(context, segment, segment.delayTicks());
                 continue;
             }
             executeSegment(context, segment);
         }
-
-        return ExecutionResult.ok(0);
     }
 
     public void executeSegment(ExecutionContext context, ExecutionSegment segment) {
@@ -68,7 +72,9 @@ public final class SpellPipeline {
     }
 
     private TargetList applyFilters(ExecutionContext context, ExecutionSegment segment, TargetList targets) {
-        TargetList current = targets;
+        // Alvos podem ter morrido ou sumido durante o atraso.
+        TargetList current = new TargetList(
+                targets.entities().stream().filter(e -> e.isAlive() && !e.isRemoved()).toList(), targets.blocks());
         for (FilterSpec filter : segment.filters()) {
             FilterResolver resolver = GlyphHandlerRegistry.getFilter(filter.handler()).orElse(null);
             if (resolver != null) {

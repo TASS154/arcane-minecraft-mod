@@ -1,0 +1,17 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:dig"
+  },
+  "parameters": {
+    "power": {
+      "type": "float",
+      "default": 2.0,
+      "min": 0.5,
+      "max": 5.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  }
+}

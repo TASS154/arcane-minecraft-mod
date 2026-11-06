@@ -8,13 +8,15 @@ Este guia explica como colocar o mod no jogo, o que é a **Bancada Arcana** e o 
 
 Todos os blocos, itens, a GUI da bancada, o grimório, o projétil, o Mago NPC, a armadura e as partículas têm **arte própria** em pixel art (paleta roxa/ciano). Os sons também são próprios (sintetizados).
 
-São artes **provisórias de qualidade**: coerentes entre si e no formato exato do Minecraft. Para trocar qualquer uma, substitua o PNG/OGG mantendo o mesmo caminho e tamanho. Os geradores ficam em `tools/`:
+São artes **provisórias de qualidade**: coerentes entre si e no formato exato do Minecraft. Para trocar qualquer uma, substitua o PNG/OGG mantendo o mesmo caminho e tamanho. Os mais de 40 glifos vêm de uma única tabela (`tools/glyph_table.py`), que gera os JSONs, os textos, os ícones e o `GLIFOS.md`. Os 18 magos são gerados proceduralmente (nenhum arquivo de terceiros). Os geradores ficam em `tools/`:
 
 ```bash
 pip install pillow numpy soundfile
 python tools/gen_textures.py   # texturas em assets/arcane/textures
 python tools/gen_sounds.py     # sons em assets/arcane/sounds
 python tools/gen_data.py       # receitas, loot, tags e worldgen
+python tools/gen_glyphs.py     # glifos (JSON + idiomas)
+python tools/gen_glyph_docs.py # docs/GLIFOS.md
 ```
 
 ---
@@ -104,20 +106,20 @@ Abra o inventário criativo e vá na aba **Arcane**, ou use comandos:
 
 No sobrevivência, tudo tem receita (veja o livro de receitas). Os **Cristais de Mana** aparecem nas cavernas (entre Y -56 e Y 24); minerar com picareta de ferro dá fragmentos de ametista, com Toque de Seda dá o cristal. **Notas de Glifo** aparecem em baús de masmorras, minas abandonadas, bibliotecas de fortaleza, templos, mansões e cidades antigas.
 
-### 2. Desbloquear glifos para teste
+### 2. Glifos
 
-O mod não dá feitiços prontos. Você precisa **conhecer glifos** antes de usá-los. Para testar, use:
+Você começa conhecendo **Eu, Projétil e Dano** e com uma magia pronta, a **Faísca** (Projétil → Dano). Os outros 39 glifos você descobre jogando (veja [GLIFOS.md](GLIFOS.md) para a lista completa, com o que cada um faz):
+
+- **Veja um mago conjurar** perto de você: você passa a suspeitar dos glifos dele.
+- **Experimente na Bancada** com glifos suspeitos (`?`): salvar não grava, mas aumenta o entendimento até identificar.
+- **Estude notas de glifo** (botão direito): identifica na hora. Vêm de baús e dos magos mortos.
+
+Para testar tudo de uma vez (precisa de permissão de operador):
 
 ```
-/arcane know arcane:self
-/arcane know arcane:projectile
-/arcane know arcane:damage
+/arcane know all
 /arcane know arcane:fire
-/arcane know arcane:heal
-/arcane know arcane:push
 ```
-
-Sem isso, a bancada monta a inscrição, mas a conjuração pode falhar por “glifo desconhecido”.
 
 ---
 
@@ -144,6 +146,8 @@ A **Bancada Arcana** (`arcane:arcane_workbench`) é o local onde você **monta s
 | **Salvar** | Valida e grava no grimório. A magia salva vira a ativa |
 | **Conjurar** | Conjura a magia ativa com a precisão da bancada |
 | **◀ ▶** (rodapé) | Troca a magia ativa entre as salvas |
+| **Editar** (rodapé) | Carrega a magia ativa na composição. Salvar com o mesmo nome **substitui** a antiga |
+| **Roda do mouse** sobre uma linha | Ajusta o parâmetro principal do glifo (dano, duração, raio...). Shift: passo 5x maior. O custo na tela acompanha |
 
 Composições com glifos ainda não identificados **não são salvas**, mas contam como experimento: cada tentativa aumenta seu entendimento (Suspeito → Parcial → Identificado).
 
@@ -192,18 +196,20 @@ A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fo
 |---------|-----------|
 | **Cristal de Mana** | Magias ficam mais fortes perto dele (até ×32). Ficar muito tempo perto causa Mana Poisoning |
 | **Máscara Arcana / Manto Isolante** | Armaduras (cabeça / peito) que reduzem o Mana Poisoning em 30% / 40% |
+| **Grimório** (item) | Botão direito ou tecla **G** abre o grimório: aba **Magias** (ativar e apagar), **Glifos** (os que você conhece e quantos faltam) e **Diário** (como você descobriu cada um). Craft: livro + ametista + tinta comum. Se o dono morrer, o item cai e só ele o recupera |
 | **Pena Arcana** | Pena na mão principal e tinta na secundária, clique direito num bloco: grava a magia ativa. Em baú dispara **ao abrir**; em qualquer outro bloco dispara **quando uma criatura pisa** (ex.: Eu + Dano vira armadilha). Agachado apaga. Quebrar o bloco também apaga. Consome 1 tinta (fora do criativo); tinta de sangue custa 2 de vida; com tinta invisível a inscrição não solta faíscas |
 | **Nota de Glifo** | Clique direito para aprender o glifo indicado na dica do item |
-| **Mago NPC** | Inimigo que conjura magias e dropa notas. Use o ovo gerador na aba Arcane |
+| **Mago NPC** | 18 variantes (6 elementos × 3 estilos): Fogo, Gelo, Tempestade, Veneno, Estouro e Vento. Cada elemento conjura uma magia diferente com o mesmo motor do jogador. Aparece naturalmente no Overworld (raro) ou pelo ovo gerador. Ao morrer, dropa uma nota de um glifo da magia dele |
 | **Projetor de Glifos / Espelho de Simetria** | Registrados e com arte, mas **ainda sem função** (dependem de design de rituais) |
+| **Glifo Ativar** | Dispara um ritual armazenado. Rituais ainda não estão disponíveis, então o glifo ainda não faz nada visível |
 
 ---
 
 ## Testes automáticos
 
 ```bash
-./gradlew test               # testes unitários e integridade de assets
-./gradlew runGameTestServer  # testes dentro de um mundo (cristal, inscrição por toque, apagar)
+./gradlew test               # testes unitários, integridade de assets, compilador e sincronização
+./gradlew runGameTestServer  # 28 testes dentro de um mundo (cada glifo, mago, cristal, pena)
 ```
 
 ---
@@ -211,7 +217,8 @@ A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fo
 ## Comandos úteis
 
 ```
-/arcane know <namespace:glifo>   → aprende um glifo (debug/teste)
+/arcane know <namespace:glifo>   → aprende um glifo (precisa ser operador)
+/arcane know all                 → aprende todos os glifos (precisa ser operador)
 /give @s arcane:glyph_note      → nota de pesquisa
 ```
 
@@ -236,7 +243,7 @@ Os geradores de texturas, sons e dados ficam em `tools/`. Para trocar uma textur
 | Bloco roxo e preto listrado | Textura faltando: confira o caminho do PNG (glifos novos precisam de ícone próprio) |
 | Tecla V diz "Nenhuma magia ativa" | Salve uma inscrição na bancada ou troque com **B**; verifique conflito de teclas em Opções → Controles |
 | “Mana insuficiente” | Espere regenerar ou reduza glifos na inscrição |
-| “Glifo desconhecido” | Use `/arcane know arcane:nome_do_glifo` |
+| “Você ainda não identificou um destes glifos” | Estude uma nota, experimente na bancada, ou (operador) `/arcane know arcane:nome_do_glifo` |
 | Mod não aparece no jogo | Confirme Forge 1.20.1 e que o `.jar` está em `.minecraft/mods` |
 
 ---

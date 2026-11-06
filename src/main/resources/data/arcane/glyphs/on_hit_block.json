@@ -1,0 +1,9 @@
+{
+  "category": "condition",
+  "behavior": {
+    "handler": "arcane:on_hit_block"
+  },
+  "cost": {
+    "mana": 0
+  }
+}

@@ -1,1 +1,9 @@
-{"category":"filter","behavior":{"handler":"arcane:self_filter"},"cost":{"mana":0}}
+{
+  "category": "filter",
+  "behavior": {
+    "handler": "arcane:self_filter"
+  },
+  "cost": {
+    "mana": 0
+  }
+}

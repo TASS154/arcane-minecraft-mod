@@ -1,1 +1,21 @@
-{"category":"form","behavior":{"handler":"arcane:touch"},"composition":{"max_per_inscription":1,"position":"start"},"cost":{"mana":2}}
+{
+  "category": "form",
+  "behavior": {
+    "handler": "arcane:touch"
+  },
+  "composition": {
+    "max_per_inscription": 1,
+    "position": "start"
+  },
+  "parameters": {
+    "range": {
+      "type": "float",
+      "default": 3.0,
+      "min": 1.0,
+      "max": 6.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  }
+}

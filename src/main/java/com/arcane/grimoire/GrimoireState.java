@@ -11,6 +11,7 @@ import java.util.*;
 public class GrimoireState {
     private final Map<ResourceLocation, GlyphKnowledge> knowledge = new HashMap<>();
     private final Map<UUID, Inscription> spellbook = new LinkedHashMap<>();
+    private static final int MAX_LOG = 60;
     private final List<String> discoveryLog = new ArrayList<>();
     private int visualStage = 1;
     private boolean grimoirePresent = true;
@@ -45,12 +46,30 @@ public class GrimoireState {
         spellbook.put(inscription.id(), inscription);
     }
 
+    /** Apaga uma magia do grimorio. Se era a ativa, passa para outra (ou nenhuma). */
+    public boolean removeInscription(UUID id) {
+        if (spellbook.remove(id) == null) return false;
+        if (id.equals(activeInscriptionId)) {
+            activeInscriptionId = spellbook.keySet().stream().findFirst().orElse(null);
+        }
+        return true;
+    }
+
+    /** Magia salva com este nome (sem distinguir maiusculas), para o salvar-por-cima da bancada. */
+    public Optional<Inscription> findByName(String name) {
+        if (name == null || name.isBlank()) return Optional.empty();
+        return spellbook.values().stream().filter(i -> i.metadata().name().equalsIgnoreCase(name.trim())).findFirst();
+    }
+
     public Optional<Inscription> getInscription(UUID id) {
         return Optional.ofNullable(spellbook.get(id));
     }
 
     public void logDiscovery(String entry) {
         discoveryLog.add(entry);
+        while (discoveryLog.size() > MAX_LOG) {
+            discoveryLog.remove(0);
+        }
     }
 
     public void save(CompoundTag tag) {
@@ -67,6 +86,9 @@ public class GrimoireState {
             spells.add(spellTag);
         });
         tag.put("spellbook", spells);
+        ListTag log = new ListTag();
+        discoveryLog.forEach(entry -> log.add(net.minecraft.nbt.StringTag.valueOf(entry)));
+        tag.put("discoveryLog", log);
         tag.putInt("visualStage", visualStage);
         tag.putBoolean("grimoirePresent", grimoirePresent);
         tag.putLong("destroyedUntil", grimoireDestroyedUntilTick);
@@ -93,6 +115,11 @@ public class GrimoireState {
                         .result().ifPresent(inscription -> spellbook.put(id, inscription));
             }
         }
+        discoveryLog.clear();
+        if (tag.contains("discoveryLog", Tag.TAG_LIST)) {
+            ListTag log = tag.getList("discoveryLog", Tag.TAG_STRING);
+            for (int i = 0; i < log.size(); i++) discoveryLog.add(log.getString(i));
+        }
         visualStage = tag.getInt("visualStage");
         if (visualStage == 0) visualStage = 1;
         grimoirePresent = !tag.contains("grimoirePresent") || tag.getBoolean("grimoirePresent");
@@ -105,8 +132,14 @@ public class GrimoireState {
         state.learnGlyph(new ResourceLocation("arcane", "self"), GlyphKnowledge.MASTERED);
         state.learnGlyph(new ResourceLocation("arcane", "projectile"), GlyphKnowledge.MASTERED);
         state.learnGlyph(new ResourceLocation("arcane", "damage"), GlyphKnowledge.MASTERED);
-        state.addInscription(Inscription.testProjectileDamageFire());
-        state.setActiveInscription(state.spellbook.keySet().iterator().next());
+        Inscription starter = new Inscription(List.of(
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "projectile")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "damage"))),
+                new com.arcane.inscription.InscriptionMetadata("Faísca", new ResourceLocation("arcane", "common"),
+                        new ResourceLocation("arcane", "arcane_pen"), 1.0, Optional.empty(), 0L,
+                        com.arcane.inscription.InscriptionSourceKind.GRIMOIRE));
+        state.addInscription(starter);
+        state.setActiveInscription(starter.id());
         return state;
     }
 }

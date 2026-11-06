@@ -1,0 +1,26 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:speed",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 200.0,
+      "min": 20.0,
+      "max": 1200.0
+    },
+    "level": {
+      "type": "int",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 3.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  }
+}

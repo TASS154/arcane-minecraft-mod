@@ -1,0 +1,9 @@
+{
+  "category": "condition",
+  "behavior": {
+    "handler": "arcane:low_health"
+  },
+  "cost": {
+    "mana": 0
+  }
+}

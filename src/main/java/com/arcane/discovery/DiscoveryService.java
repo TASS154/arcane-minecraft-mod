@@ -26,8 +26,8 @@ public final class DiscoveryService {
   public static void onExperiment(ServerPlayer player, List<ResourceLocation> glyphs) {
     GrimoireAttachments.get(player).ifPresent(grimoire -> {
       for (ResourceLocation glyph : glyphs) {
-        // Ignora ids inexistentes enviados pelo cliente, para nao poluir o grimorio.
-        if (com.arcane.glyph.GlyphRegistry.get(glyph).isEmpty()) continue;
+        // So se experimenta com o que ja se suspeita existir; o cliente nao pode inventar descobertas.
+        if (com.arcane.glyph.GlyphRegistry.get(glyph).isEmpty() || !grimoire.knowledge().containsKey(glyph)) continue;
         GlyphKnowledge before = grimoire.knowledge().getOrDefault(glyph, GlyphKnowledge.UNKNOWN);
         GlyphKnowledge next = step(grimoire, glyph);
         grimoire.learnGlyph(glyph, next);
@@ -42,6 +42,26 @@ public final class DiscoveryService {
       }
     });
     com.arcane.network.ArcaneSync.sync(player, true);
+  }
+
+  /**
+   * Ver uma magia ser conjurada (por um mago, por exemplo) faz o jogador suspeitar dos glifos que ainda
+   * nao conhece. A partir de SUSPEITO o glifo aparece na bancada e pode ser experimentado.
+   */
+  public static void onWitness(ServerPlayer player, com.arcane.inscription.Inscription inscription) {
+    GrimoireAttachments.get(player).ifPresent(grimoire -> {
+      boolean changed = false;
+      for (com.arcane.inscription.GlyphInstance instance : inscription.glyphs()) {
+        ResourceLocation id = instance.glyphId();
+        if (com.arcane.glyph.GlyphRegistry.get(id).isEmpty() || grimoire.knowledge().containsKey(id)) continue;
+        grimoire.learnGlyph(id, GlyphKnowledge.SUSPECTED);
+        grimoire.logDiscovery("witness:" + id);
+        player.displayClientMessage(Component.translatable("message.arcane.discovery.hint",
+            Component.translatable(glyphKey(id))), false);
+        changed = true;
+      }
+      if (changed) com.arcane.network.ArcaneSync.sync(player, true);
+    });
   }
 
   private static void learn(ServerPlayer player, ResourceLocation glyph, GlyphKnowledge level, String source) {

@@ -63,19 +63,23 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
           precision,
           result instanceof EntityHitResult entityHit
               ? new ExecutionContext.TriggerEvent("hit_entity", java.util.Optional.ofNullable(entityHit.getEntity()), java.util.Optional.empty())
-              : ExecutionContext.TriggerEvent.cast()
+              : result instanceof net.minecraft.world.phys.BlockHitResult blockHit2
+                  ? new ExecutionContext.TriggerEvent("hit_block", java.util.Optional.empty(), java.util.Optional.of(blockHit2.getBlockPos()))
+                  : ExecutionContext.TriggerEvent.cast()
       );
       if (result instanceof EntityHitResult entityHit && entityHit.getEntity() != null) {
         context.setResolvedTargets(TargetList.ofEntities(entityHit.getEntity()));
+      } else if (result instanceof net.minecraft.world.phys.BlockHitResult blockHit) {
+        net.minecraft.core.BlockPos pos = blockHit.getBlockPos();
+        context.setResolvedTargets(new TargetList(java.util.List.of(),
+            java.util.List.of(new TargetList.BlockTarget(pos, level().getBlockState(pos)))));
       }
       var server = (net.minecraft.server.level.ServerLevel) level();
       server.playSound(null, getX(), getY(), getZ(), com.arcane.registry.ModSounds.SPELL_HIT.get(),
           net.minecraft.sounds.SoundSource.PLAYERS, 0.9f, 1.0f);
       server.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(), getX(), getY(), getZ(),
           16, 0.25, 0.25, 0.25, 0.08);
-      for (CompiledExecutionPlan.ExecutionSegment segment : plan.segments()) {
-        SpellPipeline.INSTANCE.executeSegment(context, segment);
-      }
+      SpellPipeline.INSTANCE.runSegments(context);
       discard();
     }
   }

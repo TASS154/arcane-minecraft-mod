@@ -1,0 +1,31 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:power"
+  },
+  "modifier_scope": {
+    "target": "previous_effect",
+    "kind": "effect",
+    "mutate": {
+      "amount": {
+        "op": "multiply",
+        "value": 1.5
+      },
+      "strength": {
+        "op": "multiply",
+        "value": 1.5
+      },
+      "level": {
+        "op": "add",
+        "value": 1.0
+      },
+      "power": {
+        "op": "multiply",
+        "value": 1.5
+      }
+    }
+  },
+  "cost": {
+    "mana": 2
+  }
+}

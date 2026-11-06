@@ -16,7 +16,18 @@ public class ArcaneCommands {
   public static void register(RegisterCommandsEvent event) {
     event.getDispatcher().register(Commands.literal("arcane")
         .then(Commands.literal("know")
+            .then(Commands.literal("all")
+                .requires(src -> src.hasPermission(2))
+                .executes(ctx -> {
+                  if (ctx.getSource().getEntity() instanceof ServerPlayer player) {
+                    com.arcane.glyph.GlyphRegistry.all().keySet().forEach(id -> DiscoveryService.learnMastered(player, id));
+                    ctx.getSource().sendSuccess(() -> Component.literal("Learned " + com.arcane.glyph.GlyphRegistry.size() + " glyphs"), true);
+                    return 1;
+                  }
+                  return 0;
+                }))
             .then(Commands.argument("glyph", StringArgumentType.greedyString())
+                .requires(src -> src.hasPermission(2))
                 .executes(ctx -> {
                   if (ctx.getSource().getEntity() instanceof ServerPlayer player) {
                     ResourceLocation glyph = new ResourceLocation(StringArgumentType.getString(ctx, "glyph"));

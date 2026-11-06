@@ -1,18 +1,18 @@
 package com.arcane.npc;
 
-import com.arcane.grimoire.GrimoireState;
 import com.arcane.inscription.Inscription;
 
+/** Conhecimento arcano de um mago NPC: a magia do seu elemento. */
 public final class NPCArcaneComponent {
-  private final GrimoireState grimoire;
+  private MageElement element = MageElement.FIRE;
 
-  public NPCArcaneComponent() {
-    this.grimoire = GrimoireState.createDefault();
+  public MageElement element() { return element; }
+
+  public void setElement(MageElement element) {
+    this.element = element;
   }
 
-  public GrimoireState grimoire() { return grimoire; }
-
   public Inscription selectSpell() {
-    return grimoire.activeInscriptionId().flatMap(grimoire::getInscription).orElse(Inscription.testProjectileDamageFire());
+    return element.spell();
   }
 }

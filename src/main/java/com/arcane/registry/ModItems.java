@@ -4,6 +4,7 @@ import com.arcane.ArcaneMod;
 import com.arcane.item.ArcaneArmorMaterial;
 import com.arcane.item.ArcanePenItem;
 import com.arcane.item.GlyphNoteItem;
+import com.arcane.item.GrimoireItem;
 import com.arcane.item.InkItem;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
@@ -33,6 +34,7 @@ public final class ModItems {
     public static final RegistryObject<Item> GLYPH_PROJECTOR = ITEMS.register("glyph_projector", () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SYMMETRY_MIRROR = ITEMS.register("symmetry_mirror", () -> new Item(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> GRIMOIRE = ITEMS.register("grimoire", () -> new GrimoireItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> NPC_MAGE_SPAWN_EGG = ITEMS.register("npc_mage_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.NPC_MAGE, 0x2D1946, 0x5ADCF0, new Item.Properties()));
 

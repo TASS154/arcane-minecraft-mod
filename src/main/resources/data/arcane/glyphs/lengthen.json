@@ -1,0 +1,19 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:lengthen"
+  },
+  "modifier_scope": {
+    "target": "previous_effect",
+    "kind": "effect",
+    "mutate": {
+      "duration": {
+        "op": "multiply",
+        "value": 2.0
+      }
+    }
+  },
+  "cost": {
+    "mana": 1
+  }
+}

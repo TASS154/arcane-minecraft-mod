@@ -1,1 +1,20 @@
-{"category":"effect","behavior":{"handler":"arcane:push","magnitude_keys":["strength"]},"cost":{"mana":2}}
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:push",
+    "magnitude_keys": [
+      "strength"
+    ]
+  },
+  "parameters": {
+    "strength": {
+      "type": "float",
+      "default": 1.0,
+      "min": 0.3,
+      "max": 3.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  }
+}

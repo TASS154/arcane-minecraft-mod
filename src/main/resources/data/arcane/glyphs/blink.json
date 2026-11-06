@@ -1,0 +1,17 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:blink"
+  },
+  "parameters": {
+    "distance": {
+      "type": "float",
+      "default": 8.0,
+      "min": 2.0,
+      "max": 24.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  }
+}

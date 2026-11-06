@@ -23,6 +23,11 @@ public class ClientEvents {
         ClientSetup.tryCast(false);
       }
     }
+    if (ClientSetup.GRIMOIRE_KEY != null) {
+      while (ClientSetup.GRIMOIRE_KEY.consumeClick()) {
+        ClientHooks.openGrimoire();
+      }
+    }
     if (ClientSetup.CYCLE_KEY != null) {
       while (ClientSetup.CYCLE_KEY.consumeClick()) {
         ClientSetup.cycleSpell(1);
@@ -48,6 +53,11 @@ public class ClientEvents {
         event.getToolTip().add(Component.translatable("tooltip.arcane.glyph_note.glyph",
             Component.translatable("glyph." + glyph.getNamespace() + "." + glyph.getPath())).withStyle(ChatFormatting.AQUA));
       }
+    }
+
+    if (stack.hasTag() && stack.getTag().contains(com.arcane.item.GrimoireItem.OWNER_NAME)) {
+      event.getToolTip().add(Component.translatable("tooltip.arcane.grimoire.owner",
+          stack.getTag().getString(com.arcane.item.GrimoireItem.OWNER_NAME)).withStyle(ChatFormatting.DARK_PURPLE));
     }
 
     String key = stack.getDescriptionId() + ".desc";

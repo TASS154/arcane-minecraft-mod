@@ -36,6 +36,7 @@ import java.util.UUID;
 public class ClientSetup {
   public static KeyMapping CAST_KEY;
   public static KeyMapping CYCLE_KEY;
+  public static KeyMapping GRIMOIRE_KEY;
 
   @SubscribeEvent
   public static void onClientSetup(FMLClientSetupEvent event) {
@@ -63,8 +64,10 @@ public class ClientSetup {
   public static void registerKeys(RegisterKeyMappingsEvent event) {
     CAST_KEY = new KeyMapping("key.arcane.cast", GLFW.GLFW_KEY_V, "key.categories.arcane");
     CYCLE_KEY = new KeyMapping("key.arcane.cycle", GLFW.GLFW_KEY_B, "key.categories.arcane");
+    GRIMOIRE_KEY = new KeyMapping("key.arcane.grimoire", GLFW.GLFW_KEY_G, "key.categories.arcane");
     event.register(CAST_KEY);
     event.register(CYCLE_KEY);
+    event.register(GRIMOIRE_KEY);
   }
 
   /** Conjura a inscricao ativa. O id vem do servidor (ClientArcaneData); o servidor revalida tudo. */

@@ -52,6 +52,28 @@ Tudo abaixo está no repositório. As artes e sons são **provisórios de qualid
 - **Inscrição por toque**: dispara para qualquer criatura que pise no bloco, sem custo de mana, com intervalo de 2 s. Quem pisa é a origem e o alvo da forma Eu. O baú manteve a regra original (quem abre paga a mana).
 - **Superfícies da pena**: `pens/arcane_pen.json` lista pedra, terra e grama, e a documentação diz que a Pena Arcana escreve em grimórios e cajados. Hoje ela escreve em qualquer bloco, porque baús precisam funcionar. Falta decidir.
 
+### Atualização de 6 nov 2026
+
+| Área | Feito |
+|------|-------|
+| Glifos | De 16 para **42**: formas Raio e Aura; efeitos Lentidão, Veneno, Velocidade, Levitação, Escudo, Trovão, Explosão, Salto, Incendiar, Escavar; filtros Jogadores, Animais, Mortos-vivos, Exceto Eu, Mais Próximo, Ferido; condições Ao Bater, Em Perigo, Agachado, Noite, Na Água; modificadores Potência, Duração, Velocidade do Projétil. Tabela única em `tools/glyph_table.py`; lista em [GLIFOS.md](GLIFOS.md) |
+| Motor | Alcance, Área, Atraso e Após Segundos **não funcionavam** (valores gravados em campo que ninguém lia, atraso que vazava entre trechos). Corrigidos, com testes. Toque agora tem 3 blocos e mira de verdade. Os parâmetros dos glifos agora chegam ao servidor (antes a bancada só mandava os ids) e são limitados ao intervalo da definição |
+| Bancada | Roda do mouse ajusta o parâmetro principal; custo da prévia igual ao do servidor (testado); **Editar** carrega a magia ativa; salvar com o mesmo nome substitui |
+| Grimório | Item (receita) + tela com Magias, Glifos e Diário (tecla G ou botão direito); apagar magias; diário persistido; o item só é recuperado pelo dono (antes qualquer jogador restaurava o grimório de outro ao pegá-lo) |
+| Descoberta | Ver magos conjurar faz suspeitar dos glifos; experimentar só vale para glifos já suspeitos (**fecha a brecha** de aprender glifos por pacote); `/arcane know` agora exige operador |
+| Mago NPC | **18 skins** procedurais (6 elementos × 3 estilos × tons de pele e cabelo), uma magia por elemento, olha para o alvo antes de conjurar, dropa nota de glifo (antes dropava nota vazia), spawn natural raro no Overworld |
+| Segurança | Pacote de salvar com limites e testes; Explosão não quebra blocos; Escavar nunca quebra baús; efeitos que mexem no mundo respeitam `mobGriefing` para NPCs |
+| Testes | 37 unitários e 28 GameTests em mundo real (todos os efeitos, formas, filtros e condições novos) |
+
+### Sobre as skins "da internet"
+
+Pediram skins da internet, mas skins de sites como NameMC e Planet Minecraft são arte de terceiros sem licença de redistribuição, e embutir arquivos baixados num mod publicado traz risco de direitos autorais. Em vez disso gerei 18 skins próprias. Se quiser skins específicas, indique a fonte e a licença (ex.: CC0 ou o autor autorizando) e eu as importo no lugar de `textures/entity/npc_mage/mage_NN.png`.
+
+### Ainda pendente (atualizado)
+
+- O chat do ChatGPT indicado não pôde ser lido (exige login). O que combinamos lá, se for além disto, precisa ser colado aqui.
+- Nada foi aberto dentro do jogo por uma pessoa: as telas (Bancada, Grimório, HUD) só foram verificadas por compilação e pelo log do cliente.
+
 ### Ainda pendente
 
 - Função do **Projetor de Glifos** e do **Espelho de Simetria** (depende do design de rituais).

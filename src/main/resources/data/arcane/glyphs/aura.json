@@ -1,0 +1,21 @@
+{
+  "category": "form",
+  "behavior": {
+    "handler": "arcane:aura"
+  },
+  "composition": {
+    "max_per_inscription": 1,
+    "position": "start"
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 5.0,
+      "min": 2.0,
+      "max": 12.0
+    }
+  },
+  "cost": {
+    "mana": 4
+  }
+}

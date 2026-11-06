@@ -18,8 +18,8 @@ public class ProjectileFormHandler implements FormHandler {
         projectile.setOwner(context.caster());
         projectile.setPos(context.origin().x, context.origin().y, context.origin().z);
         projectile.shoot(context.look().x, context.look().y, context.look().z,
-                (float) context.amplify(1.5, List.of("speed"), "speed"),
-                1.0F);
+                (float) Math.max(0.5, Math.min(4.0, spec.parameters().getOrDefault("speed", 1.5))),
+                0.5F);
         projectile.setInscription(context.inscription());
         projectile.setPlan(com.arcane.inscription.CompiledPlanCache.getOrCompile(context.inscription()));
         projectile.setPrecision(context.precision());

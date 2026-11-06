@@ -1,1 +1,24 @@
-{"category":"form","behavior":{"handler":"arcane:projectile","magnitude_keys":["range","speed"]},"composition":{"max_per_inscription":1,"position":"start"},"cost":{"mana":3}}
+{
+  "category": "form",
+  "behavior": {
+    "handler": "arcane:projectile",
+    "magnitude_keys": [
+      "speed"
+    ]
+  },
+  "composition": {
+    "max_per_inscription": 1,
+    "position": "start"
+  },
+  "parameters": {
+    "speed": {
+      "type": "float",
+      "default": 1.5,
+      "min": 0.5,
+      "max": 3.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  }
+}

@@ -63,9 +63,7 @@ public class GrimoireLifecycleHandler {
     if (!(event.getEntity() instanceof ServerPlayer player)) return;
     GrimoireAttachments.get(player).ifPresent(grimoire -> {
       grimoire.setGrimoirePresent(false);
-      ItemStack drop = new ItemStack(ModItems.GLYPH_NOTE.get());
-      drop.setHoverName(net.minecraft.network.chat.Component.literal("Grimório de " + player.getName().getString()));
-      ItemEntity entity = player.drop(drop, false);
+      ItemEntity entity = player.drop(com.arcane.item.GrimoireItem.createFor(player), false);
       if (entity != null) {
         entity.setExtendedLifetime();
         entity.setNoPickUpDelay();
@@ -78,7 +76,8 @@ public class GrimoireLifecycleHandler {
 
   @SubscribeEvent
   public void onItemPickup(PlayerEvent.ItemPickupEvent event) {
-    if (event.getStack().getHoverName().getString().startsWith("Grimório de ")) {
+    // So o dono recupera o proprio grimorio; o de outro jogador e apenas um livro.
+    if (com.arcane.item.GrimoireItem.isOwnedBy(event.getStack(), event.getEntity().getUUID())) {
       GrimoireAttachments.get(event.getEntity()).ifPresent(grimoire -> {
         grimoire.setGrimoirePresent(true);
         grimoire.setGrimoireDestroyedUntilTick(0L);

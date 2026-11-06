@@ -1,7 +1,6 @@
 package com.arcane.menu;
 
 import com.arcane.grimoire.GrimoireAttachments;
-import com.arcane.grimoire.GrimoireState;
 import com.arcane.inscription.GlyphInstance;
 import com.arcane.inscription.Inscription;
 import com.arcane.inscription.InscriptionMetadata;
@@ -48,6 +47,10 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
     building.clear();
   }
 
+  /**
+   * Grava no grimorio e torna a magia ativa. Salvar com o nome de uma magia existente substitui
+   * a antiga (e assim que se edita uma magia); com nome novo ou vazio, cria outra.
+   */
   public boolean saveToGrimoire(Player player) {
     if (building.isEmpty()) return false;
     Inscription inscription = new Inscription(List.copyOf(building), new InscriptionMetadata(
@@ -60,6 +63,7 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
         InscriptionSourceKind.WORKBENCH
     ));
     return GrimoireAttachments.get(player).map(grimoire -> {
+      grimoire.findByName(spellName).ifPresent(old -> grimoire.removeInscription(old.id()));
       grimoire.addInscription(inscription);
       grimoire.setActiveInscription(inscription.id());
       return true;

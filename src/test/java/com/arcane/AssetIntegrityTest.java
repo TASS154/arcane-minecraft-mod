@@ -24,7 +24,7 @@ class AssetIntegrityTest {
   static final Path ASSETS = Path.of("src/main/resources/assets/arcane");
   static final Path DATA = Path.of("src/main/resources/data/arcane");
   static final List<String> ITEMS = List.of("arcane_workbench", "mana_crystal", "arcane_pen", "common_ink", "blood_ink",
-      "invisible_ink", "glyph_note", "arcane_mask", "insulating_cloak", "glyph_projector", "symmetry_mirror", "npc_mage_spawn_egg");
+      "invisible_ink", "glyph_note", "arcane_mask", "insulating_cloak", "glyph_projector", "symmetry_mirror", "npc_mage_spawn_egg", "grimoire");
 
   static JsonObject read(Path path) throws IOException {
     return JsonParser.parseString(Files.readString(path, StandardCharsets.UTF_8)).getAsJsonObject();
@@ -122,9 +122,38 @@ class AssetIntegrityTest {
 
   @Test
   void guiTexturesExist() {
-    for (String gui : List.of("gui/arcane_workbench.png", "gui/mana_bar.png", "entity/grimoire.png", "entity/npc_mage.png",
+    for (String gui : List.of("gui/arcane_workbench.png", "gui/mana_bar.png", "gui/grimoire.png", "entity/grimoire.png",
         "entity/arcane_projectile.png", "models/armor/arcane_weave_layer_1.png", "gui/glyphs/unknown.png")) {
       assertTrue(Files.exists(ASSETS.resolve("textures/" + gui)), "faltando: " + gui);
     }
+  }
+
+  @Test
+  void everyMageVariantHasASkinAndEveryElementAName() throws IOException {
+    for (int i = 0; i < 18; i++) {
+      assertTrue(Files.exists(ASSETS.resolve(String.format("textures/entity/npc_mage/mage_%02d.png", i))), "skin faltando: " + i);
+    }
+    JsonObject pt = read(ASSETS.resolve("lang/pt_br.json"));
+    for (String e : List.of("fire", "frost", "storm", "venom", "blast", "gale")) {
+      assertTrue(pt.has("entity.arcane.npc_mage." + e), "nome do mago: " + e);
+    }
+  }
+
+  @Test
+  void everyTranslationKeyUsedInGuiCodeExists() throws IOException {
+    JsonObject pt = read(ASSETS.resolve("lang/pt_br.json"));
+    List<String> missing = new ArrayList<>();
+    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("translatable\\(\"([a-z_.]+)\"");
+    try (Stream<Path> files = Files.walk(Path.of("src/main/java"))) {
+      for (Path file : files.filter(f -> f.toString().endsWith(".java")).toList()) {
+        var m = pattern.matcher(Files.readString(file, StandardCharsets.UTF_8));
+        while (m.find()) {
+          String key = m.group(1);
+          if (key.endsWith(".")) continue;
+          if (!pt.has(key)) missing.add(key + "  (" + file.getFileName() + ")");
+        }
+      }
+    }
+    assertTrue(missing.isEmpty(), "chaves de traducao faltando no pt_br: " + missing);
   }
 }

@@ -4,11 +4,14 @@ import com.arcane.execution.EnvironmentalSnapshot;
 import com.arcane.execution.ManaState;
 import com.arcane.glyph.GlyphDefinition;
 import com.arcane.glyph.GlyphRegistry;
+import com.arcane.glyph.ParameterSchema;
 import com.arcane.grimoire.GrimoireAttachments;
 import com.arcane.grimoire.GrimoireState;
+import com.arcane.inscription.CompiledPlanCache;
 import com.arcane.network.packet.S2CGrimoireSyncPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
@@ -16,7 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Envia ao cliente somente o que o HUD e a Bancada precisam exibir.
+ * Envia ao cliente somente o que o HUD, a Bancada e o Grimorio precisam exibir.
  * O servidor continua autoritativo: o cliente nunca decide custo, mana ou conhecimento.
  */
 public final class ArcaneSync {
@@ -57,8 +60,10 @@ public final class ArcaneSync {
     ModNetwork.sendToPlayer(player, new S2CGrimoireSyncPacket(tag));
   }
 
-  private static CompoundTag buildKnowledge(GrimoireState grimoire) {
+  static CompoundTag buildKnowledge(GrimoireState grimoire) {
     CompoundTag full = new CompoundTag();
+    full.putInt("total", GlyphRegistry.size());
+
     ListTag glyphs = new ListTag();
     grimoire.knowledge().forEach((id, level) -> {
       CompoundTag g = new CompoundTag();
@@ -67,6 +72,14 @@ public final class ArcaneSync {
       GlyphRegistry.get(id).ifPresent((GlyphDefinition def) -> {
         g.putString("category", def.category().getSerializedName());
         g.putInt("cost", def.cost().mana());
+        g.putBoolean("scales", def.category() == com.arcane.glyph.GlyphCategory.EFFECT);
+        ListTag params = new ListTag();
+        // Parametro principal primeiro: e o que a roda do mouse ajusta na bancada.
+        def.primaryParam().ifPresent(primary -> params.add(paramTag(primary, def.parameters().get(primary))));
+        def.parameters().entrySet().stream().sorted(Map.Entry.comparingByKey())
+            .filter(e -> !e.getKey().equals(def.primaryParam().orElse("")))
+            .forEach(e -> params.add(paramTag(e.getKey(), e.getValue())));
+        g.put("params", params);
       });
       glyphs.add(g);
     });
@@ -77,13 +90,41 @@ public final class ArcaneSync {
       CompoundTag s = new CompoundTag();
       s.putUUID("id", id);
       s.putString("name", inscription.metadata().name());
-      ListTag ids = new ListTag();
-      inscription.glyphs().forEach(gi -> ids.add(net.minecraft.nbt.StringTag.valueOf(gi.glyphId().toString())));
-      s.put("glyphs", ids);
+      int cost = -1;
+      try {
+        cost = CompiledPlanCache.getOrCompile(inscription).baseManaCost();
+      } catch (RuntimeException ignored) {
+        // glifo removido por datapack: a magia fica listada, sem custo
+      }
+      s.putInt("cost", cost);
+      ListTag entries = new ListTag();
+      inscription.glyphs().forEach(gi -> {
+        CompoundTag e = new CompoundTag();
+        e.putString("id", gi.glyphId().toString());
+        CompoundTag p = new CompoundTag();
+        gi.parameters().forEach(p::putDouble);
+        e.put("p", p);
+        entries.add(e);
+      });
+      s.put("glyphs", entries);
       spells.add(s);
     });
     full.put("spells", spells);
     grimoire.activeInscriptionId().ifPresent(id -> full.putUUID("active", id));
+
+    ListTag log = new ListTag();
+    grimoire.discoveryLog().forEach(entry -> log.add(StringTag.valueOf(entry)));
+    full.put("log", log);
     return full;
+  }
+
+  private static CompoundTag paramTag(String key, ParameterSchema.ParameterDef def) {
+    CompoundTag t = new CompoundTag();
+    t.putString("k", key);
+    t.putDouble("d", def.defaultValue());
+    t.putDouble("lo", def.min());
+    t.putDouble("hi", def.max());
+    t.putBoolean("int", "int".equals(def.type()));
+    return t;
   }
 }

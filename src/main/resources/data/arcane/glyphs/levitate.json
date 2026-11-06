@@ -1,0 +1,20 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:levitate",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 40.0,
+      "min": 10.0,
+      "max": 200.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  }
+}

@@ -1,1 +1,9 @@
-{"category":"condition","behavior":{"handler":"arcane:on_hit_entity"},"cost":{"mana":0}}
+{
+  "category": "condition",
+  "behavior": {
+    "handler": "arcane:on_hit_entity"
+  },
+  "cost": {
+    "mana": 0
+  }
+}

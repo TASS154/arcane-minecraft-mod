@@ -1,0 +1,9 @@
+{
+  "category": "filter",
+  "behavior": {
+    "handler": "arcane:not_self"
+  },
+  "cost": {
+    "mana": 0
+  }
+}

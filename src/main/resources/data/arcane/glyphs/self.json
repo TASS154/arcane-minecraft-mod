@@ -1,1 +1,13 @@
-{"category":"form","behavior":{"handler":"arcane:self"},"composition":{"max_per_inscription":1,"position":"start"},"cost":{"mana":1}}
+{
+  "category": "form",
+  "behavior": {
+    "handler": "arcane:self"
+  },
+  "composition": {
+    "max_per_inscription": 1,
+    "position": "start"
+  },
+  "cost": {
+    "mana": 1
+  }
+}

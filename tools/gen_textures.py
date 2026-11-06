@@ -15,6 +15,11 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from glyph_table import G  # noqa: E402  (tabela unica dos glifos)
+import gen_mage_skins  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "arcane" / "textures"
 RES = ROOT / "src" / "main" / "resources"
@@ -399,25 +404,7 @@ CATEGORY_COLORS = {
     "activator": ((150, 160, 175, 255), (240, 245, 255, 255)),
 }
 
-GLYPH_SYMBOLS = {
-    "self": ["..####..", ".#....#.", "#..##..#", "#.#..#.#", "#.#..#.#", "#..##..#", ".#....#.", "..####.."],
-    "projectile": ["........", "....#...", "....##..", "########", "########", "....##..", "....#...", "........"],
-    "touch": ["..#.#...", "..#.#.#.", "..#.#.#.", "#.#####.", "#######.", ".######.", "..####..", "..####.."],
-    "area": ["#..##..#", "........", "..####..", "#.#..#.#", "#.#..#.#", "..####..", "........", "#..##..#"],
-    "damage": ["#......#", ".#....#.", "..#..#..", "...##...", "...##...", "..#..#..", ".#....#.", "#......#"],
-    "fire": ["...#....", "...##...", "..###.#.", ".#####..", ".######.", "########", ".######.", "..####.."],
-    "heal": ["...##...", "...##...", "...##...", "########", "########", "...##...", "...##...", "...##..."],
-    "push": ["#...#...", ".#...#..", "..#...#.", "...#...#", "...#...#", "..#...#.", ".#...#..", "#...#..."],
-    "hostile": ["#......#", "##....##", ".######.", ".#.##.#.", ".######.", "..#..#..", "..####..", "........"],
-    "blocks": ["########", "#..#...#", "#..#...#", "########", "#...#..#", "#...#..#", "########", "........"],
-    "self_filter": [".######.", "#......#", "#..##..#", "#.####.#", "#.####.#", "#..##..#", "#......#", ".######."],
-    "more_range": ["........", "#...#...", ".#...#..", "..#...#.", "..#...#.", ".#...#..", "#...#...", "........"],
-    "delay": ["########", ".#....#.", "..#..#..", "...##...", "...##...", "..#..#..", ".#.##.#.", "########"],
-    "after_seconds": ["..####..", ".#..#.#.", "#...#..#", "#...#..#", "#....#.#", "#.....##", ".#....#.", "..####.."],
-    "on_hit_entity": ["...#....", "..#.#...", "#..#..#.", ".#...#..", "..#.#...", ".#...#..", "#..#..#.", "...#...."],
-    "unknown": ["..####..", ".#....#.", "......#.", ".....#..", "....#...", "....#...", "........", "....#..."],
-    "activate": ["...##...", ".#.##.#.", "#..##..#", "#..##..#", "#......#", "#......#", ".#....#.", "..####.."],
-}
+UNKNOWN_SYMBOL = ["..####..", ".#....#.", "......#.", ".....#..", "....#...", "....#...", "........", "....#..."]
 
 
 def glyph_icon(name, category):
@@ -426,7 +413,7 @@ def glyph_icon(name, category):
     d = ImageDraw.Draw(img)
     d.ellipse((0, 0, 15, 15), fill=(20, 12, 30, 230), outline=dark)
     d.ellipse((1, 1, 14, 14), outline=shade(dark, 0.7))
-    sym = GLYPH_SYMBOLS.get(name)
+    sym = UNKNOWN_SYMBOL if name == "unknown" else G[name]["icon"]
     if sym:
         for y, row in enumerate(sym):
             for x, ch in enumerate(row):
@@ -458,49 +445,6 @@ def grimoire_book():
     for x in range(1, 33, 3):
         img.putpixel((x, 13), PAL["P"])
         img.putpixel((x + 1, 15), PAL["c"])
-    return img
-
-
-def mage_skin():
-    """Skin 64x64 (layout humanoide) para o Mago NPC: manto roxo, capuz, olhos ciano."""
-    img = Image.new("RGBA", (64, 64), T)
-    d = ImageDraw.Draw(img)
-    skin, skin_d = (200, 160, 130, 255), (160, 120, 95, 255)
-    robe, robe_d, robe_l = PAL["p"], PAL["d"], PAL["P"]
-    # cabeca 0,0 (32x16)
-    d.rectangle((0, 8, 31, 15), fill=skin)
-    d.rectangle((8, 0, 23, 7), fill=skin_d)
-    # rosto (front 8..15, 8..15)
-    d.rectangle((8, 8, 15, 15), fill=skin)
-    img.putpixel((9, 11), PAL["C"]); img.putpixel((10, 11), PAL["W"])
-    img.putpixel((13, 11), PAL["W"]); img.putpixel((14, 11), PAL["C"])
-    d.line([(10, 14), (13, 14)], fill=skin_d)
-    d.rectangle((9, 15, 14, 15), fill=(190, 190, 200, 255))  # barba
-    # capuz (camada hat 32..63, 0..15)
-    d.rectangle((32, 8, 63, 15), fill=robe)
-    d.rectangle((40, 0, 55, 7), fill=robe_d)
-    d.rectangle((41, 9, 46, 15), fill=T)  # abertura do rosto (front 40..47)
-    d.line([(40, 8), (47, 8)], fill=PAL["G"])
-    # corpo 16..40, 16..32
-    d.rectangle((16, 20, 39, 31), fill=robe)
-    d.rectangle((20, 16, 35, 19), fill=robe_d)
-    d.line([(23, 20), (23, 31)], fill=PAL["G"]); d.line([(24, 20), (24, 31)], fill=PAL["G"])
-    d.rectangle((20, 26, 27, 27), fill=robe_d)  # cinto
-    img.putpixel((23, 26), PAL["C"]); img.putpixel((24, 26), PAL["C"])
-    # bracos 40..56, 16..32
-    d.rectangle((40, 20, 55, 31), fill=robe)
-    d.rectangle((44, 16, 51, 19), fill=robe_d)
-    d.rectangle((40, 29, 55, 31), fill=skin)
-    d.line([(40, 28), (55, 28)], fill=PAL["G"])
-    # pernas 0..16, 16..32 (manto ate o pe)
-    d.rectangle((0, 20, 15, 31), fill=robe_d)
-    d.rectangle((4, 16, 11, 19), fill=robe_d)
-    d.line([(0, 31), (15, 31)], fill=(30, 20, 20, 255))
-    for x in range(0, 16, 3):
-        img.putpixel((x, 22), robe_l)
-    # camadas externas 64x64 (pernas/bracos esquerdos) copiam as direitas
-    img.paste(img.crop((0, 16, 16, 32)), (16, 48))
-    img.paste(img.crop((40, 16, 56, 32)), (32, 48))
     return img
 
 
@@ -593,6 +537,64 @@ def mod_logo():
     return img
 
 
+def grimoire_item():
+    """Item do Grimorio (16x16)."""
+    return sprite([
+        "................",
+        "..kkkkkkkkkkk...",
+        ".kdppppppppppk..",
+        ".kdpGGGGGGGGpk..",
+        ".kdpGppppppGpk..",
+        ".kdpGpCCCCpGpk..",
+        ".kdpGpCWWCpGpk..",
+        ".kdpGpCWWCpGpk..",
+        ".kdpGpCCCCpGpk..",
+        ".kdpGppppppGpk..",
+        ".kdpGGGGGGGGpk..",
+        ".kdppppppppppk..",
+        ".kdYYYYYYYYYyk..",
+        ".kkYyyyyyyyyyk..",
+        "..kkkkkkkkkkkk..",
+        "................",
+    ])
+
+
+def grimoire_gui():
+    """Fundo da tela do Grimorio: capa de couro, duas paginas de pergaminho e lombada (256x200)."""
+    img = Image.new("RGBA", (256, 256), T)
+    d = ImageDraw.Draw(img)
+    rnd = random.Random(77)
+    # capa
+    d.rectangle((0, 0, 255, 199), fill=(58, 30, 74, 255), outline=PAL["k"])
+    for y in range(1, 199):
+        for x in range(1, 255):
+            if rnd.random() < 0.18:
+                img.putpixel((x, y), shade((58, 30, 74, 255), 1 + rnd.uniform(-0.1, 0.1)))
+    d.rectangle((3, 3, 252, 196), outline=PAL["g"])
+    for cx, cy in [(3, 3), (252, 3), (3, 196), (252, 196)]:
+        d.rectangle((cx - 1, cy - 1, cx + 1, cy + 1), fill=PAL["G"])
+    # paginas
+    for x0, x1 in ((12, 124), (132, 244)):
+        d.rectangle((x0, 24, x1, 172), fill=(238, 224, 186, 255), outline=(120, 90, 50, 255))
+        for y in range(25, 172):
+            for x in range(x0 + 1, x1):
+                if rnd.random() < 0.12:
+                    img.putpixel((x, y), shade((238, 224, 186, 255), 1 + rnd.uniform(-0.05, 0.03)))
+        for y in range(39, 172, 12):  # linhas de caderno, alinhadas as linhas da lista
+            d.line([(x0 + 3, y), (x1 - 3, y)], fill=(216, 198, 156, 255))
+    # lombada: sombra suave nas bordas internas das paginas
+    for i in range(7):
+        f = 0.92 - i * 0.012
+        for y in range(25, 172):
+            for x in (124 - i, 132 + i):
+                if 12 < x < 244:
+                    r, g, b, _ = img.getpixel((x, y))
+                    img.putpixel((x, y), shade((r, g, b, 255), f))
+    d.rectangle((125, 24, 131, 172), fill=(86, 52, 40, 255))
+    d.line([(128, 24), (128, 172)], fill=(60, 34, 28, 255))
+    return img
+
+
 def main():
     print("Gerando texturas Arcane...")
     for name, rows in ITEMS.items():
@@ -609,20 +611,17 @@ def main():
 
     save(workbench_gui(), "gui/arcane_workbench.png")
     save(mana_bar(), "gui/mana_bar.png")
-    categories = {
-        "self": "form", "projectile": "form", "touch": "form",
-        "area": "modifier", "more_range": "modifier", "delay": "modifier",
-        "damage": "effect", "fire": "effect", "heal": "effect", "push": "effect",
-        "hostile": "filter", "blocks": "filter", "self_filter": "filter",
-        "after_seconds": "condition", "on_hit_entity": "condition", "activate": "activator",
-    }
-    for name, cat in categories.items():
-        save(glyph_icon(name, cat), f"gui/glyphs/{name}.png")
-    unknown = glyph_icon("unknown", "activator")
-    save(unknown, "gui/glyphs/unknown.png")
+    for name, g in G.items():
+        save(glyph_icon(name, g["cat"]), f"gui/glyphs/{name}.png")
+    save(glyph_icon("unknown", "activator"), "gui/glyphs/unknown.png")
+    save(grimoire_gui(), "gui/grimoire.png")
+    save(grimoire_item(), "item/grimoire.png")
 
     save(grimoire_book(), "entity/grimoire.png")
-    save(mage_skin(), "entity/npc_mage.png")
+    gen_mage_skins.generate()
+    old = ASSETS / "entity" / "npc_mage.png"
+    if old.exists():
+        old.unlink()
     save(projectile_tex(), "entity/arcane_projectile.png")
     save(armor_layer(), "models/armor/arcane_weave_layer_1.png")
 

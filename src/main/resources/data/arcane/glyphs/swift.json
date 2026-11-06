@@ -1,0 +1,19 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:swift"
+  },
+  "modifier_scope": {
+    "target": "delivery",
+    "kind": "form",
+    "mutate": {
+      "speed": {
+        "op": "multiply",
+        "value": 1.5
+      }
+    }
+  },
+  "cost": {
+    "mana": 1
+  }
+}

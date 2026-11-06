@@ -7,7 +7,11 @@ Os valores aqui sao provisorios e devem ser revisados no balanceamento.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from glyph_table import G  # noqa: E402
 
 DATA = Path(__file__).resolve().parents[1] / "src" / "main" / "resources" / "data"
 
@@ -63,6 +67,7 @@ def main():
            {"G": "minecraft:glass", "I": "minecraft:gold_ingot", "A": "minecraft:amethyst_shard", "P": "#minecraft:planks"})
     shaped("symmetry_mirror", [" G ", "GSG", " T "],
            {"G": "minecraft:gold_ingot", "S": "minecraft:glass_pane", "T": "minecraft:stick"})
+    shapeless("grimoire", ["minecraft:book", "minecraft:amethyst_shard", "arcane:common_ink"])
     shapeless("blood_ink", ["arcane:common_ink", "minecraft:redstone", "minecraft:rotten_flesh"])
     shapeless("invisible_ink", ["arcane:common_ink", "minecraft:glowstone_dust", "minecraft:phantom_membrane"])
 
@@ -126,13 +131,12 @@ def main():
     })
 
     # ---------------------------------------------------------- loot de baus
+    starters = {"self", "projectile", "damage"}
+    notes = [note(f"arcane:{gid}", max(1, 9 - g["cost"])) for gid, g in G.items() if gid not in starters]
     write("arcane/loot_tables/chests/simple_dungeon_glyph.json", {
         "type": "minecraft:chest",
         "pools": [
-            {"rolls": {"type": "minecraft:uniform", "min": 0, "max": 1},
-             "entries": [note("arcane:fire", 3), note("arcane:push", 3), note("arcane:touch", 3),
-                         note("arcane:heal", 2), note("arcane:hostile", 2), note("arcane:on_hit_entity", 2),
-                         note("arcane:area", 1), note("arcane:more_range", 1), note("arcane:activate", 1)]},
+            {"rolls": {"type": "minecraft:uniform", "min": 0, "max": 1}, "entries": notes},
             {"rolls": {"type": "minecraft:uniform", "min": 0, "max": 2},
              "entries": [
                  {"type": "minecraft:item", "name": "arcane:common_ink", "weight": 4},
@@ -143,6 +147,12 @@ def main():
         ],
     })
 
+    # ---------------------------------------------------------- spawn natural do Mago
+    write("arcane/forge/biome_modifier/add_mage_spawn.json", {
+        "type": "forge:add_spawns",
+        "biomes": "#minecraft:is_overworld",
+        "spawners": {"type": "arcane:npc_mage", "weight": 4, "minCount": 1, "maxCount": 1},
+    })
 
 if __name__ == "__main__":
     main()

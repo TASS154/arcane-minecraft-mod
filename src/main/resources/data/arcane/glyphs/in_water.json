@@ -1,0 +1,9 @@
+{
+  "category": "condition",
+  "behavior": {
+    "handler": "arcane:in_water"
+  },
+  "cost": {
+    "mana": 0
+  }
+}

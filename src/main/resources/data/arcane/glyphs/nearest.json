@@ -1,0 +1,9 @@
+{
+  "category": "filter",
+  "behavior": {
+    "handler": "arcane:nearest"
+  },
+  "cost": {
+    "mana": 1
+  }
+}

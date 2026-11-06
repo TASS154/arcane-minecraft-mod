@@ -38,6 +38,8 @@ Data: 6 nov 2026. Tudo aqui foi conferido no código e, onde indicado, em teste 
 - **Projétil animado** (4 quadros) e **variante de tempestade** com arcos em zigue-zague, tingido pela cor do elemento.
 - **Mago**: brilho animado nos olhos, mãos e peito na cor do elemento; braços sobem ao conjurar; balanço leve parado.
 - **Grimório flutuante**: capa com brilho que varre e runas que pulsam (8 quadros por estágio), cresce e solta faíscas nos estágios altos.
+- **Feixe 3D do Raio** (forma Raio): fita volumétrica de dois planos cruzados, saindo da altura da mão, com núcleo branco, brilho na cor do elemento, tremor em zigue-zague na tempestade e esmaecimento em 8 ticks. Visto no jogo (laranja para fogo, amarelo para raio).
+- **Grimório em 3D**: além do livro aberto, páginas soltas orbitam em volta (4 no estágio 1, até 10 no 4), com um anel de runas luminoso que gira; do estágio 3 em diante há um segundo anel inclinado. Vistas no jogo. Em primeira pessoa só o livro aparece, para as páginas não taparem a tela.
 - Bancada com modelo 3D, altar com modelo, cristal animado, traços acesos, GUIs redesenhadas.
 
 ---
@@ -73,6 +75,8 @@ Pré-requisito: Minecraft com Forge 1.20.1 e `arcane-0.1.0.jar` em `mods` (já i
 | Grimório flutua ao lado do jogador | **Implementada e vista no jogo** | Captura F5 confirmou o livro aberto ao lado do jogador |
 | Grimório com capa animada | Implementada | Compila e roda sem erro; o brilho é discreto e difícil de ver em captura parada |
 | Grimório muda por estágio (1 a 4) | Implementada | Só a capa e o tamanho mudam; páginas em órbita e o estágio "só páginas / Julius" não existem |
+| Grimório 3D (páginas e anéis em órbita) | Implementada e vista no jogo | Páginas orbitando e anéis de runas |
+| Feixe 3D do Raio | Implementada e vista no jogo | Só visual; o dano continua no servidor |
 | Estágio visual atualiza na hora ao usar Página Arcana | **Parcial** | A entidade só troca de estágio quando é recriada (relogar ou recuperar o grimório) |
 | Grimório equipável em slot próprio | **Não implementada** | Hoje é item no inventário + entidade flutuante |
 | Glifos de vários tipos | Implementada | 6 categorias, 68 glifos |

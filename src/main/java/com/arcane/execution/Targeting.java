@@ -49,22 +49,14 @@ public final class Targeting {
       hitPoint = end;
     }
     if (particles) {
-      trail(level, start.add(ctx.look().scale(0.6)), hitPoint);
+      // sai da altura da mao direita, nao do olho
+      Vec3 right = ctx.look().cross(new Vec3(0, 1, 0));
+      right = right.lengthSqr() < 1.0e-4 ? Vec3.ZERO : right.normalize();
+      Vec3 beamStart = start.add(ctx.look().scale(0.6)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
+      SpellElement element = SpellElement.of(ctx.plan());
+      com.arcane.network.ModNetwork.sendBeam(level, beamStart, hitPoint, element.color(), element == SpellElement.STORM, 8);
     }
     return new RayResult(targets, hitPoint);
-  }
-
-  private static void trail(ServerLevel level, Vec3 from, Vec3 to) {
-    Vec3 delta = to.subtract(from);
-    double length = delta.length();
-    if (length < 0.1) return;
-    Vec3 step = delta.normalize().scale(0.6);
-    int count = Math.min(90, (int) (length / 0.6));
-    Vec3 p = from;
-    for (int i = 0; i < count; i++) {
-      level.sendParticles(ModParticles.ARCANE_SPARK.get(), p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
-      p = p.add(step);
-    }
   }
 
   /** Posicoes de impacto: centro das criaturas e centro dos blocos. */

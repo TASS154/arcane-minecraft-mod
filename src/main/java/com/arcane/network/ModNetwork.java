@@ -6,6 +6,7 @@ import com.arcane.network.packet.C2SCopyToScrollPacket;
 import com.arcane.network.packet.C2SDeleteInscriptionPacket;
 import com.arcane.network.packet.C2SSaveInscriptionPacket;
 import com.arcane.network.packet.C2SSelectInscriptionPacket;
+import com.arcane.network.packet.S2CBeamPacket;
 import com.arcane.network.packet.S2CGrimoireSyncPacket;
 import com.arcane.network.packet.S2CSpellFxPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +17,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-  private static final String PROTOCOL = "4";
+  private static final String PROTOCOL = "5";
   public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       new ResourceLocation(ArcaneMod.MODID, "main"),
       () -> PROTOCOL,
@@ -34,6 +35,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(S2CSpellFxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CSpellFxPacket::encode).decoder(S2CSpellFxPacket::decode)
         .consumerMainThread(S2CSpellFxPacket::handle).add();
+    CHANNEL.messageBuilder(S2CBeamPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(S2CBeamPacket::encode).decoder(S2CBeamPacket::decode)
+        .consumerMainThread(S2CBeamPacket::handle).add();
     CHANNEL.messageBuilder(S2CGrimoireSyncPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CGrimoireSyncPacket::encode).decoder(S2CGrimoireSyncPacket::decode)
         .consumerMainThread(S2CGrimoireSyncPacket::handle).add();
@@ -49,6 +53,13 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(C2SCopyToScrollPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SCopyToScrollPacket::encode).decoder(C2SCopyToScrollPacket::decode)
         .consumerMainThread(C2SCopyToScrollPacket::handle).add();
+  }
+
+  /** Feixe 3D visivel para quem estiver a ate 96 blocos. */
+  public static void sendBeam(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 from,
+                              net.minecraft.world.phys.Vec3 to, int rgb, boolean jagged, int ticks) {
+    CHANNEL.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(from.x, from.y, from.z, 96.0, level.dimension())),
+        new S2CBeamPacket(from, to, rgb, jagged, ticks));
   }
 
   public static void sendToPlayer(ServerPlayer player, Object packet) {

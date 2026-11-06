@@ -6,12 +6,16 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 /** Grimorio flutuante: usa o modelo de livro vanilla com textura propria, girando e folheando. */
 public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
@@ -60,7 +64,83 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
     VertexConsumer consumer = buffers.getBuffer(book.renderType(cover(stage, time)));
     book.renderToBuffer(pose, consumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
     pose.popPose();
+    renderOrbit(entity, time, pose, buffers, stage);
     super.render(entity, yaw, partialTick, pose, buffers, light);
+  }
+
+  private static final ResourceLocation PAGE = new ResourceLocation("arcane", "textures/entity/grimoire_page.png");
+
+  /**
+   * Extras 3D do grimorio: paginas soltas em orbita (mais paginas a cada estagio), anel de runas luminoso girando
+   * na horizontal e, do estagio 3 em diante, um segundo anel inclinado em volta do livro.
+   */
+  private void renderOrbit(GrimoireEntity entity, float time, PoseStack pose, MultiBufferSource buffers, int stage) {
+    // perto da camera (primeira pessoa) as paginas tampariam a tela: so o livro aparece
+    if (this.entityRenderDispatcher.distanceToSqr(entity) < 4.0) return;
+    int pages = 2 + stage * 2;
+    pose.pushPose();
+    pose.translate(0.0, 0.45 + Mth.sin(time * 0.08f) * 0.08, 0.0);
+    VertexConsumer pageBuf = buffers.getBuffer(RenderType.entityCutoutNoCull(PAGE));
+    for (int i = 0; i < pages; i++) {
+      float a = time * 0.035f + i * Mth.TWO_PI / pages;
+      float r = 0.75f + 0.08f * Mth.sin(time * 0.1f + i);
+      float y = 0.15f * Mth.sin(time * 0.06f + i * 1.7f) + (i % 2 == 0 ? 0.12f : -0.1f);
+      pose.pushPose();
+      pose.translate(Mth.cos(a) * r, y, Mth.sin(a) * r);
+      pose.mulPose(Axis.YP.rotationDegrees(-a * 57.2958f + 90f));
+      pose.mulPose(Axis.XP.rotationDegrees(20f * Mth.sin(time * 0.07f + i)));
+      pose.scale(0.34f, 0.34f, 0.34f);
+      quad(pageBuf, pose, LightTexture.FULL_BRIGHT, 255, 255, 255, 255, true);
+      pose.popPose();
+    }
+    VertexConsumer glow = buffers.getBuffer(RenderType.lightning());
+    ring(glow, pose, time * 0.9f, 0f, 0.95f, 12, 0.07f, 150, 120, 255, 170);
+    if (stage >= 3) {
+      pose.pushPose();
+      pose.mulPose(Axis.ZP.rotationDegrees(65f));
+      ring(glow, pose, -time * 1.3f, 0f, 0.85f, 10, 0.06f, 120, 230, 255, 150);
+      pose.popPose();
+    }
+    pose.popPose();
+  }
+
+  /** Anel de losangos luminosos no plano XZ. */
+  private static void ring(VertexConsumer c, PoseStack pose, float spinDeg, float y, float radius, int count, float size,
+                           int r, int g, int b, int a) {
+    Matrix4f m = pose.last().pose();
+    float spin = spinDeg * 0.017453f;
+    for (int i = 0; i < count; i++) {
+      float ang = spin + i * Mth.TWO_PI / count;
+      float cx = Mth.cos(ang) * radius, cz = Mth.sin(ang) * radius;
+      float tx = -Mth.sin(ang) * size, tz = Mth.cos(ang) * size; // tangente
+      float rx = Mth.cos(ang) * size, rz = Mth.sin(ang) * size;  // radial
+      float pulse = 0.6f + 0.4f * Mth.sin(spinDeg * 0.05f + i);
+      int al = (int) (a * pulse);
+      // losango deitado (visto de cima) e outro em pe (visto de lado): bom de qualquer angulo
+      v(c, m, cx + tx, y, cz + tz, r, g, b, al);
+      v(c, m, cx + rx, y, cz + rz, r, g, b, al);
+      v(c, m, cx - tx, y, cz - tz, r, g, b, al);
+      v(c, m, cx - rx, y, cz - rz, r, g, b, al);
+      v(c, m, cx + tx, y, cz + tz, r, g, b, al);
+      v(c, m, cx, y + size, cz, r, g, b, al);
+      v(c, m, cx - tx, y, cz - tz, r, g, b, al);
+      v(c, m, cx, y - size, cz, r, g, b, al);
+    }
+  }
+
+  private static void v(VertexConsumer c, Matrix4f m, float x, float y, float z, int r, int g, int b, int a) {
+    c.vertex(m, x, y, z).color(r, g, b, a).endVertex();
+  }
+
+  /** Quadrado unitario centrado, com UV completo; double-sided por chamada dupla. */
+  private static void quad(VertexConsumer c, PoseStack pose, int light, int r, int g, int b, int a, boolean both) {
+    PoseStack.Pose last = pose.last();
+    Matrix4f m = last.pose();
+    Matrix3f n = last.normal();
+    float[][] pts = {{-0.5f, -0.5f, 0, 1}, {0.5f, -0.5f, 1, 1}, {0.5f, 0.5f, 1, 0}, {-0.5f, 0.5f, 0, 0}};
+    for (float[] p : pts) {
+      c.vertex(m, p[0], p[1], 0f).color(r, g, b, a).uv(p[2], p[3]).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0f, 0f, 1f).endVertex();
+    }
   }
 
   @Override

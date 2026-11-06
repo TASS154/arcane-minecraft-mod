@@ -22,6 +22,8 @@ public class ArcaneSparkParticle extends TextureSheetParticle {
     public static final Profile VENOM = new Profile(0.03f, 14, 24, 0.09f, 0.9f, 0.015f);
     public static final Profile FORCE = new Profile(0f, 12, 20, 0.13f, 0.88f, 0.06f);
     public static final Profile VOID = new Profile(0.015f, 18, 32, 0.12f, 0.92f, 0.02f);
+    public static final Profile STRIKE = new Profile(0f, 8, 8, 2.0f, 1f, 0f);
+    public static final Profile SHOCK = new Profile(0f, 10, 10, 1.6f, 1f, 0f);
     public static final Profile LIFE = new Profile(-0.02f, 18, 30, 0.11f, 0.93f, 0.012f);
   }
 
@@ -35,7 +37,7 @@ public class ArcaneSparkParticle extends TextureSheetParticle {
     this.yd = dy + (random.nextDouble() - 0.5) * profile.speedJitter();
     this.zd = dz + (random.nextDouble() - 0.5) * profile.speedJitter();
     this.lifetime = profile.minLife() + random.nextInt(Math.max(1, profile.maxLife() - profile.minLife() + 1));
-    this.quadSize = profile.size() * (0.7f + random.nextFloat() * 0.6f);
+    this.quadSize = profile.size() * (profile.speedJitter() == 0f ? 1f : 0.7f + random.nextFloat() * 0.6f);
     this.gravity = profile.gravity();
     this.friction = profile.friction();
     this.hasPhysics = false;
@@ -47,7 +49,7 @@ public class ArcaneSparkParticle extends TextureSheetParticle {
     super.tick();
     if (!removed) {
       setSpriteFromAge(sprites);
-      this.alpha = 1.0f - ((float) age / lifetime) * 0.6f;
+      this.alpha = quadSize > 1f ? 1.0f : 1.0f - ((float) age / lifetime) * 0.6f;
     }
   }
 

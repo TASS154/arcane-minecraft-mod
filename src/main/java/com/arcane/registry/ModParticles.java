@@ -21,6 +21,9 @@ public final class ModParticles {
   public static final RegistryObject<SimpleParticleType> ARCANE_FORCE = reg("arcane_force");
   public static final RegistryObject<SimpleParticleType> ARCANE_VOID = reg("arcane_void");
   public static final RegistryObject<SimpleParticleType> ARCANE_LIFE = reg("arcane_life");
+  /** Animacoes grandes: raio que cai e onda de choque (6 quadros cada). */
+  public static final RegistryObject<SimpleParticleType> ARCANE_BOLT_STRIKE = reg("arcane_bolt_strike");
+  public static final RegistryObject<SimpleParticleType> ARCANE_SHOCK = reg("arcane_shock");
 
   private ModParticles() {}
 

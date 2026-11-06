@@ -34,6 +34,8 @@ import java.util.List;
  * Conjura pelo mesmo CastingService do jogador; quem assiste suspeita dos glifos usados.
  */
 public class NPCMageEntity extends Monster {
+  private static final EntityDataAccessor<Integer> DATA_CASTING =
+      SynchedEntityData.defineId(NPCMageEntity.class, EntityDataSerializers.INT);
   private static final EntityDataAccessor<Integer> DATA_VARIANT =
       SynchedEntityData.defineId(NPCMageEntity.class, EntityDataSerializers.INT);
   private static final int CAST_INTERVAL_TICKS = 80;
@@ -57,7 +59,13 @@ public class NPCMageEntity extends Monster {
   protected void defineSynchedData() {
     super.defineSynchedData();
     entityData.define(DATA_VARIANT, 0);
+    entityData.define(DATA_CASTING, 0);
   }
+
+  /** Ticks restantes da animacao de conjuracao (bracos erguidos, brilho forte). */
+  public int castingTicks() { return entityData.get(DATA_CASTING); }
+
+  public void startCastAnimation() { entityData.set(DATA_CASTING, 14); }
 
   public int variant() { return entityData.get(DATA_VARIANT); }
 
@@ -97,6 +105,7 @@ public class NPCMageEntity extends Monster {
   @Override
   public void tick() {
     super.tick();
+    if (!level().isClientSide && castingTicks() > 0) entityData.set(DATA_CASTING, castingTicks() - 1);
     if (level().isClientSide || tickCount % CAST_INTERVAL_TICKS != 0) return;
 
     MageElement element = element();
@@ -106,6 +115,7 @@ public class NPCMageEntity extends Monster {
     lookAt(EntityAnchorArgument.Anchor.EYES, target.getEyePosition());
     Inscription spell = arcane.selectSpell();
     if (CastingService.tryCast(this, spell, (ServerLevel) level()).success()) {
+      startCastAnimation();
       for (ServerPlayer witness : ((ServerLevel) level()).getPlayers(p -> p.distanceToSqr(this) <= WITNESS_RANGE * WITNESS_RANGE)) {
         DiscoveryService.onWitness(witness, spell);
       }

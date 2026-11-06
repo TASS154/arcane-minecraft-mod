@@ -16,15 +16,22 @@ import net.minecraft.util.Mth;
 /** Grimorio flutuante: usa o modelo de livro vanilla com textura propria, girando e folheando. */
 public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
   private static final ResourceLocation TEXTURE = new ResourceLocation("arcane", "textures/entity/grimoire.png");
-  private static final ResourceLocation[] COVERS = {
-      new ResourceLocation("arcane", "textures/entity/grimoire_s1.png"),
-      new ResourceLocation("arcane", "textures/entity/grimoire_s2.png"),
-      new ResourceLocation("arcane", "textures/entity/grimoire_s3.png"),
-      new ResourceLocation("arcane", "textures/entity/grimoire_s4.png")};
+  private static final int FRAMES = 8;
+  /** [estagio-1][quadro]: o brilho varre a capa e as runas pulsam (tools/gen_art_anim.py). */
+  private static final ResourceLocation[][] COVERS = new ResourceLocation[4][FRAMES];
+
+  static {
+    for (int s = 0; s < 4; s++) {
+      for (int f = 0; f < FRAMES; f++) {
+        COVERS[s][f] = new ResourceLocation("arcane", "textures/entity/grimoire_s" + (s + 1) + "_f" + f + ".png");
+      }
+    }
+  }
 
   /** Estagios 1-4 mudam a capa; do 5 em diante usa a capa mais elaborada e cresce um pouco. */
-  private static ResourceLocation cover(int stage) {
-    return COVERS[Math.min(COVERS.length, Math.max(1, stage)) - 1];
+  private static ResourceLocation cover(int stage, float time) {
+    int frame = Math.floorMod((int) (time / 3f), FRAMES);
+    return COVERS[Math.min(COVERS.length, Math.max(1, stage)) - 1][frame];
   }
   private final BookModel book;
 
@@ -50,7 +57,7 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
     float open = 0.9f + Mth.sin(time * 0.05f) * 0.08f;
     book.setupAnim(time, Mth.clamp(flipA, 0f, 1f), Mth.clamp(flipB, 0f, 1f), open);
 
-    VertexConsumer consumer = buffers.getBuffer(book.renderType(cover(stage)));
+    VertexConsumer consumer = buffers.getBuffer(book.renderType(cover(stage, time)));
     book.renderToBuffer(pose, consumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
     pose.popPose();
     super.render(entity, yaw, partialTick, pose, buffers, light);
@@ -58,6 +65,6 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
 
   @Override
   public ResourceLocation getTextureLocation(GrimoireEntity entity) {
-    return cover(entity.visualStage());
+    return cover(entity.visualStage(), entity.tickCount);
   }
 }

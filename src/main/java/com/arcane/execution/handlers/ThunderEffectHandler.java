@@ -24,6 +24,7 @@ public class ThunderEffectHandler implements EffectHandler {
       bolt.moveTo(pos.x, Math.floor(pos.y), pos.z);
       if (context.caster() instanceof ServerPlayer player) bolt.setCause(player);
       context.level().addFreshEntity(bolt);
+      context.level().sendParticles(com.arcane.registry.ModParticles.ARCANE_BOLT_STRIKE.get(), pos.x, Math.floor(pos.y) + 2.0, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
     }
   }
 }

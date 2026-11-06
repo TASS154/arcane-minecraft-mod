@@ -41,6 +41,10 @@ public class GrimoireEntity extends Entity {
             getX() + Math.cos(a) * 0.35, getY() + 0.3 + random.nextDouble() * 0.3, getZ() + Math.sin(a) * 0.35, 0.0, 0.01, 0.0);
       }
     }
+    if (!level().isClientSide && ownerId == null && tickCount > 40) {
+      discard(); // grimorio sem dono (sobra de teste ou dado antigo)
+      return;
+    }
     if (!level().isClientSide && ownerId != null) {
       Player owner = level().getPlayerByUUID(ownerId);
       if (owner == null || !owner.isAlive()) {

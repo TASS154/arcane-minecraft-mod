@@ -20,6 +20,7 @@ public class ExplodeEffectHandler implements EffectHandler {
     int count = 0;
     for (Vec3 pos : Targeting.positions(targets)) {
       if (count++ >= MAX_EXPLOSIONS) break;
+      context.level().sendParticles(com.arcane.registry.ModParticles.ARCANE_SHOCK.get(), pos.x, pos.y + 0.3, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
       context.level().explode(context.caster(), pos.x, pos.y, pos.z, radius, Level.ExplosionInteraction.NONE);
     }
   }

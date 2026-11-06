@@ -17,7 +17,16 @@ import org.joml.Matrix4f;
 /** Orbe brilhante voltado para a camera (mesma tecnica do DragonFireballRenderer). */
 public class ArcaneProjectileRenderer extends EntityRenderer<ArcaneProjectileEntity> {
   private static final ResourceLocation TEXTURE = new ResourceLocation("arcane", "textures/entity/arcane_projectile.png");
-  private static final RenderType RENDER_TYPE = RenderType.entityTranslucentEmissive(TEXTURE);
+  private static final RenderType[] ORB = frames("arcane_projectile_f");
+  private static final RenderType[] STORM = frames("arcane_projectile_storm_f");
+
+  private static RenderType[] frames(String prefix) {
+    RenderType[] all = new RenderType[4];
+    for (int i = 0; i < 4; i++) {
+      all[i] = RenderType.entityTranslucentEmissive(new ResourceLocation("arcane", "textures/entity/" + prefix + i + ".png"));
+    }
+    return all;
+  }
 
   public ArcaneProjectileRenderer(EntityRendererProvider.Context context) {
     super(context);
@@ -35,7 +44,7 @@ public class ArcaneProjectileRenderer extends EntityRenderer<ArcaneProjectileEnt
     PoseStack.Pose last = pose.last();
     Matrix4f matrix = last.pose();
     Matrix3f normal = last.normal();
-    VertexConsumer consumer = buffers.getBuffer(RENDER_TYPE);
+    VertexConsumer consumer = buffers.getBuffer((entity.element() == com.arcane.execution.SpellElement.STORM ? STORM : ORB)[Math.floorMod(entity.tickCount / 2, 4)]);
     int full = LightTexture.FULL_BRIGHT;
     int rgb = entity.element().color();
     int r = (rgb >> 16) & 255, g = (rgb >> 8) & 255, b = rgb & 255;

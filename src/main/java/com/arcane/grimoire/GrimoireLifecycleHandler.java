@@ -124,7 +124,7 @@ public class GrimoireLifecycleHandler {
   private static void spawnGrimoire(ServerPlayer player) {
     ServerLevel level = player.serverLevel();
     level.getEntitiesOfClass(GrimoireEntity.class, player.getBoundingBox().inflate(32))
-        .stream().filter(g -> player.getUUID().equals(g.getPersistentData().getUUID("owner")))
+        .stream().filter(g -> g.getPersistentData().hasUUID("owner") && player.getUUID().equals(g.getPersistentData().getUUID("owner")))
         .forEach(GrimoireEntity::discard);
 
     int stage = GrimoireAttachments.get(player).map(GrimoireState::visualStage).orElse(1);

@@ -59,6 +59,8 @@ public class ClientSetup {
     event.registerSpriteSet(ModParticles.ARCANE_VENOM.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.VENOM));
     event.registerSpriteSet(ModParticles.ARCANE_FORCE.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.FORCE));
     event.registerSpriteSet(ModParticles.ARCANE_VOID.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.VOID));
+    event.registerSpriteSet(ModParticles.ARCANE_BOLT_STRIKE.get(), sp -> new ArcaneSparkParticle.Provider(sp, ArcaneSparkParticle.Profile.STRIKE));
+    event.registerSpriteSet(ModParticles.ARCANE_SHOCK.get(), sp -> new ArcaneSparkParticle.Provider(sp, ArcaneSparkParticle.Profile.SHOCK));
     event.registerSpriteSet(ModParticles.ARCANE_LIFE.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.LIFE));
   }
 

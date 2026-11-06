@@ -98,6 +98,17 @@ class AssetIntegrityTest {
   }
 
   @Test
+  void animationFramesExist() {
+    List<String> missing = new ArrayList<>();
+    for (int stage = 1; stage <= 4; stage++) for (int f = 0; f < 8; f++) missing.add("entity/grimoire_s" + stage + "_f" + f);
+    for (int f = 0; f < 4; f++) { missing.add("entity/arcane_projectile_f" + f); missing.add("entity/arcane_projectile_storm_f" + f); }
+    for (int e = 0; e < 6; e++) for (int f = 0; f < 6; f++) missing.add("entity/npc_mage/glow_" + e + "_" + f);
+    for (int f = 0; f < 6; f++) { missing.add("particle/bolt_strike_" + f); missing.add("particle/shock_" + f); }
+    missing.removeIf(n -> Files.exists(ASSETS.resolve("textures/" + n + ".png")));
+    assertTrue(missing.isEmpty(), "quadros de animacao faltando: " + missing);
+  }
+
+  @Test
   void glyphsHaveIconsAndTranslations() throws IOException {
     JsonObject pt = read(ASSETS.resolve("lang/pt_br.json"));
     JsonObject en = read(ASSETS.resolve("lang/en_us.json"));

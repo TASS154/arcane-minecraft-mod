@@ -7,7 +7,7 @@ Data: 6 nov 2026. Tudo aqui foi conferido no código e, onde indicado, em teste 
 ## 1. O que existe no mod
 
 ### Núcleo do sistema de magia
-- **68 glifos** em 6 categorias: 1 ativador, 10 condições, 13 filtros, 10 modificadores, 24 efeitos e 10 formas. Cada glifo tem tier (1 a 4), custo de mana, ícone 8x8 e nome em PT e EN. A lista completa está em `docs/GLIFOS.md`.
+- **72 glifos** em 6 categorias: 1 ativador, 11 condições, 13 filtros, 13 modificadores, 24 efeitos e 10 formas. Cada glifo tem tier (1 a 4), custo de mana, ícone 8x8 e nome em PT e EN. A lista completa está em `docs/GLIFOS.md`.
 - **A ordem dos glifos importa.** O compilador monta um plano de execução a partir da sequência: forma, filtros, condições, efeitos, modificadores, grupos (`grupo` / `fim de grupo`), repetição e atraso entre segmentos.
 - **Até 10 glifos por magia**, com custo de mana crescendo de forma exponencial (fator 1,3; os 3 primeiros são grátis de multiplicador).
 - **Formas:** projétil, raio, aura, onda, pilar, barreira, invocação, entre outras.
@@ -78,16 +78,26 @@ Pré-requisito: Minecraft com Forge 1.20.1 e `arcane-0.1.0.jar` em `mods` (já i
 | Grimório 3D (páginas e anéis em órbita) | Implementada e vista no jogo | Páginas orbitando e anéis de runas |
 | Feixe 3D do Raio | Implementada e vista no jogo | Só visual; o dano continua no servidor |
 | Estágio visual atualiza na hora ao usar Página Arcana | **Parcial** | A entidade só troca de estágio quando é recriada (relogar ou recuperar o grimório) |
-| Grimório equipável em slot próprio | **Não implementada** | Hoje é item no inventário + entidade flutuante |
-| Glifos de vários tipos | Implementada | 6 categorias, 68 glifos |
+| Equipar/guardar o grimório flutuante | Implementada (GameTest não cobre) | Agachado + botão direito com o grimório vazio mostra ou guarda; a escolha é salva no jogador. Slot de equipamento próprio não existe |
+| Glifos de vários tipos | Implementada | 6 categorias, 72 glifos |
 | Salvar magias no grimório | Implementada | Testada por GameTest e captura |
 | Bancada com GUI | Implementada | Captura confirmou |
 | Rituais (círculos, altar, componentes) | Implementada | GameTests de arena; captura confirmou traços acesos |
-| Rituais lendários e círculos maiores que 16 | **Não implementados** | Dependem da sua decisão de regra |
-| Votos de vinculação, assinatura e cicatrizes no mundo | **Não implementados** | |
-| Análise ativa de glifos (interface) | **Não implementada** | |
+| Rituais lendários e círculos maiores que 16 | **Não implementados** | Dependem da sua decisão de regra (o Weather já é ritual lendário) |
+| Juramentos (Quietude, Sangue, Luz) | Implementados e testados por GameTest | Dão +60/+70/+50% de força; a restrição e o custo são checados no servidor |
+| Glifo Ao Morrer | Implementado e testado por GameTest | Arma a magia como Ao Sofrer Dano; dispara uma vez antes da morte |
+| Assinatura arcana e cicatrizes (resíduos) | Implementadas e testadas por GameTest | Magias de custo 5+ deixam resíduo brilhante; só ficam em memória (somem ao fechar o servidor); configuráveis |
+| Análise de resíduo | Implementada | Projetor de Glifos agachado: mostra elemento e assinatura e avança o conhecimento de um glifo. Não testada no jogo |
+| Interações de elemento (chuva, pântano, gelo apaga fogo) | Implementadas, GameTest de gelo/fogo | Configuráveis; as de chuva/pântano não foram vistas no jogo |
+| Efeitos visuais por forma (aura, onda, pilar, impacto, ritual, holograma) e flash de conjuração | Implementados; aura, ritual e feixe vistos no jogo | Onda, pilar, impacto, flash, holograma e livro-guia não foram vistos |
+| Espelho de Simetria e Projetor de Glifos | Implementados; espelho testado por GameTest | Projetor (holograma) não testado no jogo |
+| Livro-guia na primeira entrada | Implementado | Não testado no jogo |
+| Estágios 5 a 7 do grimório | Implementados no código | Livro some a partir do 6; 7 ganha terceiro anel; não vistos no jogo |
+| Aba de hipóteses/pesquisa (interface) | **Não implementada** | Só a análise de resíduos |
 | Árvore de ramos paralelos | **Não implementada** | |
-| Masmorras e estruturas próprias | **Não implementadas** | Só o spawn de cristais e magos |
+| Masmorras, estruturas próprias e mago chefe | **Não implementados** | Só o spawn de cristais e magos |
+| Outras condições (Quando outro glifo terminar, Ao quebrar a barreira) | **Não implementadas** | |
+| Qualidade da mana, Envenenamento por Mana completo, teste multijogador | **Não implementados** | |
 | Animação do raio | Implementada e vista no jogo | Partícula pixel art de 6 quadros |
 | Animação dos magos | Implementada e vista no jogo | Brilho animado visto; braços sobem pela metade na captura (pode precisar de ajuste fino) |
 | Animação do projétil | Implementada | Código roda; não vi em captura parada |

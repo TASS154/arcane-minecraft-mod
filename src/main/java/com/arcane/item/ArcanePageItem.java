@@ -41,6 +41,7 @@ public class ArcanePageItem extends Item {
           serverPlayer.displayClientMessage(Component.translatable("message.arcane.grimoire.stage_up",
               Component.translatable("grimoire.arcane.stage." + grimoire.get().visualStage())).withStyle(ChatFormatting.GOLD), false);
         }
+        com.arcane.grimoire.GrimoireLifecycleHandler.refreshGrimoire(serverPlayer);
         ArcaneSync.sync(serverPlayer, true);
       }
     }

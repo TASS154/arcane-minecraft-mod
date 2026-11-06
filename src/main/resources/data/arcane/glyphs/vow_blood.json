@@ -1,0 +1,31 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:vow_blood"
+  },
+  "modifier_scope": {
+    "target": "all",
+    "kind": "effect",
+    "mutate": {
+      "amount": {
+        "op": "multiply",
+        "value": 1.7
+      },
+      "strength": {
+        "op": "multiply",
+        "value": 1.7
+      },
+      "power": {
+        "op": "multiply",
+        "value": 1.7
+      }
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 3,
+  "families": [
+    "void"
+  ]
+}

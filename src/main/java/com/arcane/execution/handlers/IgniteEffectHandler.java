@@ -16,7 +16,7 @@ public class IgniteEffectHandler implements EffectHandler {
     if (!Targeting.mayAlterWorld(context)) return;
     for (TargetList.BlockTarget block : targets.blocks()) {
       BlockPos above = block.pos().above();
-      if (context.level().isEmptyBlock(above) && BaseFireBlock.canBePlacedAt(context.level(), above, Direction.UP)) {
+      if (com.arcane.execution.ElementInteractions.canIgniteAt(context.level(), above) && context.level().isEmptyBlock(above) && BaseFireBlock.canBePlacedAt(context.level(), above, Direction.UP)) {
         context.level().setBlockAndUpdate(above, BaseFireBlock.getState(context.level(), above));
       }
     }

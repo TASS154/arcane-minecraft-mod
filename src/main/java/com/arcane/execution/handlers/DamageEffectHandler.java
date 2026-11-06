@@ -14,8 +14,11 @@ public class DamageEffectHandler implements EffectHandler {
     public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
         float amount = (float) context.amplify(call.parameters().getOrDefault("amount", 4.0), call.magnitudeKeys(), "amount");
         DamageSource source = context.level().damageSources().indirectMagic(context.caster(), context.caster());
+        com.arcane.execution.SpellElement element = com.arcane.execution.SpellElement.of(context.plan());
         for (Entity entity : targets.entities()) {
-            entity.hurt(source, amount);
+            double mult = com.arcane.execution.ElementInteractions.damageMultiplier(context.level(), element, entity);
+            entity.hurt(source, (float) (amount * mult));
+            com.arcane.execution.ElementInteractions.afterHit(context.level(), element, entity);
         }
     }
 }

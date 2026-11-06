@@ -33,8 +33,8 @@ public final class ModItems {
             () -> new ArmorItem(ArcaneArmorMaterial.ARCANE_WEAVE, ArmorItem.Type.HELMET, new Item.Properties()));
     public static final RegistryObject<Item> INSULATING_CLOAK = ITEMS.register("insulating_cloak",
             () -> new ArmorItem(ArcaneArmorMaterial.ARCANE_WEAVE, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
-    public static final RegistryObject<Item> GLYPH_PROJECTOR = ITEMS.register("glyph_projector", () -> new Item(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> SYMMETRY_MIRROR = ITEMS.register("symmetry_mirror", () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> GLYPH_PROJECTOR = ITEMS.register("glyph_projector", () -> new com.arcane.item.GlyphProjectorItem(new Item.Properties()));
+    public static final RegistryObject<Item> SYMMETRY_MIRROR = ITEMS.register("symmetry_mirror", () -> new com.arcane.item.SymmetryMirrorItem(new Item.Properties()));
 
     public static final RegistryObject<Item> GRIMOIRE = ITEMS.register("grimoire", () -> new GrimoireItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ARCANE_PAGE = ITEMS.register("arcane_page", () -> new ArcanePageItem(new Item.Properties()));

@@ -1,0 +1,13 @@
+{
+  "category": "condition",
+  "behavior": {
+    "handler": "arcane:on_death"
+  },
+  "cost": {
+    "mana": 0
+  },
+  "tier": 3,
+  "families": [
+    "void"
+  ]
+}

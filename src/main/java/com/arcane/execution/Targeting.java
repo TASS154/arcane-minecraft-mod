@@ -62,6 +62,10 @@ public final class Targeting {
           .add(right.scale(Math.cos(ang) * rad))
           .add(upAxis.scale(Math.max(-0.3, Math.sin(ang) * rad)));
       SpellElement element = SpellElement.of(ctx.plan());
+      com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.IMPACT, hitPoint,
+          look.scale(-1), 0.9f, element.color(), element.ordinal(), 12);
+      ElementSounds.playImpact(level, hitPoint, element);
+      WorldScars.leave(ctx, hitPoint);
       com.arcane.network.ModNetwork.sendBeam(level, beamStart, hitPoint, element.color(), element.ordinal(), 14);
     }
     return new RayResult(targets, hitPoint);

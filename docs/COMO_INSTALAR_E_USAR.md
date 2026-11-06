@@ -304,3 +304,11 @@ Os geradores de texturas, sons e dados ficam em `tools/`. Para trocar uma textur
 Veja [TRABALHO_MANUAL.md](TRABALHO_MANUAL.md): o que já foi feito e o que ainda depende de decisão humana (balanceamento, rituais, estruturas, arte final).
 
 Para detalhes técnicos da arquitetura, veja [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Novidades desta rodada (resumo de uso)
+- **Juramentos** (Quietude, Sangue, Luz): modificadores que aumentam a força, mas exigem algo ao conjurar. Quietude: parado no chão. Sangue: custa 4 de vida. Luz: só de dia com o céu aberto.
+- **Ao Morrer**: condição que arma a magia em você e a dispara quando morrer.
+- **Resíduos e assinatura**: magias de custo 5+ deixam um brilho no ponto de impacto. Agachado + botão direito com o **Projetor de Glifos** analisa o mais próximo.
+- **Projetor de Glifos** (botão direito): holograma da magia ativa. **Espelho de Simetria** (botão direito no Altar): completa traços do círculo por simetria.
+- **Grimório flutuante**: agachado + botão direito com o grimório vazio mostra ou guarda.
+- **Interações**: raio rende na chuva, fogo falha na água, gelo apaga fogo, veneno rende no pântano (tudo na config).

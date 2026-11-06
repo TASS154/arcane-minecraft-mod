@@ -370,6 +370,31 @@ glyph("weather", "effect", 10,
       params={"mode": (1.0, 0.0, 2.0, "int")}, tier=4, ritual=4,
       components=[("minecraft:lightning_rod", 1)])
 
+
+# ================================================================== JURAMENTOS: poder em troca de uma restricao (checada no servidor)
+VOW_MUT = lambda m: {"target": "all", "kind": "effect",
+                     "mutate": {"amount": {"op": "multiply", "value": m}, "strength": {"op": "multiply", "value": m},
+                                "power": {"op": "multiply", "value": m}}}
+glyph("vow_stillness", "modifier", 1,
+      ("Juramento da Quietude", "Juramento: +60% de força, mas só funciona se você estiver parado no chão ao conjurar."),
+      ("Vow of Stillness", "Vow: +60% strength, but it only works if you stand still on the ground when casting."),
+      ["...##...", "...##...", "..####..", "..####..", "...##...", "...##...", "..####..", "..####.."],
+      scope=VOW_MUT(1.6))
+glyph("vow_blood", "modifier", 1,
+      ("Juramento de Sangue", "Juramento: +70% de força, mas custa 4 pontos de vida (2 corações) e não pode ser lançado com pouca vida."),
+      ("Vow of Blood", "Vow: +70% strength, but costs 4 health (2 hearts) and cannot be cast on low health."),
+      ["...##...", "..####..", ".######.", ".######.", "..####..", "..####..", "...##...", "........"],
+      scope=VOW_MUT(1.7))
+glyph("vow_daylight", "modifier", 1,
+      ("Juramento da Luz", "Juramento: +50% de força, mas só funciona de dia e com o céu aberto."),
+      ("Vow of Daylight", "Vow: +50% strength, but it only works by day with open sky."),
+      ["#..##..#", ".#.##.#.", "..####..", "########", "########", "..####..", ".#.##.#.", "#..##..#"],
+      scope=VOW_MUT(1.5))
+glyph("on_death", "condition", 0,
+      ("Ao Morrer", "Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s)."),
+      ("On Death", "Condition: arms the spell on you: what follows only happens when you die (once, for up to 60 s)."),
+      ["..####..", ".######.", "##.##.##", "########", ".######.", "..#..#..", "..####..", "...##..."])
+
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
@@ -378,7 +403,7 @@ TIERS = {
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
         "ray", "dig", "shield", "standing_still", "low_mana", "wave"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate"],
+        "activate", "vow_blood", "on_death"],
     4: ["thunder", "gravity", "invisible"],
 }
 FAMILIES = {
@@ -389,8 +414,8 @@ FAMILIES = {
     "life": ["heal", "shield", "speed", "allies", "players", "animals"],
     "force": ["push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
-                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana"],
-    "void": ["warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
+                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight"],
+    "void": ["vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
     "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():

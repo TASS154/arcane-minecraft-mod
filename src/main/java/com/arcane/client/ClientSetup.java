@@ -67,6 +67,7 @@ public class ClientSetup {
   @SubscribeEvent
   public static void registerOverlays(RegisterGuiOverlaysEvent event) {
     event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "mana", new ManaHudOverlay());
+    event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "cast_flash", new com.arcane.client.hud.CastFlashOverlay());
   }
 
   @SubscribeEvent

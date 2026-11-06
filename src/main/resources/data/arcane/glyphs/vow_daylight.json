@@ -1,0 +1,31 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:vow_daylight"
+  },
+  "modifier_scope": {
+    "target": "all",
+    "kind": "effect",
+    "mutate": {
+      "amount": {
+        "op": "multiply",
+        "value": 1.5
+      },
+      "strength": {
+        "op": "multiply",
+        "value": 1.5
+      },
+      "power": {
+        "op": "multiply",
+        "value": 1.5
+      }
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 1,
+  "families": [
+    "knowledge"
+  ]
+}

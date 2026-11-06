@@ -8,6 +8,7 @@ import com.arcane.network.packet.C2SSaveInscriptionPacket;
 import com.arcane.network.packet.C2SSelectInscriptionPacket;
 import com.arcane.network.packet.S2CBeamPacket;
 import com.arcane.network.packet.S2CGrimoireSyncPacket;
+import com.arcane.network.packet.S2CShapeFxPacket;
 import com.arcane.network.packet.S2CSpellFxPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,7 +18,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-  private static final String PROTOCOL = "5";
+  private static final String PROTOCOL = "6";
   public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       new ResourceLocation(ArcaneMod.MODID, "main"),
       () -> PROTOCOL,
@@ -38,6 +39,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(S2CBeamPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CBeamPacket::encode).decoder(S2CBeamPacket::decode)
         .consumerMainThread(S2CBeamPacket::handle).add();
+    CHANNEL.messageBuilder(S2CShapeFxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(S2CShapeFxPacket::encode).decoder(S2CShapeFxPacket::decode)
+        .consumerMainThread(S2CShapeFxPacket::handle).add();
     CHANNEL.messageBuilder(S2CGrimoireSyncPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CGrimoireSyncPacket::encode).decoder(S2CGrimoireSyncPacket::decode)
         .consumerMainThread(S2CGrimoireSyncPacket::handle).add();
@@ -60,6 +64,13 @@ public final class ModNetwork {
                               net.minecraft.world.phys.Vec3 to, int rgb, int element, int ticks) {
     CHANNEL.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(from.x, from.y, from.z, 96.0, level.dimension())),
         new S2CBeamPacket(from, to, rgb, element, ticks));
+  }
+
+  /** Efeito de forma/impacto/ritual visivel num raio de 96 blocos. */
+  public static void sendShape(net.minecraft.server.level.ServerLevel level, int type, net.minecraft.world.phys.Vec3 pos,
+                               net.minecraft.world.phys.Vec3 dir, float size, int rgb, int element, int ticks) {
+    CHANNEL.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(pos.x, pos.y, pos.z, 96.0, level.dimension())),
+        new S2CShapeFxPacket(type, pos, dir, size, rgb, element, ticks));
   }
 
   public static void sendToPlayer(ServerPlayer player, Object packet) {

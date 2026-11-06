@@ -28,7 +28,11 @@ public class PillarFormHandler implements FormHandler {
     AABB column = new AABB(base.x - radius, base.y - 2, base.z - radius, base.x + radius, base.y + 10, base.z + radius);
     List<Entity> entities = new ArrayList<>(context.level().getEntitiesOfClass(LivingEntity.class, column,
         e -> e != caster && e.isAlive() && !e.isSpectator()));
-    for (int i = 0; i < 20; i++) {
+    com.arcane.execution.SpellElement element = com.arcane.execution.SpellElement.of(context.plan());
+    com.arcane.network.ModNetwork.sendShape(context.level(), com.arcane.network.packet.S2CShapeFxPacket.PILLAR,
+        base, Vec3.ZERO, (float) radius, element.color(), element.ordinal(), 18);
+    com.arcane.execution.ElementSounds.playImpact(context.level(), base, element);
+    for (int i = 0; i < 0; i++) {
       context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(), base.x, base.y + i * 0.5, base.z, 1, radius * 0.3, 0.0, radius * 0.3, 0.0);
     }
     return DeliveryResult.of(new TargetList(entities, ray.targets().blocks()));

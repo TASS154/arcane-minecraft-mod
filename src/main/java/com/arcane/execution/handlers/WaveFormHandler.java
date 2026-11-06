@@ -27,6 +27,10 @@ public class WaveFormHandler implements FormHandler {
         .stream().map(e -> (Entity) e).toList();
 
     Vec3 flat = new Vec3(look.x, 0, look.z).normalize();
+    com.arcane.execution.SpellElement element = com.arcane.execution.SpellElement.of(context.plan());
+    com.arcane.network.ModNetwork.sendShape(context.level(), com.arcane.network.packet.S2CShapeFxPacket.WAVE,
+        caster.position(), flat, (float) range, element.color(), element.ordinal(), 14);
+    com.arcane.execution.ElementSounds.playImpact(context.level(), caster.position(), element);
     for (int i = -4; i <= 4; i++) {
       double angle = Math.toRadians(i * 11.0);
       double cos = Math.cos(angle), sin = Math.sin(angle);

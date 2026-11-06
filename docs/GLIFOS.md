@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **68 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **72 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -101,7 +101,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Dobrar** | `arcane:warp` | 8 | 4 | Vazio | `range` 32 (8–64) | Efeito de RITUAL (maior): leva todas as criaturas alvo para o ponto que você mira (até 48). Com Aura ou Pilar e um círculo grande, desloca uma região inteira. |
 | **Clima** | `arcane:weather` | 10 | 4 | Vazio | `mode` 1 (0–2) | Efeito de RITUAL (lendário): muda o clima do mundo (0 limpo, 1 chuva, 2 tempestade). Exige a oferenda de uma Estrela do Nether no círculo maior. |
 
-## Modificadores (10)
+## Modificadores (13)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -117,8 +117,11 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Fim do Grupo** | `arcane:end_group` | 0 | 1 | Conhecimento | — | Modificador: fecha o grupo aberto por Grupo. |
 | **Enfraquecer** | `arcane:weaken` | 1 | 2 | Conhecimento | — | Modificador: metade da força do efeito anterior (dano, cura, empurrão, nível). Barateia a magia. |
 | **Repetição** | `arcane:repeat` | 2 | 3 | Força | `times` 2 (2–4) | Modificador: repete o efeito anterior (no total, o número de vezes do parâmetro). Cada repetição custa o efeito de novo. |
+| **Juramento da Quietude** | `arcane:vow_stillness` | 1 | 1 | Conhecimento | — | Juramento: +60% de força, mas só funciona se você estiver parado no chão ao conjurar. |
+| **Juramento de Sangue** | `arcane:vow_blood` | 1 | 3 | Vazio | — | Juramento: +70% de força, mas custa 4 pontos de vida (2 corações) e não pode ser lançado com pouca vida. |
+| **Juramento da Luz** | `arcane:vow_daylight` | 1 | 1 | Conhecimento | — | Juramento: +50% de força, mas só funciona de dia e com o céu aberto. |
 
-## Condições (10)
+## Condições (11)
 
 Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira.
 
@@ -134,6 +137,7 @@ Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira
 | **Ao Sofrer Dano** | `arcane:on_hurt` | 0 | 3 | Vazio | — | Condição: arma a magia em você: o que vem depois só acontece quando você levar dano (uma vez, por até 60 s). |
 | **Mana Baixa** | `arcane:low_mana` | 0 | 2 | Conhecimento | — | Condição: o que vem depois só acontece se sua mana estiver abaixo de 20%. |
 | **Parado** | `arcane:standing_still` | 0 | 2 | Conhecimento | — | Condição: o que vem depois só acontece se você estiver parado no chão. |
+| **Ao Morrer** | `arcane:on_death` | 0 | 3 | Vazio | — | Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s). |
 
 ## Ativadores (1)
 

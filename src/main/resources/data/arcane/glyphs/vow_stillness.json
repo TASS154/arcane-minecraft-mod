@@ -1,0 +1,31 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:vow_stillness"
+  },
+  "modifier_scope": {
+    "target": "all",
+    "kind": "effect",
+    "mutate": {
+      "amount": {
+        "op": "multiply",
+        "value": 1.6
+      },
+      "strength": {
+        "op": "multiply",
+        "value": 1.6
+      },
+      "power": {
+        "op": "multiply",
+        "value": 1.6
+      }
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 1,
+  "families": [
+    "knowledge"
+  ]
+}

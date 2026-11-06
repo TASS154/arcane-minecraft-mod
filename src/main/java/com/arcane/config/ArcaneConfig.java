@@ -13,6 +13,12 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.DoubleValue RITUAL_POWER_MEDIUM;
   public static final ForgeConfigSpec.DoubleValue RITUAL_POWER_MAJOR;
   public static final ForgeConfigSpec.DoubleValue RITUAL_MIN_COMPLETENESS;
+  public static final ForgeConfigSpec.BooleanValue ELEMENT_INTERACTIONS;
+  public static final ForgeConfigSpec.DoubleValue ELEMENT_INTERACTION_STRENGTH;
+  public static final ForgeConfigSpec.IntValue MAGE_CAST_INTERVAL_TICKS;
+  public static final ForgeConfigSpec.IntValue GRIMOIRE_LOSS_DAYS;
+  public static final ForgeConfigSpec.BooleanValue SCARS_ENABLED;
+  public static final ForgeConfigSpec.IntValue SCAR_LIFETIME_TICKS;
 
   static {
     ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -31,6 +37,14 @@ public class ArcaneConfig {
         .defineInRange("ritualPowerMajor", 10.0, 1.0, 100.0);
     RITUAL_MIN_COMPLETENESS = builder.comment("Fraction of the circle's traces that must be drawn for a ritual to work")
         .defineInRange("ritualMinCompleteness", 0.85, 0.3, 1.0);
+    ELEMENT_INTERACTIONS = builder.comment("Elements interact with the environment (storm stronger in rain, fire weaker when wet...)")
+        .define("elementInteractions", true);
+    ELEMENT_INTERACTION_STRENGTH = builder.comment("Scale of the element interaction bonuses (0 = none, 1 = default)")
+        .defineInRange("elementInteractionStrength", 1.0, 0.0, 3.0);
+    MAGE_CAST_INTERVAL_TICKS = builder.comment("Ticks between NPC mage casts").defineInRange("mageCastIntervalTicks", 80, 10, 1200);
+    GRIMOIRE_LOSS_DAYS = builder.comment("Days of reduced mana after losing the grimoire (PROVISIONAL)").defineInRange("grimoireLossDays", 3, 0, 30);
+    SCARS_ENABLED = builder.comment("Powerful spells leave temporary scars in the world").define("scarsEnabled", true);
+    SCAR_LIFETIME_TICKS = builder.comment("How long a world scar lasts, in ticks (PROVISIONAL)").defineInRange("scarLifetimeTicks", 24000, 200, 1728000);
     SPEC = builder.build();
   }
 }

@@ -169,7 +169,7 @@ public class BeamRenderer {
   }
 
   /** Paralelepipedo ao longo de from->to; cada face com brilho proprio para dar volume. */
-  private static void box(VertexConsumer c, PoseStack.Pose pose, Vec3 from, Vec3 to, Vec3 u, Vec3 v, float w, int r, int g, int b, int a) {
+  static void box(VertexConsumer c, PoseStack.Pose pose, Vec3 from, Vec3 to, Vec3 u, Vec3 v, float w, int r, int g, int b, int a) {
     Vec3 uw = u.scale(w), vw = v.scale(w);
     Vec3[] f = {from.add(uw).add(vw), from.subtract(uw).add(vw), from.subtract(uw).subtract(vw), from.add(uw).subtract(vw)};
     Vec3[] t = {to.add(uw).add(vw), to.subtract(uw).add(vw), to.subtract(uw).subtract(vw), to.add(uw).subtract(vw)};
@@ -184,7 +184,7 @@ public class BeamRenderer {
   }
 
   /** Cada face e desenhada nos dois sentidos, para nao sumir por culling. */
-  private static void face(VertexConsumer c, PoseStack.Pose pose, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4, int r, int g, int b, int a) {
+  static void face(VertexConsumer c, PoseStack.Pose pose, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4, int r, int g, int b, int a) {
     vtx(c, pose, p1, r, g, b, a);
     vtx(c, pose, p2, r, g, b, a);
     vtx(c, pose, p3, r, g, b, a);
@@ -195,7 +195,7 @@ public class BeamRenderer {
     vtx(c, pose, p1, r, g, b, a);
   }
 
-  private static void vtx(VertexConsumer c, PoseStack.Pose pose, Vec3 p, int r, int g, int b, int a) {
+  static void vtx(VertexConsumer c, PoseStack.Pose pose, Vec3 p, int r, int g, int b, int a) {
     c.vertex(pose.pose(), (float) p.x, (float) p.y, (float) p.z).color(r, g, b, a).endVertex();
   }
 }

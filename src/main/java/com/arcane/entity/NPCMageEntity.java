@@ -38,7 +38,6 @@ public class NPCMageEntity extends Monster {
       SynchedEntityData.defineId(NPCMageEntity.class, EntityDataSerializers.INT);
   private static final EntityDataAccessor<Integer> DATA_VARIANT =
       SynchedEntityData.defineId(NPCMageEntity.class, EntityDataSerializers.INT);
-  private static final int CAST_INTERVAL_TICKS = 80;
   private static final double WITNESS_RANGE = 24.0;
 
   private final NPCArcaneComponent arcane = new NPCArcaneComponent();
@@ -106,7 +105,7 @@ public class NPCMageEntity extends Monster {
   public void tick() {
     super.tick();
     if (!level().isClientSide && castingTicks() > 0) entityData.set(DATA_CASTING, castingTicks() - 1);
-    if (level().isClientSide || tickCount % CAST_INTERVAL_TICKS != 0) return;
+    if (level().isClientSide || tickCount % com.arcane.config.ArcaneConfig.MAGE_CAST_INTERVAL_TICKS.get() != 0) return;
 
     MageElement element = element();
     Player target = level().getNearestPlayer(this, Math.max(element.castRange(), 6.0));

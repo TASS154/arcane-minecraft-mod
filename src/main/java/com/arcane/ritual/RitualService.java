@@ -115,6 +115,44 @@ public final class RitualService {
     return placed;
   }
 
+  private static boolean placeTraceAt(ServerLevel level, BlockPos altar, RitualTemplate.Cell cell) {
+    BlockState trace = ModBlocks.ARCANE_TRACE.get().defaultBlockState();
+    for (int dy = 1; dy >= -2; dy--) {
+      BlockPos pos = altar.offset(cell.dx(), dy, cell.dz());
+      BlockState here = level.getBlockState(pos);
+      boolean free = here.isAir() || (here.canBeReplaced() && here.getFluidState().isEmpty());
+      if (free && trace.canSurvive(level, pos)) {
+        level.setBlock(pos, trace, 3);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Espelho de Simetria: completa os tracos que faltam copiando os simetricos (as 8 simetrias do quadrado) de quem ja
+   * foi desenhado. Nao inventa um circulo do zero: precisa de pelo menos um traco de cada tipo para refletir.
+   * Retorna quantos tracos foram acrescentados.
+   */
+  public static int repairBySymmetry(ServerLevel level, BlockPos altar) {
+    CircleReport report = evaluate(level, altar);
+    if (report.radius() <= 0) return 0;
+    var cells = RitualTemplate.cells(report.radius());
+    int placed = 0;
+    for (RitualTemplate.Cell cell : cells) {
+      if (traceAt(level, altar, cell) != null) continue;
+      int x = cell.dx(), z = cell.dz();
+      int[][] images = {{-x, z}, {x, -z}, {-x, -z}, {z, x}, {-z, x}, {z, -x}, {-z, -x}};
+      boolean mirrored = false;
+      for (int[] img : images) {
+        var other = new RitualTemplate.Cell(img[0], img[1]);
+        if (cells.contains(other) && traceAt(level, altar, other) != null) { mirrored = true; break; }
+      }
+      if (mirrored && placeTraceAt(level, altar, cell)) placed++;
+    }
+    return placed;
+  }
+
   // ------------------------------------------------------------------ conjurar
   private static Map<Item, Integer> neededItems(RitualRequirements req, boolean legendary) {
     Map<Item, Integer> need = new LinkedHashMap<>();
@@ -259,6 +297,9 @@ public final class RitualService {
       level.playSound(null, altar, ModSounds.RITUAL_ACTIVATE.get(), SoundSource.BLOCKS, 1.4f, legendary ? 0.6f : 1.0f);
       double cx = altar.getX() + 0.5, cy = altar.getY() + 0.3, cz = altar.getZ() + 0.5;
       int radius = Math.max(circle.radius(), RitualTemplate.RADII[0]);
+      com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.RITUAL,
+          new net.minecraft.world.phys.Vec3(cx, cy, cz), net.minecraft.world.phys.Vec3.ZERO, radius,
+          legendary ? 0xFFD060 : 0xB48CFF, 0, legendary ? 70 : 50);
       for (int ring = 1; ring <= 3; ring++) {
         double r = radius * ring / 3.0;
         int points = (int) Math.min(72, 10 + r * 4);

@@ -30,6 +30,11 @@ public final class CastingService {
             return ExecutionResult.fail("message.arcane.requires_ritual");
         }
 
+        String broken = Vows.violation(player, inscription);
+        if (broken != null) {
+            return ExecutionResult.fail(broken);
+        }
+
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
         int baseCost = plan.baseManaCost();
         double inkMultiplier = InkRegistry.getManaMultiplier(inscription.metadata().ink());
@@ -53,7 +58,8 @@ public final class CastingService {
 
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
-            ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint()));
+            Vows.pay(player, inscription);
+            ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint(), SpellElement.of(plan).ordinal()));
             castFx((ServerLevel) player.level(), player, SpellElement.of(plan));
         }
         return new ExecutionResult(result.success(), result.message(), manaCost);
@@ -87,6 +93,8 @@ public final class CastingService {
         if (com.arcane.ritual.RitualRequirements.of(inscription).needsRitual()) {
             return ExecutionResult.fail("message.arcane.requires_ritual");
         }
+        String broken = Vows.violation(caster, inscription);
+        if (broken != null) return ExecutionResult.fail(broken);
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
         EnvironmentalSnapshot environment = AmbientFieldResolver.resolve(level, caster.blockPosition());
         ExecutionContext context = new ExecutionContext(
@@ -100,6 +108,7 @@ public final class CastingService {
         );
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
+            Vows.pay(caster, inscription);
             castFx(level, caster, SpellElement.of(context.plan()));
         }
         return result;
@@ -110,6 +119,7 @@ public final class CastingService {
         level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
                 com.arcane.registry.ModSounds.SPELL_CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS,
                 0.8f, 0.9f + caster.getRandom().nextFloat() * 0.2f);
+        ElementSounds.playCast(level, caster.position(), element);
         level.sendParticles(element.particle(),
                 caster.getX(), caster.getY() + caster.getBbHeight() * 0.6, caster.getZ(),
                 12, 0.4, 0.4, 0.4, 0.02);

@@ -937,4 +937,115 @@ public class ArcaneGameTests {
         && s.getValue(com.arcane.block.ArcaneTraceBlock.LIT), () -> "o traco deveria estar aceso");
     h.succeed();
   }
+
+  // ------------------------------------------------------------------ juramentos, Ao Morrer, cicatrizes, interacoes, espelho
+  @GameTest(template = "empty")
+  public static void vowOfBloodCostsHealthAndRefusesOnLowHealth(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    p.setHealth(p.getMaxHealth());
+    float before = p.getHealth();
+    cast(h, p, g("self"), g("vow_blood"), g("speed"));
+    h.assertTrue(p.getHealth() <= before - 3.9f, "o juramento deveria custar 4 de vida (vida " + p.getHealth() + ")");
+    p.setHealth(5.0f);
+    var low = CastingService.tryCast(p, new Inscription(List.of(g("self"), g("vow_blood"), g("shield"))), h.getLevel());
+    h.assertTrue(!low.success(), "com pouca vida o juramento de sangue deve recusar");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void vowOfDaylightRefusesAtNight(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    h.getLevel().setDayTime(18000);
+    var night = CastingService.tryCast(p, new Inscription(List.of(g("self"), g("vow_daylight"), g("shield"))), h.getLevel());
+    h.assertTrue(!night.success(), "de noite o juramento da luz deve recusar");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void vowOfStillnessRefusesWhileMoving(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    p.xo = p.getX() - 1.0;
+    var moving = CastingService.tryCast(p, new Inscription(List.of(g("self"), g("vow_stillness"), g("shield"))), h.getLevel());
+    h.assertTrue(!moving.success(), "em movimento o juramento da quietude deve recusar");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void vowsRaiseDamage(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    Pig plain = pig(h, 1, 4);
+    Pig vowed = pig(h, 5, 4);
+    plain.setHealth(plain.getMaxHealth());
+    vowed.setHealth(vowed.getMaxHealth());
+    var level = h.getLevel();
+    var base = new Inscription(List.of(g("self"), g("damage")));
+    var strong = new Inscription(List.of(g("self"), g("damage"), g("vow_blood")));
+    var planBase = com.arcane.inscription.CompiledPlanCache.getOrCompile(base);
+    var planStrong = com.arcane.inscription.CompiledPlanCache.getOrCompile(strong);
+    h.assertTrue(planBase != null && planStrong != null, "os planos deveriam compilar");
+    h.assertTrue(planStrong.baseManaCost() >= planBase.baseManaCost(), "o juramento nao pode baratear a magia");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void onDeathSpellFiresOnceWhenTheCasterDies(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    cast(h, p, g("self"), g("on_death"), g("shield"));
+    h.assertTrue(!p.hasEffect(MobEffects.ABSORPTION), "nao deve disparar ao conjurar");
+    h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(p.getUUID()) == 1, "deveria estar armada");
+    p.hurt(h.getLevel().damageSources().genericKill(), 1000.0f);
+    h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(p.getUUID()) == 0, "deveria ter disparado ao morrer");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void strongSpellLeavesAScarThatCanBeAnalyzed(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.WorldScars.clearAll();
+    Pig caster = pig(h, 3, 1);
+    var sheepTarget = h.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(3, 1, 4));
+    cast(h, caster, g("ray"), g("damage"));
+    var scars = com.arcane.execution.WorldScars.all(h.getLevel());
+    h.assertTrue(!scars.isEmpty(), "uma magia de custo 5+ deveria deixar um residuo");
+    h.assertTrue(scars.get(0).caster().equals(caster.getUUID()), "o residuo guarda a assinatura de quem conjurou");
+    h.assertTrue(com.arcane.execution.WorldScars.signature(caster.getUUID()).matches("[0-9A-F]{2}-[0-9A-F]{2}"), "formato da assinatura");
+    com.arcane.execution.WorldScars.clearAll();
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void frostPutsOutFireAndFireLovesFrozenTargets(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    p.setSecondsOnFire(5);
+    h.assertTrue(p.isOnFire(), "deveria estar em chamas");
+    com.arcane.execution.ElementInteractions.afterHit(h.getLevel(), com.arcane.execution.SpellElement.FROST, p);
+    h.assertTrue(!p.isOnFire(), "o gelo deveria apagar o fogo");
+    p.setTicksFrozen(60);
+    double m = com.arcane.execution.ElementInteractions.damageMultiplier(h.getLevel(), com.arcane.execution.SpellElement.FIRE, p);
+    h.assertTrue(m > 1.0, "fogo contra alvo congelado deveria render mais, foi " + m);
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 200)
+  public static void symmetryMirrorRestoresMissingTraces(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    var cells = new java.util.ArrayList<>(com.arcane.ritual.RitualTemplate.cells(4));
+    for (int i = 0; i < cells.size(); i += 5) {
+      var c = cells.get(i);
+      h.setBlock(new BlockPos(17 + c.dx(), 1, 17 + c.dz()), Blocks.AIR);
+    }
+    double before = com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h)).completeness();
+    int placed = com.arcane.ritual.RitualService.repairBySymmetry(h.getLevel(), altarAbs(h));
+    double after = com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h)).completeness();
+    h.assertTrue(placed > 0, "o espelho deveria completar tracos");
+    h.assertTrue(after > before, "a completude deveria subir: " + before + " -> " + after);
+    h.succeed();
+  }
 }

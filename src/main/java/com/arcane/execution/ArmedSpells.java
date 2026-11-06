@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ArmedSpells {
   public static final long EXPIRE_TICKS = 1200L;
   public static final int MAX_ARMED = 3;
-  private static final Set<ResourceLocation> TRIGGER_CONDITIONS = Set.of(new ResourceLocation("arcane", "on_hurt"));
+  private static final Set<ResourceLocation> TRIGGER_CONDITIONS = Set.of(new ResourceLocation("arcane", "on_hurt"), new ResourceLocation("arcane", "on_death"));
 
   private record Armed(ExecutionContext context, CompiledExecutionPlan.ExecutionSegment segment, long expiresAt) {}
 
@@ -66,7 +66,16 @@ public final class ArmedSpells {
 
   @SubscribeEvent
   public static void onHurt(LivingHurtEvent event) {
-    LivingEntity victim = event.getEntity();
+    trigger(event.getEntity(), "hurt", "on_hurt", event.getSource().getEntity());
+  }
+
+  /** Ao Morrer: dispara antes da morte ser consumada (a magia pode curar ou teleportar a criatura). */
+  @SubscribeEvent
+  public static void onDeath(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
+    trigger(event.getEntity(), "death", "on_death", event.getSource().getEntity());
+  }
+
+  private static void trigger(LivingEntity victim, String type, String conditionPath, net.minecraft.world.entity.Entity source) {
     if (victim.level().isClientSide || FIRING.get()) return;
     List<Armed> list = ARMED.get(victim.getUUID());
     if (list == null || list.isEmpty()) return;
@@ -75,15 +84,16 @@ public final class ArmedSpells {
     synchronized (list) {
       long now = victim.level().getGameTime();
       list.removeIf(a -> a.expiresAt() < now);
-      toFire = new ArrayList<>(list);
-      list.clear();
+      toFire = list.stream().filter(a -> a.segment().condition()
+          .map(c -> c.conditionId().getPath().equals(conditionPath)).orElse(false)).toList();
+      list.removeAll(toFire);
     }
     FIRING.set(true);
     try {
       for (Armed armed : toFire) {
         ExecutionContext old = armed.context();
         ExecutionContext fresh = new ExecutionContext(old.level(), victim, old.inscription(), old.plan(), old.environment(),
-            old.precision(), new ExecutionContext.TriggerEvent("hurt", Optional.ofNullable(event.getSource().getEntity()), Optional.empty()));
+            old.precision(), new ExecutionContext.TriggerEvent(type, Optional.ofNullable(source), Optional.empty()));
         fresh.setGeometryBonus(old.geometryBonus());
         fresh.setAreaScale(old.areaScale());
         fresh.setRitualLevel(old.ritualLevel());

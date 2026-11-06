@@ -20,7 +20,11 @@ public class AuraFormHandler implements FormHandler {
     List<Entity> found = context.level().getEntitiesOfClass(LivingEntity.class, caster.getBoundingBox().inflate(radius),
         e -> e != caster && e.isAlive() && !e.isSpectator() && e.distanceToSqr(caster) <= radius * radius)
         .stream().map(e -> (Entity) e).toList();
-    int points = (int) Math.min(48, radius * 6);
+    com.arcane.execution.SpellElement element = com.arcane.execution.SpellElement.of(context.plan());
+    com.arcane.network.ModNetwork.sendShape(context.level(), com.arcane.network.packet.S2CShapeFxPacket.AURA,
+        caster.position(), net.minecraft.world.phys.Vec3.ZERO, (float) radius, element.color(), element.ordinal(), 16);
+    com.arcane.execution.ElementSounds.playImpact(context.level(), caster.position(), element);
+    int points = 0;
     for (int i = 0; i < points; i++) {
       double angle = Math.PI * 2 * i / points;
       context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(),

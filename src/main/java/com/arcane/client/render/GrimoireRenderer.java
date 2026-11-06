@@ -61,8 +61,10 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
     float open = 0.9f + Mth.sin(time * 0.05f) * 0.08f;
     book.setupAnim(time, Mth.clamp(flipA, 0f, 1f), Mth.clamp(flipB, 0f, 1f), open);
 
-    VertexConsumer consumer = buffers.getBuffer(book.renderType(cover(stage, time)));
-    book.renderToBuffer(pose, consumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+    if (stage < 6) { // do estagio 6 em diante so ficam as paginas e os aneis (o livro "se desfaz")
+      VertexConsumer consumer = buffers.getBuffer(book.renderType(cover(stage, time)));
+      book.renderToBuffer(pose, consumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+    }
     pose.popPose();
     renderOrbit(entity, time, pose, buffers, stage);
     super.render(entity, yaw, partialTick, pose, buffers, light);
@@ -100,6 +102,13 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
       pose.mulPose(Axis.ZP.rotationDegrees(65f));
       ring(glow, pose, -time * 1.3f, 0f, 0.85f, 10, 0.06f, 120, 230, 255, 150);
       pose.popPose();
+    }
+    if (stage >= 7) { // estagio final: terceiro anel cruzado e um nucleo de luz
+      pose.pushPose();
+      pose.mulPose(Axis.XP.rotationDegrees(65f));
+      ring(glow, pose, time * 1.7f, 0f, 0.95f, 14, 0.06f, 255, 230, 140, 150);
+      pose.popPose();
+      ring(glow, pose, time * 2.2f, 0f, 0.25f, 6, 0.09f, 255, 255, 255, 200);
     }
     pose.popPose();
   }

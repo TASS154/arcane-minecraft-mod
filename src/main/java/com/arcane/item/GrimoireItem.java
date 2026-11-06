@@ -64,6 +64,11 @@ public class GrimoireItem extends Item {
   public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
     ItemStack stack = player.getItemInHand(hand);
     boolean handlesContents = player.isShiftKeyDown() && contents(stack) != null;
+    boolean toggles = player.isShiftKeyDown() && contents(stack) == null;
+    if (toggles) {
+      if (!level.isClientSide && player instanceof ServerPlayer sp) com.arcane.grimoire.GrimoireLifecycleHandler.toggleFloating(sp);
+      return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    }
     if (level.isClientSide) {
       if (!handlesContents) {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> com.arcane.client.ClientHooks::openGrimoire);

@@ -106,6 +106,10 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
           net.minecraft.sounds.SoundSource.PLAYERS, 0.9f, 1.0f);
       server.sendParticles(element().particle(), getX(), getY(), getZ(),
           26, 0.3, 0.3, 0.3, 0.1);
+      com.arcane.network.ModNetwork.sendShape(server, com.arcane.network.packet.S2CShapeFxPacket.IMPACT, position(),
+          getDeltaMovement().scale(-1).normalize(), 1.0f, element().color(), element().ordinal(), 12);
+      com.arcane.execution.ElementSounds.playImpact(server, position(), element());
+      com.arcane.execution.WorldScars.leave(context, position());
       if (element() == SpellElement.STORM) {
         server.sendParticles(com.arcane.registry.ModParticles.ARCANE_BOLT_STRIKE.get(), getX(), getY() + 1.6, getZ(), 1, 0.0, 0.0, 0.0, 0.0);
       } else if (element() == SpellElement.FORCE) {

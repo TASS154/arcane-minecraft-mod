@@ -25,3 +25,7 @@ run-data
 
 repo
 .vscodelogs/
+
+# execucao local
+logs/
+run/

@@ -65,6 +65,12 @@ Tudo abaixo está no repositório. As artes e sons são **provisórios de qualid
 | Segurança | Pacote de salvar com limites e testes; Explosão não quebra blocos; Escavar nunca quebra baús; efeitos que mexem no mundo respeitam `mobGriefing` para NPCs |
 | Testes | 37 unitários e 28 GameTests em mundo real (todos os efeitos, formas, filtros e condições novos) |
 
+### Bug grave achado só ao abrir o jogo de verdade
+
+**A Bancada Arcana nunca abria no jogo** (desde o código original). O menu lê a posição da bancada do pacote de abertura, mas o bloco abria com `openMenu` simples, que não envia esses dados: o cliente quebrava ao criar a tela (`buf` nulo). Corrigido com `NetworkHooks.openScreen`, e um teste (`CodeGuardsTest`) impede a volta do erro. Nenhum teste de servidor pegaria isso; só abrir o cliente.
+
+Também saíram dessa verificação: o Diário do Grimório vazava por cima da lombada e a descrição dos glifos cobria o contador (aba Glifos reorganizada: grade na página esquerda, detalhes na direita).
+
 ### Sobre as skins "da internet"
 
 Pediram skins da internet, mas skins de sites como NameMC e Planet Minecraft são arte de terceiros sem licença de redistribuição, e embutir arquivos baixados num mod publicado traz risco de direitos autorais. Em vez disso gerei 18 skins próprias. Se quiser skins específicas, indique a fonte e a licença (ex.: CC0 ou o autor autorizando) e eu as importo no lugar de `textures/entity/npc_mage/mage_NN.png`.
@@ -72,7 +78,7 @@ Pediram skins da internet, mas skins de sites como NameMC e Planet Minecraft sã
 ### Ainda pendente (atualizado)
 
 - O chat do ChatGPT indicado não pôde ser lido (exige login). O que combinamos lá, se for além disto, precisa ser colado aqui.
-- Nada foi aberto dentro do jogo por uma pessoa: as telas (Bancada, Grimório, HUD) só foram verificadas por compilação e pelo log do cliente.
+- Nenhuma *pessoa* jogou ainda. As telas, o HUD, o salvar/conjurar e os 18 magos foram verificados por um teste automático que abre o jogo real, entra num mundo e tira capturas (`tools/dev/`), mas falta o playtest humano: sensação, balanceamento, textos.
 
 ### Ainda pendente
 

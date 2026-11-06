@@ -33,7 +33,8 @@ public class GrimoireScreen extends Screen {
   private static final int H = 200;
   private static final int ROW = 12;
   private static final int LIST_ROWS = 11;
-  private static final int COLS = 10;
+  private static final int COLS = 5;
+  private static final int GRID_ROWS = 7;
   private static final int CELL = 20;
 
   private enum Tab { SPELLS, GLYPHS, JOURNAL }
@@ -148,18 +149,13 @@ public class GrimoireScreen extends Screen {
     int step = delta > 0 ? -1 : 1;
     switch (tab) {
       case SPELLS -> spellScroll = Math.max(0, Math.min(spellScroll + step, Math.max(0, ClientArcaneData.spells().size() - LIST_ROWS)));
-      case JOURNAL -> logScroll = Math.max(0, Math.min(logScroll + step, Math.max(0, ClientArcaneData.log().size() - LIST_ROWS)));
+      case JOURNAL -> logScroll = Math.max(0, Math.min(logScroll + step * LIST_ROWS, Math.max(0, ClientArcaneData.log().size() - 1)));
       case GLYPHS -> {
         int rows = (slotCount() + COLS - 1) / COLS;
-        glyphScroll = Math.max(0, Math.min(glyphScroll + step, Math.max(0, rows - 5)));
+        glyphScroll = Math.max(0, Math.min(glyphScroll + step, Math.max(0, rows - GRID_ROWS)));
       }
     }
     return true;
-  }
-
-  /** 5 colunas em cada pagina, deixando a lombada livre. */
-  private int cellX(int col) {
-    return left + (col < 5 ? 18 + col * CELL : 138 + (col - 5) * CELL);
   }
 
   private int slotCount() {
@@ -168,10 +164,10 @@ public class GrimoireScreen extends Screen {
 
   private KnownGlyph glyphAt(double mx, double my) {
     List<KnownGlyph> glyphs = ClientArcaneData.glyphs();
-    for (int i = 0; i < COLS * 5; i++) {
+    for (int i = 0; i < COLS * GRID_ROWS; i++) {
       int index = glyphScroll * COLS + i;
       if (index >= glyphs.size()) break;
-      int x = cellX(i % COLS);
+      int x = left + 18 + (i % COLS) * CELL;
       int y = top + 28 + (i / COLS) * CELL;
       if (mx >= x && mx < x + 18 && my >= y && my < y + 18) return glyphs.get(index);
     }
@@ -260,13 +256,13 @@ public class GrimoireScreen extends Screen {
     List<KnownGlyph> glyphs = ClientArcaneData.glyphs();
     int total = slotCount();
     long identified = glyphs.stream().filter(KnownGlyph::usable).count();
-    g.drawString(font, Component.translatable("gui.arcane.grimoire.discovered", identified, total), left + 18, top + 168, 0x5A4630, false);
 
+    // Pagina esquerda: grade de glifos (conhecidos primeiro; o resto aparece como "?")
     KnownGlyph hovered = null;
-    for (int i = 0; i < COLS * 5; i++) {
+    for (int i = 0; i < COLS * GRID_ROWS; i++) {
       int index = glyphScroll * COLS + i;
       if (index >= total) break;
-      int x = cellX(i % COLS);
+      int x = left + 18 + (i % COLS) * CELL;
       int y = top + 28 + (i / COLS) * CELL;
       if (index < glyphs.size()) {
         KnownGlyph k = glyphs.get(index);
@@ -283,28 +279,54 @@ public class GrimoireScreen extends Screen {
         g.blit(iconFor(new ResourceLocation("arcane", "unknown")), x, y, 0, 0, 16, 16, 16, 16);
       }
     }
-
-    // Detalhe do glifo selecionado, na parte de baixo das paginas
-    Optional<KnownGlyph> sel = selectedGlyph == null ? Optional.empty() : ClientArcaneData.glyph(selectedGlyph);
-    if (sel.isPresent()) {
-      KnownGlyph k = sel.get();
-      g.drawString(font, ArcaneWorkbenchScreen.glyphName(k.id()).copy().withStyle(s -> s.withColor(ArcaneWorkbenchScreen.categoryColor(k.category()) & 0x7F7F7F)),
-          left + 18, top + 132, 0x2A1A08, false);
-      g.drawString(font, Component.translatable("category.arcane." + k.category()).getString() + " - "
-          + Component.translatable("knowledge.arcane." + knowledgeName(k.level())).getString(), left + 18, top + 142, 0x5A4630, false);
-      String descKey = "glyph." + k.id().getNamespace() + "." + k.id().getPath() + ".desc";
-      if (k.usable() && I18n.exists(descKey)) {
-        g.drawWordWrap(font, Component.translatable(descKey), left + 18, top + 152, 220, 0x4A3820);
-      } else if (!k.usable()) {
-        g.drawWordWrap(font, Component.translatable("gui.arcane.glyph_unknown_hint"), left + 18, top + 152, 220, 0x8A6A20);
-      }
+    int rows = (total + COLS - 1) / COLS;
+    if (rows > GRID_ROWS) {
+      g.drawString(font, (glyphScroll + 1) + "/" + (rows - GRID_ROWS + 1), left + 118 - font.width((glyphScroll + 1) + "/" + (rows - GRID_ROWS + 1)), top + 162, 0x7A6A50, false);
     }
-    if (hovered != null) {
-      List<Component> lines = new ArrayList<>();
-      lines.add(ArcaneWorkbenchScreen.glyphName(hovered.id()));
-      lines.add(Component.translatable("category.arcane." + hovered.category()).withStyle(ChatFormatting.GRAY));
-      lines.add(Component.translatable("gui.arcane.glyph_cost", hovered.cost()).withStyle(ChatFormatting.AQUA));
-      g.renderComponentTooltip(font, lines, mouseX, mouseY);
+
+    // Pagina direita: detalhes do glifo escolhido (ou o que esta sob o mouse)
+    KnownGlyph shown = hovered != null ? hovered : (selectedGlyph == null ? null : ClientArcaneData.glyph(selectedGlyph).orElse(null));
+    int x = left + 138;
+    if (shown == null) {
+      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.pick_glyph"), x, top + 30, 100, 0x5A4630);
+    } else {
+      int y = top + 28;
+      g.drawString(font, ArcaneWorkbenchScreen.glyphName(shown.id()).copy().withStyle(st -> st.withColor(ArcaneWorkbenchScreen.categoryColor(shown.category()) & 0x7F7F7F)), x, y, 0x2A1A08, false);
+      y += 12;
+      g.drawString(font, Component.translatable("category.arcane." + shown.category()), x, y, 0x5A4630, false);
+      y += 10;
+      g.drawString(font, Component.translatable("knowledge.arcane." + knowledgeName(shown.level())), x, y, 0x6A3F8F, false);
+      y += 10;
+      g.drawString(font, Component.translatable("gui.arcane.glyph_cost", shown.cost()), x, y, 0x1F6F8F, false);
+      y += 14;
+      for (ClientArcaneData.ParamDef p : shown.params()) {
+        g.drawString(font, font.plainSubstrByWidth(p.key() + ": " + trim(p.def()) + " (" + trim(p.min()) + "-" + trim(p.max()) + ")", 100), x, y, 0x1F6F8F, false);
+        y += 10;
+      }
+      if (!shown.params().isEmpty()) y += 4;
+      String descKey = "glyph." + shown.id().getNamespace() + "." + shown.id().getPath() + ".desc";
+      Component desc = shown.usable() && I18n.exists(descKey) ? Component.translatable(descKey)
+          : Component.translatable("gui.arcane.glyph_unknown_hint");
+      drawLines(g, desc, x, y, 100, shown.usable() ? 0x4A3820 : 0x8A6A20, Math.max(1, (top + 158 - y) / 10));
+    }
+    Component discovered = Component.translatable("gui.arcane.grimoire.discovered", identified, total);
+    g.drawString(font, discovered, left + 238 - font.width(discovered), top + 162, 0x5A4630, false);
+
+    if (hovered != null && selectedGlyph != null && !hovered.id().equals(selectedGlyph)) {
+      // detalhe ja mostra o que esta sob o mouse
+    }
+  }
+
+  private String ellipsize(String text, int width) {
+    if (font.width(text) <= width) return text;
+    return font.plainSubstrByWidth(text, width - font.width("...")) + "...";
+  }
+
+  /** Quebra o texto na largura dada e desenha no maximo maxLines linhas (para caber na pagina). */
+  private void drawLines(GuiGraphics g, Component text, int x, int y, int width, int color, int maxLines) {
+    List<net.minecraft.util.FormattedCharSequence> lines = font.split(text, width);
+    for (int i = 0; i < Math.min(maxLines, lines.size()); i++) {
+      g.drawString(font, lines.get(i), x, y + i * 10, color, false);
     }
   }
 
@@ -314,11 +336,16 @@ public class GrimoireScreen extends Screen {
       g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.empty_journal"), left + 18, top + 30, 210, 0x5A4630);
       return;
     }
-    // Mais recentes primeiro
-    for (int r = 0; r < LIST_ROWS; r++) {
+    // Mais recentes primeiro; uma pagina do livro por coluna, para o texto nunca cruzar a lombada.
+    for (int r = 0; r < LIST_ROWS * 2; r++) {
       int index = log.size() - 1 - (logScroll + r);
       if (index < 0) break;
-      g.drawString(font, font.plainSubstrByWidth(describe(log.get(index)).getString(), 218), left + 18, top + 28 + r * ROW, 0x4A3820, false);
+      int x = left + (r < LIST_ROWS ? 18 : 138);
+      int y = top + 28 + (r % LIST_ROWS) * ROW;
+      g.drawString(font, ellipsize(describe(log.get(index)).getString(), 102), x, y, 0x4A3820, false);
+    }
+    if (log.size() > LIST_ROWS * 2) {
+      g.drawString(font, Component.translatable("gui.arcane.grimoire.scroll_hint"), left + 18, top + 162, 0x7A6A50, false);
     }
   }
 

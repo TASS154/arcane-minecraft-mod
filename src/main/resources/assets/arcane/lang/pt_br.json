@@ -203,9 +203,11 @@
   "gui.arcane.edit.tooltip": "Carrega a magia ativa para editar. Salvar com o mesmo nome a substitui.",
   "gui.arcane.save.tooltip": "Salva no grimório. Mesmo nome de uma magia existente substitui a antiga.",
   "gui.arcane.param_hint": "Roda do mouse ajusta (Shift: x5)",
-  "log.arcane.experiment": "Experimento com %s",
-  "log.arcane.loot": "Estudou uma nota: %s",
-  "log.arcane.mastered": "Dominou %s",
-  "log.arcane.witness": "Viu em ação: %s",
-  "log.arcane.analysis": "Analisou uma inscrição"
+  "log.arcane.experiment": "Testou: %s",
+  "log.arcane.loot": "Nota: %s",
+  "log.arcane.mastered": "Dominou: %s",
+  "log.arcane.witness": "Viu: %s",
+  "log.arcane.analysis": "Analisou uma inscrição",
+  "gui.arcane.grimoire.scroll_hint": "Role para ver entradas mais antigas",
+  "gui.arcane.grimoire.pick_glyph": "Clique num glifo para ver os detalhes."
 }

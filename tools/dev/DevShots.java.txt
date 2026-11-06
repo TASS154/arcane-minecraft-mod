@@ -1,0 +1,214 @@
+package com.arcane.client;
+
+import com.arcane.ArcaneMod;
+import com.arcane.client.screen.ArcaneWorkbenchScreen;
+import com.arcane.client.screen.GrimoireScreen;
+import com.arcane.discovery.DiscoveryService;
+import com.arcane.glyph.GlyphRegistry;
+import com.arcane.grimoire.GrimoireAttachments;
+import com.arcane.network.ArcaneSync;
+import com.arcane.npc.MageElement;
+import com.arcane.registry.ModBlocks;
+import com.mojang.logging.LogUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+import java.lang.reflect.Field;
+import java.util.List;
+
+/** TEMPORARIO (nao commitar): abre as telas num mundo real e tira capturas. Ativo so com -Darcane.devshots=true. */
+@Mod.EventBusSubscriber(modid = ArcaneMod.MODID, value = Dist.CLIENT)
+public class DevShots {
+  private static int step = 0;
+  private static int wait = 0;
+
+  private static void shot(Minecraft mc, String name) {
+    Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), c -> LogUtils.getLogger().info("SHOT {}", name));
+  }
+
+  private static Object field(Object target, Class<?> cls, String name) throws Exception {
+    Field f = cls.getDeclaredField(name);
+    f.setAccessible(true);
+    return f.get(target);
+  }
+
+  private static void setField(Object target, Class<?> cls, String name, Object value) throws Exception {
+    Field f = cls.getDeclaredField(name);
+    f.setAccessible(true);
+    f.set(target, value);
+  }
+
+  @SubscribeEvent
+  public static void tick(TickEvent.ClientTickEvent e) {
+    if (!Boolean.getBoolean("arcane.devshots") || e.phase != TickEvent.Phase.END) return;
+    Minecraft mc = Minecraft.getInstance();
+    if (mc.player == null || mc.getSingleplayerServer() == null || mc.player.tickCount < 80) return;
+    if (wait > 0) {
+      wait--;
+      return;
+    }
+    var server = mc.getSingleplayerServer();
+    try {
+      switch (step++) {
+        case 0 -> {
+          server.execute(() -> {
+            ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+            GlyphRegistry.all().keySet().forEach(id -> DiscoveryService.learnMastered(sp, id));
+            var g = GrimoireAttachments.get(sp).orElseThrow();
+            for (MageElement m : MageElement.values()) g.addInscription(m.spell());
+            g.setActiveInscription(MageElement.FROST.spell().id());
+            g.logDiscovery("witness:arcane:ray");
+            g.logDiscovery("experiment:arcane:thunder");
+            g.logDiscovery("loot:arcane:explode");
+            g.logDiscovery("mastered:arcane:fire");
+            GrimoireAttachments.getMana(sp).ifPresent(m -> m.trySpend(37));
+            ArcaneSync.sync(sp, true);
+          });
+          wait = 60;
+        }
+        case 1 -> {
+          shot(mc, "01_hud");
+          wait = 10;
+        }
+        case 2 -> {
+          mc.setScreen(new GrimoireScreen());
+          wait = 15;
+        }
+        case 3 -> {
+          shot(mc, "02_grimoire_spells");
+          wait = 10;
+        }
+        case 4 -> {
+          GrimoireScreen s = (GrimoireScreen) mc.screen;
+          Class<?> tabEnum = Class.forName("com.arcane.client.screen.GrimoireScreen$Tab");
+          setField(s, GrimoireScreen.class, "tab", java.util.Arrays.stream(tabEnum.getEnumConstants()).filter(c -> c.toString().equals("GLYPHS")).findFirst().get());
+          setField(s, GrimoireScreen.class, "selectedGlyph", new ResourceLocation("arcane", "thunder"));
+          wait = 15;
+        }
+        case 5 -> {
+          shot(mc, "03_grimoire_glyphs");
+          wait = 10;
+        }
+        case 6 -> {
+          GrimoireScreen s = (GrimoireScreen) mc.screen;
+          Class<?> tabEnum = Class.forName("com.arcane.client.screen.GrimoireScreen$Tab");
+          setField(s, GrimoireScreen.class, "tab", java.util.Arrays.stream(tabEnum.getEnumConstants()).filter(c -> c.toString().equals("JOURNAL")).findFirst().get());
+          wait = 15;
+        }
+        case 7 -> {
+          shot(mc, "04_grimoire_journal");
+          mc.setScreen(null);
+          wait = 10;
+        }
+        case 8 -> {
+          server.execute(() -> {
+            ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+            BlockPos pos = sp.blockPosition().above(3);
+            sp.serverLevel().setBlockAndUpdate(pos, ModBlocks.ARCANE_WORKBENCH.get().defaultBlockState());
+            var state = sp.serverLevel().getBlockState(pos);
+            net.minecraftforge.network.NetworkHooks.openScreen(sp, state.getMenuProvider(sp.serverLevel(), pos), pos);
+          });
+          wait = 40;
+        }
+        case 9 -> {
+          ArcaneWorkbenchScreen s = (ArcaneWorkbenchScreen) mc.screen;
+          int left = (Integer) field(s, net.minecraft.client.gui.screens.inventory.AbstractContainerScreen.class, "leftPos");
+          int top = (Integer) field(s, net.minecraft.client.gui.screens.inventory.AbstractContainerScreen.class, "topPos");
+          var glyphs = ClientArcaneData.glyphs();
+          for (String id : List.of("projectile", "damage", "fire", "slow", "area", "explode")) {
+            int index = -1;
+            for (int i = 0; i < glyphs.size(); i++) if (glyphs.get(i).id().getPath().equals(id)) index = i;
+            int row = index / 5, col = index % 5;
+            if (row >= 6) s.mouseScrolled(left + 60, top + 90, -1);
+            // sem rolagem: so as primeiras 6 linhas; efeitos tardios exigem rolar
+            int visibleRow = row;
+            if (row >= 6) visibleRow = row - 1;
+            s.mouseClicked(left + 11 + col * 20 + 5, top + 33 + visibleRow * 20 + 5, 0);
+          }
+          // ajusta o parametro de Dano (linha 2) com a roda do mouse: +3 passos
+          for (int i = 0; i < 3; i++) s.mouseScrolled(left + 170, top + 33 + 12 + 5, 1);
+          // ajusta Fogo (linha 3) com Shift nao e possivel aqui; so Dano
+          ((net.minecraft.client.gui.components.EditBox) field(s, ArcaneWorkbenchScreen.class, "nameField")).setValue("Bola Gelada");
+          wait = 15;
+        }
+        case 10 -> {
+          shot(mc, "05_workbench");
+          wait = 10;
+        }
+        case 11 -> {
+          ArcaneWorkbenchScreen s2 = (ArcaneWorkbenchScreen) mc.screen;
+          java.lang.reflect.Method save = ArcaneWorkbenchScreen.class.getDeclaredMethod("save");
+          save.setAccessible(true);
+          save.invoke(s2);
+          wait = 25;
+        }
+        case 12 -> {
+          server.execute(() -> {
+            ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+            var g = GrimoireAttachments.get(sp).orElseThrow();
+            g.findByName("Bola Gelada").ifPresentOrElse(
+                i -> LogUtils.getLogger().info("SAVED {} glyphs={} active={}", i.metadata().name(), i.glyphs(), g.activeInscriptionId().map(id -> id.equals(i.id())).orElse(false)),
+                () -> LogUtils.getLogger().info("SAVED NOTHING"));
+          });
+          LogUtils.getLogger().info("MANA before cast {}", ClientArcaneData.mana());
+          ClientSetup.tryCast(true);
+          wait = 30;
+        }
+        case 13 -> {
+          LogUtils.getLogger().info("MANA after cast {}", ClientArcaneData.mana());
+          mc.setScreen(new GrimoireScreen());
+          wait = 15;
+        }
+        case 14 -> {
+          shot(mc, "06_grimoire_after_save");
+          wait = 5;
+        }
+        case 15 -> {
+          mc.setScreen(null);
+          server.execute(() -> {
+            ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+            var level = sp.serverLevel();
+            level.setDayTime(1000);
+            BlockPos base = sp.blockPosition();
+            sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            sp.getAbilities().flying = true;
+            sp.onUpdateAbilities();
+            sp.connection.teleport(base.getX() + 0.5, base.getY() + 9, base.getZ() - 2.5, 0f, 27f);
+            for (int i = 0; i < 18; i++) {
+              var mage = com.arcane.registry.ModEntities.NPC_MAGE.get().create(level);
+              mage.setVariant(i);
+              mage.setNoAi(true);
+              mage.setPersistenceRequired();
+              double x = base.getX() + 0.5 + (i % 6 - 2.5) * 1.15;
+              double z = base.getZ() + 2.5 + (i / 6) * 1.9;
+              int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int) x, (int) z);
+              mage.moveTo(x, y, z, 180f, 0f);
+              mage.setYBodyRot(180f);
+              mage.setYHeadRot(180f);
+              level.addFreshEntity(mage);
+            }
+          });
+          wait = 50;
+        }
+        case 16 -> {
+          shot(mc, "07_mages");
+          wait = 5;
+        }
+        default -> {
+          LogUtils.getLogger().info("DEVSHOTS DONE");
+          mc.stop();
+        }
+      }
+    } catch (Exception ex) {
+      LogUtils.getLogger().error("DEVSHOTS FAILED at step " + (step - 1), ex);
+      mc.stop();
+    }
+  }
+}

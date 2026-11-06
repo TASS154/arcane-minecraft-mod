@@ -203,9 +203,11 @@
   "gui.arcane.edit.tooltip": "Loads the active spell for editing. Saving with the same name replaces it.",
   "gui.arcane.save.tooltip": "Saves to the grimoire. The same name as an existing spell replaces it.",
   "gui.arcane.param_hint": "Mouse wheel adjusts (Shift: x5)",
-  "log.arcane.experiment": "Experimented with %s",
-  "log.arcane.loot": "Studied a note: %s",
-  "log.arcane.mastered": "Mastered %s",
-  "log.arcane.witness": "Saw in action: %s",
-  "log.arcane.analysis": "Analyzed an inscription"
+  "log.arcane.experiment": "Tested: %s",
+  "log.arcane.loot": "Note: %s",
+  "log.arcane.mastered": "Mastered: %s",
+  "log.arcane.witness": "Saw: %s",
+  "log.arcane.analysis": "Analyzed an inscription",
+  "gui.arcane.grimoire.scroll_hint": "Scroll for older entries",
+  "gui.arcane.grimoire.pick_glyph": "Click a glyph to see its details."
 }

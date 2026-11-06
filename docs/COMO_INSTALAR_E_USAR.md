@@ -205,6 +205,16 @@ A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fo
 
 ---
 
+## Abrir direto num mundo (desenvolvimento)
+
+```bash
+./gradlew runClient -PquickPlay=NomeDoMundo   # mundo em run/saves/NomeDoMundo
+```
+
+Para conferir as telas sem jogar, veja `tools/dev/LEIA-ME.md` (teste que abre o jogo e tira capturas).
+
+---
+
 ## Testes automáticos
 
 ```bash

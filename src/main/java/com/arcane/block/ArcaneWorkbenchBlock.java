@@ -22,8 +22,9 @@ public class ArcaneWorkbenchBlock extends Block {
 
   @Override
   public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-    if (!level.isClientSide) {
-      player.openMenu(state.getMenuProvider(level, pos));
+    if (!level.isClientSide && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+      // O menu le a posicao da bancada do pacote de abertura: precisa de NetworkHooks, nao de openMenu simples.
+      net.minecraftforge.network.NetworkHooks.openScreen(serverPlayer, state.getMenuProvider(level, pos), pos);
     }
     return InteractionResult.sidedSuccess(level.isClientSide);
   }

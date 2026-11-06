@@ -46,6 +46,11 @@ legacyForge {
         client {
             client()
 
+            // ./gradlew runClient -PquickPlay=NomeDoMundo  -> entra direto num mundo de run/saves
+            if (project.hasProperty('quickPlay')) {
+                programArguments.addAll '--quickPlaySingleplayer', project.property('quickPlay')
+            }
+
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
         }

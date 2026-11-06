@@ -340,3 +340,12 @@ Conta no limite de 2 juramentos por magia. Rituais no altar não são bloqueados
 
 ## Animações do personagem
 Visíveis em 3ª pessoa (F5), para você e para quem estiver perto. Seis clipes encadeados de quadros-chave: conjuração com a mão direita, com a esquerda e golpe final com as duas mãos (três conjurações direcionais seguidas formam um combo; 2 s sem conjurar reinicia), magia em si mesmo (braços cruzam e abrem), magia de área (braços abertos e palmas para baixo) e ritual (sete tempos, termina com golpe no chão). Só visual. Código: `client/anim/PlayerClips.java` (edite os quadros) e `execution/PlayerAnims.java` (escolha do clipe).
+
+## Parâmetros com dois valores (Juramento Personalizado)
+Na Bancada, a **roda do mouse** sobre a linha ajusta o 1º parâmetro (o **tipo**, 1 a 5); **Ctrl + roda** ajusta o 2º (os **segundos**, 3 a 600). Shift multiplica o passo por 5. A linha mostra `tipo/segundos`.
+
+## Escrever em blocos (Pena Arcana)
+Pena Arcana (ametista, pena e pepita de ouro) na mão principal, uma **tinta** na outra, botão direito num bloco: grava a magia ativa nele. Em baú dispara ao abrir; em qualquer outro bloco dispara quando uma criatura pisa em cima (a criatura vira o alvo, então Eu + Dano numa pedra é uma armadilha). Agachado + botão direito apaga; quebrar o bloco também. Tinta Comum (gasta 1), Tinta de Sangue (mana mais barata, custa 2 de vida) ou Tinta Invisível (sem partículas).
+
+## Barreira com Área
+O glifo Área só dobra o `raio` de efeitos e formas que têm raio (Aura, Onda...). A Barreira não tem raio, então `Barreira + Área` faz a mesma parede e o Área só gasta mana.

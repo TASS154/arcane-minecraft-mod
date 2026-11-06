@@ -366,5 +366,6 @@
   "glyph.arcane.vow_oath": "Juramento Personalizado",
   "glyph.arcane.vow_oath.desc": "Você escolhe o castigo e quanto tempo ele dura, DEPOIS de conjurar. Tipo: 1 imobilidade, 2 silêncio (nenhuma outra magia), 3 mana selada, 4 fragilidade (+50% de dano recebido), 5 cegueira. Bônus = k x ln(1 + segundos/5), com k 0,30 / 0,22 / 0,35 / 0,25 / 0,20 e teto de +150%. Ex.: imobilidade por 30 s = +58%.",
   "glyph.arcane.on_death": "Ao Morrer",
-  "glyph.arcane.on_death.desc": "Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s)."
+  "glyph.arcane.on_death.desc": "Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s).",
+  "gui.arcane.param_hint2": "Ctrl + roda do mouse ajusta o 2º parâmetro (Shift: x5)"
 }

@@ -186,7 +186,7 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
       int row = listRowAt(mouseX, mouseY);
       if (row >= 0) {
         // Sobre uma linha: ajusta o parametro principal do glifo. Shift = passo 5x maior.
-        adjust(composition.get(row), delta > 0 ? 1 : -1, hasShiftDown());
+        adjust(composition.get(row), delta > 0 ? 1 : -1, hasShiftDown(), hasControlDown());
         selected = row;
       } else {
         listScroll = Math.max(0, Math.min(listScroll + step, Math.max(0, composition.size() - LIST_ROWS)));
@@ -196,8 +196,8 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
     return super.mouseScrolled(mouseX, mouseY, delta);
   }
 
-  private void adjust(Slot slot, int direction, boolean big) {
-    Optional<ParamDef> primary = ClientArcaneData.glyph(slot.id).flatMap(KnownGlyph::primary);
+  private void adjust(Slot slot, int direction, boolean big, boolean second) {
+    Optional<ParamDef> primary = ClientArcaneData.glyph(slot.id).flatMap(second ? KnownGlyph::secondary : KnownGlyph::primary);
     if (primary.isEmpty()) return;
     ParamDef p = primary.get();
     double current = slot.params.getOrDefault(p.key(), p.def());
@@ -322,6 +322,12 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
         double v = slot.params.getOrDefault(p.key(), p.def());
         changed = slot.params.containsKey(p.key());
         value = trim(v);
+        Optional<ParamDef> sec = known.flatMap(KnownGlyph::secondary);
+        if (sec.isPresent()) {
+          ParamDef q = sec.get();
+          value += "/" + trim(slot.params.getOrDefault(q.key(), q.def()));
+          changed = changed || slot.params.containsKey(q.key());
+        }
       }
       int valueWidth = value.isEmpty() ? 0 : font.width(value) + 4;
       String name = font.plainSubstrByWidth(glyphName(slot.id).getString(), 78 - valueWidth);
@@ -413,6 +419,11 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
         double v = slot.params.getOrDefault(p.key(), p.def());
         lines.add(Component.literal(p.key() + ": " + trim(v) + "  (" + trim(p.min()) + " - " + trim(p.max()) + ")").withStyle(ChatFormatting.AQUA));
         lines.add(Component.translatable("gui.arcane.param_hint").withStyle(ChatFormatting.DARK_GRAY));
+      });
+      known.flatMap(KnownGlyph::secondary).ifPresent(p -> {
+        double v = slot.params.getOrDefault(p.key(), p.def());
+        lines.add(Component.literal(p.key() + ": " + trim(v) + "  (" + trim(p.min()) + " - " + trim(p.max()) + ")").withStyle(ChatFormatting.AQUA));
+        lines.add(Component.translatable("gui.arcane.param_hint2").withStyle(ChatFormatting.DARK_GRAY));
       });
       g.renderComponentTooltip(font, lines, mouseX, mouseY);
     }

@@ -26,7 +26,7 @@ public final class ClientArcaneData {
 
     /** Passo da roda do mouse: 5% do intervalo (no minimo 1 para inteiros). */
     public double step() {
-      double s = (max - min) / 20.0;
+      double s = (max - min) / ((max - min) >= 100.0 ? 60.0 : 20.0);
       return isInt ? Math.max(1, Math.round(s)) : Math.max(0.1, Math.round(s * 10.0) / 10.0);
     }
   }
@@ -36,6 +36,9 @@ public final class ClientArcaneData {
     public boolean usable() { return level >= 3; }
 
     public Optional<ParamDef> primary() { return params.isEmpty() ? Optional.empty() : Optional.of(params.get(0)); }
+
+    /** Segundo parametro (Ctrl + roda), se o glifo tiver mais de um (ex.: Juramento Personalizado: tipo e segundos). */
+    public Optional<ParamDef> secondary() { return params.size() < 2 ? Optional.empty() : Optional.of(params.get(1)); }
   }
 
   /** Um glifo numa composicao: id e os parametros escolhidos (so os que diferem do padrao). */

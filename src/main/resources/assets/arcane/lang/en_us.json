@@ -366,5 +366,6 @@
   "glyph.arcane.vow_oath": "Custom Oath",
   "glyph.arcane.vow_oath.desc": "You choose the penalty and how long it lasts, AFTER casting. Kind: 1 immobile, 2 silence (no other spell), 3 sealed mana, 4 fragile (+50% damage taken), 5 blind. Bonus = k x ln(1 + seconds/5), with k 0.30 / 0.22 / 0.35 / 0.25 / 0.20, capped at +150%. E.g. immobile for 30 s = +58%.",
   "glyph.arcane.on_death": "On Death",
-  "glyph.arcane.on_death.desc": "Condition: arms the spell on you: what follows only happens when you die (once, for up to 60 s)."
+  "glyph.arcane.on_death.desc": "Condition: arms the spell on you: what follows only happens when you die (once, for up to 60 s).",
+  "gui.arcane.param_hint2": "Ctrl + mouse wheel adjusts the 2nd parameter (Shift: x5)"
 }

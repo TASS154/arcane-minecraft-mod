@@ -49,12 +49,20 @@ public final class Targeting {
       hitPoint = end;
     }
     if (particles) {
-      // sai da altura da mao direita, nao do olho
-      Vec3 right = ctx.look().cross(new Vec3(0, 1, 0));
-      right = right.lengthSqr() < 1.0e-4 ? Vec3.ZERO : right.normalize();
-      Vec3 beamStart = start.add(ctx.look().scale(0.6)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
+      // O feixe nasce de um ponto diferente a cada conjuracao, num circulo em volta do conjurador,
+      // mas sempre termina onde o jogador mira (hitPoint).
+      var rnd = caster.getRandom();
+      Vec3 look = ctx.look();
+      Vec3 right = look.cross(new Vec3(0, 1, 0));
+      right = right.lengthSqr() < 1.0e-4 ? new Vec3(1, 0, 0) : right.normalize();
+      Vec3 upAxis = right.cross(look).normalize();
+      double ang = rnd.nextDouble() * Math.PI * 2;
+      double rad = 0.8 + rnd.nextDouble() * 0.9;
+      Vec3 beamStart = start.add(look.scale(0.9 + rnd.nextDouble() * 0.6))
+          .add(right.scale(Math.cos(ang) * rad))
+          .add(upAxis.scale(Math.max(-0.3, Math.sin(ang) * rad)));
       SpellElement element = SpellElement.of(ctx.plan());
-        com.arcane.network.ModNetwork.sendBeam(level, beamStart, hitPoint, element.color(), element == SpellElement.STORM, 12);
+      com.arcane.network.ModNetwork.sendBeam(level, beamStart, hitPoint, element.color(), element.ordinal(), 14);
     }
     return new RayResult(targets, hitPoint);
   }

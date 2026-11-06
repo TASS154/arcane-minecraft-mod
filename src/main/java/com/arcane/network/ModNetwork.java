@@ -57,9 +57,9 @@ public final class ModNetwork {
 
   /** Feixe 3D visivel para quem estiver a ate 96 blocos. */
   public static void sendBeam(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 from,
-                              net.minecraft.world.phys.Vec3 to, int rgb, boolean jagged, int ticks) {
+                              net.minecraft.world.phys.Vec3 to, int rgb, int element, int ticks) {
     CHANNEL.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(from.x, from.y, from.z, 96.0, level.dimension())),
-        new S2CBeamPacket(from, to, rgb, jagged, ticks));
+        new S2CBeamPacket(from, to, rgb, element, ticks));
   }
 
   public static void sendToPlayer(ServerPlayer player, Object packet) {

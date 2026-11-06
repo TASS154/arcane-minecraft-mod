@@ -225,6 +225,7 @@ public final class RitualService {
         new CastingService.RitualBonus(effective, power, area, legendary));
     if (be != null) be.setCooldownUntil(level.getGameTime() + RitualSettings.COOLDOWN_TICKS);
     RitualFx.play(level, altar, circle, legendary);
+    if (performer instanceof ServerPlayer sp) com.arcane.execution.PlayerAnims.play(sp, com.arcane.execution.PlayerAnims.RITUAL);
     return new Result(Outcome.SUCCESS, circle, effective, legendary ? "legendary" : "", 0, cast, power, area);
   }
 

@@ -59,6 +59,7 @@ public final class CastingService {
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
             Vows.pay(player, inscription);
+            PlayerAnims.onCast(player, plan);
             ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint(), SpellElement.of(plan).ordinal()));
             castFx((ServerLevel) player.level(), player, SpellElement.of(plan));
         }

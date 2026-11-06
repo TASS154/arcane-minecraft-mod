@@ -18,7 +18,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-  private static final String PROTOCOL = "6";
+  private static final String PROTOCOL = "7";
   public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       new ResourceLocation(ArcaneMod.MODID, "main"),
       () -> PROTOCOL,
@@ -36,6 +36,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(S2CSpellFxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CSpellFxPacket::encode).decoder(S2CSpellFxPacket::decode)
         .consumerMainThread(S2CSpellFxPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.S2CPlayerAnimPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(com.arcane.network.packet.S2CPlayerAnimPacket::encode).decoder(com.arcane.network.packet.S2CPlayerAnimPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.S2CPlayerAnimPacket::handle).add();
     CHANNEL.messageBuilder(S2CBeamPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CBeamPacket::encode).decoder(S2CBeamPacket::decode)
         .consumerMainThread(S2CBeamPacket::handle).add();
@@ -71,6 +74,12 @@ public final class ModNetwork {
                                net.minecraft.world.phys.Vec3 dir, float size, int rgb, int element, int ticks) {
     CHANNEL.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(pos.x, pos.y, pos.z, 96.0, level.dimension())),
         new S2CShapeFxPacket(type, pos, dir, size, rgb, element, ticks));
+  }
+
+  /** Animacao do corpo do jogador, para ele e para quem o esta vendo. */
+  public static void sendPlayerAnim(ServerPlayer player, int clip) {
+    CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
+        new com.arcane.network.packet.S2CPlayerAnimPacket(player.getUUID(), clip));
   }
 
   public static void sendToPlayer(ServerPlayer player, Object packet) {

@@ -337,3 +337,6 @@ Restrições por promessa: Quietude exige ficar parado (promessa-1) segundos; Sa
 Glifo `vow_oath` com dois parâmetros: **tipo** (1 imobilidade, 2 silêncio, 3 mana selada, 4 fragilidade +50% de dano recebido, 5 cegueira) e **segundos** (3 a 600). O castigo começa depois da magia, fica salvo no jogador (sobrevive a relogar; morrer encerra).
 Fórmula: `bônus = min(1,5; k × ln(1 + segundos/5))`, k = 0,30 / 0,22 / 0,35 / 0,25 / 0,20. Exemplo: imobilidade por 30 s = +58%; mana selada por 120 s = +111%.
 Conta no limite de 2 juramentos por magia. Rituais no altar não são bloqueados pelo silêncio.
+
+## Animações do personagem
+Visíveis em 3ª pessoa (F5), para você e para quem estiver perto. Seis clipes encadeados de quadros-chave: conjuração com a mão direita, com a esquerda e golpe final com as duas mãos (três conjurações direcionais seguidas formam um combo; 2 s sem conjurar reinicia), magia em si mesmo (braços cruzam e abrem), magia de área (braços abertos e palmas para baixo) e ritual (sete tempos, termina com golpe no chão). Só visual. Código: `client/anim/PlayerClips.java` (edite os quadros) e `execution/PlayerAnims.java` (escolha do clipe).

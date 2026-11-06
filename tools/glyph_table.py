@@ -373,23 +373,24 @@ glyph("weather", "effect", 10,
 
 # ================================================================== JURAMENTOS: poder em troca de uma restricao (checada no servidor)
 VOW_MUT = lambda m: {"target": "all", "kind": "effect",
-                     "mutate": {"amount": {"op": "multiply", "value": m}, "strength": {"op": "multiply", "value": m},
-                                "power": {"op": "multiply", "value": m}}}
+                     "mutate": {"amount": {"op": "vow", "value": 1.0}, "strength": {"op": "vow", "value": 1.0},
+                                "power": {"op": "vow", "value": 1.0}}}
+VOW_PARAMS = {"pledge": (2.0, 1.0, 5.0, "int")}
 glyph("vow_stillness", "modifier", 1,
-      ("Juramento da Quietude", "Juramento: +60% de força, mas só funciona se você estiver parado no chão ao conjurar."),
-      ("Vow of Stillness", "Vow: +60% strength, but it only works if you stand still on the ground when casting."),
+      ("Juramento da Quietude", "Juramento personalizável (Promessa 1 a 5): bônus = 28% x promessa^0,85 (promessa 2 = +50%). Exige ficar parado no chão por (promessa-1) x 1 s antes de conjurar."),
+      ("Vow of Stillness", "Customizable vow (Pledge 1-5): bonus = 28% x pledge^0.85 (pledge 2 = +50%). Requires standing still on the ground for (pledge-1) x 1 s before casting."),
       ["...##...", "...##...", "..####..", "..####..", "...##...", "...##...", "..####..", "..####.."],
-      scope=VOW_MUT(1.6))
+      params=VOW_PARAMS, scope=VOW_MUT(1.6))
 glyph("vow_blood", "modifier", 1,
-      ("Juramento de Sangue", "Juramento: +70% de força, mas custa 4 pontos de vida (2 corações) e não pode ser lançado com pouca vida."),
-      ("Vow of Blood", "Vow: +70% strength, but costs 4 health (2 hearts) and cannot be cast on low health."),
+      ("Juramento de Sangue", "Juramento personalizável (Promessa 1 a 5): bônus = 30% x promessa^0,85 (promessa 2 = +54%). Custa 2 x promessa de vida e recusa se sobrar pouco."),
+      ("Vow of Blood", "Customizable vow (Pledge 1-5): bonus = 30% x pledge^0.85 (pledge 2 = +54%). Costs 2 x pledge health and refuses if too little is left."),
       ["...##...", "..####..", ".######.", ".######.", "..####..", "..####..", "...##...", "........"],
-      scope=VOW_MUT(1.7))
+      params=VOW_PARAMS, scope=VOW_MUT(1.7))
 glyph("vow_daylight", "modifier", 1,
-      ("Juramento da Luz", "Juramento: +50% de força, mas só funciona de dia e com o céu aberto."),
-      ("Vow of Daylight", "Vow: +50% strength, but it only works by day with open sky."),
+      ("Juramento da Luz", "Juramento personalizável (Promessa 1 a 5): bônus = 25% x promessa^0,85 (promessa 2 = +45%). 1 dia; 2 céu aberto; 3 sem chuva; 4 manhã a tarde; 5 perto do meio-dia."),
+      ("Vow of Daylight", "Customizable vow (Pledge 1-5): bonus = 25% x pledge^0.85 (pledge 2 = +45%). 1 day; 2 open sky; 3 no rain; 4 morning to afternoon; 5 near noon."),
       ["#..##..#", ".#.##.#.", "..####..", "########", "########", "..####..", ".#.##.#.", "#..##..#"],
-      scope=VOW_MUT(1.5))
+      params=VOW_PARAMS, scope=VOW_MUT(1.5))
 glyph("on_death", "condition", 0,
       ("Ao Morrer", "Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s)."),
       ("On Death", "Condition: arms the spell on you: what follows only happens when you die (once, for up to 60 s)."),

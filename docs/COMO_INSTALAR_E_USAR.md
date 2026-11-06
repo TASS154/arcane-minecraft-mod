@@ -312,3 +312,23 @@ Para detalhes técnicos da arquitetura, veja [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Projetor de Glifos** (botão direito): holograma da magia ativa. **Espelho de Simetria** (botão direito no Altar): completa traços do círculo por simetria.
 - **Grimório flutuante**: agachado + botão direito com o grimório vazio mostra ou guarda.
 - **Interações**: raio rende na chuva, fogo falha na água, gelo apaga fogo, veneno rende no pântano (tudo na config).
+
+## Juramentos personalizáveis
+Cada juramento tem o parâmetro **Promessa (1 a 5)**. Fórmula: `bônus = k × promessa^0,85` e `multiplicador = 1 + bônus` (k: Quietude 0,28, Sangue 0,30, Luz 0,25).
+
+| Promessa | Quietude | Sangue | Luz |
+|---|---|---|---|
+| 1 | +28% | +30% | +25% |
+| 2 (padrão) | +50% | +54% | +45% |
+| 3 | +71% | +76% | +64% |
+| 4 | +91% | +97% | +81% |
+| 5 | +110% | +118% | +98% |
+
+Restrições por promessa: Quietude exige ficar parado (promessa-1) segundos; Sangue custa 2 × promessa de vida; Luz: 1 dia, 2 céu aberto, 3 sem chuva, 4 manhã/tarde, 5 perto do meio-dia. No máximo 2 juramentos diferentes por magia; com 2, os bônus se multiplicam (teto cerca de +370%).
+
+## Como montar um ritual
+1. **Altar Arcano** (obsidiana, bloco de ametista, tijolos de pedra e ouro). Coloque num chão plano e firme.
+2. **Desenhar o círculo**: Compasso Arcano (ouro, bússola, ametista) com botão direito no altar; agachado troca o tamanho (raio 4 menor, 8 médio, 16 maior); gasta Tinta Comum (1 por 16 traços). Alternativa: Giz Arcano, traço a traço. Traço só existe sobre chão firme.
+3. **Circularidade**: o círculo precisa de 85% dos traços (config). Espelho de Simetria completa o que faltar.
+4. **Magia**: ative no grimório uma magia. Glifos de ritual exigem nível e componentes: Invocar Lobos (menor, 6 ossos), Invocar Golem (médio, 2 blocos de ferro e 1 abóbora esculpida), Dobrar (maior, 4 pérolas do Ender e 1 obsidiana chorosa), Clima (lendário, 1 para-raios e 1 Estrela do Nether).
+5. **Conjurar**: botão direito no altar. Poder = multiplicador do nível (1,5 / 3 / 10) × completude do círculo. Agachado + direito guarda a magia no altar; o glifo Ativar a dispara de até 48 blocos.

@@ -20,6 +20,10 @@ public final class ModifierApplicator {
             if (!result.containsKey(key)) continue;
             ModifierScope.ModifierMutation mutation = entry.getValue();
             double current = result.get(key);
+            if ("vow".equals(mutation.op())) { // juramento: o multiplicador vem da formula, nunca de um valor cru
+                result.put(key, current * VowFormula.multiplier(modifier));
+                continue;
+            }
             double value = mutation.param().map(p -> modifier.param(p, mutation.value())).orElse(mutation.value());
             result.put(key, switch (mutation.op()) {
                 case "multiply" -> current * value;

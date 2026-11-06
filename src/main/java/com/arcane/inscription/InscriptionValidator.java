@@ -39,6 +39,7 @@ public final class InscriptionValidator {
         }
 
         boolean hasForm = false;
+        int vows = 0;
         Map<ResourceLocation, Integer> counts = new HashMap<>();
         GlyphCategory previousCategory = null;
 
@@ -53,6 +54,13 @@ public final class InscriptionValidator {
             counts.merge(instance.glyphId(), 1, Integer::sum);
             if (counts.get(instance.glyphId()) > def.composition().maxPerInscription()) {
                 return ValidationResult.fail("message.arcane.inscription.too_many_glyph");
+            }
+
+            if (VowFormula.isVow(instance.glyphId())) {
+                vows++;
+                if (counts.get(instance.glyphId()) > 1 || vows > VowFormula.MAX_VOWS) {
+                    return ValidationResult.fail("message.arcane.inscription.too_many_vows");
+                }
             }
 
             if (def.category() == GlyphCategory.FORM) {

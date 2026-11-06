@@ -3,21 +3,29 @@
   "behavior": {
     "handler": "arcane:vow_blood"
   },
+  "parameters": {
+    "pledge": {
+      "type": "int",
+      "default": 2.0,
+      "min": 1.0,
+      "max": 5.0
+    }
+  },
   "modifier_scope": {
     "target": "all",
     "kind": "effect",
     "mutate": {
       "amount": {
-        "op": "multiply",
-        "value": 1.7
+        "op": "vow",
+        "value": 1.0
       },
       "strength": {
-        "op": "multiply",
-        "value": 1.7
+        "op": "vow",
+        "value": 1.0
       },
       "power": {
-        "op": "multiply",
-        "value": 1.7
+        "op": "vow",
+        "value": 1.0
       }
     }
   },

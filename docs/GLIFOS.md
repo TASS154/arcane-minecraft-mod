@@ -117,9 +117,9 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Fim do Grupo** | `arcane:end_group` | 0 | 1 | Conhecimento | — | Modificador: fecha o grupo aberto por Grupo. |
 | **Enfraquecer** | `arcane:weaken` | 1 | 2 | Conhecimento | — | Modificador: metade da força do efeito anterior (dano, cura, empurrão, nível). Barateia a magia. |
 | **Repetição** | `arcane:repeat` | 2 | 3 | Força | `times` 2 (2–4) | Modificador: repete o efeito anterior (no total, o número de vezes do parâmetro). Cada repetição custa o efeito de novo. |
-| **Juramento da Quietude** | `arcane:vow_stillness` | 1 | 1 | Conhecimento | — | Juramento: +60% de força, mas só funciona se você estiver parado no chão ao conjurar. |
-| **Juramento de Sangue** | `arcane:vow_blood` | 1 | 3 | Vazio | — | Juramento: +70% de força, mas custa 4 pontos de vida (2 corações) e não pode ser lançado com pouca vida. |
-| **Juramento da Luz** | `arcane:vow_daylight` | 1 | 1 | Conhecimento | — | Juramento: +50% de força, mas só funciona de dia e com o céu aberto. |
+| **Juramento da Quietude** | `arcane:vow_stillness` | 1 | 1 | Conhecimento | `pledge` 2 (1–5) | Juramento personalizável (Promessa 1 a 5): bônus = 28% x promessa^0,85 (promessa 2 = +50%). Exige ficar parado no chão por (promessa-1) x 1 s antes de conjurar. |
+| **Juramento de Sangue** | `arcane:vow_blood` | 1 | 3 | Vazio | `pledge` 2 (1–5) | Juramento personalizável (Promessa 1 a 5): bônus = 30% x promessa^0,85 (promessa 2 = +54%). Custa 2 x promessa de vida e recusa se sobrar pouco. |
+| **Juramento da Luz** | `arcane:vow_daylight` | 1 | 1 | Conhecimento | `pledge` 2 (1–5) | Juramento personalizável (Promessa 1 a 5): bônus = 25% x promessa^0,85 (promessa 2 = +45%). 1 dia; 2 céu aberto; 3 sem chuva; 4 manhã a tarde; 5 perto do meio-dia. |
 
 ## Condições (11)
 

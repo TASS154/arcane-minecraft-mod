@@ -36,6 +36,7 @@ public class ArcaneMod {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         ModBlocks.register(modBus);
+        com.arcane.registry.ModBlockEntities.register(modBus);
         ModItems.register(modBus);
         ModEntities.register(modBus);
         ModMenuTypes.register(modBus);
@@ -60,6 +61,8 @@ public class ArcaneMod {
         if (event.getConfig().getSpec() == ArcaneConfig.SPEC) {
             com.arcane.inscription.SpellLimits.set(ArcaneConfig.MAX_GLYPHS.get(), ArcaneConfig.COST_GROWTH.get(),
                     ArcaneConfig.COST_FREE_GLYPHS.get());
+            com.arcane.ritual.RitualSettings.set(ArcaneConfig.RITUAL_POWER_MINOR.get(), ArcaneConfig.RITUAL_POWER_MEDIUM.get(),
+                    ArcaneConfig.RITUAL_POWER_MAJOR.get(), ArcaneConfig.RITUAL_MIN_COMPLETENESS.get());
         }
     }
 

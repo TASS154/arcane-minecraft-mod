@@ -31,7 +31,7 @@ public final class ClientArcaneData {
     }
   }
 
-  public record KnownGlyph(ResourceLocation id, String category, int cost, int level, boolean scales, List<ParamDef> params) {
+  public record KnownGlyph(ResourceLocation id, String category, int cost, int level, boolean scales, List<ParamDef> params, int ritual) {
     /** IDENTIFIED (3) ou melhor: pode ser usado em inscricoes. */
     public boolean usable() { return level >= 3; }
 
@@ -92,7 +92,7 @@ public final class ClientArcaneData {
       }
       g.add(new KnownGlyph(new ResourceLocation(c.getString("id")),
           c.contains("category") ? c.getString("category") : "unknown", c.getInt("cost"), c.getInt("level"),
-          c.getBoolean("scales"), List.copyOf(params)));
+          c.getBoolean("scales"), List.copyOf(params), c.getInt("ritual")));
     }
     g.sort((a, b) -> {
       int cat = categoryOrder(a.category()) - categoryOrder(b.category());

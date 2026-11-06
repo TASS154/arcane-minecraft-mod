@@ -25,6 +25,15 @@ public final class ModBlocks {
                     .sound(net.minecraft.world.level.block.SoundType.AMETHYST)
                     .isRedstoneConductor((s, l, p) -> false).isSuffocating((s, l, p) -> false).isViewBlocking((s, l, p) -> false)));
 
+    public static final RegistryObject<Block> ARCANE_TRACE = BLOCKS.register("arcane_trace",
+            () -> new com.arcane.block.ArcaneTraceBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+                    .strength(0.1f).noCollission().noOcclusion().noLootTable()
+                    .lightLevel(s -> s.getValue(com.arcane.block.ArcaneTraceBlock.LIT) ? 12 : 0)
+                    .pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY)));
+    public static final RegistryObject<Block> ARCANE_ALTAR = BLOCKS.register("arcane_altar",
+            () -> new com.arcane.block.ArcaneAltarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+                    .strength(4.0f, 1200.0f).requiresCorrectToolForDrops().lightLevel(s -> 7).noOcclusion()));
+
     private ModBlocks() {}
 
     public static void register(IEventBus bus) {

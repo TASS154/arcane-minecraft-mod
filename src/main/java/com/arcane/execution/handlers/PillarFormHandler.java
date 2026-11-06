@@ -20,7 +20,7 @@ public class PillarFormHandler implements FormHandler {
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
     double range = Math.max(4.0, Math.min(64.0, spec.range()));
-    double radius = Math.max(1.0, Math.min(8.0, spec.parameters().getOrDefault("radius", 2.0)));
+    double radius = Math.max(1.0, Math.min(24.0, spec.parameters().getOrDefault("radius", 2.0) * context.areaScale()));
     Targeting.RayResult ray = Targeting.ray(context, range, false);
     Vec3 base = ray.end();
 

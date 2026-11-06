@@ -84,6 +84,9 @@ public final class ArmedSpells {
         ExecutionContext old = armed.context();
         ExecutionContext fresh = new ExecutionContext(old.level(), victim, old.inscription(), old.plan(), old.environment(),
             old.precision(), new ExecutionContext.TriggerEvent("hurt", Optional.ofNullable(event.getSource().getEntity()), Optional.empty()));
+        fresh.setGeometryBonus(old.geometryBonus());
+        fresh.setAreaScale(old.areaScale());
+        fresh.setRitualLevel(old.ritualLevel());
         fire(fresh, armed.segment());
         old.level().sendParticles(ModParticles.ARCANE_SPARK.get(), victim.getX(), victim.getY() + 1.0, victim.getZ(), 10, 0.3, 0.5, 0.3, 0.05);
       }

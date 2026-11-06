@@ -18,7 +18,7 @@ public class WaveFormHandler implements FormHandler {
 
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
-    double range = Math.max(2.0, Math.min(24.0, spec.range()));
+    double range = Math.max(2.0, Math.min(48.0, spec.range() * context.areaScale()));
     LivingEntity caster = context.caster();
     Vec3 origin = caster.position().add(0, caster.getBbHeight() * 0.5, 0);
     Vec3 look = context.look();

@@ -1,0 +1,32 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:warp"
+  },
+  "parameters": {
+    "range": {
+      "type": "float",
+      "default": 32.0,
+      "min": 8.0,
+      "max": 64.0
+    }
+  },
+  "cost": {
+    "mana": 8
+  },
+  "tier": 4,
+  "families": [
+    "void"
+  ],
+  "ritual": 3,
+  "components": [
+    {
+      "item": "minecraft:ender_pearl",
+      "count": 4
+    },
+    {
+      "item": "minecraft:crying_obsidian",
+      "count": 1
+    }
+  ]
+}

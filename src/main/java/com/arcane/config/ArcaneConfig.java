@@ -9,6 +9,10 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue MAX_GLYPHS;
   public static final ForgeConfigSpec.DoubleValue COST_GROWTH;
   public static final ForgeConfigSpec.IntValue COST_FREE_GLYPHS;
+  public static final ForgeConfigSpec.DoubleValue RITUAL_POWER_MINOR;
+  public static final ForgeConfigSpec.DoubleValue RITUAL_POWER_MEDIUM;
+  public static final ForgeConfigSpec.DoubleValue RITUAL_POWER_MAJOR;
+  public static final ForgeConfigSpec.DoubleValue RITUAL_MIN_COMPLETENESS;
 
   static {
     ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -19,6 +23,14 @@ public class ArcaneConfig {
         .defineInRange("costGrowthPerGlyph", 1.3, 1.0, 3.0);
     COST_FREE_GLYPHS = builder.comment("Glyphs that do not add to the exponential surcharge")
         .defineInRange("costFreeGlyphs", 3, 0, 24);
+    RITUAL_POWER_MINOR = builder.comment("Power multiplier of a minor ritual (radius 4 circle). PROVISIONAL balance value")
+        .defineInRange("ritualPowerMinor", 1.5, 1.0, 100.0);
+    RITUAL_POWER_MEDIUM = builder.comment("Power multiplier of a medium ritual (radius 8). PROVISIONAL")
+        .defineInRange("ritualPowerMedium", 3.0, 1.0, 100.0);
+    RITUAL_POWER_MAJOR = builder.comment("Power multiplier of a major ritual (radius 16). PROVISIONAL")
+        .defineInRange("ritualPowerMajor", 10.0, 1.0, 100.0);
+    RITUAL_MIN_COMPLETENESS = builder.comment("Fraction of the circle's traces that must be drawn for a ritual to work")
+        .defineInRange("ritualMinCompleteness", 0.85, 0.3, 1.0);
     SPEC = builder.build();
   }
 }

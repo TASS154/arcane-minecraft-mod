@@ -1,0 +1,36 @@
+{
+  "category": "form",
+  "behavior": {
+    "handler": "arcane:summon_golem"
+  },
+  "composition": {
+    "max_per_inscription": 1,
+    "position": "start"
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 2400.0,
+      "min": 400.0,
+      "max": 12000.0
+    }
+  },
+  "cost": {
+    "mana": 6
+  },
+  "tier": 3,
+  "families": [
+    "earth"
+  ],
+  "ritual": 2,
+  "components": [
+    {
+      "item": "minecraft:iron_block",
+      "count": 2
+    },
+    {
+      "item": "minecraft:carved_pumpkin",
+      "count": 1
+    }
+  ]
+}

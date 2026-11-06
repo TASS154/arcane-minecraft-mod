@@ -33,8 +33,11 @@ public class BarrierFormHandler implements FormHandler {
     int life = (int) Math.max(1, Math.min(ArcaneBarrierBlock.MAX_LIFE, Math.round(spec.parameters().getOrDefault("duration", 200.0) / 40.0)));
     BlockState barrier = ModBlocks.ARCANE_BARRIER.get().defaultBlockState().setValue(ArcaneBarrierBlock.LIFE, life);
     List<TargetList.BlockTarget> placed = new ArrayList<>();
-    for (int w = -1; w <= 1; w++) {
-      for (int h = 0; h <= 2; h++) {
+    // No ritual a parede vira muralha: 3 de largura e altura viram ate 15 x 12.
+    int half = (int) Math.max(1, Math.min(8, Math.round(context.areaScale() * 2 - 1)));
+    int height = (int) Math.max(3, Math.min(12, Math.round(3 * context.areaScale())));
+    for (int w = -half; w <= half; w++) {
+      for (int h = 0; h < height; h++) {
         BlockPos pos = center.offset(alongX ? 0 : w, h, alongX ? w : 0);
         BlockState existing = context.level().getBlockState(pos);
         if (existing.isAir() || existing.canBeReplaced()) {

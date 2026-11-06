@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "arcane:block/arcane_trace"
+    },
+    "lit=true": {
+      "model": "arcane:block/arcane_trace_lit"
+    }
+  }
+}

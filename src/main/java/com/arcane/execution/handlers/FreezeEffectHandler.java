@@ -40,7 +40,7 @@ public class FreezeEffectHandler implements EffectHandler {
     for (TargetList.BlockTarget block : targets.blocks()) centers.add(block.pos());
     if (!Targeting.mayAlterWorld(context)) return;
 
-    int radius = (int) Math.max(1, Math.min(5, Math.round(call.parameters().getOrDefault("radius", 1.0))));
+    int radius = (int) Math.max(1, Math.min(10, Math.round(call.parameters().getOrDefault("radius", 1.0) * context.areaScale())));
     ServerLevel level = context.level();
     int changed = 0;
     for (BlockPos center : centers) {

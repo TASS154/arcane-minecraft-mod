@@ -1,0 +1,28 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:weather"
+  },
+  "parameters": {
+    "mode": {
+      "type": "int",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 2.0
+    }
+  },
+  "cost": {
+    "mana": 10
+  },
+  "tier": 4,
+  "families": [
+    "void"
+  ],
+  "ritual": 4,
+  "components": [
+    {
+      "item": "minecraft:lightning_rod",
+      "count": 1
+    }
+  ]
+}

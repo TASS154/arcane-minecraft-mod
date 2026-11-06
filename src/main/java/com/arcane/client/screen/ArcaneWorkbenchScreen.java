@@ -360,11 +360,21 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
     } else if (experimental) {
       status = Component.translatable("gui.arcane.experiment");
       color = 0xFFD860;
+    } else if (requiredRitual() > 0) {
+      status = Component.translatable("gui.arcane.needs_ritual", Component.translatable("ritual.arcane.level." + requiredRitual()));
+      color = 0xFFA040;
     } else {
       status = Component.translatable("gui.arcane.ready");
       color = 0x80E080;
     }
     g.drawString(font, font.plainSubstrByWidth(status.getString(), 80), leftPos + 124, topPos + 153, color, false);
+  }
+
+  /** Maior nivel de ritual exigido pelos glifos da composicao (0 = pode conjurar em qualquer lugar). */
+  private int requiredRitual() {
+    int level = 0;
+    for (Slot s : composition) level = Math.max(level, ClientArcaneData.glyph(s.id).map(KnownGlyph::ritual).orElse(0));
+    return level;
   }
 
   private void renderActiveSpell(GuiGraphics g) {

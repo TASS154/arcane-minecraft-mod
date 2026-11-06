@@ -121,6 +121,11 @@ def main():
            {"G": "minecraft:glass", "I": "minecraft:gold_ingot", "A": "minecraft:amethyst_shard", "P": "#minecraft:planks"})
     shaped("symmetry_mirror", [" G ", "GSG", " T "],
            {"G": "minecraft:gold_ingot", "S": "minecraft:glass_pane", "T": "minecraft:stick"})
+    shaped("arcane_altar", ["OAO", "SGS", "SSS"],
+           {"O": "minecraft:obsidian", "A": "minecraft:amethyst_block", "S": "minecraft:stone_bricks", "G": "minecraft:gold_ingot"})
+    shaped("arcane_compass", [" G ", "GCG", " A "],
+           {"G": "minecraft:gold_ingot", "C": "minecraft:compass", "A": "minecraft:amethyst_shard"})
+    shapeless("arcane_chalk", ["minecraft:bone_meal", "minecraft:amethyst_shard", "arcane:common_ink"], 8)
     shapeless("grimoire", ["minecraft:book", "minecraft:amethyst_shard", "arcane:common_ink"])
     shapeless("blood_ink", ["arcane:common_ink", "minecraft:redstone", "minecraft:rotten_flesh"])
     shapeless("invisible_ink", ["arcane:common_ink", "minecraft:glowstone_dust", "minecraft:phantom_membrane"])
@@ -151,6 +156,13 @@ def main():
     # ---------------------------------------------------------- tags
     write("minecraft/tags/blocks/mineable/pickaxe.json", {"replace": False, "values": ["arcane:mana_crystal"]})
     write("minecraft/tags/blocks/needs_iron_tool.json", {"replace": False, "values": ["arcane:mana_crystal"]})
+    write("minecraft/tags/blocks/mineable/pickaxe.json", {"replace": False, "values": ["arcane:mana_crystal", "arcane:arcane_altar"]})
+    write("minecraft/tags/blocks/needs_iron_tool.json", {"replace": False, "values": ["arcane:mana_crystal", "arcane:arcane_altar"]})
+    write("arcane/loot_tables/blocks/arcane_altar.json", {
+        "type": "minecraft:block",
+        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "arcane:arcane_altar"}],
+                   "conditions": [{"condition": "minecraft:survives_explosion"}]}],
+    })
     write("minecraft/tags/blocks/mineable/axe.json", {"replace": False, "values": ["arcane:arcane_workbench"]})
 
     # ---------------------------------------------------------- worldgen

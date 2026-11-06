@@ -10,13 +10,9 @@ import java.util.UUID;
 public class ActivateHandler implements ActivatorHandler {
   @Override
   public void activate(ExecutionContext context, GlyphInstance instance) {
-    UUID ritualId = context.ritualSiteId().orElse(null);
-    if (ritualId == null && instance.parameters().containsKey("ritual_hash")) {
-      long hash = instance.parameters().get("ritual_hash").longValue();
-      ritualId = new UUID(0L, hash);
-    }
-    if (ritualId != null) {
-      RitualService.activate(context.level(), ritualId, context.caster());
+    int fired = RitualService.triggerNearby(context.level(), context.caster());
+    if (fired > 0 && context.caster() instanceof net.minecraft.world.entity.player.Player player) {
+      player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.arcane.ritual.triggered"), true);
     }
   }
 }

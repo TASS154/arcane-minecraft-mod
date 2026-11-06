@@ -24,7 +24,7 @@ class AssetIntegrityTest {
   static final Path ASSETS = Path.of("src/main/resources/assets/arcane");
   static final Path DATA = Path.of("src/main/resources/data/arcane");
   static final List<String> ITEMS = List.of("arcane_workbench", "mana_crystal", "arcane_pen", "common_ink", "blood_ink",
-      "invisible_ink", "glyph_note", "arcane_mask", "insulating_cloak", "glyph_projector", "symmetry_mirror", "npc_mage_spawn_egg", "grimoire");
+      "invisible_ink", "glyph_note", "arcane_mask", "insulating_cloak", "glyph_projector", "symmetry_mirror", "npc_mage_spawn_egg", "grimoire", "arcane_page", "arcane_altar", "arcane_chalk", "arcane_compass");
 
   static JsonObject read(Path path) throws IOException {
     return JsonParser.parseString(Files.readString(path, StandardCharsets.UTF_8)).getAsJsonObject();
@@ -115,7 +115,7 @@ class AssetIntegrityTest {
     JsonObject en = read(ASSETS.resolve("lang/en_us.json"));
     assertEquals(pt.keySet(), en.keySet());
     for (String item : ITEMS) {
-      String key = item.equals("arcane_workbench") || item.equals("mana_crystal") ? "block.arcane." + item : "item.arcane." + item;
+      String key = List.of("arcane_workbench", "mana_crystal", "arcane_altar").contains(item) ? "block.arcane." + item : "item.arcane." + item;
       assertTrue(pt.has(key), "item sem nome traduzido: " + key);
     }
   }

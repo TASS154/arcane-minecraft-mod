@@ -7,7 +7,7 @@ import gzip
 import struct
 from pathlib import Path
 
-OUT = Path(__file__).resolve().parents[1] / "src/main/resources/data/arcane/structures/empty.nbt"
+OUT_DIR = Path(__file__).resolve().parents[1] / "src/main/resources/data/arcane/structures"
 DATA_VERSION = 3465  # Minecraft 1.20.1
 
 
@@ -28,8 +28,8 @@ def tag_list(key, elem_type, payloads):
     return b"\x09" + name(key) + bytes([elem_type]) + struct.pack(">i", len(payloads)) + b"".join(payloads)
 
 
-def main():
-    size = [struct.pack(">i", v) for v in (7, 5, 7)]
+def build(structure, dims):
+    size = [struct.pack(">i", v) for v in dims]
     palette = [tag_string("Name", "minecraft:air") + b"\x00"]
     root = (tag_int("DataVersion", DATA_VERSION)
             + tag_list("size", 3, size)
@@ -37,9 +37,15 @@ def main():
             + tag_list("blocks", 10, [])
             + tag_list("entities", 10, []))
     data = b"\x0a" + name("") + root + b"\x00"
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_bytes(gzip.compress(data))
-    print("  ", OUT)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out = OUT_DIR / f"{structure}.nbt"
+    out.write_bytes(gzip.compress(data))
+    print("  ", out)
+
+
+def main():
+    build("empty", (7, 5, 7))
+    build("ritual_arena", (35, 8, 35))
 
 
 if __name__ == "__main__":

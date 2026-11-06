@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -32,6 +33,26 @@ public class ClientEvents {
       while (ClientSetup.CYCLE_KEY.consumeClick()) {
         ClientSetup.cycleSpell(1);
       }
+    }
+  }
+
+  /** Segurando o Compasso Arcano: holograma de faiscas do circulo ao redor do bloco mirado (o altar). */
+  @SubscribeEvent
+  public static void onClientTick(TickEvent.ClientTickEvent event) {
+    if (event.phase != TickEvent.Phase.END) return;
+    var mc = net.minecraft.client.Minecraft.getInstance();
+    if (mc.player == null || mc.level == null || mc.level.getGameTime() % 4 != 0) return;
+    ItemStack held = mc.player.getMainHandItem().getItem() instanceof com.arcane.item.ArcaneCompassItem ? mc.player.getMainHandItem()
+        : mc.player.getOffhandItem().getItem() instanceof com.arcane.item.ArcaneCompassItem ? mc.player.getOffhandItem() : ItemStack.EMPTY;
+    if (held.isEmpty() || !(mc.hitResult instanceof net.minecraft.world.phys.BlockHitResult hit)
+        || hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK) return;
+    net.minecraft.core.BlockPos center = hit.getBlockPos();
+    boolean onAltar = mc.level.getBlockState(center).getBlock() instanceof com.arcane.block.ArcaneAltarBlock;
+    double y = center.getY() + (onAltar ? 0.15 : 1.15);
+    for (com.arcane.ritual.RitualTemplate.Cell cell : com.arcane.ritual.RitualTemplate.cells(com.arcane.item.ArcaneCompassItem.radius(held))) {
+      if (!onAltar && (cell.dx() + cell.dz()) % 2 != 0) continue; // sem altar, o holograma e mais ralo
+      mc.level.addParticle(com.arcane.registry.ModParticles.ARCANE_SPARK.get(),
+          center.getX() + 0.5 + cell.dx(), y, center.getZ() + 0.5 + cell.dz(), 0.0, 0.01, 0.0);
     }
   }
 

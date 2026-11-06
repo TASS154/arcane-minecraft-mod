@@ -24,6 +24,7 @@ public class ProjectileFormHandler implements FormHandler {
         projectile.setPlan(com.arcane.inscription.CompiledPlanCache.getOrCompile(context.inscription()));
         projectile.setPrecision(context.precision());
         projectile.setEnvironment(context.environment());
+        projectile.setRitualBonus(context.geometryBonus(), context.areaScale(), context.ritualLevel());
         context.level().addFreshEntity(projectile);
         return DeliveryResult.stop(TargetList.empty());
     }

@@ -78,6 +78,7 @@ public final class ArcaneSync {
         g.putString("category", def.category().getSerializedName());
         g.putInt("cost", def.cost().mana());
         g.putBoolean("scales", def.category() == com.arcane.glyph.GlyphCategory.EFFECT);
+        g.putInt("ritual", def.ritual());
         ListTag params = new ListTag();
         // Parametro principal primeiro: e o que a roda do mouse ajusta na bancada.
         def.primaryParam().ifPresent(primary -> params.add(paramTag(primary, def.parameters().get(primary))));

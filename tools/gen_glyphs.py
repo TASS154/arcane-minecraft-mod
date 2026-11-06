@@ -28,6 +28,10 @@ def definition(gid, g):
     d["cost"] = {"mana": g["cost"]}
     d["tier"] = g["tier"]
     d["families"] = g["families"]
+    if g["ritual"]:
+        d["ritual"] = g["ritual"]
+    if g["components"]:
+        d["components"] = [{"item": i, "count": c} for i, c in g["components"]]
     return d
 
 

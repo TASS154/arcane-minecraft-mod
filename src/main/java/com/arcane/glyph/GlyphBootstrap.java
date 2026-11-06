@@ -52,6 +52,8 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerForm(ArcaneIds.of("wave"), new WaveFormHandler());
         GlyphHandlerRegistry.registerForm(ArcaneIds.of("pillar"), new PillarFormHandler());
         GlyphHandlerRegistry.registerForm(ArcaneIds.of("barrier"), new BarrierFormHandler());
+        GlyphHandlerRegistry.registerForm(ArcaneIds.of("summon_wolves"), new com.arcane.execution.handlers.SummonFormHandlers.Wolves());
+        GlyphHandlerRegistry.registerForm(ArcaneIds.of("summon_golem"), new com.arcane.execution.handlers.SummonFormHandlers.Golem());
 
         // Efeitos
         GlyphHandlerRegistry.registerEffect(ArcaneIds.DAMAGE, new DamageEffectHandler());
@@ -68,6 +70,8 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("blink"), new BlinkEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("ignite"), new IgniteEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("dig"), new DigEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("weather"), new com.arcane.execution.handlers.WorldRitualEffects.Weather());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("warp"), new com.arcane.execution.handlers.WorldRitualEffects.Warp());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("mark"), new MarkEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("gravity"), new GravityEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("attract"), new AttractEffectHandler());

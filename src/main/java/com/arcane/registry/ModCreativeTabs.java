@@ -18,6 +18,9 @@ public final class ModCreativeTabs {
             .displayItems((params, output) -> {
                 output.accept(ModItems.ARCANE_WORKBENCH.get());
                 output.accept(ModItems.MANA_CRYSTAL.get());
+                output.accept(ModItems.ARCANE_ALTAR.get());
+                output.accept(ModItems.ARCANE_COMPASS.get());
+                output.accept(ModItems.ARCANE_CHALK.get());
                 output.accept(ModItems.ARCANE_PEN.get());
                 output.accept(ModItems.COMMON_INK.get());
                 output.accept(ModItems.BLOOD_INK.get());

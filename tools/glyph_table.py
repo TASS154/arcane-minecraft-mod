@@ -17,9 +17,9 @@ Campos:
 G = {}
 
 
-def glyph(gid, cat, cost, pt, en, icon, params=None, magnitude=None, scope=None, comp=None, tier=1):
+def glyph(gid, cat, cost, pt, en, icon, params=None, magnitude=None, scope=None, comp=None, tier=1, ritual=0, components=None):
     G[gid] = dict(cat=cat, cost=cost, pt=pt, en=en, icon=icon, params=params or {}, magnitude=magnitude or [],
-                  scope=scope, comp=comp, tier=tier)
+                  scope=scope, comp=comp, tier=tier, ritual=ritual, components=components or [])
 
 
 FORM_COMP = {"max_per_inscription": 1, "position": "start"}
@@ -343,6 +343,33 @@ glyph("standing_still", "condition", 0,
       ("Standing Still", "Condition: what follows only happens while you stand still on the ground."),
       ["..####..", "..####..", "..####..", ".######.", ".######.", "..#..#..", "..#..#..", ".##..##."])
 
+# ================================================================== RITUAIS: glifos que SO existem como ritual
+# ritual: 1 menor, 2 medio, 3 maior, 4 lendario (nivel do circulo desenhado). components: itens consumidos ao conjurar.
+glyph("summon_wolves", "form", 4,
+      ("Invocar Lobos", "Forma de RITUAL (menor): invoca lobos domesticados que lutam por você por um tempo. Os lobos são os alvos do que vem depois."),
+      ("Summon Wolves", "RITUAL form (minor): summons tamed wolves that fight for you for a while. The wolves are the targets of what follows."),
+      ["#.#..#.#", "###..###", ".##..##.", "..####..", ".######.", "..#..#..", "..####..", "...##..."],
+      params={"count": (3.0, 2.0, 6.0, "int"), "duration": (1200.0, 200.0, 6000.0, "int")}, comp=FORM_COMP,
+      tier=2, ritual=1, components=[("minecraft:bone", 6)])
+glyph("summon_golem", "form", 6,
+      ("Invocar Golem", "Forma de RITUAL (médio): ergue um golem de ferro que protege você por um tempo. O golem é o alvo do que vem depois."),
+      ("Summon Golem", "RITUAL form (medium): raises an iron golem that guards you for a while. The golem is the target of what follows."),
+      ["..####..", ".######.", "##.##.##", "########", "..####..", ".##..##.", ".##..##.", ".##..##."],
+      params={"duration": (2400.0, 400.0, 12000.0, "int")}, comp=FORM_COMP,
+      tier=3, ritual=2, components=[("minecraft:iron_block", 2), ("minecraft:carved_pumpkin", 1)])
+glyph("warp", "effect", 8,
+      ("Dobrar", "Efeito de RITUAL (maior): leva todas as criaturas alvo para o ponto que você mira (até 48). Com Aura ou Pilar e um círculo grande, desloca uma região inteira."),
+      ("Warp", "RITUAL effect (major): moves every targeted creature to the point you aim at (up to 48). With Aura or Pillar and a big circle, it displaces a whole region."),
+      ["#......#", ".#....#.", "..#..#..", "...##...", "...##...", "..#..#..", ".#....#.", "#......#"],
+      params={"range": (32.0, 8.0, 64.0, "float")}, tier=4, ritual=3,
+      components=[("minecraft:ender_pearl", 4), ("minecraft:crying_obsidian", 1)])
+glyph("weather", "effect", 10,
+      ("Clima", "Efeito de RITUAL (lendário): muda o clima do mundo (0 limpo, 1 chuva, 2 tempestade). Exige a oferenda de uma Estrela do Nether no círculo maior."),
+      ("Weather", "RITUAL effect (legendary): changes the world's weather (0 clear, 1 rain, 2 storm). Requires a Nether Star offering in the major circle."),
+      ["...##...", ".######.", "########", "########", ".######.", "...##...", "..#..#..", ".#....#."],
+      params={"mode": (1.0, 0.0, 2.0, "int")}, tier=4, ritual=4,
+      components=[("minecraft:lightning_rod", 1)])
+
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
@@ -363,8 +390,8 @@ FAMILIES = {
     "force": ["push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana"],
-    "void": ["blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
-    "earth": ["dig", "barrier", "blocks", "wood", "more_range", "swift", "touch", "projectile", "self"],
+    "void": ["warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
+    "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():
     for _gid in _ids:

@@ -24,6 +24,8 @@ public class ExecutionContext {
     private Optional<UUID> ritualSiteId = Optional.empty();
     private double geometryBonus = 1.0;
     private double scaleFactor = 1.0;
+    private int ritualLevel = 0;
+    private double areaScale = 1.0;
 
     public ExecutionContext(ServerLevel level, LivingEntity caster, Inscription inscription,
                             CompiledExecutionPlan plan, EnvironmentalSnapshot environment,
@@ -55,6 +57,12 @@ public class ExecutionContext {
     public double geometryBonus() { return geometryBonus; }
     public void setGeometryBonus(double geometryBonus) { this.geometryBonus = geometryBonus; }
     public double scaleFactor() { return scaleFactor; }
+    /** 0 = conjuracao comum; 1..4 = nivel do ritual em que a magia esta sendo conjurada. */
+    public int ritualLevel() { return ritualLevel; }
+    public void setRitualLevel(int ritualLevel) { this.ritualLevel = ritualLevel; }
+    /** Quanto as formas crescem num ritual (raio da Aura, alcance da Onda, tamanho da Barreira...). */
+    public double areaScale() { return areaScale; }
+    public void setAreaScale(double areaScale) { this.areaScale = Math.max(1.0, areaScale); }
     public void setScaleFactor(double scaleFactor) { this.scaleFactor = scaleFactor; }
 
     public double amplify(double value, java.util.List<String> magnitudeKeys, String key) {

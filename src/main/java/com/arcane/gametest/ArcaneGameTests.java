@@ -697,4 +697,244 @@ public class ArcaneGameTests {
     h.assertTrue(sheep.isSheared(), "o Corte deveria tosquiar a ovelha");
     h.succeed();
   }
+
+  // ================================================================== RITUAIS (arena 35x35)
+  private static final BlockPos ALTAR = new BlockPos(17, 1, 17);
+
+  private static void arena(GameTestHelper h) {
+    for (int x = 0; x < 35; x++) for (int z = 0; z < 35; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+    h.setBlock(ALTAR, com.arcane.registry.ModBlocks.ARCANE_ALTAR.get());
+  }
+
+  private static BlockPos altarAbs(GameTestHelper h) {
+    return h.absolutePos(ALTAR);
+  }
+
+  private static Pig pigAt(GameTestHelper h, int x, int z) {
+    Pig pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(x, 1, z));
+    pig.setYRot(0);
+    pig.setXRot(0);
+    return pig;
+  }
+
+  private static com.arcane.ritual.ComponentSource stock(Object... itemsAndCounts) {
+    Map<net.minecraft.world.item.Item, Integer> map = new java.util.HashMap<>();
+    for (int i = 0; i < itemsAndCounts.length; i += 2) {
+      map.put((net.minecraft.world.item.Item) itemsAndCounts[i], (Integer) itemsAndCounts[i + 1]);
+    }
+    return com.arcane.ritual.ComponentSource.of(map);
+  }
+
+  private static com.arcane.ritual.RitualService.Result ritual(GameTestHelper h, LivingEntity performer,
+                                                               com.arcane.ritual.ComponentSource source, boolean legendary, GlyphInstance... glyphs) {
+    return com.arcane.ritual.RitualService.perform(h.getLevel(), altarAbs(h), performer, new Inscription(List.of(glyphs)), source, legendary);
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 200)
+  public static void circleLevelFollowsTheDrawnSize(GameTestHelper h) {
+    arena(h);
+    var none = com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h));
+    h.assertTrue(none.level() == com.arcane.ritual.RitualLevel.NONE, "sem tracos nao ha circulo");
+
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    var minor = com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h));
+    h.assertTrue(minor.level() == com.arcane.ritual.RitualLevel.MINOR && minor.completeness() > 0.99, "raio 4 = menor, foi " + minor);
+
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 8);
+    h.assertTrue(com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h)).level() == com.arcane.ritual.RitualLevel.MEDIUM, "raio 8 = medio");
+
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 16);
+    h.assertTrue(com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h)).level() == com.arcane.ritual.RitualLevel.MAJOR, "raio 16 = maior");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void aDamagedCircleLosesItsLevel(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    var cells = new java.util.ArrayList<>(com.arcane.ritual.RitualTemplate.cells(4));
+    // apaga ~30% dos tracos
+    for (int i = 0; i < cells.size(); i += 3) {
+      var c = cells.get(i);
+      h.setBlock(new BlockPos(17 + c.dx(), 1, 17 + c.dz()), Blocks.AIR);
+    }
+    var report = com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h));
+    h.assertTrue(report.level() == com.arcane.ritual.RitualLevel.NONE, "um circulo muito falho nao funciona: " + report);
+    var result = ritual(h, pigAt(h, 17, 20), com.arcane.ritual.ComponentSource.unlimited(), false, g("self"), g("heal"));
+    h.assertTrue(result.outcome() == com.arcane.ritual.RitualService.Outcome.CIRCLE_INCOMPLETE, "deveria falhar: " + result.outcome());
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void ritualMultipliesPowerAndGrowsTheArea(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    Pig caster = pigAt(h, 17, 14);
+    Pig near = pigAt(h, 17, 16);   // 2 blocos
+    Pig mid = pigAt(h, 17, 18);    // 4 blocos: fora do raio 3 normal, dentro do 4,5 do ritual menor
+    float n = near.getHealth(), m = mid.getHealth();
+
+    var result = ritual(h, caster, com.arcane.ritual.ComponentSource.unlimited(), false, g("aura", "radius", 3.0), g("damage", "amount", 4.0));
+    h.assertTrue(result.success(), "o ritual deveria funcionar: " + result.outcome());
+    h.assertTrue(result.power() > 1.4 && result.power() <= 1.5, "poder do ritual menor ~1,5x, foi " + result.power());
+    h.assertTrue(Math.abs((n - near.getHealth()) - 6.0f) < 0.2f, "dano 4 x 1,5 = 6, foi " + (n - near.getHealth()));
+    assertHurt(h, mid, m, "o alvo a 4 blocos (a area cresceu)");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void ritualOnlyGlyphsRefuseOrdinaryCasting(GameTestHelper h) {
+    arena(h);
+    Pig caster = pigAt(h, 17, 14);
+    var result = CastingService.tryCast(caster, new Inscription(List.of(g("summon_wolves"), g("shield"))), h.getLevel());
+    h.assertTrue(!result.success() && result.message().contains("requires_ritual"), "deveria exigir ritual: " + result.message());
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void summoningNeedsComponentsAndConsumesThem(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    Pig caster = pigAt(h, 17, 14);
+    var spell = new GlyphInstance[] {g("summon_wolves"), g("shield")};
+
+    var poor = stock(net.minecraft.world.item.Items.BONE, 2);
+    var fail = ritual(h, caster, poor, false, spell);
+    h.assertTrue(fail.outcome() == com.arcane.ritual.RitualService.Outcome.MISSING_COMPONENT, "faltam ossos: " + fail.outcome());
+    h.assertTrue(poor.count(net.minecraft.world.item.Items.BONE) == 2, "nada deve ser consumido numa falha");
+    h.assertTrue(h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.animal.Wolf.class,
+        new net.minecraft.world.phys.AABB(altarAbs(h)).inflate(20)).isEmpty(), "nao deveria haver lobos");
+
+    var rich = stock(net.minecraft.world.item.Items.BONE, 8);
+    var ok = ritual(h, caster, rich, false, spell);
+    h.assertTrue(ok.success(), "com 6 ossos deveria funcionar: " + ok.outcome());
+    h.assertTrue(rich.count(net.minecraft.world.item.Items.BONE) == 2, "gasta exatamente 6 ossos");
+    var wolves = h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.animal.Wolf.class, new net.minecraft.world.phys.AABB(altarAbs(h)).inflate(20));
+    h.assertTrue(wolves.size() == 3, "3 lobos, foram " + wolves.size());
+    h.assertTrue(wolves.stream().allMatch(w -> w.hasEffect(MobEffects.ABSORPTION)), "os lobos sao os alvos do que vem depois (Escudo)");
+    h.assertTrue(wolves.stream().allMatch(com.arcane.execution.Summons::isSummon), "invocacoes tem tempo de vida");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void aSmallCircleCannotCastAHigherLevelRitual(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    Pig caster = pigAt(h, 17, 14);
+    var result = ritual(h, caster, com.arcane.ritual.ComponentSource.unlimited(), false, g("summon_golem"));
+    h.assertTrue(result.outcome() == com.arcane.ritual.RitualService.Outcome.LEVEL_TOO_LOW, "golem exige ritual medio: " + result.outcome());
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void mediumRitualRaisesAGolem(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 8);
+    Pig caster = pigAt(h, 17, 14);
+    var result = ritual(h, caster, stock(Blocks.IRON_BLOCK.asItem(), 2, Blocks.CARVED_PUMPKIN.asItem(), 1), false, g("summon_golem"));
+    h.assertTrue(result.success(), "ritual medio com componentes: " + result.outcome());
+    h.assertTrue(!h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.animal.IronGolem.class,
+        new net.minecraft.world.phys.AABB(altarAbs(h)).inflate(20)).isEmpty(), "deveria haver um golem");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 100)
+  public static void summonsVanishWhenTheirTimeEnds(GameTestHelper h) {
+    arena(h);
+    Pig p = pigAt(h, 17, 14);
+    com.arcane.execution.Summons.mark(p, h.getLevel().getGameTime() + 30);
+    h.succeedWhen(() -> h.assertTrue(p.isRemoved(), "a invocacao deveria ter sido dispensada"));
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void barrierBecomesARampartInARitual(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    Pig caster = pigAt(h, 17, 12);
+    var result = ritual(h, caster, com.arcane.ritual.ComponentSource.unlimited(), false, g("barrier"));
+    h.assertTrue(result.success(), "ritual de barreira: " + result.outcome());
+    var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get();
+    h.assertBlockPresent(barrier, new BlockPos(19, 4, 15));   // 2 para o lado, 4 de altura: muralha de 5 x 5
+    h.assertBlockNotPresent(barrier, new BlockPos(20, 2, 15)); // alem da largura
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void storedRitualFiresWithTheActivateGlyph(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    Pig caster = pigAt(h, 17, 14);
+    var be = (com.arcane.block.AltarBlockEntity) h.getLevel().getBlockEntity(altarAbs(h));
+    h.assertTrue(be != null, "o altar tem BlockEntity");
+    be.store(new Inscription(List.of(g("self"), g("shield"))), caster.getUUID(), false);
+    h.assertTrue(!caster.hasEffect(MobEffects.ABSORPTION), "armazenar nao dispara");
+
+    cast(h, caster, g("self"), g("activate"));
+    h.assertTrue(caster.hasEffect(MobEffects.ABSORPTION), "o glifo Ativar deveria disparar o ritual armazenado");
+    h.assertTrue(!be.hasStored(), "o altar se esvazia depois de disparar");
+
+    // outro dono nao dispara
+    Pig stranger = pigAt(h, 16, 14);
+    be.store(new Inscription(List.of(g("self"), g("speed"))), caster.getUUID(), false);
+    be.setCooldownUntil(0);
+    cast(h, stranger, g("self"), g("activate"));
+    h.assertTrue(!stranger.hasEffect(MobEffects.MOVEMENT_SPEED), "so o dono dispara o proprio altar");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void warpMovesARegionToTheAimedPoint(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 16);
+    Pig caster = pigAt(h, 10, 10); // fora da linha do altar, senao a mira bate nele
+    Pig a = pigAt(h, 8, 12);
+    Pig b = pigAt(h, 12, 12);
+    var source = stock(net.minecraft.world.item.Items.ENDER_PEARL, 4, Blocks.CRYING_OBSIDIAN.asItem(), 1);
+    var result = ritual(h, caster, source, false, g("aura", "radius", 5.0), g("warp", "range", 12.0));
+    h.assertTrue(result.success(), "ritual maior: " + result.outcome());
+    var dest = net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(10, 1, 22)));
+    h.assertTrue(a.position().distanceTo(dest) < 5 && b.position().distanceTo(dest) < 5,
+        "os dois deveriam ter sido levados para o ponto mirado " + dest + ": a=" + a.position() + " b=" + b.position()
+        + " caster=" + caster.position() + " look=" + caster.getLookAngle());
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void legendaryRitualChangesTheWeatherWithAnOffering(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 16);
+    Pig caster = pigAt(h, 17, 10);
+    h.getLevel().setWeatherParameters(6000, 0, false, false);
+    h.assertTrue(!h.getLevel().isRaining(), "comeca com tempo limpo");
+
+    var noStar = ritual(h, caster, stock(Blocks.LIGHTNING_ROD.asItem(), 1), true, g("self"), g("weather", "mode", 2.0));
+    h.assertTrue(noStar.outcome() == com.arcane.ritual.RitualService.Outcome.LEVEL_TOO_LOW, "sem a Estrela nao ha ritual lendario: " + noStar.outcome());
+
+    var result = ritual(h, caster, stock(Blocks.LIGHTNING_ROD.asItem(), 1, net.minecraft.world.item.Items.NETHER_STAR, 1), true, g("self"), g("weather", "mode", 2.0));
+    h.assertTrue(result.success() && result.effectiveLevel() == 4 && "legendary".equals(result.detail()), "ritual lendario: " + result.outcome());
+    h.assertTrue(h.getLevel().getLevelData().isThundering() && h.getLevel().getLevelData().isRaining(), "deveria estar em tempestade");
+    h.getLevel().setWeatherParameters(6000, 0, false, false);
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void legendaryDropsTheGlyphSurchargeAndCostsTheStar(GameTestHelper h) {
+    arena(h);
+    var spell = new Inscription(List.of(g("self"), g("heal"), g("shield"), g("speed"), g("heal"), g("shield"), g("speed")));
+    int normal = CastingService.ritualCost(spell, false);
+    int legendary = CastingService.ritualCost(spell, true);
+    h.assertTrue(legendary < normal, "o lendario nao paga a sobretaxa exponencial: " + legendary + " < " + normal);
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void ritualFlashesTheTraces(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    var result = ritual(h, pigAt(h, 17, 14), com.arcane.ritual.ComponentSource.unlimited(), false, g("self"), g("heal"));
+    h.assertTrue(result.success(), "ritual simples: " + result.outcome());
+    h.assertBlockState(new BlockPos(21, 1, 17), s -> s.getBlock() == com.arcane.registry.ModBlocks.ARCANE_TRACE.get()
+        && s.getValue(com.arcane.block.ArcaneTraceBlock.LIT), () -> "o traco deveria estar aceso");
+    h.succeed();
+  }
 }

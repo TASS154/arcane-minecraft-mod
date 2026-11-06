@@ -15,7 +15,8 @@ public class ExplodeEffectHandler implements EffectHandler {
 
   @Override
   public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-    float radius = (float) Math.max(1.0, Math.min(MAX_RADIUS, call.parameters().getOrDefault("radius", 2.0)));
+    float cap = MAX_RADIUS * (float) Math.min(2.0, Math.max(1.0, context.areaScale()));
+    float radius = (float) Math.max(1.0, Math.min(cap, call.parameters().getOrDefault("radius", 2.0) * context.areaScale()));
     int count = 0;
     for (Vec3 pos : Targeting.positions(targets)) {
       if (count++ >= MAX_EXPLOSIONS) break;

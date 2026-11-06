@@ -17,7 +17,9 @@ public record GlyphDefinition(
         Map<String, ParameterSchema.ParameterDef> parameters,
         Optional<ModifierScope> modifierScope,
         int tier,
-        List<String> families
+        List<String> families,
+        int ritual,
+        List<ComponentRequirement> components
 ) {
     public static final Codec<GlyphDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("id").forGetter(GlyphDefinition::id),
@@ -28,7 +30,9 @@ public record GlyphDefinition(
             Codec.unboundedMap(Codec.STRING, ParameterSchema.ParameterDef.CODEC).optionalFieldOf("parameters", Map.of()).forGetter(GlyphDefinition::parameters),
             ModifierScope.CODEC.optionalFieldOf("modifier_scope").forGetter(GlyphDefinition::modifierScope),
             Codec.INT.optionalFieldOf("tier", 1).forGetter(GlyphDefinition::tier),
-            Codec.STRING.listOf().optionalFieldOf("families", List.of()).forGetter(GlyphDefinition::families)
+            Codec.STRING.listOf().optionalFieldOf("families", List.of()).forGetter(GlyphDefinition::families),
+            Codec.INT.optionalFieldOf("ritual", 0).forGetter(GlyphDefinition::ritual),
+            ComponentRequirement.CODEC.listOf().optionalFieldOf("components", List.of()).forGetter(GlyphDefinition::components)
     ).apply(instance, GlyphDefinition::new));
 
     /** Parametro principal: o primeiro de magnitude_keys, ou o primeiro em ordem alfabetica. */

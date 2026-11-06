@@ -513,6 +513,17 @@
               "tag": "{glyph:\"arcane:standing_still\"}"
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:summon_wolves\"}"
+            }
+          ]
         }
       ]
     },

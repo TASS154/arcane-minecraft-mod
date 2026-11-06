@@ -15,7 +15,7 @@ import java.util.List;
 public class AuraFormHandler implements FormHandler {
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
-    double radius = Math.max(1.0, Math.min(24.0, spec.parameters().getOrDefault("radius", 5.0)));
+    double radius = Math.max(1.0, Math.min(48.0, spec.parameters().getOrDefault("radius", 5.0) * context.areaScale()));
     LivingEntity caster = context.caster();
     List<Entity> found = context.level().getEntitiesOfClass(LivingEntity.class, caster.getBoundingBox().inflate(radius),
         e -> e != caster && e.isAlive() && !e.isSpectator() && e.distanceToSqr(caster) <= radius * radius)

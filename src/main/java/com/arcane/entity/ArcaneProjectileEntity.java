@@ -23,6 +23,9 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
   private CompiledExecutionPlan plan;
   private PrecisionSnapshot precision = PrecisionSnapshot.WORKBENCH;
   private EnvironmentalSnapshot environment = EnvironmentalSnapshot.NEUTRAL;
+  private double geometryBonus = 1.0;
+  private double areaScale = 1.0;
+  private int ritualLevel = 0;
 
   public ArcaneProjectileEntity(EntityType<? extends ArcaneProjectileEntity> type, Level level) {
     super(type, level);
@@ -32,6 +35,13 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
   public void setPlan(CompiledExecutionPlan plan) { this.plan = plan; }
   public void setPrecision(PrecisionSnapshot precision) { this.precision = precision; }
   public void setEnvironment(EnvironmentalSnapshot environment) { this.environment = environment; }
+
+  /** Poder, area e nivel do ritual em que foi lancado: valem quando o projetil acertar. */
+  public void setRitualBonus(double geometryBonus, double areaScale, int ritualLevel) {
+    this.geometryBonus = geometryBonus;
+    this.areaScale = areaScale;
+    this.ritualLevel = ritualLevel;
+  }
 
   @Override
   protected void defineSynchedData() {}
@@ -67,6 +77,9 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
                   ? new ExecutionContext.TriggerEvent("hit_block", java.util.Optional.empty(), java.util.Optional.of(blockHit2.getBlockPos()))
                   : ExecutionContext.TriggerEvent.cast()
       );
+      context.setGeometryBonus(geometryBonus);
+      context.setAreaScale(areaScale);
+      context.setRitualLevel(ritualLevel);
       if (result instanceof EntityHitResult entityHit && entityHit.getEntity() != null) {
         context.setResolvedTargets(TargetList.ofEntities(entityHit.getEntity()));
       } else if (result instanceof net.minecraft.world.phys.BlockHitResult blockHit) {

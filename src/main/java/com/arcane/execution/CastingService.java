@@ -26,6 +26,10 @@ public final class CastingService {
             return ExecutionResult.fail(validation.message().getString());
         }
 
+        if (com.arcane.ritual.RitualRequirements.of(inscription).needsRitual()) {
+            return ExecutionResult.fail("message.arcane.requires_ritual");
+        }
+
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
         int baseCost = plan.baseManaCost();
         double inkMultiplier = InkRegistry.getManaMultiplier(inscription.metadata().ink());
@@ -55,7 +59,34 @@ public final class CastingService {
         return new ExecutionResult(result.success(), result.message(), manaCost);
     }
 
+    /** Bonus de um ritual: nivel (1-4), poder multiplicado, escala de area e se foi lendario (sem sobretaxa). */
+    public record RitualBonus(int level, double power, double areaScale, boolean legendary) {}
+
+    /** Mana de um ritual: o custo normal; no lendario, sem a sobretaxa exponencial por tamanho. */
+    public static int ritualCost(Inscription inscription, boolean legendary) {
+        double cost = CompiledPlanCache.getOrCompile(inscription).baseManaCost();
+        if (legendary) cost /= com.arcane.inscription.SpellLimits.multiplier(inscription.glyphs().size());
+        return (int) Math.ceil(cost);
+    }
+
+    /** Conjura dentro de um ritual (os componentes e a mana ja foram cobrados por RitualService). */
+    public static ExecutionResult castRitual(LivingEntity caster, Inscription inscription, ServerLevel level, RitualBonus bonus) {
+        CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
+        EnvironmentalSnapshot environment = AmbientFieldResolver.resolve(level, caster.blockPosition());
+        ExecutionContext context = new ExecutionContext(level, caster, inscription, plan, environment,
+                PrecisionSnapshot.WORKBENCH, ExecutionContext.TriggerEvent.cast());
+        context.setGeometryBonus(bonus.power());
+        context.setAreaScale(bonus.areaScale());
+        context.setRitualLevel(bonus.level());
+        ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
+        if (result.success()) castFx(level, caster);
+        return result;
+    }
+
     public static ExecutionResult tryCast(LivingEntity caster, Inscription inscription, ServerLevel level) {
+        if (com.arcane.ritual.RitualRequirements.of(inscription).needsRitual()) {
+            return ExecutionResult.fail("message.arcane.requires_ritual");
+        }
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
         EnvironmentalSnapshot environment = AmbientFieldResolver.resolve(level, caster.blockPosition());
         ExecutionContext context = new ExecutionContext(

@@ -2,6 +2,7 @@ package com.arcane.registry;
 
 import com.arcane.ArcaneMod;
 import com.arcane.item.ArcaneArmorMaterial;
+import com.arcane.item.ArcanePageItem;
 import com.arcane.item.ArcanePenItem;
 import com.arcane.item.GlyphNoteItem;
 import com.arcane.item.GrimoireItem;
@@ -35,6 +36,7 @@ public final class ModItems {
     public static final RegistryObject<Item> SYMMETRY_MIRROR = ITEMS.register("symmetry_mirror", () -> new Item(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> GRIMOIRE = ITEMS.register("grimoire", () -> new GrimoireItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> ARCANE_PAGE = ITEMS.register("arcane_page", () -> new ArcanePageItem(new Item.Properties()));
     public static final RegistryObject<Item> NPC_MAGE_SPAWN_EGG = ITEMS.register("npc_mage_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.NPC_MAGE, 0x2D1946, 0x5ADCF0, new Item.Properties()));
 

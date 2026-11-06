@@ -65,6 +65,16 @@ Tudo abaixo está no repositório. As artes e sons são **provisórios de qualid
 | Segurança | Pacote de salvar com limites e testes; Explosão não quebra blocos; Escavar nunca quebra baús; efeitos que mexem no mundo respeitam `mobGriefing` para NPCs |
 | Testes | 37 unitários e 28 GameTests em mundo real (todos os efeitos, formas, filtros e condições novos) |
 
+### Atualização "design do chat" (6 nov 2026)
+
+O chat de design foi colado e cruzado com o código em [DESIGN_CHAT.md](DESIGN_CHAT.md) (feito × pendente × decisões a confirmar).
+
+Implementado e testado: limite de 10 glifos com custo exponencial; Grupo/Fim do Grupo, Repetição e Enfraquecer; 22 glifos novos (64 no total) com Marcar/Marcados, Gravidade somável, Atrair, Corte físico, Congelar, formas Onda, Pilar e Barreira, filtros Aliados e Madeira, condições Mana Baixa e Parado; magias reativas (Ao Sofrer Dano); nível e especialidade por glifo e por estrutura (19 estruturas); grimório que sempre cai com todo o conteúdo, recuperação pelo dono, estudo por outros, penalidade de 3 dias; páginas e estágios; copiar magia para pergaminho; selo geométrico das magias.
+
+Números: 63 testes unitários e 46 GameTests em mundo real, todos passando. Telas, selo e Barreira conferidos por capturas no jogo real.
+
+**Não testado em jogo:** o ciclo de morte do grimório (cair, recuperar, estudar) tem a lógica de fusão coberta por testes unitários, mas o evento de morte em si precisa de um jogador de verdade (os GameTests não criam `ServerPlayer`). Teste: morrer (`/kill`), ver o item brilhando, morrer de novo para ver o provisório, pegar o item de volta.
+
 ### Bug grave achado só ao abrir o jogo de verdade
 
 **A Bancada Arcana nunca abria no jogo** (desde o código original). O menu lê a posição da bancada do pacote de abertura, mas o bloco abria com `openMenu` simples, que não envia esses dados: o cliente quebrava ao criar a tela (`buf` nulo). Corrigido com `NetworkHooks.openScreen`, e um teste (`CodeGuardsTest`) impede a volta do erro. Nenhum teste de servidor pegaria isso; só abrir o cliente.

@@ -55,6 +55,13 @@ public class ClientEvents {
       }
     }
 
+    var contents = com.arcane.item.GrimoireItem.contents(stack);
+    if (contents != null) {
+      event.getToolTip().add(Component.translatable("tooltip.arcane.grimoire.contents",
+          contents.getList("spellbook", net.minecraft.nbt.Tag.TAG_COMPOUND).size(),
+          contents.getCompound("knowledge").getAllKeys().size()).withStyle(ChatFormatting.LIGHT_PURPLE));
+      event.getToolTip().add(Component.translatable("tooltip.arcane.grimoire.shift").withStyle(ChatFormatting.DARK_GRAY));
+    }
     if (stack.hasTag() && stack.getTag().contains(com.arcane.item.GrimoireItem.OWNER_NAME)) {
       event.getToolTip().add(Component.translatable("tooltip.arcane.grimoire.owner",
           stack.getTag().getString(com.arcane.item.GrimoireItem.OWNER_NAME)).withStyle(ChatFormatting.DARK_PURPLE));

@@ -63,7 +63,22 @@ public class DevShots {
             GlyphRegistry.all().keySet().forEach(id -> DiscoveryService.learnMastered(sp, id));
             var g = GrimoireAttachments.get(sp).orElseThrow();
             for (MageElement m : MageElement.values()) g.addInscription(m.spell());
-            g.setActiveInscription(MageElement.FROST.spell().id());
+            var big = new com.arcane.inscription.Inscription(List.of(
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "projectile")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "marked")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "damage")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "fire")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "area")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "group")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "slow")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "gravity")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "end_group")),
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "power"))),
+                new com.arcane.inscription.InscriptionMetadata("Selo Grande", new ResourceLocation("arcane", "common"),
+                    new ResourceLocation("arcane", "arcane_pen"), 1.0, java.util.Optional.empty(), 0L,
+                    com.arcane.inscription.InscriptionSourceKind.WORKBENCH));
+            g.addInscription(big);
+            g.setActiveInscription(big.id());
             g.logDiscovery("witness:arcane:ray");
             g.logDiscovery("experiment:arcane:thunder");
             g.logDiscovery("loot:arcane:explode");
@@ -175,6 +190,25 @@ public class DevShots {
           server.execute(() -> {
             ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
             var level = sp.serverLevel();
+            sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            sp.setXRot(15f);
+            sp.setYRot(0f);
+            sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), 0f, 15f);
+            com.arcane.execution.CastingService.tryCast(sp, new com.arcane.inscription.Inscription(List.of(
+                new com.arcane.inscription.GlyphInstance(new ResourceLocation("arcane", "barrier"),
+                    java.util.Map.of("duration", 400.0)))), level);
+          });
+          wait = 40;
+        }
+        case 16 -> {
+          shot(mc, "08_barrier");
+          wait = 5;
+        }
+        case 17 -> {
+          mc.setScreen(null);
+          server.execute(() -> {
+            ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+            var level = sp.serverLevel();
             level.setDayTime(1000);
             BlockPos base = sp.blockPosition();
             sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
@@ -197,7 +231,7 @@ public class DevShots {
           });
           wait = 50;
         }
-        case 16 -> {
+        case 18 -> {
           shot(mc, "07_mages");
           wait = 5;
         }

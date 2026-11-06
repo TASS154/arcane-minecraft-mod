@@ -2,6 +2,7 @@ package com.arcane.network;
 
 import com.arcane.ArcaneMod;
 import com.arcane.network.packet.C2SCastRequestPacket;
+import com.arcane.network.packet.C2SCopyToScrollPacket;
 import com.arcane.network.packet.C2SDeleteInscriptionPacket;
 import com.arcane.network.packet.C2SSaveInscriptionPacket;
 import com.arcane.network.packet.C2SSelectInscriptionPacket;
@@ -15,7 +16,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-  private static final String PROTOCOL = "3";
+  private static final String PROTOCOL = "4";
   public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       new ResourceLocation(ArcaneMod.MODID, "main"),
       () -> PROTOCOL,
@@ -45,6 +46,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(C2SDeleteInscriptionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SDeleteInscriptionPacket::encode).decoder(C2SDeleteInscriptionPacket::decode)
         .consumerMainThread(C2SDeleteInscriptionPacket::handle).add();
+    CHANNEL.messageBuilder(C2SCopyToScrollPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(C2SCopyToScrollPacket::encode).decoder(C2SCopyToScrollPacket::decode)
+        .consumerMainThread(C2SCopyToScrollPacket::handle).add();
   }
 
   public static void sendToPlayer(ServerPlayer player, Object packet) {

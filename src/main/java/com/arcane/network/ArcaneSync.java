@@ -63,6 +63,8 @@ public final class ArcaneSync {
   static CompoundTag buildKnowledge(GrimoireState grimoire) {
     CompoundTag full = new CompoundTag();
     full.putInt("total", GlyphRegistry.size());
+    full.putInt("pages", grimoire.pages());
+    full.putInt("stage", grimoire.visualStage());
     full.putInt("maxGlyphs", com.arcane.inscription.SpellLimits.maxGlyphs());
     full.putDouble("costGrowth", com.arcane.inscription.SpellLimits.growth());
     full.putInt("costFree", com.arcane.inscription.SpellLimits.freeGlyphs());

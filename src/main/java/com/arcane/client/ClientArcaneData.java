@@ -51,6 +51,8 @@ public final class ClientArcaneData {
   private static double poison = 0.0;
   private static boolean grimoirePresent = true;
   private static int totalGlyphs;
+  private static int pages = 8;
+  private static int stage = 1;
   private static int maxGlyphs = 10;
   private static double costGrowth = 1.3;
   private static int costFree = 3;
@@ -73,6 +75,8 @@ public final class ClientArcaneData {
 
     CompoundTag full = tag.getCompound("full");
     totalGlyphs = full.getInt("total");
+    pages = full.getInt("pages");
+    stage = Math.max(1, full.getInt("stage"));
     if (full.contains("maxGlyphs")) {
       maxGlyphs = full.getInt("maxGlyphs");
       costGrowth = full.getDouble("costGrowth");
@@ -160,6 +164,9 @@ public final class ClientArcaneData {
     return Math.ceil(total * costMultiplier(entries.size()));
   }
 
+  public static int pages() { return pages; }
+  public static int stage() { return stage; }
+  public static int freePages() { return pages - spells.size(); }
   public static int maxGlyphs() { return maxGlyphs; }
 
   /** Sobretaxa exponencial por tamanho (igual ao servidor, com os valores que ele enviou). */

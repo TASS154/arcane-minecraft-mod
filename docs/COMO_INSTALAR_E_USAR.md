@@ -184,6 +184,16 @@ A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fo
 - Ao **morrer**, o grimório cai no chão como item. **Recolha-o**: sem ele sua mana máxima cai para **50%** (o HUD avisa).
 - A mana **regenera sozinha** com o tempo.
 
+### O grimório sempre cai (e leva tudo)
+
+- Ao **morrer**, o grimório **sempre** cai no chão **com todo o seu conteúdo** (magias, descobertas, diário, páginas). Ele não some com o tempo e resiste a fogo e lava (só o vazio o destrói), e fica brilhando.
+- Você fica com um **grimório provisório** em branco (e metade da mana) até recuperar o original ou até passarem **3 dias de jogo**; depois disso o provisório passa a ser o seu.
+- **Pegue-o do chão** (ou Shift + botão direito): tudo volta, somado ao que você aprendeu nesse meio tempo.
+- **Outro jogador** que o encontrar pode, com Shift + botão direito, **estudá-lo**: copia as fórmulas, mas só passa a *suspeitar* dos glifos (precisa pesquisar para usar).
+- **Páginas:** o grimório guarda tantas magias quantas páginas tiver (começa com 8). **Páginas Arcanas** (achadas em estruturas de nível 2+) acrescentam 2 cada, e o grimório evolui visualmente: Caderninho, Livro comum, Livro grosso, Livro flutuante, Páginas em órbita, Só páginas, Grimório infinito.
+- **Pergaminho:** na aba Magias, **Copiar** escreve a magia num pergaminho (1 papel + 1 tinta comum). Quem o recebe pode lançá-lo ou, com Shift + botão direito, estudá-lo. É assim que magos compartilham magias.
+- A aba Magias mostra o **selo** da magia: formas encaixadas, cada glifo envolvendo o anterior (triângulo = Forma, círculo = Efeito, quadrado = Filtro, losango = Modificador, pentágono = Condição).
+
 ### HUD
 
 À direita da hotbar ficam a barra de mana, o nome da magia ativa e avisos de zona: **Zona de mana ×N** perto de cristais e **Mana Poisoning!** quando a exposição está te ferindo. A barra fica azul durante o envenenamento.
@@ -197,6 +207,8 @@ A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fo
 | **Cristal de Mana** | Magias ficam mais fortes perto dele (até ×32). Ficar muito tempo perto causa Mana Poisoning |
 | **Máscara Arcana / Manto Isolante** | Armaduras (cabeça / peito) que reduzem o Mana Poisoning em 30% / 40% |
 | **Grimório** (item) | Botão direito ou tecla **G** abre o grimório: aba **Magias** (ativar e apagar), **Glifos** (os que você conhece e quantos faltam) e **Diário** (como você descobriu cada um). Craft: livro + ametista + tinta comum. Se o dono morrer, o item cai e só ele o recupera |
+| **Página Arcana** | Botão direito: +2 páginas no grimório (espaço para mais magias) |
+| **Barreira Arcana** | Bloco criado pela forma Barreira: parede translúcida temporária (até 30 s) |
 | **Pena Arcana** | Pena na mão principal e tinta na secundária, clique direito num bloco: grava a magia ativa. Em baú dispara **ao abrir**; em qualquer outro bloco dispara **quando uma criatura pisa** (ex.: Eu + Dano vira armadilha). Agachado apaga. Quebrar o bloco também apaga. Consome 1 tinta (fora do criativo); tinta de sangue custa 2 de vida; com tinta invisível a inscrição não solta faíscas |
 | **Nota de Glifo** | Clique direito para aprender o glifo indicado na dica do item |
 | **Mago NPC** | 18 variantes (6 elementos × 3 estilos): Fogo, Gelo, Tempestade, Veneno, Estouro e Vento. Cada elemento conjura uma magia diferente com o mesmo motor do jogador. Aparece naturalmente no Overworld (raro) ou pelo ovo gerador. Ao morrer, dropa uma nota de um glifo da magia dele |

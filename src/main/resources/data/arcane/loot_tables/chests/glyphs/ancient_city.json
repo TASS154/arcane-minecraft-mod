@@ -4,14 +4,14 @@
     {
       "rolls": {
         "type": "minecraft:uniform",
-        "min": 0,
-        "max": 1
+        "min": 1,
+        "max": 2
       },
       "entries": [
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -22,7 +22,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 6,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -33,7 +33,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 5,
+          "weight": 12,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -44,7 +44,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -55,7 +55,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -66,7 +66,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 6,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -77,7 +77,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -88,7 +88,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -99,7 +99,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -110,7 +110,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 12,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -121,7 +121,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 6,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -132,7 +132,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 3,
+          "weight": 5,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -154,7 +154,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 6,
+          "weight": 12,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -165,7 +165,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -176,7 +176,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 6,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -187,7 +187,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -198,7 +198,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 9,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -209,7 +209,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -220,7 +220,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -231,7 +231,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -242,7 +242,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -253,7 +253,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 9,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -264,7 +264,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -275,7 +275,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -286,7 +286,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -297,7 +297,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -308,7 +308,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -319,7 +319,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 7,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -330,7 +330,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -341,7 +341,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -352,7 +352,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 9,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -363,7 +363,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 9,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -374,7 +374,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 9,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -385,7 +385,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 9,
+          "weight": 12,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -396,7 +396,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 9,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -407,7 +407,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 9,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -418,7 +418,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 9,
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -429,11 +429,253 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 8,
+          "weight": 12,
           "functions": [
             {
               "function": "minecraft:set_nbt",
               "tag": "{glyph:\"arcane:activate\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:wave\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:pillar\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:barrier\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:mark\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:gravity\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:attract\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:blind\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:wither\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:invisible\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:cut\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:freeze\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:marked\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:unmarked\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:allies\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:wood\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:group\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:end_group\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:weaken\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 12,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:repeat\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 12,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:on_hurt\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:low_mana\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:standing_still\"}"
             }
           ]
         }
@@ -449,7 +691,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:common_ink",
-          "weight": 4
+          "weight": 5
         },
         {
           "type": "minecraft:item",
@@ -461,15 +703,20 @@
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
-                "max": 4
+                "max": 7
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "arcane:blood_ink",
-          "weight": 1
+          "name": "arcane:arcane_page",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:invisible_ink",
+          "weight": 2
         }
       ]
     }

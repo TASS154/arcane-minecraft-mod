@@ -77,7 +77,12 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs) {
       var draft = new com.arcane.inscription.Inscription(List.copyOf(menu.building()));
       var validation = com.arcane.inscription.InscriptionValidator.validate(draft,
           com.arcane.grimoire.GrimoireAttachments.get(player));
-      if (validation.valid() && menu.saveToGrimoire(player)) {
+      var grimoire = com.arcane.grimoire.GrimoireAttachments.get(player);
+      boolean replaces = grimoire.map(g -> g.findByName(menu.spellName()).isPresent()).orElse(false);
+      boolean noPages = validation.valid() && !replaces && grimoire.map(g -> g.freePages() <= 0).orElse(false);
+      if (noPages) {
+        player.displayClientMessage(Component.translatable("message.arcane.workbench.no_pages").withStyle(ChatFormatting.RED), true);
+      } else if (validation.valid() && menu.saveToGrimoire(player)) {
         player.displayClientMessage(Component.translatable("message.arcane.workbench.saved",
             name.isBlank() ? Component.translatable("gui.arcane.unnamed") : Component.literal(name.trim()))
             .withStyle(ChatFormatting.LIGHT_PURPLE), true);

@@ -23,6 +23,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.BLOOD_INK.get());
                 output.accept(ModItems.INVISIBLE_INK.get());
                 output.accept(ModItems.GRIMOIRE.get());
+                output.accept(ModItems.ARCANE_PAGE.get());
                 output.accept(ModItems.GLYPH_NOTE.get());
                 output.accept(ModItems.ARCANE_MASK.get());
                 output.accept(ModItems.INSULATING_CLOAK.get());

@@ -665,4 +665,36 @@ public class ArcaneGameTests {
     com.arcane.execution.ArmedSpells.clear(p.getUUID());
     h.succeed();
   }
+
+  /** O loot por estrutura foi injetado nos baus vanilla (e so nos que o mapa lista). */
+  @GameTest(template = "empty")
+  public static void glyphLootIsInjectedIntoVanillaStructureChests(GameTestHelper h) {
+    var loot = h.getLevel().getServer().getLootData();
+    for (String path : List.of("chests/desert_pyramid", "chests/ancient_city", "chests/simple_dungeon", "chests/stronghold_library")) {
+      var table = loot.getLootTable(new ResourceLocation("minecraft", path));
+      h.assertTrue(table.getPool("arcane_glyphs") != null, path + " deveria ter a pool arcane_glyphs");
+    }
+    var untouched = loot.getLootTable(new ResourceLocation("minecraft", "chests/spawn_bonus_chest"));
+    h.assertTrue(untouched.getPool("arcane_glyphs") == null, "o bau de bonus nao deve receber glifos");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void arcanePageAddsPagesToTheGrimoire(GameTestHelper h) {
+    var state = new com.arcane.grimoire.GrimoireState();
+    state.addPages(com.arcane.item.ArcanePageItem.PAGES_PER_ITEM);
+    h.assertTrue(state.pages() == 10, "2 paginas a mais, tem " + state.pages());
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void cutShearsReadySheep(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var sheep = h.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(3, 1, 4));
+    h.assertTrue(!sheep.isSheared(), "a ovelha deveria comecar com la");
+    cast(h, caster, g("ray"), g("cut"));
+    h.assertTrue(sheep.isSheared(), "o Corte deveria tosquiar a ovelha");
+    h.succeed();
+  }
 }

@@ -20,9 +20,28 @@ public class ScrollHandler {
     Inscription inscription = ItemInscriptionHelper.read(stack);
     if (inscription == null || event.getLevel().isClientSide) return;
     if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-      CastingService.tryCast(serverPlayer, inscription, PrecisionSnapshot.FIELD);
+      if (serverPlayer.isShiftKeyDown()) {
+        study(serverPlayer, stack, inscription);
+      } else {
+        CastingService.tryCast(serverPlayer, inscription, PrecisionSnapshot.FIELD);
+      }
     }
     event.setCanceled(true);
+  }
+
+  /** Shift + botao direito: copia a formula para o grimorio (se houver pagina) e passa a suspeitar dos glifos. */
+  private static void study(net.minecraft.server.level.ServerPlayer player, ItemStack stack, Inscription inscription) {
+    com.arcane.grimoire.GrimoireAttachments.get(player).ifPresent(grimoire -> {
+      var result = com.arcane.grimoire.GrimoireTransfer.studySpell(grimoire, inscription);
+      if (result.skippedKnown() > 0) {
+        player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.arcane.scroll.already_known"), true);
+        return;
+      }
+      stack.shrink(1);
+      player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.arcane.grimoire.studied",
+          result.added(), result.suspected(), result.skippedNoPages()), false);
+      com.arcane.network.ArcaneSync.sync(player, true);
+    });
   }
 
   @SubscribeEvent

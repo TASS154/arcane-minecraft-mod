@@ -13,6 +13,9 @@ public class GrimoireState {
     private final Map<UUID, Inscription> spellbook = new LinkedHashMap<>();
     private static final int MAX_LOG = 60;
     private final List<String> discoveryLog = new ArrayList<>();
+    public static final int DEFAULT_PAGES = 8;
+    public static final int MAX_PAGES = 120;
+    private int pages = DEFAULT_PAGES;
     private int visualStage = 1;
     private boolean grimoirePresent = true;
     private long grimoireDestroyedUntilTick = 0L;
@@ -22,6 +25,47 @@ public class GrimoireState {
     public Map<UUID, Inscription> spellbook() { return spellbook; }
     public List<String> discoveryLog() { return discoveryLog; }
     public int visualStage() { return visualStage; }
+
+    /** Capacidade: quantas magias cabem. Cresce com Paginas Arcanas (e, no futuro, rituais). */
+    public int pages() { return pages; }
+    public int freePages() { return pages - spellbook.size(); }
+
+    public void addPages(int amount) {
+        pages = Math.max(1, Math.min(MAX_PAGES, pages + amount));
+        visualStage = stageFor(pages);
+    }
+
+    /** Estagios visuais do design: caderno, livro, livro grosso, flutuante, paginas em orbita, so paginas, infinito. */
+    public static int stageFor(int pages) {
+        if (pages < 12) return 1;
+        if (pages < 20) return 2;
+        if (pages < 32) return 3;
+        if (pages < 48) return 4;
+        if (pages < 70) return 5;
+        if (pages < 100) return 6;
+        return 7;
+    }
+
+    public boolean hasSameSpell(Inscription spell) {
+        return spellbook.values().stream().anyMatch(i -> i.glyphs().equals(spell.glyphs()));
+    }
+
+    /**
+     * Recupera um grimorio (o proprio, ao pega-lo de volta): conhecimento mais alto de cada glifo, todas as magias
+     * que ainda nao existem aqui (ignorando a capacidade), paginas e diario.
+     */
+    public void mergeFrom(GrimoireState other) {
+        other.knowledge.forEach(this::learnGlyph);
+        other.spellbook.forEach((id, spell) -> {
+            if (!spellbook.containsKey(id) && !hasSameSpell(spell)) spellbook.put(id, spell);
+        });
+        pages = Math.max(pages, other.pages);
+        visualStage = stageFor(pages);
+        other.discoveryLog.forEach(this::logDiscovery);
+        if (activeInscriptionId == null && other.activeInscriptionId != null && spellbook.containsKey(other.activeInscriptionId)) {
+            activeInscriptionId = other.activeInscriptionId;
+        }
+    }
     public boolean grimoirePresent() { return grimoirePresent; }
     public long grimoireDestroyedUntilTick() { return grimoireDestroyedUntilTick; }
     public Optional<UUID> activeInscriptionId() { return Optional.ofNullable(activeInscriptionId); }
@@ -89,6 +133,7 @@ public class GrimoireState {
         ListTag log = new ListTag();
         discoveryLog.forEach(entry -> log.add(net.minecraft.nbt.StringTag.valueOf(entry)));
         tag.put("discoveryLog", log);
+        tag.putInt("pages", pages);
         tag.putInt("visualStage", visualStage);
         tag.putBoolean("grimoirePresent", grimoirePresent);
         tag.putLong("destroyedUntil", grimoireDestroyedUntilTick);
@@ -120,8 +165,8 @@ public class GrimoireState {
             ListTag log = tag.getList("discoveryLog", Tag.TAG_STRING);
             for (int i = 0; i < log.size(); i++) discoveryLog.add(log.getString(i));
         }
-        visualStage = tag.getInt("visualStage");
-        if (visualStage == 0) visualStage = 1;
+        pages = tag.contains("pages") ? Math.max(1, Math.min(MAX_PAGES, tag.getInt("pages"))) : DEFAULT_PAGES;
+        visualStage = stageFor(pages);
         grimoirePresent = !tag.contains("grimoirePresent") || tag.getBoolean("grimoirePresent");
         grimoireDestroyedUntilTick = tag.getLong("destroyedUntil");
         activeInscriptionId = tag.hasUUID("activeInscription") ? tag.getUUID("activeInscription") : null;

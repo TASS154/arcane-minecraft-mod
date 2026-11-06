@@ -6,7 +6,9 @@ Modular glyph-based magic system for Minecraft 1.20.1 (NeoForge/Forge).
 
 **Guia completo em português:** [docs/COMO_INSTALAR_E_USAR.md](docs/COMO_INSTALAR_E_USAR.md) — instalação, bancada arcana, primeiros passos no jogo.
 
-**Todos os glifos (42), com o que cada um faz:** [docs/GLIFOS.md](docs/GLIFOS.md)
+**Design do chat × estado do mod (feito, pendente, decisões):** [docs/DESIGN_CHAT.md](docs/DESIGN_CHAT.md)
+
+**Todos os glifos (64), com o que cada um faz:** [docs/GLIFOS.md](docs/GLIFOS.md)
 
 **Checklist de trabalho manual (arte, sons, design):** [docs/TRABALHO_MANUAL.md](docs/TRABALHO_MANUAL.md)
 

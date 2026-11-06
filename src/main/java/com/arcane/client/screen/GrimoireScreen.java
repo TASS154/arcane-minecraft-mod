@@ -5,6 +5,7 @@ import com.arcane.client.ClientArcaneData.GlyphEntry;
 import com.arcane.client.ClientArcaneData.KnownGlyph;
 import com.arcane.client.ClientArcaneData.SpellEntry;
 import com.arcane.network.ModNetwork;
+import com.arcane.network.packet.C2SCopyToScrollPacket;
 import com.arcane.network.packet.C2SDeleteInscriptionPacket;
 import com.arcane.network.packet.C2SSelectInscriptionPacket;
 import net.minecraft.ChatFormatting;
@@ -50,6 +51,7 @@ public class GrimoireScreen extends Screen {
   private boolean confirmDelete;
   private Button activateButton;
   private Button deleteButton;
+  private Button copyButton;
 
   public GrimoireScreen() {
     super(Component.translatable("gui.arcane.grimoire"));
@@ -71,6 +73,9 @@ public class GrimoireScreen extends Screen {
         .bounds(left + 190, top + 176, 52, 20).build());
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.close"), b -> onClose())
         .bounds(left + 14, top + 176, 52, 20).build());
+    copyButton = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.copy"), b -> copyToScroll())
+        .bounds(left + 70, top + 176, 60, 20).tooltip(net.minecraft.client.gui.components.Tooltip.create(
+            Component.translatable("gui.arcane.grimoire.copy.tooltip"))).build());
     if (selectedSpell == null) selectedSpell = ClientArcaneData.active().orElse(null);
     updateButtons();
   }
@@ -85,6 +90,7 @@ public class GrimoireScreen extends Screen {
     boolean spells = tab == Tab.SPELLS && selectedSpellEntry().isPresent();
     activateButton.visible = spells;
     deleteButton.visible = spells;
+    copyButton.visible = spells;
     deleteButton.setMessage(Component.translatable(confirmDelete ? "gui.arcane.grimoire.confirm" : "gui.arcane.grimoire.delete")
         .withStyle(confirmDelete ? ChatFormatting.RED : ChatFormatting.WHITE));
     activateButton.active = selectedSpellEntry().map(s -> !ClientArcaneData.active().map(a -> a.equals(s.id())).orElse(false)).orElse(false);
@@ -97,6 +103,10 @@ public class GrimoireScreen extends Screen {
 
   private void activate() {
     selectedSpellEntry().ifPresent(s -> ModNetwork.CHANNEL.sendToServer(new C2SSelectInscriptionPacket(s.id())));
+  }
+
+  private void copyToScroll() {
+    selectedSpellEntry().ifPresent(s -> ModNetwork.CHANNEL.sendToServer(new C2SCopyToScrollPacket(s.id())));
   }
 
   private void delete() {
@@ -225,6 +235,11 @@ public class GrimoireScreen extends Screen {
       return;
     }
     SpellEntry spell = sel.get();
+    Component stageName = Component.translatable("grimoire.arcane.stage." + ClientArcaneData.stage());
+    g.drawString(font, Component.translatable("gui.arcane.grimoire.pages", spells.size(), ClientArcaneData.pages()),
+        left + 134, top + 150, spells.size() >= ClientArcaneData.pages() ? 0xB04020 : 0x5A4630, false);
+    g.drawString(font, font.plainSubstrByWidth(Component.translatable("gui.arcane.grimoire.stage", stageName).getString(), 106),
+        left + 134, top + 160, 0x6A3F8F, false);
     g.drawString(font, font.plainSubstrByWidth(spellName(spell).getString(), 106), left + 134, top + 28, 0x2A1A08, false);
     if (spell.cost() >= 0) {
       g.drawString(font, Component.translatable("gui.arcane.glyph_cost", spell.cost()), left + 134, top + 40, 0x1F6F8F, false);
@@ -239,6 +254,8 @@ public class GrimoireScreen extends Screen {
         tip = glyphEntryTooltip(entry);
       }
     }
+    // Selo geometrico: cada glifo envolve o anterior (design). Unico por composicao.
+    com.arcane.client.SealRenderer.draw(g, spell.glyphs().stream().map(GlyphEntry::id).toList(), left + 188, top + 118, 28);
     if (tip != null) g.renderComponentTooltip(font, tip, mouseX, mouseY);
   }
 

@@ -1,0 +1,21 @@
+{
+  "simple_dungeon": "chests/glyphs/simple_dungeon",
+  "abandoned_mineshaft": "chests/glyphs/abandoned_mineshaft",
+  "igloo_chest": "chests/glyphs/igloo_chest",
+  "village/village_temple": "chests/glyphs/village_village_temple",
+  "shipwreck_supply": "chests/glyphs/shipwreck_supply",
+  "desert_pyramid": "chests/glyphs/desert_pyramid",
+  "jungle_temple": "chests/glyphs/jungle_temple",
+  "nether_bridge": "chests/glyphs/nether_bridge",
+  "ruined_portal": "chests/glyphs/ruined_portal",
+  "pillager_outpost": "chests/glyphs/pillager_outpost",
+  "underwater_ruin_big": "chests/glyphs/underwater_ruin_big",
+  "stronghold_library": "chests/glyphs/stronghold_library",
+  "stronghold_corridor": "chests/glyphs/stronghold_corridor",
+  "stronghold_crossing": "chests/glyphs/stronghold_crossing",
+  "woodland_mansion": "chests/glyphs/woodland_mansion",
+  "bastion_treasure": "chests/glyphs/bastion_treasure",
+  "bastion_other": "chests/glyphs/bastion_other",
+  "ancient_city": "chests/glyphs/ancient_city",
+  "end_city_treasure": "chests/glyphs/end_city_treasure"
+}

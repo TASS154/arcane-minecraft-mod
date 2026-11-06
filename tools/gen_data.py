@@ -51,6 +51,60 @@ def note(glyph, weight):
             "functions": [{"function": "minecraft:set_nbt", "tag": "{glyph:\"%s\"}" % glyph}]}
 
 
+# nivel (raridade maxima dos glifos), especialidades (familias favorecidas) e rolagens de nota por bau
+# Estruturas vanilla -> arcane:chests/glyphs/<nome>. Ajuste aqui e rode: python tools/gen_data.py
+STRUCTURES = {
+    "simple_dungeon": (1, ["blood", "earth"], (0, 1)),
+    "abandoned_mineshaft": (1, ["earth", "force"], (0, 1)),
+    "igloo_chest": (1, ["ice", "life"], (0, 1)),
+    "village/village_temple": (1, ["life", "knowledge"], (0, 1)),
+    "shipwreck_supply": (1, ["storm", "earth"], (0, 1)),
+    "desert_pyramid": (2, ["fire", "blood"], (1, 1)),
+    "jungle_temple": (2, ["blood", "life"], (1, 1)),
+    "nether_bridge": (2, ["fire", "blood"], (1, 1)),
+    "ruined_portal": (2, ["fire", "void"], (0, 1)),
+    "pillager_outpost": (2, ["blood", "force"], (1, 1)),
+    "underwater_ruin_big": (2, ["ice", "knowledge"], (1, 1)),
+    "stronghold_library": (3, ["knowledge", "void"], (1, 2)),
+    "stronghold_corridor": (3, ["knowledge", "force"], (1, 1)),
+    "stronghold_crossing": (3, ["knowledge", "earth"], (1, 1)),
+    "woodland_mansion": (3, ["blood", "knowledge"], (1, 2)),
+    "bastion_treasure": (3, ["fire", "force"], (1, 2)),
+    "bastion_other": (3, ["fire", "force"], (1, 1)),
+    "ancient_city": (4, ["void", "knowledge", "force"], (1, 2)),
+    "end_city_treasure": (4, ["void", "storm", "force"], (1, 2)),
+}
+STARTERS = {"self", "projectile", "damage"}
+
+
+def structure_table(tier, families, rolls):
+    """Glifos ate o nivel da estrutura; os da especialidade pesam mais; o nivel exato pesa mais que os abaixo."""
+    entries = []
+    for gid, g in G.items():
+        if gid in STARTERS or g["tier"] > tier:
+            continue
+        match = len(set(g["families"]) & set(families))
+        base = 5 if g["tier"] == tier else (3 if g["tier"] == tier - 1 else 1)
+        weight = base * (4 * match if match else 1)
+        entries.append(note(f"arcane:{gid}", weight))
+    inks = [{"type": "minecraft:item", "name": "arcane:common_ink", "weight": 5},
+            {"type": "minecraft:item", "name": "minecraft:amethyst_shard", "weight": 3,
+             "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3 + tier}}]}]
+    if tier >= 2:
+        inks.append({"type": "minecraft:item", "name": "arcane:arcane_page", "weight": tier - 1})
+    if "blood" in families:
+        inks.append({"type": "minecraft:item", "name": "arcane:blood_ink", "weight": 2})
+    if "void" in families:
+        inks.append({"type": "minecraft:item", "name": "arcane:invisible_ink", "weight": 2})
+    return {
+        "type": "minecraft:chest",
+        "pools": [
+            {"rolls": {"type": "minecraft:uniform", "min": rolls[0], "max": rolls[1]}, "entries": entries},
+            {"rolls": {"type": "minecraft:uniform", "min": 0, "max": 2}, "entries": inks},
+        ],
+    }
+
+
 def main():
     # ---------------------------------------------------------- receitas
     shaped("arcane_workbench", ["ABA", "PCP", "P P"],
@@ -131,21 +185,13 @@ def main():
     })
 
     # ---------------------------------------------------------- loot de baus
-    starters = {"self", "projectile", "damage"}
-    notes = [note(f"arcane:{gid}", max(1, 9 - g["cost"])) for gid, g in G.items() if gid not in starters]
-    write("arcane/loot_tables/chests/simple_dungeon_glyph.json", {
-        "type": "minecraft:chest",
-        "pools": [
-            {"rolls": {"type": "minecraft:uniform", "min": 0, "max": 1}, "entries": notes},
-            {"rolls": {"type": "minecraft:uniform", "min": 0, "max": 2},
-             "entries": [
-                 {"type": "minecraft:item", "name": "arcane:common_ink", "weight": 4},
-                 {"type": "minecraft:item", "name": "minecraft:amethyst_shard", "weight": 3,
-                  "functions": [{"function": "minecraft:set_count",
-                                 "count": {"type": "minecraft:uniform", "min": 1, "max": 4}}]},
-                 {"type": "minecraft:item", "name": "arcane:blood_ink", "weight": 1}]},
-        ],
-    })
+    # ---------------------------------------------------------- dungeons: nivel (raridade) e especialidade (familia)
+    index = {}
+    for key, (tier, families, rolls) in STRUCTURES.items():
+        name = key.replace("/", "_")
+        index[key] = f"chests/glyphs/{name}"
+        write(f"arcane/loot_tables/chests/glyphs/{name}.json", structure_table(tier, families, rolls))
+    write("arcane/glyph_loot_targets.json", index)
 
     # ---------------------------------------------------------- spawn natural do Mago
     write("arcane/forge/biome_modifier/add_mage_spawn.json", {

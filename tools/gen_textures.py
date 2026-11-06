@@ -555,6 +555,28 @@ def barrier_block():
     return img
 
 
+def arcane_page_item():
+    """Pagina Arcana (16x16): folha com glifo luminoso."""
+    return sprite([
+        "................",
+        "....kkkkkkkk....",
+        "...kYYYYYYYYYk..",
+        "...kYyyyyyyyYk..",
+        "...kYyyCCyyyYk..",
+        "...kYyyCWCyyYk..",
+        "...kYyCCWCCyYk..",
+        "...kYyyCWCyyYk..",
+        "...kYyyyCCyyYk..",
+        "...kYyPyyyPyYk..",
+        "...kYyyPPPyyYk..",
+        "...kYyyyyyyyYk..",
+        "...kYoooooooYk..",
+        "....kkkkkkkkkk..",
+        "................",
+        "................",
+    ])
+
+
 def grimoire_item():
     """Item do Grimorio (16x16)."""
     return sprite([
@@ -635,6 +657,7 @@ def main():
     save(glyph_icon("unknown", "activator"), "gui/glyphs/unknown.png")
     save(grimoire_gui(), "gui/grimoire.png")
     save(grimoire_item(), "item/grimoire.png")
+    save(arcane_page_item(), "item/arcane_page.png")
 
     save(grimoire_book(), "entity/grimoire.png")
     gen_mage_skins.generate()

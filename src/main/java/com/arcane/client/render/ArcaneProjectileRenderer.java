@@ -37,17 +37,19 @@ public class ArcaneProjectileRenderer extends EntityRenderer<ArcaneProjectileEnt
     Matrix3f normal = last.normal();
     VertexConsumer consumer = buffers.getBuffer(RENDER_TYPE);
     int full = LightTexture.FULL_BRIGHT;
-    vertex(consumer, matrix, normal, full, 0f, 0, 0, 1);
-    vertex(consumer, matrix, normal, full, 1f, 0, 1, 1);
-    vertex(consumer, matrix, normal, full, 1f, 1, 1, 0);
-    vertex(consumer, matrix, normal, full, 0f, 1, 0, 0);
+    int rgb = entity.element().color();
+    int r = (rgb >> 16) & 255, g = (rgb >> 8) & 255, b = rgb & 255;
+    vertex(consumer, matrix, normal, full, r, g, b, 0f, 0, 0, 1);
+    vertex(consumer, matrix, normal, full, r, g, b, 1f, 0, 1, 1);
+    vertex(consumer, matrix, normal, full, r, g, b, 1f, 1, 1, 0);
+    vertex(consumer, matrix, normal, full, r, g, b, 0f, 1, 0, 0);
     pose.popPose();
     super.render(entity, yaw, partialTick, pose, buffers, light);
   }
 
-  private static void vertex(VertexConsumer consumer, Matrix4f matrix, Matrix3f normal, int light, float x, int y, int u, int v) {
+  private static void vertex(VertexConsumer consumer, Matrix4f matrix, Matrix3f normal, int light, int r, int g, int b, float x, int y, int u, int v) {
     consumer.vertex(matrix, x - 0.5f, y - 0.5f, 0.0f)
-        .color(255, 255, 255, 255)
+        .color(r, g, b, 255)
         .uv((float) u, (float) v)
         .overlayCoords(OverlayTexture.NO_OVERLAY)
         .uv2(light)

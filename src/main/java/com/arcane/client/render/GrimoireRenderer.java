@@ -16,6 +16,16 @@ import net.minecraft.util.Mth;
 /** Grimorio flutuante: usa o modelo de livro vanilla com textura propria, girando e folheando. */
 public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
   private static final ResourceLocation TEXTURE = new ResourceLocation("arcane", "textures/entity/grimoire.png");
+  private static final ResourceLocation[] COVERS = {
+      new ResourceLocation("arcane", "textures/entity/grimoire_s1.png"),
+      new ResourceLocation("arcane", "textures/entity/grimoire_s2.png"),
+      new ResourceLocation("arcane", "textures/entity/grimoire_s3.png"),
+      new ResourceLocation("arcane", "textures/entity/grimoire_s4.png")};
+
+  /** Estagios 1-4 mudam a capa; do 5 em diante usa a capa mais elaborada e cresce um pouco. */
+  private static ResourceLocation cover(int stage) {
+    return COVERS[Math.min(COVERS.length, Math.max(1, stage)) - 1];
+  }
   private final BookModel book;
 
   public GrimoireRenderer(EntityRendererProvider.Context context) {
@@ -31,14 +41,16 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
     pose.translate(0.0, 0.4 + Mth.sin(time * 0.08f) * 0.08, 0.0);
     pose.mulPose(Axis.YP.rotationDegrees(-time * 1.5f));
     pose.mulPose(Axis.ZP.rotationDegrees(80.0f));
-    pose.scale(0.8f, 0.8f, 0.8f);
+    int stage = entity.visualStage();
+    float size = 0.8f + Math.min(5, Math.max(0, stage - 4)) * 0.05f;
+    pose.scale(size, size, size);
 
     float flipA = Mth.frac(time * 0.015f + 0.25f) * 1.6f - 0.3f;
     float flipB = Mth.frac(time * 0.015f + 0.75f) * 1.6f - 0.3f;
     float open = 0.9f + Mth.sin(time * 0.05f) * 0.08f;
     book.setupAnim(time, Mth.clamp(flipA, 0f, 1f), Mth.clamp(flipB, 0f, 1f), open);
 
-    VertexConsumer consumer = buffers.getBuffer(book.renderType(TEXTURE));
+    VertexConsumer consumer = buffers.getBuffer(book.renderType(cover(stage)));
     book.renderToBuffer(pose, consumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
     pose.popPose();
     super.render(entity, yaw, partialTick, pose, buffers, light);
@@ -46,6 +58,6 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
 
   @Override
   public ResourceLocation getTextureLocation(GrimoireEntity entity) {
-    return TEXTURE;
+    return cover(entity.visualStage());
   }
 }

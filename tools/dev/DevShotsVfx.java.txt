@@ -1,0 +1,142 @@
+package com.arcane.client;
+
+import com.arcane.ArcaneMod;
+import com.arcane.discovery.DiscoveryService;
+import com.arcane.entity.GrimoireEntity;
+import com.arcane.glyph.GlyphRegistry;
+import com.arcane.inscription.GlyphInstance;
+import com.arcane.inscription.Inscription;
+import com.arcane.registry.ModBlocks;
+import com.arcane.registry.ModEntities;
+import com.mojang.logging.LogUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+import java.util.List;
+
+/** TEMPORARIO (nao commitar): captura os visuais (elementos, altar/ritual, estagios do grimorio, bancada). */
+@Mod.EventBusSubscriber(modid = ArcaneMod.MODID, value = Dist.CLIENT)
+public class DevShotsVfx {
+  private static int step = 0;
+  private static int wait = 0;
+  private static BlockPos base;
+
+  private static void shot(Minecraft mc, String name) {
+    Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), c -> LogUtils.getLogger().info("SHOT {}", name));
+  }
+
+  private static Inscription spell(String... ids) {
+    return new Inscription(java.util.Arrays.stream(ids).map(i -> new GlyphInstance(new ResourceLocation("arcane", i))).toList(),
+        new com.arcane.inscription.InscriptionMetadata("vfx", new ResourceLocation("arcane", "common"),
+            new ResourceLocation("arcane", "arcane_pen"), 1.0, java.util.Optional.empty(), 0L,
+            com.arcane.inscription.InscriptionSourceKind.WORKBENCH));
+  }
+
+  private static final String[][] ELEMENTS = {
+      {"projectile", "damage", "fire"}, {"projectile", "damage", "freeze"}, {"projectile", "damage", "thunder"},
+      {"projectile", "damage", "poison"}, {"projectile", "gravity"}, {"projectile", "blink"}};
+
+  @SubscribeEvent
+  public static void tick(TickEvent.ClientTickEvent e) {
+    if (!Boolean.getBoolean("arcane.devshots") || e.phase != TickEvent.Phase.END) return;
+    Minecraft mc = Minecraft.getInstance();
+    if (mc.player == null || mc.getSingleplayerServer() == null || mc.player.tickCount < 80) return;
+    if (wait > 0) { wait--; return; }
+    var server = mc.getSingleplayerServer();
+    try {
+      int s = step++;
+      if (s == 0) {
+        server.execute(() -> {
+          ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+          GlyphRegistry.all().keySet().forEach(id -> DiscoveryService.learnMastered(sp, id));
+          com.arcane.grimoire.GrimoireAttachments.getMana(sp).ifPresent(m -> m.trySpend(0));
+          sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+          sp.getAbilities().flying = true;
+          sp.onUpdateAbilities();
+          base = sp.blockPosition();
+          var level = sp.serverLevel();
+          level.setDayTime(18000);
+          // estagios do grimorio em fila
+          for (int i = 1; i <= 4; i++) {
+            GrimoireEntity g = ModEntities.GRIMOIRE.get().create(level);
+            var tag = g.saveWithoutId(new net.minecraft.nbt.CompoundTag());
+            tag.putInt("stage", i);
+            g.load(tag);
+            g.setPos(base.getX() + 6 + i * 1.4, base.getY() + 2, base.getZ() + 6);
+            level.addFreshEntity(g);
+          }
+        });
+        wait = 40;
+      } else if (s == 1) {
+        server.execute(() -> {
+          ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+          sp.connection.teleport(base.getX() + 9.6, base.getY() + 2.2, base.getZ() + 2, 0f, 5f);
+        });
+        wait = 30;
+      } else if (s == 2) {
+        shot(mc, "v01_grimoire_stages");
+        wait = 5;
+      } else if (s >= 3 && s < 3 + ELEMENTS.length * 2 && false) {
+        int idx = (s - 3) / 2;
+        if ((s - 3) % 2 == 0) {
+          server.execute(() -> {
+            ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+            sp.connection.teleport(base.getX() + 0.5, base.getY() + 1, base.getZ() - 20, 0f, 5f);
+            com.arcane.grimoire.GrimoireAttachments.getMana(sp).ifPresent(m -> m.trySpend(0));
+            com.arcane.execution.CastingService.tryCast(sp, spell(ELEMENTS[idx]), sp.serverLevel());
+          });
+          wait = 6;
+        } else {
+          shot(mc, "v02_element_" + idx);
+          wait = 25;
+        }
+      } else if (s == 3 + ELEMENTS.length * 2) {
+        server.execute(() -> {
+          ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+          var level = sp.serverLevel();
+          BlockPos altar = base.offset(-14, 0, 14);
+          int gy = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, altar.getX(), altar.getZ());
+          BlockPos a = new BlockPos(altar.getX(), gy, altar.getZ());
+          level.setBlock(a, ModBlocks.ARCANE_ALTAR.get().defaultBlockState(), 3);
+          com.arcane.ritual.RitualService.drawCircle(level, a, 8);
+          level.setBlock(a.offset(3, 0, 0), ModBlocks.ARCANE_WORKBENCH.get().defaultBlockState(), 3);
+          level.setBlock(a.offset(5, 0, 0), ModBlocks.MANA_CRYSTAL.get().defaultBlockState(), 3);
+          sp.connection.teleport(a.getX() + 0.5, a.getY() + 16, a.getZ() + 8, 180f, 55f);
+          base = a;
+        });
+        wait = 40;
+      } else if (s == 4 + ELEMENTS.length * 2) {
+        shot(mc, "v03_ritual_circle");
+        server.execute(() -> {
+          ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+          com.arcane.ritual.RitualService.perform(sp.serverLevel(), base, sp, spell("self", "heal"),
+              com.arcane.ritual.ComponentSource.unlimited(), false);
+        });
+        wait = 8;
+      } else if (s == 5 + ELEMENTS.length * 2) {
+        shot(mc, "v04_ritual_perform");
+        server.execute(() -> {
+          ServerPlayer sp = server.getPlayerList().getPlayer(mc.player.getUUID());
+          sp.connection.teleport(base.getX() + 4, base.getY() + 2, base.getZ() + 4, 135f, 25f);
+        });
+        wait = 30;
+      } else if (s == 6 + ELEMENTS.length * 2) {
+        shot(mc, "v05_altar_workbench_crystal");
+        wait = 3;
+      } else {
+        LogUtils.getLogger().info("DEVSHOTS DONE");
+        mc.stop();
+      }
+    } catch (Exception ex) {
+      LogUtils.getLogger().error("DEVSHOTS FAILED at step " + (step - 1), ex);
+      mc.stop();
+    }
+  }
+}

@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from glyph_table import G  # noqa: E402  (tabela unica dos glifos)
 import gen_mage_skins  # noqa: E402
 import gen_art_ritual  # noqa: E402
+import gen_art_vfx  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "arcane" / "textures"
@@ -675,6 +676,7 @@ def main():
     logo = mod_logo()
     logo.save(RES / "arcane_logo.png")
     print("   src/main/resources/arcane_logo.png")
+    gen_art_vfx.generate()  # segunda passada (por ultimo): sobrescreve com as versoes elaboradas
 
 
 if __name__ == "__main__":

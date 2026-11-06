@@ -52,7 +52,14 @@ public class ClientSetup {
 
   @SubscribeEvent
   public static void registerParticles(RegisterParticleProvidersEvent event) {
-    event.registerSpriteSet(ModParticles.ARCANE_SPARK.get(), ArcaneSparkParticle.Provider::new);
+    event.registerSpriteSet(ModParticles.ARCANE_SPARK.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.SPARK));
+    event.registerSpriteSet(ModParticles.ARCANE_EMBER.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.EMBER));
+    event.registerSpriteSet(ModParticles.ARCANE_FROST.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.FROST));
+    event.registerSpriteSet(ModParticles.ARCANE_BOLT.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.BOLT));
+    event.registerSpriteSet(ModParticles.ARCANE_VENOM.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.VENOM));
+    event.registerSpriteSet(ModParticles.ARCANE_FORCE.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.FORCE));
+    event.registerSpriteSet(ModParticles.ARCANE_VOID.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.VOID));
+    event.registerSpriteSet(ModParticles.ARCANE_LIFE.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.LIFE));
   }
 
   @SubscribeEvent

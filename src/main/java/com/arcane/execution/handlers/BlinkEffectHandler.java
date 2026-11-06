@@ -32,8 +32,8 @@ public class BlinkEffectHandler implements EffectHandler {
       moved = caster.randomTeleport(candidate.x, candidate.y - eye, candidate.z, true);
     }
     if (moved) {
-      context.level().sendParticles(ModParticles.ARCANE_SPARK.get(), from.x, from.y + 1.0, from.z, 14, 0.3, 0.5, 0.3, 0.05);
-      context.level().sendParticles(ModParticles.ARCANE_SPARK.get(), caster.getX(), caster.getY() + 1.0, caster.getZ(), 14, 0.3, 0.5, 0.3, 0.05);
+      context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(), from.x, from.y + 1.0, from.z, 14, 0.3, 0.5, 0.3, 0.05);
+      context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(), caster.getX(), caster.getY() + 1.0, caster.getZ(), 14, 0.3, 0.5, 0.3, 0.05);
     }
   }
 }

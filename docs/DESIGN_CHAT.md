@@ -38,7 +38,7 @@ Pilar: *magia é conhecimento; conhecimento gera poder; poder gera reputação; 
 
 Ordenado do que mais valeria fazer a seguir.
 
-1. **Rituais e grandes glifos.** O maior bloco do design: níveis (150% / 300% / 1000% / lendário), componentes físicos (cabeças, sangue, altar, machado do Wither), círculos de 16×16 a 64×64 desenhados com o **Compasso Arcano** (holograma, centro + anéis + conectores), rituais que só existem como ritual (invocar gigantes, teleportar regiões, alterar clima). Hoje existem o serviço de ritual e o glifo Ativar, mas nada os aciona. *Preciso das decisões da lista abaixo.*
+1. **Rituais: implementados (primeira versão).** Altar Arcano, Giz e Bússola Arcana, círculos de raio 4/8/16 (×1,5 / ×3 / ×10), glifos exclusivos de ritual e componentes físicos, glifo Ativar, traços que acendem. Ainda em aberto: regra do nível Lendário, listas finais de componentes e círculos maiores que 16. Ver "Rituais" em `docs/COMO_INSTALAR_E_USAR.md`.
 2. **Juramentos (binding vows).** Aceitar uma limitação em troca de poder (parado +150%, só à noite +80%, um alvo +200%, metade da vida +500%, sem mana por 10 min +700%). Cabe bem como uma nova categoria de modificador com custo e restrição checada no servidor.
 3. **Assinatura arcana e cicatrizes no mundo.** Cada mago "desenha diferente": a assinatura sairia do estilo (ordem, parâmetros, rotação do selo), permitindo rastrear quem lançou. Magias fortes deixam marcas por dias (grama queimada, pedras flutuando, árvores envelhecidas, neve).
 4. **Análise ativa.** Hoje só se *suspeita* ao ver ou estudar. Falta analisar uma magia já lançada (resíduo no mundo, vítima) e a aba de pesquisa do grimório com hipóteses e comparações ("A B C / A B D / A B E").

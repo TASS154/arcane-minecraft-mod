@@ -54,7 +54,7 @@ public final class CastingService {
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
             ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint()));
-            castFx((ServerLevel) player.level(), player);
+            castFx((ServerLevel) player.level(), player, SpellElement.of(plan));
         }
         return new ExecutionResult(result.success(), result.message(), manaCost);
     }
@@ -79,7 +79,7 @@ public final class CastingService {
         context.setAreaScale(bonus.areaScale());
         context.setRitualLevel(bonus.level());
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
-        if (result.success()) castFx(level, caster);
+        if (result.success()) castFx(level, caster, SpellElement.of(context.plan()));
         return result;
     }
 
@@ -100,17 +100,17 @@ public final class CastingService {
         );
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
-            castFx(level, caster);
+            castFx(level, caster, SpellElement.of(context.plan()));
         }
         return result;
     }
 
     /** Som e particulas de conjuracao, visiveis para todos por perto. */
-    private static void castFx(ServerLevel level, LivingEntity caster) {
+    private static void castFx(ServerLevel level, LivingEntity caster, SpellElement element) {
         level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
                 com.arcane.registry.ModSounds.SPELL_CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS,
                 0.8f, 0.9f + caster.getRandom().nextFloat() * 0.2f);
-        level.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(),
+        level.sendParticles(element.particle(),
                 caster.getX(), caster.getY() + caster.getBbHeight() * 0.6, caster.getZ(),
                 12, 0.4, 0.4, 0.4, 0.02);
     }

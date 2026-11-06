@@ -44,7 +44,7 @@ public final class SummonFormHandlers {
         wolf.setPersistenceRequired();
         Summons.mark(wolf, until);
         context.level().addFreshEntity(wolf);
-        context.level().sendParticles(ModParticles.ARCANE_SPARK.get(), p.x, p.y + 0.5, p.z, 10, 0.3, 0.4, 0.3, 0.05);
+        context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(), p.x, p.y + 0.5, p.z, 10, 0.3, 0.4, 0.3, 0.05);
         summoned.add(wolf);
       }
       return DeliveryResult.of(new TargetList(summoned, List.of()));
@@ -64,7 +64,7 @@ public final class SummonFormHandlers {
       golem.setPersistenceRequired();
       Summons.mark(golem, until);
       context.level().addFreshEntity(golem);
-      context.level().sendParticles(ModParticles.ARCANE_SPARK.get(), p.x, p.y + 1.0, p.z, 24, 0.5, 0.8, 0.5, 0.06);
+      context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(), p.x, p.y + 1.0, p.z, 24, 0.5, 0.8, 0.5, 0.06);
       return DeliveryResult.of(TargetList.ofEntities(golem));
     }
   }

@@ -213,7 +213,36 @@ A ordem importa: `Projétil → Dano → Fogo` é diferente de `Projétil → Fo
 | **Nota de Glifo** | Clique direito para aprender o glifo indicado na dica do item |
 | **Mago NPC** | 18 variantes (6 elementos × 3 estilos): Fogo, Gelo, Tempestade, Veneno, Estouro e Vento. Cada elemento conjura uma magia diferente com o mesmo motor do jogador. Aparece naturalmente no Overworld (raro) ou pelo ovo gerador. Ao morrer, dropa uma nota de um glifo da magia dele |
 | **Projetor de Glifos / Espelho de Simetria** | Registrados e com arte, mas **ainda sem função** (dependem de design de rituais) |
-| **Glifo Ativar** | Dispara um ritual armazenado. Rituais ainda não estão disponíveis, então o glifo ainda não faz nada visível |
+| **Glifo Ativar** | Dispara um ritual armazenado num altar por perto (até 48 blocos). Veja a seção Rituais abaixo |
+
+---
+
+## Rituais
+
+Um ritual executa uma magia com poder e área ampliados, num círculo desenhado no chão em volta de um **Altar Arcano**.
+
+1. Coloque o **Altar Arcano** no chão.
+2. Com o **Giz Arcano** (ou a **Bússola Arcana**, que desenha o círculo inteiro de uma vez gastando tinta), trace as células do círculo. O tamanho do círculo define o nível.
+3. Com a magia ativa no grimório, use o altar (clique direito). Magias com glifos exclusivos de ritual só funcionam aqui.
+4. Depois de executado, os traços do círculo acendem (brilho ciano) e soltam partículas.
+
+| Nível | Raio | Poder | Área |
+|-------|------|-------|------|
+| Menor | 4 | ×1,5 | ×1,5 |
+| Médio | 8 | ×3 | ×2,5 |
+| Maior | 16 | ×10 | ×4 |
+| Lendário | 16 | ×10 | ×4 (regra especial, sujeita à sua confirmação) |
+
+- O círculo precisa estar pelo menos **85% completo**; traços faltando reduzem a chance de funcionar.
+- Alguns glifos pedem **componentes físicos** consumidos no altar (ver `docs/GLIFOS.md`, coluna ritual).
+- Depois de cada ritual o altar tem um tempo de recarga de 5 s.
+- Os valores (×1,5 / ×3 / ×10, 85%) ficam em `RitualSettings` e são provisórios.
+
+## Visuais
+
+- Cada magia tem um **elemento visual** pelo primeiro efeito com identidade própria: fogo (brasas), gelo, raio, veneno, força, vazio e vida. Ele define a cor do projétil e as partículas das formas, do impacto e da conjuração. Não muda a mecânica.
+- O **grimório flutuante** muda de capa conforme o estágio (1 a 4), cresce e solta faíscas a partir do estágio 3.
+- A **bancada** tem modelo 3D próprio, o cristal de mana é animado, e as GUIs foram redesenhadas.
 
 ---
 

@@ -23,7 +23,7 @@ public class AuraFormHandler implements FormHandler {
     int points = (int) Math.min(48, radius * 6);
     for (int i = 0; i < points; i++) {
       double angle = Math.PI * 2 * i / points;
-      context.level().sendParticles(ModParticles.ARCANE_SPARK.get(),
+      context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(),
           caster.getX() + Math.cos(angle) * radius, caster.getY() + 0.2, caster.getZ() + Math.sin(angle) * radius,
           1, 0.0, 0.05, 0.0, 0.0);
     }

@@ -7,7 +7,11 @@ import com.arcane.execution.SpellPipeline;
 import com.arcane.execution.TargetList;
 import com.arcane.inscription.CompiledExecutionPlan;
 import com.arcane.inscription.Inscription;
+import com.arcane.execution.SpellElement;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.EntityType;
@@ -20,6 +24,8 @@ import net.minecraftforge.network.NetworkHooks;
 
 public class ArcaneProjectileEntity extends ThrowableProjectile {
   private Inscription inscription = Inscription.testProjectileDamageFire();
+  private static final EntityDataAccessor<Integer> ELEMENT =
+      SynchedEntityData.defineId(ArcaneProjectileEntity.class, EntityDataSerializers.INT);
   private CompiledExecutionPlan plan;
   private PrecisionSnapshot precision = PrecisionSnapshot.WORKBENCH;
   private EnvironmentalSnapshot environment = EnvironmentalSnapshot.NEUTRAL;
@@ -32,7 +38,13 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
   }
 
   public void setInscription(Inscription inscription) { this.inscription = inscription; }
-  public void setPlan(CompiledExecutionPlan plan) { this.plan = plan; }
+  public void setPlan(CompiledExecutionPlan plan) {
+    this.plan = plan;
+    if (plan != null) this.entityData.set(ELEMENT, SpellElement.of(plan).ordinal());
+  }
+
+  /** Elemento visual (cor e particulas); sincronizado para o cliente. */
+  public SpellElement element() { return SpellElement.byOrdinal(this.entityData.get(ELEMENT)); }
   public void setPrecision(PrecisionSnapshot precision) { this.precision = precision; }
   public void setEnvironment(EnvironmentalSnapshot environment) { this.environment = environment; }
 
@@ -44,14 +56,16 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
   }
 
   @Override
-  protected void defineSynchedData() {}
+  protected void defineSynchedData() {
+    this.entityData.define(ELEMENT, 0);
+  }
 
   @Override
   public void tick() {
     super.tick();
     if (level().isClientSide) {
       for (int i = 0; i < 2; i++) {
-        level().addParticle(com.arcane.registry.ModParticles.ARCANE_SPARK.get(),
+        level().addParticle(element().particle(),
             getX() + (random.nextDouble() - 0.5) * 0.2, getY() + (random.nextDouble() - 0.5) * 0.2,
             getZ() + (random.nextDouble() - 0.5) * 0.2, 0.0, 0.0, 0.0);
       }
@@ -90,8 +104,8 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
       var server = (net.minecraft.server.level.ServerLevel) level();
       server.playSound(null, getX(), getY(), getZ(), com.arcane.registry.ModSounds.SPELL_HIT.get(),
           net.minecraft.sounds.SoundSource.PLAYERS, 0.9f, 1.0f);
-      server.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(), getX(), getY(), getZ(),
-          16, 0.25, 0.25, 0.25, 0.08);
+      server.sendParticles(element().particle(), getX(), getY(), getZ(),
+          26, 0.3, 0.3, 0.3, 0.1);
       SpellPipeline.INSTANCE.runSegments(context);
       discard();
     }

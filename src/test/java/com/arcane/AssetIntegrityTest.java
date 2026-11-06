@@ -85,9 +85,15 @@ class AssetIntegrityTest {
 
   @Test
   void particleTexturesExist() throws IOException {
-    for (JsonElement t : read(ASSETS.resolve("particles/arcane_spark.json")).getAsJsonArray("textures")) {
-      String name = t.getAsString().substring("arcane:".length());
-      assertTrue(Files.exists(ASSETS.resolve("textures/particle/" + name + ".png")), "particula sem textura: " + name);
+    try (Stream<Path> files = Files.list(ASSETS.resolve("particles"))) {
+      List<Path> defs = files.filter(f -> f.toString().endsWith(".json")).toList();
+      assertTrue(defs.size() >= 8, "particulas por elemento faltando");
+      for (Path def : defs) {
+        for (JsonElement t : read(def).getAsJsonArray("textures")) {
+          String name = t.getAsString().substring("arcane:".length());
+          assertTrue(Files.exists(ASSETS.resolve("textures/particle/" + name + ".png")), "particula sem textura: " + name);
+        }
+      }
     }
   }
 

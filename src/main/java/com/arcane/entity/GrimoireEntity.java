@@ -2,6 +2,9 @@ package com.arcane.entity;
 
 import com.arcane.registry.ModEntities;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.Entity;
@@ -14,7 +17,8 @@ import java.util.UUID;
 
 public class GrimoireEntity extends Entity {
   private UUID ownerId;
-  private int visualStage = 1;
+  private static final EntityDataAccessor<Integer> STAGE =
+      SynchedEntityData.defineId(GrimoireEntity.class, EntityDataSerializers.INT);
 
   public GrimoireEntity(EntityType<? extends GrimoireEntity> type, Level level) {
     super(type, level);
@@ -23,12 +27,20 @@ public class GrimoireEntity extends Entity {
 
   public void bind(Player player, int stage) {
     this.ownerId = player.getUUID();
-    this.visualStage = stage;
+    this.entityData.set(STAGE, Math.max(1, stage));
   }
 
   @Override
   public void tick() {
     super.tick();
+    if (level().isClientSide) {
+      int stage = visualStage();
+      if (stage >= 3 && tickCount % (stage >= 6 ? 2 : 6) == 0) {
+        double a = tickCount * 0.2;
+        level().addParticle(com.arcane.registry.ModParticles.ARCANE_SPARK.get(),
+            getX() + Math.cos(a) * 0.35, getY() + 0.3 + random.nextDouble() * 0.3, getZ() + Math.sin(a) * 0.35, 0.0, 0.01, 0.0);
+      }
+    }
     if (!level().isClientSide && ownerId != null) {
       Player owner = level().getPlayerByUUID(ownerId);
       if (owner == null || !owner.isAlive()) {
@@ -39,21 +51,23 @@ public class GrimoireEntity extends Entity {
     }
   }
 
-  public int visualStage() { return visualStage; }
+  public int visualStage() { return this.entityData.get(STAGE); }
 
   @Override
-  protected void defineSynchedData() {}
+  protected void defineSynchedData() {
+    this.entityData.define(STAGE, 1);
+  }
 
   @Override
   protected void readAdditionalSaveData(CompoundTag tag) {
     if (tag.hasUUID("owner")) ownerId = tag.getUUID("owner");
-    visualStage = tag.getInt("stage");
+    this.entityData.set(STAGE, Math.max(1, tag.getInt("stage")));
   }
 
   @Override
   protected void addAdditionalSaveData(CompoundTag tag) {
     if (ownerId != null) tag.putUUID("owner", ownerId);
-    tag.putInt("stage", visualStage);
+    tag.putInt("stage", visualStage());
   }
 
   @Override

@@ -31,7 +31,7 @@ public class WaveFormHandler implements FormHandler {
       double angle = Math.toRadians(i * 11.0);
       double cos = Math.cos(angle), sin = Math.sin(angle);
       Vec3 dir = new Vec3(flat.x * cos - flat.z * sin, 0, flat.x * sin + flat.z * cos);
-      context.level().sendParticles(ModParticles.ARCANE_SPARK.get(), origin.x + dir.x * range, origin.y, origin.z + dir.z * range,
+      context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(), origin.x + dir.x * range, origin.y, origin.z + dir.z * range,
           1, 0.0, 0.2, 0.0, 0.0);
     }
     return DeliveryResult.of(new TargetList(found, List.of()));

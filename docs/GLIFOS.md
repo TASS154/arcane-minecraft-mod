@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **64 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **68 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -33,7 +33,7 @@ São **64 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–m
 | Muralha | Barreira | Parede de energia 3x3 que some sozinha |
 | Grupo | Raio → Grupo → Dano → Fogo → Fim do Grupo → Potência | A Potência vale para Dano **e** Fogo |
 
-## Formas (8)
+## Formas (10)
 
 Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única exceção são Condições e Ativadores). Só pode haver uma.
 
@@ -47,6 +47,8 @@ Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única
 | **Onda** | `arcane:wave` | 3 | 2 | Força | `range` 8 (2–16) | Forma: uma onda em cone a sua frente, afetando todas as criaturas que ela alcança. |
 | **Pilar** | `arcane:pillar` | 4 | 3 | Tempestade | `range` 24 (4–48), `radius` 2 (1–6) | Forma: uma coluna vertical no ponto que você mira (criaturas e o bloco atingido). |
 | **Barreira** | `arcane:barrier` | 4 | 3 | Terra | `duration` 200 (40–600) | Forma: ergue uma parede de 3x3 blocos de energia a sua frente, que some sozinha. |
+| **Invocar Lobos** | `arcane:summon_wolves` | 4 | 2 | Terra | `count` 3 (2–6), `duration` 1200 (200–6000) | Forma de RITUAL (menor): invoca lobos domesticados que lutam por você por um tempo. Os lobos são os alvos do que vem depois. |
+| **Invocar Golem** | `arcane:summon_golem` | 6 | 3 | Terra | `duration` 2400 (400–12000) | Forma de RITUAL (médio): ergue um golem de ferro que protege você por um tempo. O golem é o alvo do que vem depois. |
 
 ## Filtros (13)
 
@@ -68,7 +70,7 @@ Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para
 | **Aliados** | `arcane:allies` | 1 | 2 | Vida | — | Filtro: jogadores, animais domesticados, aldeões e golens de ferro. |
 | **Madeira** | `arcane:wood` | 1 | 1 | Terra | — | Filtro: só blocos de madeira (troncos e tábuas). |
 
-## Efeitos (22)
+## Efeitos (24)
 
 O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro principal (o dobro do dano custa o dobro).
 
@@ -96,6 +98,8 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Invisibilidade** | `arcane:invisible` | 3 | 4 | Vazio | `duration` 600 (100–2400) | Efeito: o alvo fica invisível por um tempo. |
 | **Corte** | `arcane:cut` | 2 | 1 | Sangue | `amount` 3 (1–16) | Efeito: dano físico (a armadura reduz). Tosquia ovelhas e, em blocos, corta folhas na hora. |
 | **Congelar** | `arcane:freeze` | 3 | 3 | Gelo | `duration` 100 (20–400), `radius` 1 (0.5–5) | Efeito: congela criaturas (lentidão e frio) e, nos blocos, transforma água em gelo e lava em obsidiana. |
+| **Dobrar** | `arcane:warp` | 8 | 4 | Vazio | `range` 32 (8–64) | Efeito de RITUAL (maior): leva todas as criaturas alvo para o ponto que você mira (até 48). Com Aura ou Pilar e um círculo grande, desloca uma região inteira. |
+| **Clima** | `arcane:weather` | 10 | 4 | Vazio | `mode` 1 (0–2) | Efeito de RITUAL (lendário): muda o clima do mundo (0 limpo, 1 chuva, 2 tempestade). Exige a oferenda de uma Estrela do Nether no círculo maior. |
 
 ## Modificadores (10)
 

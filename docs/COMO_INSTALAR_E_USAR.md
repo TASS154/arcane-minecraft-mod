@@ -324,7 +324,7 @@ Cada juramento tem o parâmetro **Promessa (1 a 5)**. Fórmula: `bônus = k × p
 | 4 | +91% | +97% | +81% |
 | 5 | +110% | +118% | +98% |
 
-Restrições por promessa: Quietude exige ficar parado (promessa-1) segundos; Sangue custa 2 × promessa de vida; Luz: 1 dia, 2 céu aberto, 3 sem chuva, 4 manhã/tarde, 5 perto do meio-dia. No máximo 2 juramentos diferentes por magia; com 2, os bônus se multiplicam (teto cerca de +370%).
+Restrições por promessa: Quietude exige ficar parado (promessa-1) segundos; Sangue custa 2 × promessa de vida; Luz: 1 dia, 2 céu aberto, 3 sem chuva, 4 manhã/tarde, 5 perto do meio-dia. No máximo 2 juramentos diferentes por magia; com 2, os bônus se multiplicam (teto cerca de +360%).
 
 ## Como montar um ritual
 1. **Altar Arcano** (obsidiana, bloco de ametista, tijolos de pedra e ouro). Coloque num chão plano e firme.

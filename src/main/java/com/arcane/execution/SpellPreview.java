@@ -61,9 +61,18 @@ public final class SpellPreview {
     }
 
     List<Component> warnings = new ArrayList<>();
+    boolean zone = params.getOrDefault("zone_seconds", 0.0) > 0.0;
+    if (zone && form.startsWith("summon_")) {
+      warnings.add(Component.translatable("gui.arcane.preview.warn.zone_summon").withStyle(ChatFormatting.GOLD));
+    } else if (zone) {
+      lines.add(Component.translatable("gui.arcane.preview.zone", trim(params.get("zone_seconds")), trim(params.getOrDefault("zone_interval", 1.0))));
+    }
     for (CompiledExecutionPlan.ExecutionSegment segment : plan.segments()) {
       int mask = reach;
       for (var filter : segment.filters()) mask = EffectReach.afterFilter(path(filter.filterId()), mask);
+      if (Zones.isEndSegment(segment) && !(zone && !form.startsWith("summon_"))) {
+        warnings.add(Component.translatable("gui.arcane.preview.warn.zone_end_without_zone").withStyle(ChatFormatting.GOLD));
+      }
       segment.condition().ifPresent(c -> lines.add(Component.translatable("gui.arcane.preview.condition", name(c.conditionId())).withStyle(ChatFormatting.GRAY)));
       for (var effect : segment.effects()) {
         int acts = EffectReach.ofEffect(path(effect.glyphId()));
@@ -80,6 +89,8 @@ public final class SpellPreview {
     lines.addAll(warnings);
     return lines;
   }
+
+  private static String trim(double v) { return v == Math.rint(v) ? String.valueOf((long) v) : String.format(java.util.Locale.ROOT, "%.1f", v); }
 
   private static Component origin(double v) {
     String key = v >= 0.5 ? "aim" : v <= -0.5 ? "self" : "default";

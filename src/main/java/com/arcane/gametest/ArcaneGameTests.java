@@ -1243,4 +1243,61 @@ public class ArcaneGameTests {
     return lines.stream().filter(c -> c.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
         && (t.getKey().startsWith("gui.arcane.preview.warn."))).count();
   }
+
+  // ------------------------------------------------------------------ zonas e eventos
+  @GameTest(template = "empty", timeoutTicks = 120)
+  public static void zoneRepeatsTheSpellOverTime(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var victim = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 4));
+    cast(h, caster, g("aura"), g("zone", "seconds", 2.0), g("damage", "amount", 1.0));
+    float afterCast = victim.getHealth();
+    h.assertTrue(afterCast < victim.getMaxHealth(), "a primeira entrega fere");
+    h.assertTrue(com.arcane.execution.Zones.activeFor(caster.getUUID()) == 1, "deveria haver 1 zona ativa");
+    h.runAfterDelay(30, () -> {
+      h.assertTrue(victim.getHealth() < afterCast, "a zona deveria ferir de novo (vida " + victim.getHealth() + ")");
+      com.arcane.execution.Zones.clearFor(caster.getUUID());
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 120)
+  public static void zoneEndEventRunsOnlyWhenTheZoneEnds(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var victim = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 4));
+    float before = victim.getHealth();
+    cast(h, caster, g("aura"), g("zone", "seconds", 2.0), g("on_zone_end"), g("damage", "amount", 1.0));
+    h.assertTrue(victim.getHealth() >= before, "o trecho 'Quando a zona acabar' nao roda ao conjurar");
+    h.runAfterDelay(25, () -> h.assertTrue(victim.getHealth() >= before, "nem durante a zona"));
+    h.runAfterDelay(55, () -> {
+      h.assertTrue(victim.getHealth() < before, "deveria ferir quando a zona acabou");
+      h.assertTrue(com.arcane.execution.Zones.activeFor(caster.getUUID()) == 0, "zona encerrada");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty")
+  public static void casterHasAtMostTwoZones(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    for (int i = 0; i < 3; i++) cast(h, caster, g("aura"), g("zone"), g("damage"));
+    h.assertTrue(com.arcane.execution.Zones.activeFor(caster.getUUID()) == 2, "maximo de 2 zonas por conjurador");
+    com.arcane.execution.Zones.clearFor(caster.getUUID());
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void summonsIgnoreZoneAndPreviewWarns(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    h.assertTrue(!com.arcane.execution.Zones.zoneable(com.arcane.inscription.InscriptionCompiler.compile(new Inscription(List.of(g("summon_wolves"), g("zone"))))), "invocacao nao vira zona");
+    var summonZone = com.arcane.execution.SpellPreview.describe(new Inscription(List.of(g("summon_wolves"), g("zone"))));
+    h.assertTrue(countWarnings(summonZone) == 1, "Invocar + Zona deveria avisar");
+    var endNoZone = com.arcane.execution.SpellPreview.describe(new Inscription(List.of(g("aura"), g("on_zone_end"), g("damage"))));
+    h.assertTrue(countWarnings(endNoZone) == 1, "Quando a zona acabar sem Zona deveria avisar");
+    var good = com.arcane.execution.SpellPreview.describe(new Inscription(List.of(g("aura"), g("zone"), g("on_zone_end"), g("damage"))));
+    h.assertTrue(countWarnings(good) == 0, "Aura + Zona + fim nao deveria avisar");
+    h.succeed();
+  }
 }

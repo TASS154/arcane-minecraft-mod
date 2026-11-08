@@ -51,15 +51,15 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
         boolean alongX = wallAlongX(look);
         int sx = alongX ? (look.x > 0 ? 1 : -1) : 0;
         int sz = alongX ? 0 : (look.z > 0 ? 1 : -1);
-        BlockPos b = caster.blockPosition().offset(sx * 3, 0, sz * 3);
+        BlockPos b = BlockPos.containing(ctx.position()).offset(sx * 3, 0, sz * 3);
         return new Vec3(b.getX() + 0.5, b.getY(), b.getZ() + 0.5);
       }
       case ShapeGeometry.COLUMN:
         return Targeting.ray(ctx, Math.max(4.0, Math.min(64.0, spec.range())), false).end();
       case ShapeGeometry.CONE:
-        return caster.position().add(0, caster.getBbHeight() * 0.5, 0);
+        return ctx.position().add(0, caster.getBbHeight() * 0.5, 0);
       default:
-        return caster.position();
+        return ctx.position();
     }
   }
 
@@ -69,7 +69,7 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
     double origin = spec.parameters().getOrDefault("origin", 0.0);
     Vec3 center;
     if (origin >= 0.5) center = Targeting.ray(ctx, Targeting.AIM_RANGE, false).end();
-    else if (origin <= -0.5) center = ctx.caster().position();
+    else if (origin <= -0.5) center = ctx.position();
     else center = defaultCenter(ctx, spec, shape);
     if (shape == ShapeGeometry.WALL) {
       BlockPos b = BlockPos.containing(center);

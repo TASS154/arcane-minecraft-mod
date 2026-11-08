@@ -115,6 +115,7 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("in_water"), new PredicateCondition(c -> c.caster().isInWater()));
 
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_death"), new PredicateCondition(c -> "death".equals(c.trigger().type())));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_zone_end"), new PredicateCondition(c -> "zone_end".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_hurt"), new PredicateCondition(c -> "hurt".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("low_mana"), new PredicateCondition(c ->
             c.caster() instanceof Player p && com.arcane.grimoire.GrimoireAttachments.getMana(p)

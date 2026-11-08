@@ -30,7 +30,7 @@ public final class Targeting {
   /** Centro de uma forma: o conjurador, ou o ponto mirado se o glifo Mira gravou origin=1. */
   public static Vec3 center(ExecutionContext ctx, DeliverySpec spec) {
     if (spec.parameters().getOrDefault("origin", 0.0) >= 0.5) return ray(ctx, AIM_RANGE, false).end();
-    return ctx.caster().position();
+    return ctx.position();
   }
 
   /** Raio do olhar do conjurador: primeira criatura ou bloco no caminho, dentro do alcance. */

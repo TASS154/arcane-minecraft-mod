@@ -36,6 +36,7 @@ public final class SpellPipeline {
             return ExecutionResult.ok(0);
         }
 
+        Zones.begin(context);
         runSegments(context);
         return ExecutionResult.ok(0);
     }
@@ -43,6 +44,11 @@ public final class SpellPipeline {
     /** Roda os segmentos do plano; os que tem atraso vao para o agendador. */
     public void runSegments(ExecutionContext context) {
         for (ExecutionSegment segment : context.plan().segments()) {
+            // "Quando a zona acabar": espera o fim da zona desta conjuracao (sem zona, nunca roda).
+            if (Zones.isEndSegment(segment)) {
+                Zones.attachEnd(context, segment);
+                continue;
+            }
             // Trechos com gatilho (Ao Sofrer Dano) ficam armados no conjurador em vez de rodar agora.
             if ("cast".equals(context.trigger().type()) && ArmedSpells.isTriggerSegment(segment)) {
                 ArmedSpells.arm(context, segment);

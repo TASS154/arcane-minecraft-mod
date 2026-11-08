@@ -111,6 +111,11 @@ Pré-requisito: Minecraft com Forge 1.20.1 e `arcane-0.1.0.jar` em `mods` (já i
 - `EffectReach` guarda o que cada forma entrega e cada efeito alcança; `SpellPreview` gera a descrição e os avisos, e os pacotes `C2SPreviewPacket`/`S2CPreviewPacket` (protocolo 8) levam isso à bancada.
 - Testado: 81 GameTests (4 novos) e testes unitários passando. Não verificado no cliente: a aparência do tooltip da prévia.
 
+### Zonas e barramento de eventos (modularização, passo 3)
+- Glifos novos: **Zona** e **Quando a Zona Acabar** (83 glifos). `Zones` repete a forma do mesmo lugar (contexto congelado via `ExecutionContext.freeze`), com limites por conjurador e global; `SpellEvents` é o barramento de eventos por chave.
+- Testado: 85 GameTests (4 novos: repetição, evento de fim, limite de 2 zonas, invocação + avisos da prévia) e testes unitários. Não testado em jogo.
+- Falta: condições "Ao quebrar a barreira" e "Ao entrar na zona" (basta emitir a chave); `ArmedSpells` (Ao sofrer dano / Ao morrer) ainda não passa pelo barramento; zonas não persistem entre sessões.
+
 ## 4. Bug corrigido nesta rodada
 Um grimório flutuante sem dono (sobra de teste ou dado antigo) derrubava o login com `NullPointerException`. Agora o filtro verifica o dono e grimórios sem dono se removem sozinhos após 2 segundos.
 

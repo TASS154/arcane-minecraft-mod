@@ -375,3 +375,11 @@ O **Toque** nunca entrega ponto vazio (só alcança o que está colado). Efeitos
 
 ### Prévia na bancada
 Na bancada, **passe o mouse sobre a linha de estado** (Pronto / ⚠ Veja a prévia, embaixo da lista de glifos). O servidor calcula e mostra: a forma e o que ela alcança, o formato e a origem, e o que cada efeito faz. Combinações que não fazem nada viram **avisos dourados**, por exemplo: Eu + Escavar (Escavar só age em blocos), Raio + Domo (o Raio ignora formato e origem), Toque + Hostil + Escavar (o filtro deixa só criaturas).
+
+## Zonas e eventos (qualquer forma pode ser persistente)
+
+- **Zona** (modificador, 3 de custo): coloque depois da forma. A forma se repete **do mesmo lugar** a cada intervalo, pelo tempo escolhido, reaplicando os efeitos em quem está dentro. Parâmetros: segundos (2–60, padrão 10) e intervalo (0,5–5 s, padrão 1 s); a roda do mouse ajusta o primeiro e Ctrl+roda o segundo.
+  - `Aura + Zona + Fogo` = campo em chamas parado onde você estava. `Barreira + Zona` = parede contínua. `Projétil + Zona` = torre que atira. `Aura + Zona + Cura` = área de cura.
+  - Limites: 2 zonas suas ao mesmo tempo (a mais antiga acaba), 64 no servidor. Invocações ignoram a Zona. Zonas vivem na memória: somem ao fechar o mundo ou se você morrer.
+- **Quando a Zona Acabar** (condição): o trecho seguinte só roda no fim da zona, uma vez. Ex.: `Aura + Zona + Quando a Zona Acabar + Explosão` = uma mina que explode no fim. Sem Zona, nunca acontece (a prévia avisa).
+- Por baixo, as zonas usam o **barramento de eventos** (`SpellEvents`): qualquer sistema pode emitir uma chave e qualquer trecho pode esperar por ela. Novos eventos (por exemplo "ao quebrar a barreira") só precisam emitir a chave.

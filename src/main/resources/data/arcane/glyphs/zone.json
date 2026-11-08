@@ -1,0 +1,43 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:zone"
+  },
+  "parameters": {
+    "seconds": {
+      "type": "float",
+      "default": 10.0,
+      "min": 2.0,
+      "max": 60.0
+    },
+    "interval": {
+      "type": "float",
+      "default": 1.0,
+      "min": 0.5,
+      "max": 5.0
+    }
+  },
+  "modifier_scope": {
+    "target": "delivery",
+    "kind": "form",
+    "mutate": {
+      "zone_seconds": {
+        "op": "put",
+        "value": 10.0,
+        "param": "seconds"
+      },
+      "zone_interval": {
+        "op": "put",
+        "value": 1.0,
+        "param": "interval"
+      }
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "knowledge"
+  ]
+}

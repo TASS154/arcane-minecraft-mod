@@ -443,6 +443,17 @@ glyph("origin_aim", "modifier", 1,
       ["...##...", "...##...", "..#..#..", "###..###", "###..###", "..#..#..", "...##...", "...##..."],
       scope={"target": "delivery", "kind": "form", "mutate": {"origin": {"op": "put", "value": 1.0}}})
 
+glyph("zone", "modifier", 3,
+      ("Zona", "Torna a forma persistente: ela se repete do mesmo lugar a cada intervalo, durante o tempo escolhido, reaplicando os efeitos em quem está dentro (Aura + Fogo vira um campo em chamas; Barreira vira parede contínua; Projétil vira torre). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). No máximo 2 zonas suas ao mesmo tempo. Invocações ignoram a Zona."),
+      ("Zone", "Makes the form persistent: it repeats from the same place every interval for the chosen time, reapplying effects to whoever is inside (Aura + Fire becomes a burning field; Barrier becomes a continuous wall; Projectile becomes a turret). Parameters: seconds (up to 60) and interval (min 0.5 s). At most 2 of your zones at once. Summons ignore Zone."),
+      ["..####..", ".#....#.", "#.####.#", "#.#..#.#", "#.#..#.#", "#.####.#", ".#....#.", "..####.."],
+      params={"seconds": (10.0, 2.0, 60.0, "float"), "interval": (1.0, 0.5, 5.0, "float")},
+      scope={"target": "delivery", "kind": "form", "mutate": {"zone_seconds": {"op": "put", "value": 10.0, "param": "seconds"}, "zone_interval": {"op": "put", "value": 1.0, "param": "interval"}}})
+glyph("on_zone_end", "condition", 0,
+      ("Quando a Zona Acabar", "Condição: o que vem depois só acontece quando a zona desta magia terminar (uma vez). Sem o glifo Zona, nunca acontece."),
+      ("When the Zone Ends", "Condition: what follows only happens when this spell's zone ends (once). Without the Zone glyph, it never happens."),
+      ["..####..", ".#....#.", "#..##..#", "#.####.#", "#.####.#", "#..##..#", ".#....#.", "..####.."])
+
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
@@ -451,7 +462,7 @@ TIERS = {
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
         "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column"],
+        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end"],
     4: ["thunder", "gravity", "invisible"],
 }
 FAMILIES = {
@@ -462,7 +473,7 @@ FAMILIES = {
     "life": ["heal", "shield", "speed", "allies", "players", "animals"],
     "force": ["shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
-                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight"],
+                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
     "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
 }

@@ -19,7 +19,7 @@ public final class ModifierApplicator {
             String key = entry.getKey();
             ModifierScope.ModifierMutation mutation = entry.getValue();
             if ("put".equals(mutation.op())) { // grava mesmo que a forma nao declare o parametro (formato, origem)
-                result.put(key, mutation.value());
+                result.put(key, mutation.param().map(p -> modifier.param(p, mutation.value())).orElse(mutation.value()));
                 continue;
             }
             if (!result.containsKey(key)) continue;

@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **81 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **83 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -101,7 +101,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Dobrar** | `arcane:warp` | 8 | 4 | Vazio | `range` 32 (8–64) | Efeito de RITUAL (maior): leva todas as criaturas alvo para o ponto que você mira (até 48). Com Aura ou Pilar e um círculo grande, desloca uma região inteira. |
 | **Clima** | `arcane:weather` | 10 | 4 | Vazio | `mode` 1 (0–2) | Efeito de RITUAL (lendário): muda o clima do mundo (0 limpo, 1 chuva, 2 tempestade). Exige a oferenda de uma Estrela do Nether no círculo maior. |
 
-## Modificadores (22)
+## Modificadores (23)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -129,8 +129,9 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Parede** | `arcane:shape_wall` | 2 | 2 | Arcano | — | Formato: a forma vira uma parede perpendicular ao seu olhar, a 3 blocos a frente (a Barreira ja e assim). |
 | **Eu (origem)** | `arcane:origin_self` | 1 | 1 | Terra | — | Origem: o centro da forma passa a ser voce, mesmo em formas que normalmente miram (Pilar) ou ficam a frente (parede). |
 | **Mira** | `arcane:origin_aim` | 1 | 1 | Terra | — | Origem: o centro da forma passa a ser o ponto para onde voce olha (ate 32 blocos), em vez de voce. |
+| **Zona** | `arcane:zone` | 3 | 3 | Conhecimento | `seconds` 10 (2–60), `interval` 1 (0.5–5) | Torna a forma persistente: ela se repete do mesmo lugar a cada intervalo, durante o tempo escolhido, reaplicando os efeitos em quem está dentro (Aura + Fogo vira um campo em chamas; Barreira vira parede contínua; Projétil vira torre). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). No máximo 2 zonas suas ao mesmo tempo. Invocações ignoram a Zona. |
 
-## Condições (11)
+## Condições (12)
 
 Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira.
 
@@ -147,6 +148,7 @@ Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira
 | **Mana Baixa** | `arcane:low_mana` | 0 | 2 | Conhecimento | — | Condição: o que vem depois só acontece se sua mana estiver abaixo de 20%. |
 | **Parado** | `arcane:standing_still` | 0 | 2 | Conhecimento | — | Condição: o que vem depois só acontece se você estiver parado no chão. |
 | **Ao Morrer** | `arcane:on_death` | 0 | 3 | Vazio | — | Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s). |
+| **Quando a Zona Acabar** | `arcane:on_zone_end` | 0 | 3 | Conhecimento | — | Condição: o que vem depois só acontece quando a zona desta magia terminar (uma vez). Sem o glifo Zona, nunca acontece. |
 
 ## Ativadores (1)
 

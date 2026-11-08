@@ -17,8 +17,10 @@ public class ExecutionContext {
     private final CompiledExecutionPlan plan;
     private final EnvironmentalSnapshot environment;
     private final PrecisionSnapshot precision;
-    private final Vec3 origin;
-    private final Vec3 look;
+    private Vec3 origin;
+    private Vec3 look;
+    private Vec3 anchor;
+    private Object zone;
     private final TriggerEvent trigger;
     private TargetList resolvedTargets = TargetList.empty();
     private Optional<UUID> ritualSiteId = Optional.empty();
@@ -49,6 +51,12 @@ public class ExecutionContext {
     public PrecisionSnapshot precision() { return precision; }
     public Vec3 origin() { return origin; }
     public Vec3 look() { return look; }
+    /** Onde a magia esta ancorada: o conjurador, ou o ponto congelado (zonas ficam onde foram lancadas). */
+    public Vec3 position() { return anchor != null ? anchor : caster.position(); }
+    /** Congela origem, olhar e posicao (usado pelas zonas para repetir a magia sempre do mesmo lugar). */
+    public void freeze(Vec3 origin, Vec3 look, Vec3 position) { this.origin = origin; this.look = look; this.anchor = position; }
+    public Object zone() { return zone; }
+    public void setZone(Object zone) { this.zone = zone; }
     public TriggerEvent trigger() { return trigger; }
     public TargetList resolvedTargets() { return resolvedTargets; }
     public void setResolvedTargets(TargetList targets) { this.resolvedTargets = targets; }

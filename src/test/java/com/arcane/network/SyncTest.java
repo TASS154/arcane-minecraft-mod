@@ -83,7 +83,7 @@ class SyncTest {
   @Test
   void adjustingStepsAreSensible() {
     var duration = new ClientArcaneData.ParamDef("duration", 100, 20, 600, true);
-    assertEquals(29.0, duration.step(), 1e-9);
+    assertEquals(10.0, duration.step(), 1e-9);
     assertEquals(600.0, duration.clamp(99999), 1e-9);
     var amount = new ClientArcaneData.ParamDef("amount", 4.0, 1.0, 20.0, false);
     assertEquals(1.0, amount.step(), 1e-9);

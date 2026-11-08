@@ -374,6 +374,14 @@
   "glyph.arcane.shape_sphere.desc": "Formato: a forma vira uma esfera completa em volta do centro.",
   "glyph.arcane.shape_ring": "Anel",
   "glyph.arcane.shape_ring.desc": "Formato: a forma vira um anel no chao em volta do centro (coluna de 2 blocos de altura).",
+  "glyph.arcane.shape_cone": "Cone",
+  "glyph.arcane.shape_cone.desc": "Formato: a forma vira um cone de ~100 graus a sua frente (a Onda ja e assim). Na Barreira, uma tampa curva.",
+  "glyph.arcane.shape_column": "Coluna",
+  "glyph.arcane.shape_column.desc": "Formato: a forma vira uma coluna vertical no ponto mirado (o Pilar ja e assim). Na Barreira, um cilindro oco.",
+  "glyph.arcane.shape_wall": "Parede",
+  "glyph.arcane.shape_wall.desc": "Formato: a forma vira uma parede perpendicular ao seu olhar, a 3 blocos a frente (a Barreira ja e assim).",
+  "glyph.arcane.origin_self": "Eu (origem)",
+  "glyph.arcane.origin_self.desc": "Origem: o centro da forma passa a ser voce, mesmo em formas que normalmente miram (Pilar) ou ficam a frente (parede).",
   "glyph.arcane.origin_aim": "Mira",
   "glyph.arcane.origin_aim.desc": "Origem: o centro da forma passa a ser o ponto para onde voce olha (ate 32 blocos), em vez de voce."
 }

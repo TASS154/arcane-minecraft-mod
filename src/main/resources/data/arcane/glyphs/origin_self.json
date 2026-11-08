@@ -1,0 +1,23 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:origin_self"
+  },
+  "modifier_scope": {
+    "target": "delivery",
+    "kind": "form",
+    "mutate": {
+      "origin": {
+        "op": "put",
+        "value": -1.0
+      }
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 1,
+  "families": [
+    "earth"
+  ]
+}

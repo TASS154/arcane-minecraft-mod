@@ -15,26 +15,16 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Pilar: coluna vertical no ponto mirado. Pega as criaturas na coluna e o bloco atingido (se a mira acertou um). */
+/** Pilar: por padrao uma coluna vertical no ponto mirado. Pega as criaturas da regiao e o bloco atingido pela mira. */
 public class PillarFormHandler implements FormHandler {
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
-    double range = Math.max(4.0, Math.min(64.0, spec.range()));
     double radius = Math.max(1.0, Math.min(24.0, spec.parameters().getOrDefault("radius", 2.0) * context.areaScale()));
-    Targeting.RayResult ray = Targeting.ray(context, range, false);
-    Vec3 base = ray.end();
-
-    LivingEntity caster = context.caster();
-    AABB column = new AABB(base.x - radius, base.y - 2, base.z - radius, base.x + radius, base.y + 10, base.z + radius);
-    List<Entity> entities = new ArrayList<>(context.level().getEntitiesOfClass(LivingEntity.class, column,
-        e -> e != caster && e.isAlive() && !e.isSpectator()));
-    com.arcane.execution.SpellElement element = com.arcane.execution.SpellElement.of(context.plan());
-    com.arcane.network.ModNetwork.sendShape(context.level(), com.arcane.network.packet.S2CShapeFxPacket.PILLAR,
-        base, Vec3.ZERO, (float) radius, element.color(), element.ordinal(), 18);
-    com.arcane.execution.ElementSounds.playImpact(context.level(), base, element);
-    for (int i = 0; i < 0; i++) {
-      context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(), base.x, base.y + i * 0.5, base.z, 1, radius * 0.3, 0.0, radius * 0.3, 0.0);
-    }
-    return DeliveryResult.of(new TargetList(entities, ray.targets().blocks()));
+    com.arcane.execution.Region region = com.arcane.execution.Region.of(context, spec, com.arcane.execution.ShapeGeometry.COLUMN, radius);
+    List<Entity> entities = new ArrayList<>(region.entities(context.level(), context.caster(), false));
+    region.playFx(context);
+    double range = Math.max(4.0, Math.min(64.0, spec.range()));
+    List<TargetList.BlockTarget> blocks = Targeting.ray(context, range, false).targets().blocks();
+    return DeliveryResult.of(new TargetList(entities, blocks));
   }
 }

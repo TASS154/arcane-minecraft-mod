@@ -1138,4 +1138,52 @@ public class ArcaneGameTests {
     assertHurt(h, above, before, "criatura dentro do domo da aura");
     h.succeed();
   }
+
+  // ------------------------------------------------------------------ regioes: qualquer formato em qualquer forma
+  @GameTest(template = "empty")
+  public static void auraWithConeOnlyHitsCreaturesInFront(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var front = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 5));
+    var behind = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 1));
+    float fb = front.getHealth(), bb = behind.getHealth();
+    cast(h, caster, g("aura"), g("shape_cone"), g("damage"));
+    assertHurt(h, front, fb, "criatura na frente do cone");
+    assertUnhurt(h, behind, bb, "criatura atras do cone");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void waveWithSphereHitsEveryoneAround(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var behind = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 1));
+    float bb = behind.getHealth();
+    cast(h, caster, g("wave"), g("shape_sphere"), g("damage"));
+    assertHurt(h, behind, bb, "a Onda com Esfera atinge tambem quem esta atras");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void pillarWithSelfOriginStrikesAroundTheCaster(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var near = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(4, 1, 3));
+    float nb = near.getHealth();
+    cast(h, caster, g("pillar"), g("origin_self"), g("damage"));
+    assertHurt(h, near, nb, "o Pilar com origem Eu cai em volta do conjurador");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 100)
+  public static void barrierWithColumnAndConeBuildBlocks(GameTestHelper h) {
+    for (int x = 0; x < 15; x++) for (int z = 0; z < 15; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+    Pig c = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(7, 1, 7));
+    c.setYRot(0);
+    c.setXRot(0);
+    h.assertTrue(CastingService.tryCast(c, new Inscription(List.of(g("barrier"), g("shape_column"), g("origin_self"))), h.getLevel()).success(), "coluna");
+    int column = countBarrier(h, 7);
+    h.assertTrue(column > 20, "cilindro oco com blocos, tem " + column);
+    h.succeed();
+  }
 }

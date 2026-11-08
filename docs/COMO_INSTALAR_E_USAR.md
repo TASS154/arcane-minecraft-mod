@@ -347,11 +347,11 @@ Na Bancada, a **roda do mouse** sobre a linha ajusta o 1º parâmetro (o **tipo*
 ## Escrever em blocos (Pena Arcana)
 Pena Arcana (ametista, pena e pepita de ouro) na mão principal, uma **tinta** na outra, botão direito num bloco: grava a magia ativa nele. Em baú dispara ao abrir; em qualquer outro bloco dispara quando uma criatura pisa em cima (a criatura vira o alvo, então Eu + Dano numa pedra é uma armadilha). Agachado + botão direito apaga; quebrar o bloco também. Tinta Comum (gasta 1), Tinta de Sangue (mana mais barata, custa 2 de vida) ou Tinta Invisível (sem partículas).
 
-## Formatos e origem (modulares)
-Glifos de **formato** (Domo, Esfera, Anel) e de **origem** (Mira) são modificadores que valem para qualquer forma com área: gravam `shape` e `origin` na forma, e quem cria blocos ou escolhe criaturas por área lê isso (hoje: **Barreira** e **Aura**).
-- `Barreira`: parede de energia (3x3 com raio 3). `Barreira + Domo`: meia-esfera oca em volta do centro. `+ Esfera`: esfera completa. `+ Anel`: anel no chão com 2 de altura.
-- **Raio** da Barreira: 2º parâmetro (Ctrl + roda na bancada), de 2 a 12 (padrão 3). **Área** dobra o raio (também amplia a parede). Teto de 2500 blocos por casca; domo até 16, esfera até 12, anel até 24.
-- **Mira** move o centro para onde você olha (até 32 blocos); sem ela o centro é você (a parede continua 3 blocos à frente).
-- `Aura + Domo`: só as criaturas dentro da meia-esfera; `Aura + Anel`: só as da faixa do anel.
-- Os glifos seguintes atingem os **blocos e as criaturas dentro ou encostadas** (`Barreira + Domo + Cura` cura quem está dentro; use filtros como Hostil ou Não eu para escolher). O efeito vale uma vez, na hora da conjuração: a barreira não aplica efeitos continuamente depois.
-- Exemplos: `Barreira, Domo, Área` (domo grande em você); `Barreira, Domo, Mira` (domo onde você mira); `Aura, Anel, Dano`.
+## Regiões: formatos e origem valem para qualquer forma
+Toda forma com área (Aura, Onda, Pilar, Barreira) monta uma **Região** (formato, centro, raio, altura) em `execution/Region.java`, e usa a mesma Região para escolher criaturas, criar blocos e mostrar o efeito. Por isso os glifos de formato e origem funcionam em todas elas.
+- **Formato natural:** Aura = esfera, Onda = cone, Pilar = coluna, Barreira = parede.
+- **Glifos de formato** (trocam o natural): Domo, Esfera, Anel, Cone, Coluna, Parede. Ex.: `Aura, Cone, Dano` fere só quem está à frente; `Onda, Esfera, Dano` fere todos em volta; `Barreira, Coluna` cria um cilindro oco.
+- **Origem:** Mira (centro onde você olha, até 32 blocos) e Eu (centro em você, mesmo no Pilar ou na parede).
+- **Raio:** Aura e Pilar usam o parâmetro `radius`; a Onda usa o alcance; a Barreira usa `radius` (2º parâmetro, Ctrl + roda). **Área** dobra o raio de todas.
+- **Casca de blocos (Barreira):** teto de 2500 blocos. Raio máximo: domo 16, esfera 12, anel 24, cone 12, coluna 16, parede 12.
+- Os glifos seguintes atingem os **blocos e as criaturas dentro ou encostadas** (`Barreira, Domo, Cura` cura quem está dentro). O efeito vale uma vez, na conjuração.

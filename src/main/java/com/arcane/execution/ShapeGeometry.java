@@ -9,7 +9,7 @@ import java.util.List;
  * mesmo formato vale para Barreira, Aura e o que vier depois. 0 = padrao da forma (a parede da Barreira, a esfera da Aura).
  */
 public final class ShapeGeometry {
-  public static final int DEFAULT = 0, DOME = 1, SPHERE = 2, RING = 3;
+  public static final int DEFAULT = 0, DOME = 1, SPHERE = 2, RING = 3, CONE = 4, COLUMN = 5, WALL = 6;
   /** Limite de blocos de uma casca (protege o servidor); o excedente simplesmente nao e criado. */
   public static final int MAX_BLOCKS = 2500;
   public static final double MIN_RADIUS = 2.0;
@@ -20,7 +20,7 @@ public final class ShapeGeometry {
 
   public static int shapeOf(double raw) {
     int s = (int) Math.round(raw);
-    return s < DEFAULT || s > RING ? DEFAULT : s;
+    return s < DEFAULT || s > WALL ? DEFAULT : s;
   }
 
   /** Raio maximo por formato, para a casca caber em {@link #MAX_BLOCKS}. */
@@ -29,6 +29,9 @@ public final class ShapeGeometry {
       case DOME -> 16.0;
       case SPHERE -> 12.0;
       case RING -> 24.0;
+      case CONE -> 12.0;
+      case COLUMN -> 16.0;
+      case WALL -> 12.0;
       default -> 12.0;
     };
   }

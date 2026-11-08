@@ -1,0 +1,23 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:shape_column"
+  },
+  "modifier_scope": {
+    "target": "delivery",
+    "kind": "form",
+    "mutate": {
+      "shape": {
+        "op": "put",
+        "value": 5.0
+      }
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 3,
+  "families": [
+    "arcane"
+  ]
+}

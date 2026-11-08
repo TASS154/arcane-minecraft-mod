@@ -374,6 +374,14 @@
   "glyph.arcane.shape_sphere.desc": "Shape: the form becomes a full sphere around the center.",
   "glyph.arcane.shape_ring": "Ring",
   "glyph.arcane.shape_ring.desc": "Shape: the form becomes a ring on the ground around the center (2 blocks high).",
+  "glyph.arcane.shape_cone": "Cone",
+  "glyph.arcane.shape_cone.desc": "Shape: the form becomes a ~100 degree cone in front of you (Wave already is). For Barrier, a curved cap.",
+  "glyph.arcane.shape_column": "Column",
+  "glyph.arcane.shape_column.desc": "Shape: the form becomes a vertical column at the aimed point (Pillar already is). For Barrier, a hollow cylinder.",
+  "glyph.arcane.shape_wall": "Wall",
+  "glyph.arcane.shape_wall.desc": "Shape: the form becomes a wall perpendicular to your gaze, 3 blocks ahead (Barrier already is).",
+  "glyph.arcane.origin_self": "Self (origin)",
+  "glyph.arcane.origin_self.desc": "Origin: the form's center becomes you, even for forms that normally aim (Pillar) or sit ahead (wall).",
   "glyph.arcane.origin_aim": "Aim",
   "glyph.arcane.origin_aim.desc": "Origin: the form's center becomes the point you look at (up to 32 blocks) instead of you."
 }

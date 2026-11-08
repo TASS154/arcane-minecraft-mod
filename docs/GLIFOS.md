@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **77 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **81 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -101,7 +101,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Dobrar** | `arcane:warp` | 8 | 4 | Vazio | `range` 32 (8–64) | Efeito de RITUAL (maior): leva todas as criaturas alvo para o ponto que você mira (até 48). Com Aura ou Pilar e um círculo grande, desloca uma região inteira. |
 | **Clima** | `arcane:weather` | 10 | 4 | Vazio | `mode` 1 (0–2) | Efeito de RITUAL (lendário): muda o clima do mundo (0 limpo, 1 chuva, 2 tempestade). Exige a oferenda de uma Estrela do Nether no círculo maior. |
 
-## Modificadores (18)
+## Modificadores (22)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -124,6 +124,10 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Domo** | `arcane:shape_dome` | 2 | 2 | Força | — | Formato: a forma vira uma meia-esfera (casca de blocos na Barreira; so quem esta dentro na Aura). Use Area para aumentar o raio. |
 | **Esfera** | `arcane:shape_sphere` | 3 | 3 | Força | — | Formato: a forma vira uma esfera completa em volta do centro. |
 | **Anel** | `arcane:shape_ring` | 2 | 2 | Força | — | Formato: a forma vira um anel no chao em volta do centro (coluna de 2 blocos de altura). |
+| **Cone** | `arcane:shape_cone` | 2 | 2 | Arcano | — | Formato: a forma vira um cone de ~100 graus a sua frente (a Onda ja e assim). Na Barreira, uma tampa curva. |
+| **Coluna** | `arcane:shape_column` | 2 | 3 | Arcano | — | Formato: a forma vira uma coluna vertical no ponto mirado (o Pilar ja e assim). Na Barreira, um cilindro oco. |
+| **Parede** | `arcane:shape_wall` | 2 | 2 | Arcano | — | Formato: a forma vira uma parede perpendicular ao seu olhar, a 3 blocos a frente (a Barreira ja e assim). |
+| **Eu (origem)** | `arcane:origin_self` | 1 | 1 | Terra | — | Origem: o centro da forma passa a ser voce, mesmo em formas que normalmente miram (Pilar) ou ficam a frente (parede). |
 | **Mira** | `arcane:origin_aim` | 1 | 1 | Terra | — | Origem: o centro da forma passa a ser o ponto para onde voce olha (ate 32 blocos), em vez de voce. |
 
 ## Condições (11)

@@ -419,6 +419,24 @@ glyph("shape_ring", "modifier", 2,
       ("Anel", "Formato: a forma vira um anel no chao em volta do centro (coluna de 2 blocos de altura)."),
       ("Ring", "Shape: the form becomes a ring on the ground around the center (2 blocks high)."),
       [".######.", "#......#", "#.####.#", "#.#..#.#", "#.#..#.#", "#.####.#", "#......#", ".######."], scope=SHAPE_SCOPE(3))
+glyph("shape_cone", "modifier", 2,
+      ("Cone", "Formato: a forma vira um cone de ~100 graus a sua frente (a Onda ja e assim). Na Barreira, uma tampa curva."),
+      ("Cone", "Shape: the form becomes a ~100 degree cone in front of you (Wave already is). For Barrier, a curved cap."),
+      ["...##...", "..####..", "..####..", ".######.", ".######.", "########", "########", "........"], scope=SHAPE_SCOPE(4))
+glyph("shape_column", "modifier", 2,
+      ("Coluna", "Formato: a forma vira uma coluna vertical no ponto mirado (o Pilar ja e assim). Na Barreira, um cilindro oco."),
+      ("Column", "Shape: the form becomes a vertical column at the aimed point (Pillar already is). For Barrier, a hollow cylinder."),
+      ["..####..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", "..####.."], scope=SHAPE_SCOPE(5))
+glyph("shape_wall", "modifier", 2,
+      ("Parede", "Formato: a forma vira uma parede perpendicular ao seu olhar, a 3 blocos a frente (a Barreira ja e assim)."),
+      ("Wall", "Shape: the form becomes a wall perpendicular to your gaze, 3 blocks ahead (Barrier already is)."),
+      ["########", "#.#.#.#.", "########", "#.#.#.#.", "########", "#.#.#.#.", "########", "#.#.#.#."], scope=SHAPE_SCOPE(6))
+glyph("origin_self", "modifier", 1,
+      ("Eu (origem)", "Origem: o centro da forma passa a ser voce, mesmo em formas que normalmente miram (Pilar) ou ficam a frente (parede)."),
+      ("Self (origin)", "Origin: the form's center becomes you, even for forms that normally aim (Pillar) or sit ahead (wall)."),
+      ["..####..", ".#....#.", "#..##..#", "#.#..#.#", "#.#..#.#", "#..##..#", ".#....#.", "..####.."],
+      scope={"target": "delivery", "kind": "form", "mutate": {"origin": {"op": "put", "value": -1.0}}})
+
 glyph("origin_aim", "modifier", 1,
       ("Mira", "Origem: o centro da forma passa a ser o ponto para onde voce olha (ate 32 blocos), em vez de voce."),
       ("Aim", "Origin: the form's center becomes the point you look at (up to 32 blocks) instead of you."),
@@ -431,9 +449,9 @@ TIERS = {
         "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group"],
     2: ["slow", "poison", "speed", "players", "animals", "undead", "nearest", "wounded", "allies", "delay", "lengthen",
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
-        "ray", "dig", "shield", "shape_dome", "shape_ring", "standing_still", "low_mana", "wave"],
+        "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere"],
+        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column"],
     4: ["thunder", "gravity", "invisible"],
 }
 FAMILIES = {
@@ -446,7 +464,7 @@ FAMILIES = {
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
-    "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "touch", "projectile", "self"],
+    "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():
     for _gid in _ids:

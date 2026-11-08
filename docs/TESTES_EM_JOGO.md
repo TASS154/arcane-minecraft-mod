@@ -13,7 +13,7 @@ Como repetir: `JAVA_TOOL_OPTIONS=-Darcane.observe=true` e `./gradlew runGameTest
 - **Formatos:** domo e esfera acertam todos ao redor, cone só o que está à frente, coluna e anel acertam o que o geometria prevê. Em Barreira: parede 9 blocos, domo 57, esfera 57, anel 32, cone 13, coluna oca 112.
 - **Alvos de bloco:** Dano quebra vidro (e não pedra), Escavar quebra pedra, Fogo/Acender acendem TNT, Fogo derrete gelo, Congelar vira água em gelo, Gravidade derruba areia, Cura faz grama crescer, Veneno deixa nuvem, Acender põe fogo em cima.
 - **Ponto vazio (Raio sem alvo, alcance 8):** Fogo, Acender e Raio acendem ou caem no chão; Veneno deixa nuvem; Empurrar, Dano, Atrair, Cura e Explosão agem na criatura perto do ponto; Explosão sem criatura não faz nada (por desenho, sem dano em blocos).
-- **Zonas:** Aura + Zona repete (dano de 1 em 1 s causou 1 a 2 de dano acumulado; com intervalo 0,5 s o dobro), Zona + Fogo manteve tudo queimando, Zona + Cura curou até o máximo (husk 12→20), Zona + Empurrar empurrou, e `Quando a Zona Acabar + Explosão` matou os três no fim. Barreira + Zona e Projétil + Zona também repetem.
+- **Zonas:** Zona + Fogo manteve tudo queimando, Zona + Veneno envenenou, Zona + Cura curou até o máximo (husk 12→20), Zona + Empurrar empurrou, e `Quando a Zona Acabar + Explosão` matou os três no fim. **Não ficou demonstrada a repetição do Dano** nesta bateria (ver achado 8).
 - **Juramentos:** Sangue custou 4 de vida ao conjurador e a vaca morreu (bônus de dano); Quietude e Juramento Personalizado também aumentaram o dano (vaca morreu / vida 6→0).
 - **Atraso:** `Atraso` aplicou o dano depois de 110 ticks (não aos 30).
 - **Combinações mistas:** `Dano + Fogo + Veneno` na mesma vaca aplicou dano, fogo e veneno; `Fogo + Cura` queimou e curou (6→8).
@@ -27,6 +27,8 @@ Como repetir: `JAVA_TOOL_OPTIONS=-Darcane.observe=true` e `./gradlew runGameTest
 5. **Filtro `wounded` (Feridos) não pegou a vaca a 60% de vida:** o limite parece ser menor que 60%. Não verifiquei o valor exato.
 6. **Anel de Onda (alcance 8) não pegou ninguém:** o anel é uma faixa de 8±1,5 blocos; os alvos estavam a 3 e 4. Correto, mas pouco intuitivo.
 7. **Limites do teste:** foi num servidor de testes, sem cliente: **não vi** partículas, sons, animações do personagem, o tooltip da prévia nem o aspecto das zonas e barreiras na tela. O conjurador é um porco (sem mana nem grimório), então custos de mana, ritual e juramentos de jogador não foram exercidos de verdade. O "nada observado" também só vê o que a bateria mede (não vê, por exemplo, partículas).
+
+8. **Zona + Dano de 1 não repetiu na bateria:** a vaca, a ovelha e o husk perderam só 1 de vida (um golpe) apesar de a zona durar 2 s com pulso a cada 1 s (e 0,5 s). A hipótese mais provável é que o **knockback do primeiro golpe empurra os alvos 2 blocos para fora do raio 5 da Aura**, então os pulsos seguintes não os alcançam; com Fogo, Veneno, Cura e Empurrar (sem esse recuo) a zona agiu. Não confirmei a causa. O GameTest `zoneRepeatsTheSpellOverTime` já mostrou a repetição do Dano com um alvo mais próximo. O mesmo vale para Projétil + Zona (vaca 6→5) e para Barreira + Zona (mesmos 9 blocos da barreira simples): **a repetição desses dois não foi observada aqui.**
 
 ## Tabela completa
 

@@ -42,7 +42,7 @@ public enum SpellElement {
 
   public static SpellElement ofGlyph(String glyphPath) {
     return switch (glyphPath) {
-      case "fire", "ignite", "explode" -> FIRE;
+      case "fire", "ignite", "explode", "blast" -> FIRE;
       case "slow", "freeze" -> FROST;
       case "thunder", "weather" -> STORM;
       case "poison", "wither" -> VENOM;

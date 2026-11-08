@@ -20,6 +20,15 @@ public class DamageEffectHandler implements EffectHandler {
             entity.hurt(source, (float) (amount * mult));
             com.arcane.execution.ElementInteractions.afterHit(context.level(), element, entity);
         }
+        if (com.arcane.execution.Chain.enabled(call)) {
+            java.util.Set<java.util.UUID> seen = com.arcane.execution.Chain.seenOf(targets.entities());
+            seen.add(context.caster().getUUID());
+            for (Entity entity : targets.entities()) {
+                if (entity instanceof net.minecraft.world.entity.LivingEntity living && living.isAlive()) {
+                    com.arcane.execution.Chain.arc(context, living, amount, source, seen);
+                }
+            }
+        }
         // Blocos muito frageis (vidro, folhas, gelo fino...) racham sob o dano; nada mais.
         if (!com.arcane.execution.Targeting.mayBreakBlocks(context)) return;
         int broken = 0;

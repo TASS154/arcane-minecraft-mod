@@ -67,6 +67,7 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("shield"), new PotionEffectHandler(MobEffects.ABSORPTION, 4800));
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("thunder"), new ThunderEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("explode"), new ExplodeEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("blast"), new com.arcane.execution.handlers.BlastEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("blink"), new BlinkEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("ignite"), new IgniteEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("dig"), new DigEffectHandler());

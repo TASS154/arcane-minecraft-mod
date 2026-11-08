@@ -130,3 +130,7 @@ Um grimório flutuante sem dono (sobra de teste ou dado antigo) derrubava o logi
 - As animações são trocas de quadro por tempo (código), não `.mcmeta`; isso funciona em entidades e partículas, mas não em blocos.
 - O braço do mago sobe com interpolação de 14 ticks; se quiser mais teatral, aumente `14` em `NPCMageEntity.startCastAnimation`.
 - As capturas de verificação foram feitas num mundo de teste com muitos mobs; pode haver ruído visual.
+
+### Imunidade do conjurador, Explosão Destrutiva e Cadeia (esta rodada)
+- Imunidade: `SpellPipeline` tira o conjurador dos alvos de efeitos nocivos (exceto forma Eu); `SpellImmunity` poupa o dono de explosão, relâmpago e nuvem nociva (remoção do efeito um tick depois, pois o efeito só entra após o evento).
+- Novos glifos: `blast` (efeito) e `chain` (modificador), total 85. Testados por GameTest (95 passando) e JUnit; não vistos ainda num cliente real.

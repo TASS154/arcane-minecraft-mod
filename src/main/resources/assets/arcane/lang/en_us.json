@@ -248,6 +248,7 @@
   "gui.arcane.preview.zone": "Zone: repeats for %s s, every %s s, from the same place",
   "gui.arcane.preview.warn.zone_summon": "⚠ Summons ignore Zone (repeating them would create a swarm).",
   "gui.arcane.preview.warn.zone_end_without_zone": "⚠ \"When the Zone Ends\" never happens without the Zone glyph.",
+  "gui.arcane.preview.warn.chain_unsupported": "⚠ %s ignores Chain (only Damage, Explosion and Destructive Blast chain).",
   "glyph.arcane.self": "Self",
   "glyph.arcane.self.desc": "Form: the spell happens on you.",
   "glyph.arcane.touch": "Touch",
@@ -413,5 +414,9 @@
   "glyph.arcane.zone": "Zone",
   "glyph.arcane.zone.desc": "Makes the form persistent: it repeats from the same place every interval for the chosen time, reapplying effects to whoever is inside (Aura + Fire becomes a burning field; Barrier becomes a continuous wall; Projectile becomes a turret). Parameters: seconds (up to 60) and interval (min 0.5 s). At most 2 of your zones at once. Summons ignore Zone.",
   "glyph.arcane.on_zone_end": "When the Zone Ends",
-  "glyph.arcane.on_zone_end.desc": "Condition: what follows only happens when this spell's zone ends (once). Without the Zone glyph, it never happens."
+  "glyph.arcane.on_zone_end.desc": "Condition: what follows only happens when this spell's zone ends (once). Without the Zone glyph, it never happens.",
+  "glyph.arcane.blast": "Destructive Blast",
+  "glyph.arcane.blast.desc": "Effect: explodes at the target DESTROYING blocks (like TNT, dropping items) and hurting nearby creatures. You are immune. Radius 1-6. Respects the server configs against block destruction.",
+  "glyph.arcane.chain": "Chain",
+  "glyph.arcane.chain.desc": "Modifier: the previous effect spreads from creature to creature. Explosion and Destructive Blast detonate again, smaller, on nearby creatures (up to 3 hops, 8 extra); Damage arcs to the nearest creature at 60% per hop. Other effects ignore Chain (the preview warns)."
 }

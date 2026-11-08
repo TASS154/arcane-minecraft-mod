@@ -248,6 +248,7 @@
   "gui.arcane.preview.zone": "Zona: repete por %s s, a cada %s s, do mesmo lugar",
   "gui.arcane.preview.warn.zone_summon": "⚠ Invocações ignoram a Zona (repeti-las criaria um enxame).",
   "gui.arcane.preview.warn.zone_end_without_zone": "⚠ \"Quando a Zona Acabar\" nunca acontece sem o glifo Zona.",
+  "gui.arcane.preview.warn.chain_unsupported": "⚠ %s ignora a Cadeia (só Dano, Explosão e Explosão Destrutiva encadeiam).",
   "glyph.arcane.self": "Eu",
   "glyph.arcane.self.desc": "Forma: o feitiço acontece em você.",
   "glyph.arcane.touch": "Toque",
@@ -413,5 +414,9 @@
   "glyph.arcane.zone": "Zona",
   "glyph.arcane.zone.desc": "Torna a forma persistente: ela se repete do mesmo lugar a cada intervalo, durante o tempo escolhido, reaplicando os efeitos em quem está dentro (Aura + Fogo vira um campo em chamas; Barreira vira parede contínua; Projétil vira torre). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). No máximo 2 zonas suas ao mesmo tempo. Invocações ignoram a Zona.",
   "glyph.arcane.on_zone_end": "Quando a Zona Acabar",
-  "glyph.arcane.on_zone_end.desc": "Condição: o que vem depois só acontece quando a zona desta magia terminar (uma vez). Sem o glifo Zona, nunca acontece."
+  "glyph.arcane.on_zone_end.desc": "Condição: o que vem depois só acontece quando a zona desta magia terminar (uma vez). Sem o glifo Zona, nunca acontece.",
+  "glyph.arcane.blast": "Explosão Destrutiva",
+  "glyph.arcane.blast.desc": "Efeito: explode no alvo DESTRUINDO blocos (como TNT, com queda de itens) e ferindo quem está perto. Você é imune. Raio 1–6. Respeita as configs do servidor contra destruição de blocos.",
+  "glyph.arcane.chain": "Cadeia",
+  "glyph.arcane.chain.desc": "Modificador: o efeito anterior se propaga de criatura em criatura. Explosão e Explosão Destrutiva detonam de novo, menores, em quem estava perto (até 3 saltos, 8 extras); Dano salta em arco para a mais próxima, com 60% do dano a cada salto. Outros efeitos ignoram a Cadeia (a prévia avisa)."
 }

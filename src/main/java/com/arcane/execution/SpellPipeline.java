@@ -99,7 +99,13 @@ public final class SpellPipeline {
         for (EffectCallCompiled effectCompiled : segment.effects()) {
             EffectHandler handler = GlyphHandlerRegistry.getEffect(effectCompiled.handler()).orElse(null);
             if (handler != null) {
-                handler.apply(context, EffectCall.fromCompiled(effectCompiled), targets);
+                TargetList effective = targets;
+                // O conjurador nao sofre os efeitos nocivos das proprias formas de area (so a forma Eu o atinge).
+                if (EffectReach.harmful(effectCompiled.glyphId().getPath()) && !"self".equals(context.plan().delivery().formId().getPath())
+                        && targets.entities().contains(context.caster())) {
+                    effective = new TargetList(targets.entities().stream().filter(e -> e != context.caster()).toList(), targets.blocks(), targets.points());
+                }
+                handler.apply(context, EffectCall.fromCompiled(effectCompiled), effective);
             }
         }
     }

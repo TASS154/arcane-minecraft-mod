@@ -77,6 +77,9 @@ public final class SpellPreview {
       for (var effect : segment.effects()) {
         int acts = EffectReach.ofEffect(path(effect.glyphId()));
         int hit = acts & mask;
+        if (Chain.enabled(EffectCall.fromCompiled(effect)) && !EffectReach.chainable(path(effect.glyphId()))) {
+          warnings.add(Component.translatable("gui.arcane.preview.warn.chain_unsupported", name(effect.glyphId())).withStyle(ChatFormatting.GOLD));
+        }
         if (EffectReach.independent(path(effect.glyphId()))) {
           lines.add(Component.translatable("gui.arcane.preview.effect.free", name(effect.glyphId())));
         } else if (hit == 0) {

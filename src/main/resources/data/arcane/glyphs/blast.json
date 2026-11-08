@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:blast"
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 3.0,
+      "min": 1.0,
+      "max": 6.0
+    }
+  },
+  "cost": {
+    "mana": 8
+  },
+  "tier": 4,
+  "families": [
+    "fire"
+  ]
+}

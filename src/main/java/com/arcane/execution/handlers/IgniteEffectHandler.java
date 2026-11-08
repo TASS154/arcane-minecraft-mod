@@ -1,5 +1,7 @@
 package com.arcane.execution.handlers;
 
+import net.minecraft.world.phys.Vec3;
+
 import com.arcane.api.effect.EffectHandler;
 import com.arcane.execution.EffectCall;
 import com.arcane.execution.ExecutionContext;
@@ -22,7 +24,7 @@ public class IgniteEffectHandler implements EffectHandler {
     }
     // Ponto vazio: acende no chao logo abaixo.
     for (var point : targets.points()) {
-      com.arcane.execution.Targeting.groundCell(context.level(), point).ifPresent(cell -> {
+      com.arcane.execution.Targeting.groundCell(context.level(), point).filter(cell -> Vec3.atCenterOf(cell).distanceToSqr(context.caster().position()) > 2.25).ifPresent(cell -> {
         if (com.arcane.execution.ElementInteractions.canIgniteAt(context.level(), cell) && BaseFireBlock.canBePlacedAt(context.level(), cell, Direction.UP)) {
           context.level().setBlockAndUpdate(cell, BaseFireBlock.getState(context.level(), cell));
         }

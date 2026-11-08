@@ -38,6 +38,7 @@ public class PotionEffectHandler implements EffectHandler {
       if (clouds++ >= 2) break;
       var cloud = new net.minecraft.world.entity.AreaEffectCloud(context.level(), spot.x, spot.y, spot.z);
       cloud.setOwner(context.caster());
+      cloud.getPersistentData().putBoolean(com.arcane.execution.SpellImmunity.CLOUD_TAG, true);
       cloud.setRadius(2.0f);
       cloud.setDuration(100);
       cloud.setWaitTime(0);

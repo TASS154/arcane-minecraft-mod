@@ -454,6 +454,17 @@ glyph("on_zone_end", "condition", 0,
       ("When the Zone Ends", "Condition: what follows only happens when this spell's zone ends (once). Without the Zone glyph, it never happens."),
       ["..####..", ".#....#.", "#..##..#", "#.####.#", "#.####.#", "#..##..#", ".#....#.", "..####.."])
 
+glyph("blast", "effect", 8,
+      ("Explosão Destrutiva", "Efeito: explode no alvo DESTRUINDO blocos (como TNT, com queda de itens) e ferindo quem está perto. Você é imune. Raio 1–6. Respeita as configs do servidor contra destruição de blocos."),
+      ("Destructive Blast", "Effect: explodes at the target DESTROYING blocks (like TNT, dropping items) and hurting nearby creatures. You are immune. Radius 1-6. Respects the server configs against block destruction."),
+      ["#.#..#.#", ".#.##.#.", "#.####.#", "..####..", "..####..", "#.####.#", ".#.##.#.", "#.#..#.#"],
+      params={"radius": (3.0, 1.0, 6.0, "float")})
+glyph("chain", "modifier", 3,
+      ("Cadeia", "Modificador: o efeito anterior se propaga de criatura em criatura. Explosão e Explosão Destrutiva detonam de novo, menores, em quem estava perto (até 3 saltos, 8 extras); Dano salta em arco para a mais próxima, com 60% do dano a cada salto. Outros efeitos ignoram a Cadeia (a prévia avisa)."),
+      ("Chain", "Modifier: the previous effect spreads from creature to creature. Explosion and Destructive Blast detonate again, smaller, on nearby creatures (up to 3 hops, 8 extra); Damage arcs to the nearest creature at 60% per hop. Other effects ignore Chain (the preview warns)."),
+      ["#......#", "##....##", ".##..##.", "..####..", "..####..", ".##..##.", "##....##", "#......#"],
+      scope={"target": "previous_effect", "kind": "effect", "mutate": {"chain": {"op": "put", "value": 1.0}}})
+
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
@@ -462,16 +473,16 @@ TIERS = {
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
         "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end"],
-    4: ["thunder", "gravity", "invisible"],
+        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "chain"],
+    4: ["thunder", "gravity", "invisible", "blast"],
 }
 FAMILIES = {
-    "fire": ["fire", "ignite", "explode"],
+    "fire": ["fire", "ignite", "explode", "blast"],
     "ice": ["slow", "freeze", "shield"],
     "storm": ["thunder", "ray", "pillar"],
     "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead"],
     "life": ["heal", "shield", "speed", "allies", "players", "animals"],
-    "force": ["shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
+    "force": ["chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],

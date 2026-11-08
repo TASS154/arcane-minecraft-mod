@@ -21,7 +21,12 @@ public class ExplodeEffectHandler implements EffectHandler {
     for (Vec3 pos : Targeting.positions(targets)) {
       if (count++ >= MAX_EXPLOSIONS) break;
       context.level().sendParticles(com.arcane.registry.ModParticles.ARCANE_SHOCK.get(), pos.x, pos.y + 0.3, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
-      context.level().explode(context.caster(), pos.x, pos.y, pos.z, radius, Level.ExplosionInteraction.NONE);
+      final float r = radius;
+      com.arcane.execution.SpellImmunity.explodeAs(context.caster(), () -> context.level().explode(context.caster(), pos.x, pos.y, pos.z, r, Level.ExplosionInteraction.NONE));
+      if (com.arcane.execution.Chain.enabled(call)) {
+        com.arcane.execution.Chain.explosions(context, pos, radius, Level.ExplosionInteraction.NONE, 0,
+            new java.util.HashSet<>(java.util.List.of(context.caster().getUUID())), com.arcane.execution.Chain.explosionBudget());
+      }
     }
   }
 }

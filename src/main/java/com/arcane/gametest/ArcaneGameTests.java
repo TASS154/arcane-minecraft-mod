@@ -1193,11 +1193,11 @@ public class ArcaneGameTests {
   @GameTest(template = "empty")
   public static void fireOnEmptyPointLightsTheGround(GameTestHelper h) {
     floor(h);
-    Pig caster = pig(h, 3, 3);
-    cast(h, caster, g("pillar"), g("origin_self"), g("fire"));
+    Pig caster = pig(h, 3, 1);
+    cast(h, caster, g("ray", "range", 4.0), g("fire"));
     boolean found = false;
     for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-      if (h.getBlockState(new BlockPos(3 + dx, 1, 3 + dz)).is(Blocks.FIRE)) found = true;
+      if (h.getBlockState(new BlockPos(3 + dx, 1, 5 + dz)).is(Blocks.FIRE)) found = true;
     }
     h.assertTrue(found, "o Fogo num ponto vazio deveria acender uma chama no chao");
     h.succeed();
@@ -1369,5 +1369,121 @@ public class ArcaneGameTests {
 
   private static void add(List<String> failures, String failure) {
     if (failure != null) failures.add(failure);
+  }
+
+  // ------------------------------------------------------------------ imunidade do conjurador, explosao destrutiva, cadeia
+  @GameTest(template = "empty", timeoutTicks = 60)
+  public static void casterIsImmuneToItsOwnAreaSpells(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    float hp = caster.getHealth();
+    StringBuilder trail = new StringBuilder();
+    cast(h, caster, g("pillar"), g("origin_self"), g("poison"));
+    trail.append("veneno=").append(caster.getHealth()).append(' ');
+    cast(h, caster, g("barrier"), g("shape_column"), g("origin_self"), g("damage"));
+    trail.append("barreira=").append(caster.getHealth()).append(' ');
+    cast(h, caster, g("aura"), g("damage"));
+    trail.append("aura=").append(caster.getHealth()).append(' ');
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 5));
+    float cowHp = cow.getHealth();
+    cast(h, caster, g("ray"), g("explode", "radius", 6.0));
+    trail.append("explosao=").append(caster.getHealth());
+    h.runAfterDelay(10, () -> {
+      h.assertTrue(caster.isAlive() && !caster.isRemoved(), "o conjurador continua vivo e continua um porco");
+      h.assertTrue(caster.getHealth() >= hp, "o conjurador nao deveria se ferir (vida " + caster.getHealth() + "; " + trail + "; efeitos=" + caster.getActiveEffects() + "; fogo=" + caster.isOnFire() + ")");
+      h.assertTrue(!caster.hasEffect(net.minecraft.world.effect.MobEffects.POISON), "nem se envenenar com a propria nuvem");
+      h.assertTrue(cow.getHealth() < cowHp || !cow.isAlive(), "mas a vaca continua sendo atingida");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 60)
+  public static void casterIsImmuneToItsOwnLightning(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    cast(h, caster, g("ray"), g("thunder"));
+    h.runAfterDelay(10, () -> {
+      h.assertTrue(caster.isAlive() && !caster.isRemoved(), "o porco conjurador nao vira piglin com o proprio raio");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 60)
+  public static void selfFormStillHurtsOnPurpose(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    float hp = caster.getHealth();
+    cast(h, caster, g("self"), g("damage"));
+    h.assertTrue(caster.getHealth() < hp, "Eu + Dano ainda fere o conjurador (de proposito)");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 60)
+  public static void destructiveBlastBreaksBlocks(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 0);
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.STONE);
+    h.setBlock(new BlockPos(3, 2, 4), Blocks.DIRT);
+    float hp = caster.getHealth();
+    cast(h, caster, g("ray"), g("blast"));
+    h.assertTrue(h.getBlockState(new BlockPos(3, 2, 4)).isAir(), "a Explosao Destrutiva deveria quebrar a terra do alvo");
+    h.assertTrue(caster.getHealth() >= hp, "o conjurador e imune");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 60)
+  public static void plainExplosionStillKeepsBlocks(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 0);
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.DIRT);
+    cast(h, caster, g("ray"), g("explode"));
+    h.assertTrue(h.getBlockState(new BlockPos(3, 1, 4)).is(Blocks.DIRT), "a Explosao comum nao destroi blocos");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 80)
+  public static void chainArcsDamageToNearbyCreatures(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 0);
+    var a = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    var b = h.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(1, 1, 4));
+    float bHp = b.getHealth();
+    cast(h, caster, g("ray"), g("damage"));
+    h.assertTrue(b.getHealth() >= bHp, "sem Cadeia a segunda criatura nao e ferida");
+    cast(h, caster, g("ray"), g("damage"), g("chain"));
+    h.assertTrue(b.getHealth() < bHp, "com Cadeia o dano salta para a criatura proxima (vida " + b.getHealth() + ")");
+    h.assertTrue(com.arcane.execution.SpellPreview.describe(new Inscription(List.of(g("ray"), g("heal"), g("chain")))).stream()
+        .anyMatch(c -> c.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t && t.getKey().endsWith("chain_unsupported")), "Cadeia em Cura deveria avisar");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 100)
+  public static void chainMakesExplosionsDetonateAgain(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 0);
+    var a = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(3, 1, 3));
+    var b = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(1, 1, 5));
+    float aHp = a.getHealth(), bHp = b.getHealth();
+    cast(h, caster, g("ray"), g("explode"));
+    h.runAfterDelay(15, () -> {
+      float lostPlain = (aHp - a.getHealth()) + (bHp - b.getHealth());
+      a.setHealth(aHp);
+      b.setHealth(bHp);
+      a.invulnerableTime = 0;
+      b.invulnerableTime = 0;
+      var pa = h.absolutePos(new BlockPos(3, 1, 3));
+      var pb = h.absolutePos(new BlockPos(1, 1, 5));
+      a.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+      b.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+      a.moveTo(pa.getX() + 0.5, pa.getY(), pa.getZ() + 0.5);
+      b.moveTo(pb.getX() + 0.5, pb.getY(), pb.getZ() + 0.5);
+      cast(h, caster, g("ray"), g("explode"), g("chain"));
+      h.runAfterDelay(25, () -> {
+        float lostChain = (aHp - a.getHealth()) + (bHp - b.getHealth());
+        h.assertTrue(lostChain > lostPlain, "com Cadeia a perda total deveria ser maior: " + lostChain + " vs " + lostPlain);
+        h.succeed();
+      });
+    });
   }
 }

@@ -1083,4 +1083,59 @@ public class ArcaneGameTests {
     com.arcane.execution.OathPenalties.clear(player);
     h.succeed();
   }
+
+  // ------------------------------------------------------------------ formatos e origem
+  private static int countBarrier(GameTestHelper h, int r) {
+    int n = 0;
+    for (int x = -r; x <= r; x++) for (int y = -1; y <= r + 1; y++) for (int z = -r; z <= r; z++) {
+      if (h.getLevel().getBlockState(h.absolutePos(new BlockPos(7 + x, 1 + y, 7 + z))).is(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get())) n++;
+    }
+    return n;
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 100)
+  public static void barrierWithDomeBuildsAHollowShellAndHealsThoseInside(GameTestHelper h) {
+    for (int x = 0; x < 15; x++) for (int z = 0; z < 15; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+    Pig caster = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(7, 1, 7));
+    caster.setHealth(2.0f);
+    caster.setYRot(0);
+    caster.setXRot(0);
+    var res = CastingService.tryCast(caster, new Inscription(List.of(g("barrier"), g("shape_dome"), g("heal"))), h.getLevel());
+    h.assertTrue(res.success(), "falhou: " + res.message());
+    int blocks = countBarrier(h, 6);
+    h.assertTrue(blocks > 20, "o domo deveria ter blocos, tem " + blocks);
+    h.assertTrue(blocks <= com.arcane.execution.ShapeGeometry.MAX_BLOCKS, "dentro do limite");
+    h.assertTrue(!h.getLevel().getBlockState(h.absolutePos(new BlockPos(7, 1, 7))).is(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get()), "oco por dentro");
+    h.assertTrue(caster.getHealth() > 2.0f, "quem esta dentro do domo deveria ser curado, vida " + caster.getHealth());
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 100)
+  public static void areaModifierEnlargesTheDome(GameTestHelper h) {
+    for (int x = 0; x < 15; x++) for (int z = 0; z < 15; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+    Pig c1 = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(7, 1, 7));
+    c1.setYRot(0);
+    c1.setXRot(0);
+    h.assertTrue(CastingService.tryCast(c1, new Inscription(List.of(g("barrier"), g("shape_dome"))), h.getLevel()).success(), "domo simples");
+    int small = countBarrier(h, 7);
+    for (int x = 0; x < 15; x++) for (int y = 0; y < 10; y++) for (int z = 0; z < 15; z++) {
+      var p = new BlockPos(x, 1 + y, z);
+      if (h.getBlockState(p).is(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get())) h.setBlock(p, Blocks.AIR);
+    }
+    h.assertTrue(CastingService.tryCast(c1, new Inscription(List.of(g("barrier"), g("shape_dome"), g("area"))), h.getLevel()).success(), "domo com area");
+    int big = countBarrier(h, 7);
+    h.assertTrue(big > small, "o Area deveria ampliar o domo: " + small + " -> " + big);
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void auraWithDomeHitsCreaturesInside(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var above = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 2, 4));
+    float before = above.getHealth();
+    cast(h, caster, g("aura"), g("shape_dome"), g("damage"));
+    assertHurt(h, above, before, "criatura dentro do domo da aura");
+    h.succeed();
+  }
 }

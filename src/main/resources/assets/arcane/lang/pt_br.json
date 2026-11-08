@@ -221,6 +221,7 @@
   "oath.arcane.kind.3": "Mana selada",
   "oath.arcane.kind.4": "Fragilidade",
   "oath.arcane.kind.5": "Cegueira",
+  "gui.arcane.param_hint2": "Ctrl + roda do mouse ajusta o 2º parâmetro (Shift: x5)",
   "glyph.arcane.self": "Eu",
   "glyph.arcane.self.desc": "Forma: o feitiço acontece em você.",
   "glyph.arcane.touch": "Toque",
@@ -310,7 +311,7 @@
   "glyph.arcane.pillar": "Pilar",
   "glyph.arcane.pillar.desc": "Forma: uma coluna vertical no ponto que você mira (criaturas e o bloco atingido).",
   "glyph.arcane.barrier": "Barreira",
-  "glyph.arcane.barrier.desc": "Forma: ergue uma parede de 3x3 blocos de energia a sua frente, que some sozinha.",
+  "glyph.arcane.barrier.desc": "Forma: ergue uma parede de energia a sua frente (3x3 com raio 3; Area e raio ampliam). Com Domo, Esfera ou Anel vira uma casca em volta do centro. Os glifos seguintes atingem os blocos e quem estiver dentro ou encostado.",
   "glyph.arcane.mark": "Marcar",
   "glyph.arcane.mark.desc": "Efeito: marca o alvo (ele brilha). Os Marcados podem ser escolhidos depois pelo filtro Marcados.",
   "glyph.arcane.gravity": "Gravidade",
@@ -367,5 +368,12 @@
   "glyph.arcane.vow_oath.desc": "Você escolhe o castigo e quanto tempo ele dura, DEPOIS de conjurar. Tipo: 1 imobilidade, 2 silêncio (nenhuma outra magia), 3 mana selada, 4 fragilidade (+50% de dano recebido), 5 cegueira. Bônus = k x ln(1 + segundos/5), com k 0,30 / 0,22 / 0,35 / 0,25 / 0,20 e teto de +150%. Ex.: imobilidade por 30 s = +58%.",
   "glyph.arcane.on_death": "Ao Morrer",
   "glyph.arcane.on_death.desc": "Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s).",
-  "gui.arcane.param_hint2": "Ctrl + roda do mouse ajusta o 2º parâmetro (Shift: x5)"
+  "glyph.arcane.shape_dome": "Domo",
+  "glyph.arcane.shape_dome.desc": "Formato: a forma vira uma meia-esfera (casca de blocos na Barreira; so quem esta dentro na Aura). Use Area para aumentar o raio.",
+  "glyph.arcane.shape_sphere": "Esfera",
+  "glyph.arcane.shape_sphere.desc": "Formato: a forma vira uma esfera completa em volta do centro.",
+  "glyph.arcane.shape_ring": "Anel",
+  "glyph.arcane.shape_ring.desc": "Formato: a forma vira um anel no chao em volta do centro (coluna de 2 blocos de altura).",
+  "glyph.arcane.origin_aim": "Mira",
+  "glyph.arcane.origin_aim.desc": "Origem: o centro da forma passa a ser o ponto para onde voce olha (ate 32 blocos), em vez de voce."
 }

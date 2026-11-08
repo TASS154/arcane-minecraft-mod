@@ -16,6 +16,12 @@
       "default": 200.0,
       "min": 40.0,
       "max": 600.0
+    },
+    "radius": {
+      "type": "float",
+      "default": 3.0,
+      "min": 2.0,
+      "max": 12.0
     }
   },
   "cost": {

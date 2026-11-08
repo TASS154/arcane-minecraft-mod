@@ -24,6 +24,15 @@ public final class Targeting {
 
   public record RayResult(TargetList targets, Vec3 end) {}
 
+  /** Alcance maximo da mira para o glifo Mira (origem). */
+  public static final double AIM_RANGE = 32.0;
+
+  /** Centro de uma forma: o conjurador, ou o ponto mirado se o glifo Mira gravou origin=1. */
+  public static Vec3 center(ExecutionContext ctx, DeliverySpec spec) {
+    if (spec.parameters().getOrDefault("origin", 0.0) >= 0.5) return ray(ctx, AIM_RANGE, false).end();
+    return ctx.caster().position();
+  }
+
   /** Raio do olhar do conjurador: primeira criatura ou bloco no caminho, dentro do alcance. */
   public static RayResult ray(ExecutionContext ctx, double range, boolean particles) {
     ServerLevel level = ctx.level();

@@ -1,0 +1,23 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:shape_ring"
+  },
+  "modifier_scope": {
+    "target": "delivery",
+    "kind": "form",
+    "mutate": {
+      "shape": {
+        "op": "put",
+        "value": 3.0
+      }
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 2,
+  "families": [
+    "force"
+  ]
+}

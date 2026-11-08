@@ -221,6 +221,7 @@
   "oath.arcane.kind.3": "Sealed mana",
   "oath.arcane.kind.4": "Fragility",
   "oath.arcane.kind.5": "Blindness",
+  "gui.arcane.param_hint2": "Ctrl + mouse wheel adjusts the 2nd parameter (Shift: x5)",
   "glyph.arcane.self": "Self",
   "glyph.arcane.self.desc": "Form: the spell happens on you.",
   "glyph.arcane.touch": "Touch",
@@ -310,7 +311,7 @@
   "glyph.arcane.pillar": "Pillar",
   "glyph.arcane.pillar.desc": "Form: a vertical column at the point you aim at (creatures and the block hit).",
   "glyph.arcane.barrier": "Barrier",
-  "glyph.arcane.barrier.desc": "Form: raises a 3x3 wall of energy in front of you that fades on its own.",
+  "glyph.arcane.barrier.desc": "Form: raises a wall of energy in front of you (3x3 at radius 3; Area and radius enlarge it). With Dome, Sphere or Ring it becomes a shell around the center. Following glyphs hit the blocks and anyone inside or touching.",
   "glyph.arcane.mark": "Mark",
   "glyph.arcane.mark.desc": "Effect: marks the target (it glows). The Marked can be picked later with the Marked filter.",
   "glyph.arcane.gravity": "Gravity",
@@ -367,5 +368,12 @@
   "glyph.arcane.vow_oath.desc": "You choose the penalty and how long it lasts, AFTER casting. Kind: 1 immobile, 2 silence (no other spell), 3 sealed mana, 4 fragile (+50% damage taken), 5 blind. Bonus = k x ln(1 + seconds/5), with k 0.30 / 0.22 / 0.35 / 0.25 / 0.20, capped at +150%. E.g. immobile for 30 s = +58%.",
   "glyph.arcane.on_death": "On Death",
   "glyph.arcane.on_death.desc": "Condition: arms the spell on you: what follows only happens when you die (once, for up to 60 s).",
-  "gui.arcane.param_hint2": "Ctrl + mouse wheel adjusts the 2nd parameter (Shift: x5)"
+  "glyph.arcane.shape_dome": "Dome",
+  "glyph.arcane.shape_dome.desc": "Shape: the form becomes a half-sphere (a block shell for Barrier; only those inside for Aura). Use Area to grow the radius.",
+  "glyph.arcane.shape_sphere": "Sphere",
+  "glyph.arcane.shape_sphere.desc": "Shape: the form becomes a full sphere around the center.",
+  "glyph.arcane.shape_ring": "Ring",
+  "glyph.arcane.shape_ring.desc": "Shape: the form becomes a ring on the ground around the center (2 blocks high).",
+  "glyph.arcane.origin_aim": "Aim",
+  "glyph.arcane.origin_aim.desc": "Origin: the form's center becomes the point you look at (up to 32 blocks) instead of you."
 }

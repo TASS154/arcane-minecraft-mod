@@ -17,8 +17,12 @@ public final class ModifierApplicator {
         Map<String, Double> result = new HashMap<>(params);
         for (Map.Entry<String, ModifierScope.ModifierMutation> entry : scope.mutate().entrySet()) {
             String key = entry.getKey();
-            if (!result.containsKey(key)) continue;
             ModifierScope.ModifierMutation mutation = entry.getValue();
+            if ("put".equals(mutation.op())) { // grava mesmo que a forma nao declare o parametro (formato, origem)
+                result.put(key, mutation.value());
+                continue;
+            }
+            if (!result.containsKey(key)) continue;
             double current = result.get(key);
             if ("vow".equals(mutation.op())) { // juramento: o multiplicador vem da formula, nunca de um valor cru
                 result.put(key, current * VowFormula.multiplier(modifier));

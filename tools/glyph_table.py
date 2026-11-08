@@ -243,10 +243,10 @@ glyph("pillar", "form", 4,
       ["..####..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", ".######."],
       params={"range": (24.0, 4.0, 48.0, "float"), "radius": (2.0, 1.0, 6.0, "float")}, comp=FORM_COMP)
 glyph("barrier", "form", 4,
-      ("Barreira", "Forma: ergue uma parede de 3x3 blocos de energia a sua frente, que some sozinha."),
-      ("Barrier", "Form: raises a 3x3 wall of energy in front of you that fades on its own."),
+      ("Barreira", "Forma: ergue uma parede de energia a sua frente (3x3 com raio 3; Area e raio ampliam). Com Domo, Esfera ou Anel vira uma casca em volta do centro. Os glifos seguintes atingem os blocos e quem estiver dentro ou encostado."),
+      ("Barrier", "Form: raises a wall of energy in front of you (3x3 at radius 3; Area and radius enlarge it). With Dome, Sphere or Ring it becomes a shell around the center. Following glyphs hit the blocks and anyone inside or touching."),
       ["#.#.#.#.", "########", "#.#.#.#.", "########", "#.#.#.#.", "########", "#.#.#.#.", "########"],
-      params={"duration": (200.0, 40.0, 600.0, "int")}, magnitude=["duration"], comp=FORM_COMP)
+      params={"duration": (200.0, 40.0, 600.0, "int"), "radius": (3.0, 2.0, 12.0, "float")}, magnitude=["duration"], comp=FORM_COMP)
 
 glyph("mark", "effect", 1,
       ("Marcar", "Efeito: marca o alvo (ele brilha). Os Marcados podem ser escolhidos depois pelo filtro Marcados."),
@@ -401,15 +401,39 @@ glyph("on_death", "condition", 0,
       ("On Death", "Condition: arms the spell on you: what follows only happens when you die (once, for up to 60 s)."),
       ["..####..", ".######.", "##.##.##", "########", ".######.", "..#..#..", "..####..", "...##..."])
 
+
+# ================================================================== FORMATOS e ORIGEM: valem para qualquer forma com area
+def SHAPE_SCOPE(n):
+    return {"target": "delivery", "kind": "form", "mutate": {"shape": {"op": "put", "value": float(n)}}}
+
+
+glyph("shape_dome", "modifier", 2,
+      ("Domo", "Formato: a forma vira uma meia-esfera (casca de blocos na Barreira; so quem esta dentro na Aura). Use Area para aumentar o raio."),
+      ("Dome", "Shape: the form becomes a half-sphere (a block shell for Barrier; only those inside for Aura). Use Area to grow the radius."),
+      ["..####..", ".#....#.", "#......#", "#......#", "#......#", "#......#", "########", "........"], scope=SHAPE_SCOPE(1))
+glyph("shape_sphere", "modifier", 3,
+      ("Esfera", "Formato: a forma vira uma esfera completa em volta do centro."),
+      ("Sphere", "Shape: the form becomes a full sphere around the center."),
+      ["..####..", ".#....#.", "#......#", "#......#", "#......#", "#......#", ".#....#.", "..####.."], scope=SHAPE_SCOPE(2))
+glyph("shape_ring", "modifier", 2,
+      ("Anel", "Formato: a forma vira um anel no chao em volta do centro (coluna de 2 blocos de altura)."),
+      ("Ring", "Shape: the form becomes a ring on the ground around the center (2 blocks high)."),
+      [".######.", "#......#", "#.####.#", "#.#..#.#", "#.#..#.#", "#.####.#", "#......#", ".######."], scope=SHAPE_SCOPE(3))
+glyph("origin_aim", "modifier", 1,
+      ("Mira", "Origem: o centro da forma passa a ser o ponto para onde voce olha (ate 32 blocos), em vez de voce."),
+      ("Aim", "Origin: the form's center becomes the point you look at (up to 32 blocks) instead of you."),
+      ["...##...", "...##...", "..#..#..", "###..###", "###..###", "..#..#..", "...##...", "...##..."],
+      scope={"target": "delivery", "kind": "form", "mutate": {"origin": {"op": "put", "value": 1.0}}})
+
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
         "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group"],
     2: ["slow", "poison", "speed", "players", "animals", "undead", "nearest", "wounded", "allies", "delay", "lengthen",
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
-        "ray", "dig", "shield", "standing_still", "low_mana", "wave"],
+        "ray", "dig", "shield", "shape_dome", "shape_ring", "standing_still", "low_mana", "wave"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate", "vow_blood", "on_death", "vow_oath"],
+        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere"],
     4: ["thunder", "gravity", "invisible"],
 }
 FAMILIES = {
@@ -418,11 +442,11 @@ FAMILIES = {
     "storm": ["thunder", "ray", "pillar"],
     "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead"],
     "life": ["heal", "shield", "speed", "allies", "players", "animals"],
-    "force": ["push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
+    "force": ["shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
-    "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "touch", "projectile", "self"],
+    "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():
     for _gid in _ids:

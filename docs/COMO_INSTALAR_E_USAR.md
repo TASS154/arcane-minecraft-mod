@@ -347,5 +347,11 @@ Na Bancada, a **roda do mouse** sobre a linha ajusta o 1º parâmetro (o **tipo*
 ## Escrever em blocos (Pena Arcana)
 Pena Arcana (ametista, pena e pepita de ouro) na mão principal, uma **tinta** na outra, botão direito num bloco: grava a magia ativa nele. Em baú dispara ao abrir; em qualquer outro bloco dispara quando uma criatura pisa em cima (a criatura vira o alvo, então Eu + Dano numa pedra é uma armadilha). Agachado + botão direito apaga; quebrar o bloco também. Tinta Comum (gasta 1), Tinta de Sangue (mana mais barata, custa 2 de vida) ou Tinta Invisível (sem partículas).
 
-## Barreira com Área
-O glifo Área só dobra o `raio` de efeitos e formas que têm raio (Aura, Onda...). A Barreira não tem raio, então `Barreira + Área` faz a mesma parede e o Área só gasta mana.
+## Formatos e origem (modulares)
+Glifos de **formato** (Domo, Esfera, Anel) e de **origem** (Mira) são modificadores que valem para qualquer forma com área: gravam `shape` e `origin` na forma, e quem cria blocos ou escolhe criaturas por área lê isso (hoje: **Barreira** e **Aura**).
+- `Barreira`: parede de energia (3x3 com raio 3). `Barreira + Domo`: meia-esfera oca em volta do centro. `+ Esfera`: esfera completa. `+ Anel`: anel no chão com 2 de altura.
+- **Raio** da Barreira: 2º parâmetro (Ctrl + roda na bancada), de 2 a 12 (padrão 3). **Área** dobra o raio (também amplia a parede). Teto de 2500 blocos por casca; domo até 16, esfera até 12, anel até 24.
+- **Mira** move o centro para onde você olha (até 32 blocos); sem ela o centro é você (a parede continua 3 blocos à frente).
+- `Aura + Domo`: só as criaturas dentro da meia-esfera; `Aura + Anel`: só as da faixa do anel.
+- Os glifos seguintes atingem os **blocos e as criaturas dentro ou encostadas** (`Barreira + Domo + Cura` cura quem está dentro; use filtros como Hostil ou Não eu para escolher). O efeito vale uma vez, na hora da conjuração: a barreira não aplica efeitos continuamente depois.
+- Exemplos: `Barreira, Domo, Área` (domo grande em você); `Barreira, Domo, Mira` (domo onde você mira); `Aura, Anel, Dano`.

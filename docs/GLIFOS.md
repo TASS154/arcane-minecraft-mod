@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **73 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **77 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -46,7 +46,7 @@ Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única
 | **Aura** | `arcane:aura` | 4 | 3 | Força | `radius` 5 (2–12) | Forma: afeta todas as criaturas ao seu redor (menos você). |
 | **Onda** | `arcane:wave` | 3 | 2 | Força | `range` 8 (2–16) | Forma: uma onda em cone a sua frente, afetando todas as criaturas que ela alcança. |
 | **Pilar** | `arcane:pillar` | 4 | 3 | Tempestade | `range` 24 (4–48), `radius` 2 (1–6) | Forma: uma coluna vertical no ponto que você mira (criaturas e o bloco atingido). |
-| **Barreira** | `arcane:barrier` | 4 | 3 | Terra | `duration` 200 (40–600) | Forma: ergue uma parede de 3x3 blocos de energia a sua frente, que some sozinha. |
+| **Barreira** | `arcane:barrier` | 4 | 3 | Terra | `duration` 200 (40–600), `radius` 3 (2–12) | Forma: ergue uma parede de energia a sua frente (3x3 com raio 3; Area e raio ampliam). Com Domo, Esfera ou Anel vira uma casca em volta do centro. Os glifos seguintes atingem os blocos e quem estiver dentro ou encostado. |
 | **Invocar Lobos** | `arcane:summon_wolves` | 4 | 2 | Terra | `count` 3 (2–6), `duration` 1200 (200–6000) | Forma de RITUAL (menor): invoca lobos domesticados que lutam por você por um tempo. Os lobos são os alvos do que vem depois. |
 | **Invocar Golem** | `arcane:summon_golem` | 6 | 3 | Terra | `duration` 2400 (400–12000) | Forma de RITUAL (médio): ergue um golem de ferro que protege você por um tempo. O golem é o alvo do que vem depois. |
 
@@ -101,7 +101,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Dobrar** | `arcane:warp` | 8 | 4 | Vazio | `range` 32 (8–64) | Efeito de RITUAL (maior): leva todas as criaturas alvo para o ponto que você mira (até 48). Com Aura ou Pilar e um círculo grande, desloca uma região inteira. |
 | **Clima** | `arcane:weather` | 10 | 4 | Vazio | `mode` 1 (0–2) | Efeito de RITUAL (lendário): muda o clima do mundo (0 limpo, 1 chuva, 2 tempestade). Exige a oferenda de uma Estrela do Nether no círculo maior. |
 
-## Modificadores (14)
+## Modificadores (18)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -121,6 +121,10 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Juramento de Sangue** | `arcane:vow_blood` | 1 | 3 | Vazio | `pledge` 2 (1–5) | Juramento personalizável (Promessa 1 a 5): bônus = 30% x promessa^0,85 (promessa 2 = +54%). Custa 2 x promessa de vida e recusa se sobrar pouco. |
 | **Juramento da Luz** | `arcane:vow_daylight` | 1 | 1 | Conhecimento | `pledge` 2 (1–5) | Juramento personalizável (Promessa 1 a 5): bônus = 25% x promessa^0,85 (promessa 2 = +45%). 1 dia; 2 céu aberto; 3 sem chuva; 4 manhã a tarde; 5 perto do meio-dia. |
 | **Juramento Personalizado** | `arcane:vow_oath` | 1 | 3 | Vazio | `kind` 1 (1–5), `seconds` 15 (3–600) | Você escolhe o castigo e quanto tempo ele dura, DEPOIS de conjurar. Tipo: 1 imobilidade, 2 silêncio (nenhuma outra magia), 3 mana selada, 4 fragilidade (+50% de dano recebido), 5 cegueira. Bônus = k x ln(1 + segundos/5), com k 0,30 / 0,22 / 0,35 / 0,25 / 0,20 e teto de +150%. Ex.: imobilidade por 30 s = +58%. |
+| **Domo** | `arcane:shape_dome` | 2 | 2 | Força | — | Formato: a forma vira uma meia-esfera (casca de blocos na Barreira; so quem esta dentro na Aura). Use Area para aumentar o raio. |
+| **Esfera** | `arcane:shape_sphere` | 3 | 3 | Força | — | Formato: a forma vira uma esfera completa em volta do centro. |
+| **Anel** | `arcane:shape_ring` | 2 | 2 | Força | — | Formato: a forma vira um anel no chao em volta do centro (coluna de 2 blocos de altura). |
+| **Mira** | `arcane:origin_aim` | 1 | 1 | Terra | — | Origem: o centro da forma passa a ser o ponto para onde voce olha (ate 32 blocos), em vez de voce. |
 
 ## Condições (11)
 

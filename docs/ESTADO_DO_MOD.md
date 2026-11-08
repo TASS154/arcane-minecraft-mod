@@ -7,7 +7,7 @@ Data: 6 nov 2026. Tudo aqui foi conferido no código e, onde indicado, em teste 
 ## 1. O que existe no mod
 
 ### Núcleo do sistema de magia
-- **73 glifos** em 6 categorias: 1 ativador, 11 condições, 13 filtros, 14 modificadores, 24 efeitos e 10 formas. Cada glifo tem tier (1 a 4), custo de mana, ícone 8x8 e nome em PT e EN. A lista completa está em `docs/GLIFOS.md`.
+- **77 glifos** em 6 categorias: 1 ativador, 11 condições, 13 filtros, 18 modificadores, 24 efeitos e 10 formas. Cada glifo tem tier (1 a 4), custo de mana, ícone 8x8 e nome em PT e EN. A lista completa está em `docs/GLIFOS.md`.
 - **A ordem dos glifos importa.** O compilador monta um plano de execução a partir da sequência: forma, filtros, condições, efeitos, modificadores, grupos (`grupo` / `fim de grupo`), repetição e atraso entre segmentos.
 - **Até 10 glifos por magia**, com custo de mana crescendo de forma exponencial (fator 1,3; os 3 primeiros são grátis de multiplicador).
 - **Formas:** projétil, raio, aura, onda, pilar, barreira, invocação, entre outras.
@@ -79,7 +79,7 @@ Pré-requisito: Minecraft com Forge 1.20.1 e `arcane-0.1.0.jar` em `mods` (já i
 | Feixe 3D do Raio | Implementada e vista no jogo | Só visual; o dano continua no servidor |
 | Estágio visual atualiza na hora ao usar Página Arcana | **Parcial** | A entidade só troca de estágio quando é recriada (relogar ou recuperar o grimório) |
 | Equipar/guardar o grimório flutuante | Implementada (GameTest não cobre) | Agachado + botão direito com o grimório vazio mostra ou guarda; a escolha é salva no jogador. Slot de equipamento próprio não existe |
-| Glifos de vários tipos | Implementada | 6 categorias, 73 glifos |
+| Glifos de vários tipos | Implementada | 6 categorias, 77 glifos |
 | Salvar magias no grimório | Implementada | Testada por GameTest e captura |
 | Bancada com GUI | Implementada | Captura confirmou |
 | Rituais (círculos, altar, componentes) | Implementada | GameTests de arena; captura confirmou traços acesos |

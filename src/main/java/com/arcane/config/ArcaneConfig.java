@@ -19,6 +19,8 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue GRIMOIRE_LOSS_DAYS;
   public static final ForgeConfigSpec.BooleanValue SCARS_ENABLED;
   public static final ForgeConfigSpec.IntValue SCAR_LIFETIME_TICKS;
+  public static final ForgeConfigSpec.BooleanValue WORLD_ALTERING_SPELLS;
+  public static final ForgeConfigSpec.BooleanValue BLOCK_BREAKING_SPELLS;
 
   static {
     ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -45,6 +47,10 @@ public class ArcaneConfig {
     GRIMOIRE_LOSS_DAYS = builder.comment("Days of reduced mana after losing the grimoire (PROVISIONAL)").defineInRange("grimoireLossDays", 3, 0, 30);
     SCARS_ENABLED = builder.comment("Powerful spells leave temporary scars in the world").define("scarsEnabled", true);
     SCAR_LIFETIME_TICKS = builder.comment("How long a world scar lasts, in ticks (PROVISIONAL)").defineInRange("scarLifetimeTicks", 24000, 200, 1728000);
+    WORLD_ALTERING_SPELLS = builder.comment("Spells may place or change blocks (barriers, fire, ice, growth...). Turn off on servers that want no terrain changes")
+        .define("worldAlteringSpells", true);
+    BLOCK_BREAKING_SPELLS = builder.comment("Spells may destroy blocks (Dig, Cut, Damage on fragile blocks). Turn off to protect builds")
+        .define("blockBreakingSpells", true);
     SPEC = builder.build();
   }
 }

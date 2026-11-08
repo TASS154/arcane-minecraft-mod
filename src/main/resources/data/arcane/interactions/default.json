@@ -1,0 +1,12 @@
+{
+  "_comment": "Regras de interacao elemento x ambiente. Cada regra: elemento, 'when' (todas as condicoes valem), damage_add (somado ao multiplicador de dano, vezes a forca da config) e/ou after (acao depois de acertar). Condicoes: raining, wet, frozen, on_fire, hot_biome, lush_biome, biome_tag:<id>. Acoes: extinguish. Para mudar o equilibrio, sobrescreva este arquivo num datapack.",
+  "rules": [
+    { "element": "storm", "when": ["raining"], "damage_add": 0.5 },
+    { "element": "storm", "when": ["wet"], "damage_add": 0.3 },
+    { "element": "fire", "when": ["wet"], "damage_add": -0.4 },
+    { "element": "fire", "when": ["frozen"], "damage_add": 0.25 },
+    { "element": "frost", "when": ["hot_biome"], "damage_add": -0.3 },
+    { "element": "frost", "when": ["on_fire"], "after": "extinguish" },
+    { "element": "venom", "when": ["lush_biome"], "damage_add": 0.3 }
+  ]
+}

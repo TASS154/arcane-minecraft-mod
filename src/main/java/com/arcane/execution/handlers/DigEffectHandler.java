@@ -13,7 +13,7 @@ public class DigEffectHandler implements EffectHandler {
 
   @Override
   public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-    if (!Targeting.mayAlterWorld(context)) return;
+    if (!Targeting.mayBreakBlocks(context)) return;
     double power = Math.max(0.5, Math.min(5.0, call.parameters().getOrDefault("power", 2.0)));
     int broken = 0;
     for (TargetList.BlockTarget block : targets.blocks()) {

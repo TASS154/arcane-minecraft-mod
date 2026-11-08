@@ -39,4 +39,14 @@ public final class SpellLimits {
   public static double multiplier(int glyphCount, double growthPerGlyph, int free) {
     return Math.pow(growthPerGlyph, Math.max(0, glyphCount - free));
   }
+
+  /**
+   * Custo de uma forma persistente: cada pulso da Zona reaplica os efeitos, entao o custo cresce com o numero de
+   * pulsos (segundos / intervalo): x(1 + 0,15 por pulso alem do primeiro), limitado a x6. Sem zona, x1.
+   */
+  public static double zoneMultiplier(double seconds, double intervalSeconds) {
+    if (seconds <= 0.0) return 1.0;
+    double pulses = seconds / Math.max(0.5, intervalSeconds);
+    return Math.min(6.0, 1.0 + 0.15 * Math.max(0.0, pulses - 1.0));
+  }
 }

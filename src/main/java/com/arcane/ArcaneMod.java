@@ -76,6 +76,7 @@ public class ArcaneMod {
 
     private void onAddReloadListeners(final AddReloadListenerEvent event) {
         event.addListener(GlyphRegistry.reloadListener());
+        event.addListener(com.arcane.execution.InteractionRules.reloadListener());
     }
 
     @SubscribeEvent

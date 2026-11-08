@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -319,7 +320,8 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty")
+  // Lote proprio: efeitos de area de testes vizinhos (empurrar, atrair) podiam arremessar a vaca para longe.
+  @GameTest(template = "empty", batch = "isolated_thunder")
   public static void thunderStrikesTheTarget(GameTestHelper h) {
     floor(h);
     Pig caster = pig(h, 3, 0);
@@ -1299,5 +1301,73 @@ public class ArcaneGameTests {
     var good = com.arcane.execution.SpellPreview.describe(new Inscription(List.of(g("aura"), g("zone"), g("on_zone_end"), g("damage"))));
     h.assertTrue(countWarnings(good) == 0, "Aura + Zona + fim nao deveria avisar");
     h.succeed();
+  }
+
+  // ------------------------------------------------------------------ matriz de combinacoes e tabela de interacoes
+  @GameTest(template = "empty", timeoutTicks = 60)
+  public static void interactionTableIsLoadedWithoutProblems(GameTestHelper h) {
+    h.assertTrue(com.arcane.execution.InteractionRules.rules().size() >= 7, "regras carregadas: " + com.arcane.execution.InteractionRules.rules().size());
+    h.assertTrue(com.arcane.execution.InteractionRules.problems().isEmpty(), "problemas: " + com.arcane.execution.InteractionRules.problems());
+    // Adia o fim: limpar a arena na hora apagaria criaturas de testes vizinhos que ainda rodam.
+    h.runAfterDelay(15, h::succeed);
+  }
+
+  private static List<String> glyphsOf(com.arcane.glyph.GlyphCategory category, boolean includeRitual) {
+    return com.arcane.glyph.GlyphRegistry.all().values().stream()
+        .filter(d -> d.category() == category && (includeRitual || d.ritual() == 0))
+        .map(d -> d.id().getPath()).sorted().toList();
+  }
+
+  /** Conjura e devolve um texto de falha (ou null). Falhar por mana/ritual e legitimo; excecao ou invalidez nao. */
+  private static String tryCombo(GameTestHelper h, GlyphInstance... glyphs) {
+    Pig caster = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+    caster.setYRot(0);
+    caster.setXRot(0);
+    var inscription = new Inscription(List.of(glyphs));
+    String name = glyphs.length == 0 ? "" : java.util.Arrays.stream(glyphs).map(x -> x.glyphId().getPath()).reduce((a, b) -> a + "+" + b).orElse("");
+    try {
+      var validation = com.arcane.inscription.InscriptionValidator.validate(inscription);
+      if (!validation.valid()) return name + ": invalida (" + validation.message().getString() + ")";
+      com.arcane.execution.SpellPreview.describe(inscription);
+      var result = CastingService.tryCast(caster, inscription, h.getLevel());
+      if (!result.success() && !(result.message().contains("requires_ritual") || result.message().contains("mana"))) {
+        return name + ": falhou (" + result.message() + ")";
+      }
+    } catch (RuntimeException e) {
+      return name + ": excecao " + e;
+    } finally {
+      com.arcane.execution.Zones.clearFor(caster.getUUID());
+      caster.discard();
+    }
+    return null;
+  }
+
+  // Lote proprio: as ondas e atracoes da matriz alcancam arenas vizinhas.
+  @GameTest(template = "empty", timeoutTicks = 60, batch = "isolated_matrix")
+  public static void everyFormEffectFilterAndModifierCombinationRuns(GameTestHelper h) {
+    floor(h);
+    List<String> forms = List.of("self", "touch", "projectile", "ray", "aura", "wave", "pillar", "barrier");
+    List<String> regionForms = List.of("aura", "wave", "pillar", "barrier");
+    List<String> effects = glyphsOf(com.arcane.glyph.GlyphCategory.EFFECT, false);
+    List<String> filters = glyphsOf(com.arcane.glyph.GlyphCategory.FILTER, false);
+    List<String> shapes = List.of("shape_dome", "shape_sphere", "shape_ring", "shape_cone", "shape_column", "shape_wall", "origin_aim", "origin_self");
+    List<String> probe = List.of("damage", "fire", "heal", "poison", "push");
+    List<String> failures = new ArrayList<>();
+    int runs = 0;
+    for (String form : forms) for (String effect : effects) { runs++; add(failures, tryCombo(h, g(form), g(effect))); }
+    for (String form : regionForms) for (String mod : shapes) for (String effect : probe) { runs++; add(failures, tryCombo(h, g(form), g(mod), g(effect))); }
+    for (String form : forms) for (String filter : filters) { runs++; add(failures, tryCombo(h, g(form), g(filter), g("damage"))); }
+    for (String form : forms) for (String effect : List.of("damage", "fire", "heal")) {
+      runs++;
+      add(failures, tryCombo(h, g(form), g("zone", "seconds", 2.0), g(effect)));
+      add(failures, tryCombo(h, g(form), g("zone", "seconds", 2.0), g("on_zone_end"), g(effect)));
+    }
+    h.assertTrue(runs > 300, "a matriz deveria ter centenas de combinacoes, tem " + runs);
+    h.assertTrue(failures.isEmpty(), failures.size() + " combinacoes com problema, ex.: " + failures.subList(0, Math.min(8, failures.size())));
+    h.runAfterDelay(15, h::succeed);
+  }
+
+  private static void add(List<String> failures, String failure) {
+    if (failure != null) failures.add(failure);
   }
 }

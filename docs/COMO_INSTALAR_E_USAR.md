@@ -383,3 +383,10 @@ Na bancada, **passe o mouse sobre a linha de estado** (Pronto / ⚠ Veja a prév
   - Limites: 2 zonas suas ao mesmo tempo (a mais antiga acaba), 64 no servidor. Invocações ignoram a Zona. Zonas vivem na memória: somem ao fechar o mundo ou se você morrer.
 - **Quando a Zona Acabar** (condição): o trecho seguinte só roda no fim da zona, uma vez. Ex.: `Aura + Zona + Quando a Zona Acabar + Explosão` = uma mina que explode no fim. Sem Zona, nunca acontece (a prévia avisa).
 - Por baixo, as zonas usam o **barramento de eventos** (`SpellEvents`): qualquer sistema pode emitir uma chave e qualquer trecho pode esperar por ela. Novos eventos (por exemplo "ao quebrar a barreira") só precisam emitir a chave.
+
+## Tabela de interações, custo e proteção do terreno
+
+- **Interações elemento × ambiente** agora vivem em `data/arcane/interactions/default.json` (recarregável por datapack, `/reload`). Cada regra tem `element`, `when` (lista de condições que precisam valer), `damage_add` (somado ao multiplicador de dano, vezes `elementInteractionStrength`) e/ou `after` (ação depois de acertar). Condições: `raining`, `wet`, `frozen`, `on_fire`, `hot_biome`, `lush_biome`, `biome_tag:<id>`. Ação: `extinguish`. Regras inválidas são ignoradas e registradas no log.
+- **Custo da Zona**: cada pulso reaplica os efeitos, então o custo sobe ×(1 + 0,15 por pulso além do primeiro), até ×6. Ex.: Zona de 10 s a cada 1 s = ×2,35. O número na bancada já inclui isso.
+- **Config contra griefing** (`arcane-server.toml`): `worldAlteringSpells` (false = nenhuma magia coloca ou muda blocos) e `blockBreakingSpells` (false = Escavar, Cortar e Dano em blocos frágeis não destroem nada).
+- **Teste de matriz**: um GameTest conjura todas as combinações forma × efeito, forma × filtro, região × formato/origem × efeito e forma × Zona (centenas de combinações) e exige que nenhuma lance exceção nem seja inválida.

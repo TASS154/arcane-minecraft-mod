@@ -106,8 +106,14 @@ public final class Targeting {
     return java.util.Optional.empty();
   }
 
-  /** Efeitos que alteram o mundo: jogadores sempre; criaturas so com mobGriefing ligado. */
+  /** Efeitos que alteram o mundo: ligado na config; jogadores sempre, criaturas so com mobGriefing ligado. */
   public static boolean mayAlterWorld(ExecutionContext ctx) {
+    if (!com.arcane.config.ArcaneConfig.WORLD_ALTERING_SPELLS.get()) return false;
     return ctx.caster() instanceof Player || ctx.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+  }
+
+  /** Efeitos que DESTROEM blocos: alem de {@link #mayAlterWorld}, respeitam a config blockBreakingSpells. */
+  public static boolean mayBreakBlocks(ExecutionContext ctx) {
+    return mayAlterWorld(ctx) && com.arcane.config.ArcaneConfig.BLOCK_BREAKING_SPELLS.get();
   }
 }

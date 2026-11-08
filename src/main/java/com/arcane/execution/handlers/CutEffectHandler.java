@@ -34,7 +34,7 @@ public class CutEffectHandler implements EffectHandler {
       }
       entity.hurt(source, amount);
     }
-    if (!Targeting.mayAlterWorld(context)) return;
+    if (!Targeting.mayBreakBlocks(context)) return;
     int cut = 0;
     for (TargetList.BlockTarget block : targets.blocks()) {
       if (cut >= MAX_BLOCKS) break;

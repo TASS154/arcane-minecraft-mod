@@ -164,7 +164,13 @@ public final class ClientArcaneData {
       }
       total += cost;
     }
-    return Math.ceil(total * costMultiplier(entries.size()));
+    double zone = 1.0;
+    for (GlyphEntry e : entries) {
+      if (e.id().getPath().equals("zone")) {
+        zone = com.arcane.inscription.SpellLimits.zoneMultiplier(e.params().getOrDefault("seconds", 10.0), e.params().getOrDefault("interval", 1.0));
+      }
+    }
+    return Math.ceil(total * costMultiplier(entries.size()) * zone);
   }
 
   public static int pages() { return pages; }

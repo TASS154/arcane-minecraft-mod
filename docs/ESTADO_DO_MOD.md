@@ -116,6 +116,13 @@ Pré-requisito: Minecraft com Forge 1.20.1 e `arcane-0.1.0.jar` em `mods` (já i
 - Testado: 85 GameTests (4 novos: repetição, evento de fim, limite de 2 zonas, invocação + avisos da prévia) e testes unitários. Não testado em jogo.
 - Falta: condições "Ao quebrar a barreira" e "Ao entrar na zona" (basta emitir a chave); `ArmedSpells` (Ao sofrer dano / Ao morrer) ainda não passa pelo barramento; zonas não persistem entre sessões.
 
+### Tabela de interações, matriz e proteção (modularização, passo 4)
+- `InteractionRules` lê `data/arcane/interactions/*.json` (regras: elemento + condições + dano/ação); `ElementInteractions` só aplica a força da config. Condições novas são uma entrada em `InteractionRules.CONDITIONS`.
+- Custo único por tamanho (`SpellLimits.multiplier`) e por duração (`zoneMultiplier`), espelhado no cliente.
+- Config `worldAlteringSpells` e `blockBreakingSpells` (`Targeting.mayAlterWorld` / `mayBreakBlocks`).
+- Testado: 87 GameTests, incluindo a matriz (a cada rodada centenas de combinações) e a tabela carregada sem problemas; testes unitários da tabela e do custo. A matriz só garante que nada quebra: não prova que toda combinação tem um efeito visível (para isso a prévia avisa as inúteis).
+- Os testes do Raio e da matriz rodam em lotes isolados: efeitos de área de testes vizinhos arremessavam a vaca do teste do Raio.
+
 ## 4. Bug corrigido nesta rodada
 Um grimório flutuante sem dono (sobra de teste ou dado antigo) derrubava o login com `NullPointerException`. Agora o filtro verifica o dono e grimórios sem dono se removem sozinhos após 2 segundos.
 

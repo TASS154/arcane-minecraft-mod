@@ -21,7 +21,7 @@ public class DamageEffectHandler implements EffectHandler {
             com.arcane.execution.ElementInteractions.afterHit(context.level(), element, entity);
         }
         // Blocos muito frageis (vidro, folhas, gelo fino...) racham sob o dano; nada mais.
-        if (!com.arcane.execution.Targeting.mayAlterWorld(context)) return;
+        if (!com.arcane.execution.Targeting.mayBreakBlocks(context)) return;
         int broken = 0;
         for (var block : targets.blocks()) {
             if (broken >= 2) break;

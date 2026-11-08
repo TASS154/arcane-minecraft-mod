@@ -153,6 +153,7 @@ public final class InscriptionCompiler {
         CompiledExecutionPlan.DeliverySpec spec = new CompiledExecutionPlan.DeliverySpec(
                 delivery.formId(), delivery.handler(), delivery.parameters(), delivery.range());
         mana *= SpellLimits.multiplier(inscription.glyphs().size());
+        mana *= SpellLimits.zoneMultiplier(delivery.parameters().getOrDefault("zone_seconds", 0.0), delivery.parameters().getOrDefault("zone_interval", 1.0));
         return new CompiledExecutionPlan(spec, List.copyOf(segments), (int) Math.ceil(mana), inscription.fingerprint());
     }
 

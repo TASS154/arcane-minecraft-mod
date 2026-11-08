@@ -7,6 +7,7 @@ import com.arcane.client.ClientArcaneData.ParamDef;
 import com.arcane.client.ClientSetup;
 import com.arcane.menu.ArcaneWorkbenchMenu;
 import com.arcane.network.ModNetwork;
+import com.arcane.network.packet.C2SPreviewPacket;
 import com.arcane.network.packet.C2SSaveInscriptionPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
@@ -61,6 +62,7 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
   private int gridScroll;
   private int listScroll;
   private int selected = -1;
+  private String previewSig = "";
 
   public ArcaneWorkbenchScreen(ArcaneWorkbenchMenu menu, Inventory inv, Component title) {
     super(menu, inv, title);
@@ -105,6 +107,24 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
   }
 
   // ------------------------------------------------------------------ acoes
+  /** Pede ao servidor a previa sempre que a composicao (glifos ou parametros) muda. */
+  @Override
+  protected void containerTick() {
+    super.containerTick();
+    StringBuilder sig = new StringBuilder();
+    for (Slot s : composition) sig.append(s.id).append(new java.util.TreeMap<>(s.params)).append(';');
+    if (!sig.toString().equals(previewSig)) {
+      previewSig = sig.toString();
+      if (composition.isEmpty()) {
+        ClientArcaneData.setPreview(java.util.List.of());
+      } else {
+        List<C2SSaveInscriptionPacket.Entry> entries = new ArrayList<>();
+        for (Slot s : composition) entries.add(new C2SSaveInscriptionPacket.Entry(s.id.toString(), new HashMap<>(s.params)));
+        ModNetwork.CHANNEL.sendToServer(new C2SPreviewPacket(entries));
+      }
+    }
+  }
+
   private void save() {
     List<C2SSaveInscriptionPacket.Entry> entries = new ArrayList<>();
     for (Slot s : composition) entries.add(new C2SSaveInscriptionPacket.Entry(s.id.toString(), new HashMap<>(s.params)));
@@ -264,6 +284,7 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
     renderSummary(g);
     renderActiveSpell(g);
     renderGlyphTooltip(g, mouseX, mouseY);
+    renderPreviewTooltip(g, mouseX, mouseY);
   }
 
   private void renderGlyphGrid(GuiGraphics g, int mouseX, int mouseY) {
@@ -369,6 +390,9 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
     } else if (requiredRitual() > 0) {
       status = Component.translatable("gui.arcane.needs_ritual", Component.translatable("ritual.arcane.level." + requiredRitual()));
       color = 0xFFA040;
+    } else if (ClientArcaneData.previewWarnings() > 0) {
+      status = Component.translatable("gui.arcane.preview.has_warn");
+      color = 0xFFA040;
     } else {
       status = Component.translatable("gui.arcane.ready");
       color = 0x80E080;
@@ -390,6 +414,15 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
     Component line = Component.translatable("gui.arcane.active", label);
     String text = font.plainSubstrByWidth(line.getString(), 124);
     g.drawString(font, text, leftPos + 50, topPos + 202, 0xD0B0FF, false);
+  }
+
+  /** Passando o mouse sobre a linha de estado (Pronto / Aviso), mostra a previa completa. */
+  private void renderPreviewTooltip(GuiGraphics g, int mouseX, int mouseY) {
+    if (ClientArcaneData.preview().isEmpty() || !inside(mouseX, mouseY, leftPos + 124, topPos + 151, leftPos + 208, topPos + 163)) return;
+    List<Component> lines = new ArrayList<>();
+    lines.add(Component.translatable("gui.arcane.preview.title").withStyle(ChatFormatting.LIGHT_PURPLE));
+    lines.addAll(ClientArcaneData.preview());
+    g.renderComponentTooltip(font, lines, mouseX, mouseY);
   }
 
   private void renderGlyphTooltip(GuiGraphics g, int mouseX, int mouseY) {

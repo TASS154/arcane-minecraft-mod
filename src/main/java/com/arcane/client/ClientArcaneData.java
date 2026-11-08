@@ -197,4 +197,17 @@ public final class ClientArcaneData {
     if (active == null) return Optional.empty();
     return spells.stream().filter(s -> s.id().equals(active)).findFirst();
   }
+
+  // ---- previa da bancada (calculada pelo servidor)
+  private static List<net.minecraft.network.chat.Component> preview = List.of();
+
+  public static void setPreview(List<net.minecraft.network.chat.Component> lines) { preview = List.copyOf(lines); }
+  public static List<net.minecraft.network.chat.Component> preview() { return preview; }
+
+  /** Quantos avisos (linhas douradas) a previa tem. */
+  public static int previewWarnings() {
+    int n = 0;
+    for (var c : preview) if (c.getStyle().getColor() != null && c.getStyle().getColor().getValue() == net.minecraft.ChatFormatting.GOLD.getColor()) n++;
+    return n;
+  }
 }

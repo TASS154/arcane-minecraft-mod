@@ -29,5 +29,21 @@ public class PotionEffectHandler implements EffectHandler {
         living.addEffect(new MobEffectInstance(effect, ticks, level), context.caster());
       }
     }
+    // Chao ou ponto vazio: o efeito fica numa nuvem que paira ali por alguns segundos (no maximo 2 nuvens).
+    java.util.List<net.minecraft.world.phys.Vec3> spots = new java.util.ArrayList<>();
+    for (var block : targets.blocks()) spots.add(net.minecraft.world.phys.Vec3.atBottomCenterOf(block.pos().above()));
+    for (var point : targets.points()) spots.add(point);
+    int clouds = 0;
+    for (var spot : spots) {
+      if (clouds++ >= 2) break;
+      var cloud = new net.minecraft.world.entity.AreaEffectCloud(context.level(), spot.x, spot.y, spot.z);
+      cloud.setOwner(context.caster());
+      cloud.setRadius(2.0f);
+      cloud.setDuration(100);
+      cloud.setWaitTime(0);
+      cloud.setFixedColor(effect.getColor());
+      cloud.addEffect(new MobEffectInstance(effect, Math.min(ticks, 200), level));
+      context.level().addFreshEntity(cloud);
+    }
   }
 }

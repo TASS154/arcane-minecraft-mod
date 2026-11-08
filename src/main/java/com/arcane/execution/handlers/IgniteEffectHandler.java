@@ -20,5 +20,13 @@ public class IgniteEffectHandler implements EffectHandler {
         context.level().setBlockAndUpdate(above, BaseFireBlock.getState(context.level(), above));
       }
     }
+    // Ponto vazio: acende no chao logo abaixo.
+    for (var point : targets.points()) {
+      com.arcane.execution.Targeting.groundCell(context.level(), point).ifPresent(cell -> {
+        if (com.arcane.execution.ElementInteractions.canIgniteAt(context.level(), cell) && BaseFireBlock.canBePlacedAt(context.level(), cell, Direction.UP)) {
+          context.level().setBlockAndUpdate(cell, BaseFireBlock.getState(context.level(), cell));
+        }
+      });
+    }
   }
 }

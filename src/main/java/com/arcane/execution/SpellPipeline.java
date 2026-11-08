@@ -79,7 +79,7 @@ public final class SpellPipeline {
     private TargetList applyFilters(ExecutionContext context, ExecutionSegment segment, TargetList targets) {
         // Alvos podem ter morrido ou sumido durante o atraso.
         TargetList current = new TargetList(
-                targets.entities().stream().filter(e -> e.isAlive() && !e.isRemoved()).toList(), targets.blocks());
+                targets.entities().stream().filter(e -> e.isAlive() && !e.isRemoved()).toList(), targets.blocks(), targets.points());
         for (FilterSpec filter : segment.filters()) {
             FilterResolver resolver = GlyphHandlerRegistry.getFilter(filter.handler()).orElse(null);
             if (resolver != null) {

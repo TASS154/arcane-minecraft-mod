@@ -20,5 +20,17 @@ public class DamageEffectHandler implements EffectHandler {
             entity.hurt(source, (float) (amount * mult));
             com.arcane.execution.ElementInteractions.afterHit(context.level(), element, entity);
         }
+        // Blocos muito frageis (vidro, folhas, gelo fino...) racham sob o dano; nada mais.
+        if (!com.arcane.execution.Targeting.mayAlterWorld(context)) return;
+        int broken = 0;
+        for (var block : targets.blocks()) {
+            if (broken >= 2) break;
+            var state = context.level().getBlockState(block.pos());
+            float hardness = state.getDestroySpeed(context.level(), block.pos());
+            if (!state.isAir() && hardness >= 0.0f && hardness <= 0.3f) {
+                context.level().destroyBlock(block.pos(), false, context.caster());
+                broken++;
+            }
+        }
     }
 }

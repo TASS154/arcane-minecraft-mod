@@ -19,6 +19,15 @@ public class FireEffectHandler implements EffectHandler {
         for (com.arcane.execution.TargetList.BlockTarget block : targets.blocks()) {
             igniteBlock(context, block.pos());
         }
+        // Ponto vazio: uma chama no chao logo abaixo.
+        for (var point : targets.points()) {
+            com.arcane.execution.Targeting.groundCell(context.level(), point).ifPresent(cell -> {
+                if (com.arcane.execution.ElementInteractions.canIgniteAt(context.level(), cell)
+                        && net.minecraft.world.level.block.BaseFireBlock.canBePlacedAt(context.level(), cell, net.minecraft.core.Direction.UP)) {
+                    context.level().setBlockAndUpdate(cell, net.minecraft.world.level.block.BaseFireBlock.getState(context.level(), cell));
+                }
+            });
+        }
     }
 
     /** O fogo interage com o mundo: acende TNT, fogueiras e velas; derrete gelo e neve. */

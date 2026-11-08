@@ -25,6 +25,8 @@ public class PillarFormHandler implements FormHandler {
     region.playFx(context);
     double range = Math.max(4.0, Math.min(64.0, spec.range()));
     List<TargetList.BlockTarget> blocks = Targeting.ray(context, range, false).targets().blocks();
-    return DeliveryResult.of(new TargetList(entities, blocks));
+    // O centro da coluna e sempre um ponto de impacto (efeitos de ponto agem ali, mesmo sem bloco na mira).
+    List<net.minecraft.world.phys.Vec3> points = List.of(region.center());
+    return DeliveryResult.of(new TargetList(entities, blocks, points));
   }
 }

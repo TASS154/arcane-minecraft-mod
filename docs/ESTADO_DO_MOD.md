@@ -106,6 +106,11 @@ Pré-requisito: Minecraft com Forge 1.20.1 e `arcane-0.1.0.jar` em `mods` (já i
 
 ---
 
+### Alvos tipados e prévia (modularização, passo 2)
+- `TargetList` agora tem criaturas, blocos e **pontos vazios**. O Raio que erra e o centro do Pilar entregam um ponto; Fogo, Acender, Cura, Poções, Empurrar, Congelar, Raio e Explosão sabem agir nele (ver tabela em COMO_INSTALAR_E_USAR.md).
+- `EffectReach` guarda o que cada forma entrega e cada efeito alcança; `SpellPreview` gera a descrição e os avisos, e os pacotes `C2SPreviewPacket`/`S2CPreviewPacket` (protocolo 8) levam isso à bancada.
+- Testado: 81 GameTests (4 novos) e testes unitários passando. Não verificado no cliente: a aparência do tooltip da prévia.
+
 ## 4. Bug corrigido nesta rodada
 Um grimório flutuante sem dono (sobra de teste ou dado antigo) derrubava o login com `NullPointerException`. Agora o filtro verifica o dono e grimórios sem dono se removem sozinhos após 2 segundos.
 

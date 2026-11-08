@@ -38,6 +38,7 @@ public class FreezeEffectHandler implements EffectHandler {
       centers.add(entity.blockPosition());
     }
     for (TargetList.BlockTarget block : targets.blocks()) centers.add(block.pos());
+    for (net.minecraft.world.phys.Vec3 point : targets.points()) centers.add(net.minecraft.core.BlockPos.containing(point));
     if (!Targeting.mayAlterWorld(context)) return;
 
     int radius = (int) Math.max(1, Math.min(10, Math.round(call.parameters().getOrDefault("radius", 1.0) * context.areaScale())));

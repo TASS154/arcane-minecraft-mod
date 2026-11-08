@@ -18,7 +18,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-  private static final String PROTOCOL = "7";
+  private static final String PROTOCOL = "8";
   public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       new ResourceLocation(ArcaneMod.MODID, "main"),
       () -> PROTOCOL,
@@ -39,6 +39,12 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(com.arcane.network.packet.S2CPlayerAnimPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(com.arcane.network.packet.S2CPlayerAnimPacket::encode).decoder(com.arcane.network.packet.S2CPlayerAnimPacket::decode)
         .consumerMainThread(com.arcane.network.packet.S2CPlayerAnimPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.C2SPreviewPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(com.arcane.network.packet.C2SPreviewPacket::encode).decoder(com.arcane.network.packet.C2SPreviewPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.C2SPreviewPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.S2CPreviewPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(com.arcane.network.packet.S2CPreviewPacket::encode).decoder(com.arcane.network.packet.S2CPreviewPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.S2CPreviewPacket::handle).add();
     CHANNEL.messageBuilder(S2CBeamPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CBeamPacket::encode).decoder(S2CBeamPacket::decode)
         .consumerMainThread(S2CBeamPacket::handle).add();

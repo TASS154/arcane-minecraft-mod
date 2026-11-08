@@ -17,6 +17,9 @@ public class RayFormHandler implements FormHandler {
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
     double range = Math.max(1.0, Math.min(64.0, spec.range()));
-    return DeliveryResult.of(Targeting.ray(context, range, trail).targets());
+    var targets = Targeting.ray(context, range, trail).targets();
+    // O Toque so alcanca o que esta ao seu alcance: nao entrega ponto vazio.
+    if (!trail) targets = new com.arcane.execution.TargetList(targets.entities(), targets.blocks());
+    return DeliveryResult.of(targets);
   }
 }

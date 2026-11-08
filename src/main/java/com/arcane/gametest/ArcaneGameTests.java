@@ -1186,4 +1186,61 @@ public class ArcaneGameTests {
     h.assertTrue(column > 20, "cilindro oco com blocos, tem " + column);
     h.succeed();
   }
+
+  // ------------------------------------------------------------------ alvos tipados: criatura, bloco e ponto vazio
+  @GameTest(template = "empty")
+  public static void fireOnEmptyPointLightsTheGround(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    cast(h, caster, g("pillar"), g("origin_self"), g("fire"));
+    boolean found = false;
+    for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+      if (h.getBlockState(new BlockPos(3 + dx, 1, 3 + dz)).is(Blocks.FIRE)) found = true;
+    }
+    h.assertTrue(found, "o Fogo num ponto vazio deveria acender uma chama no chao");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void poisonOnEmptyPointLeavesACloud(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    cast(h, caster, g("pillar"), g("origin_self"), g("poison"));
+    var clouds = h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.AreaEffectCloud.class,
+        new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(3, 1, 3))).inflate(4));
+    h.assertTrue(!clouds.isEmpty(), "o Veneno num ponto vazio deveria deixar uma nuvem");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void damageBreaksFragileBlockButNotStone(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    h.setBlock(new BlockPos(3, 1, 3), Blocks.GLASS);
+    cast(h, caster, g("ray"), g("damage"));
+    h.assertTrue(h.getBlockState(new BlockPos(3, 1, 3)).isAir(), "o Dano deveria quebrar o vidro mirado");
+    Pig caster2 = pig(h, 5, 1);
+    h.setBlock(new BlockPos(5, 1, 3), Blocks.STONE);
+    cast(h, caster2, g("ray"), g("damage"));
+    h.assertTrue(h.getBlockState(new BlockPos(5, 1, 3)).is(Blocks.STONE), "a pedra nao deveria quebrar");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void previewWarnsAboutNoOpCombinations(GameTestHelper h) {
+    var ok = com.arcane.execution.SpellPreview.describe(new Inscription(List.of(g("ray"), g("fire"))));
+    h.assertTrue(countWarnings(ok) == 0, "Raio + Fogo nao deveria ter avisos");
+    var selfDig = com.arcane.execution.SpellPreview.describe(new Inscription(List.of(g("self"), g("dig"))));
+    h.assertTrue(countWarnings(selfDig) == 1, "Eu + Escavar nao faz nada e deveria avisar");
+    var shapeOnRay = com.arcane.execution.SpellPreview.describe(new Inscription(List.of(g("ray"), g("shape_dome"), g("damage"))));
+    h.assertTrue(countWarnings(shapeOnRay) == 1, "formato no Raio e ignorado e deveria avisar");
+    var hostileBlocks = com.arcane.execution.SpellPreview.describe(new Inscription(List.of(g("touch"), g("hostile"), g("dig"))));
+    h.assertTrue(countWarnings(hostileBlocks) == 1, "filtro Hostil deixa so criaturas, Escavar so age em blocos");
+    h.succeed();
+  }
+
+  private static long countWarnings(List<net.minecraft.network.chat.Component> lines) {
+    return lines.stream().filter(c -> c.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
+        && (t.getKey().startsWith("gui.arcane.preview.warn."))).count();
+  }
 }

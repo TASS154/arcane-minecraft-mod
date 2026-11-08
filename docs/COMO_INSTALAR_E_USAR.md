@@ -355,3 +355,23 @@ Toda forma com área (Aura, Onda, Pilar, Barreira) monta uma **Região** (format
 - **Raio:** Aura e Pilar usam o parâmetro `radius`; a Onda usa o alcance; a Barreira usa `radius` (2º parâmetro, Ctrl + roda). **Área** dobra o raio de todas.
 - **Casca de blocos (Barreira):** teto de 2500 blocos. Raio máximo: domo 16, esfera 12, anel 24, cone 12, coluna 16, parede 12.
 - Os glifos seguintes atingem os **blocos e as criaturas dentro ou encostadas** (`Barreira, Domo, Cura` cura quem está dentro). O efeito vale uma vez, na conjuração.
+
+## Alvos: criatura, bloco e ponto vazio (e a prévia da bancada)
+
+Toda forma entrega até três tipos de alvo, e cada efeito sabe o que fazer com cada um:
+
+| Efeito | Criatura | Bloco | Ponto vazio (raio que erra, centro do Pilar) |
+|---|---|---|---|
+| Dano / Corte | fere | quebra blocos muito frágeis (vidro, folhas) / corta plantas | nada |
+| Fogo | queima | acende TNT, fogueira, derrete gelo | chama no chão logo abaixo |
+| Acender | nada | fogo em cima | chama no chão |
+| Cura | cura | faz plantas crescer (como farinha de osso) | idem, no chão |
+| Veneno, Lentidão, Velocidade, Escudo… | aplica | deixa uma **nuvem** de efeito ali (2 blocos, 5 s) | idem |
+| Empurrar | empurra | onda de choque em quem está perto | idem |
+| Congelar | congela | água vira gelo em volta | idem |
+| Raio / Explosão | atinge | atinge | atinge o ponto |
+
+O **Toque** nunca entrega ponto vazio (só alcança o que está colado). Efeitos que alteram blocos respeitam `mobGriefing` quando quem conjura não é jogador.
+
+### Prévia na bancada
+Na bancada, **passe o mouse sobre a linha de estado** (Pronto / ⚠ Veja a prévia, embaixo da lista de glifos). O servidor calcula e mostra: a forma e o que ela alcança, o formato e a origem, e o que cada efeito faz. Combinações que não fazem nada viram **avisos dourados**, por exemplo: Eu + Escavar (Escavar só age em blocos), Raio + Domo (o Raio ignora formato e origem), Toque + Hostil + Escavar (o filtro deixa só criaturas).

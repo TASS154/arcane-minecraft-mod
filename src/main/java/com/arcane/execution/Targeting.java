@@ -54,7 +54,7 @@ public final class Targeting {
       targets = new TargetList(List.of(), List.of(new TargetList.BlockTarget(pos, level.getBlockState(pos))));
       hitPoint = block.getLocation();
     } else {
-      targets = TargetList.empty();
+      targets = TargetList.ofPoint(end);
       hitPoint = end;
     }
     if (particles) {
@@ -85,7 +85,25 @@ public final class Targeting {
     List<Vec3> out = new ArrayList<>();
     for (Entity e : targets.entities()) out.add(e.position().add(0, e.getBbHeight() * 0.5, 0));
     for (TargetList.BlockTarget b : targets.blocks()) out.add(Vec3.atCenterOf(b.pos()));
+    out.addAll(targets.points());
     return out;
+  }
+
+  /**
+   * Celula de ar logo acima do chao perto de um ponto (ate 4 blocos abaixo): onde fogo, nuvens e plantas "pousam".
+   * Vazio se nao ha chao por perto (o ponto esta no ceu).
+   */
+  public static java.util.Optional<BlockPos> groundCell(net.minecraft.world.level.Level level, Vec3 point) {
+    BlockPos cell = BlockPos.containing(point.add(0, 0.5, 0));
+    for (int i = 0; i <= 5; i++) {
+      BlockPos below = cell.below();
+      var st = level.getBlockState(below);
+      if (!st.isAir() && st.isFaceSturdy(level, below, net.minecraft.core.Direction.UP) && level.getBlockState(cell).canBeReplaced()) {
+        return java.util.Optional.of(cell);
+      }
+      cell = below;
+    }
+    return java.util.Optional.empty();
   }
 
   /** Efeitos que alteram o mundo: jogadores sempre; criaturas so com mobGriefing ligado. */

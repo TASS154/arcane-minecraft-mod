@@ -22,6 +22,12 @@ public class GrimoireLifecycleHandler {
   public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
     if (event.getEntity() instanceof ServerPlayer player) {
       spawnGrimoire(player);
+      // Criativo (testes): glifos novos, adicionados depois que o mundo foi criado, ja entram no grimorio.
+      if (player.getAbilities().instabuild) {
+        GrimoireAttachments.get(player).ifPresent(g -> com.arcane.glyph.GlyphRegistry.all().keySet().stream()
+            .filter(id -> !g.knowledge().containsKey(id)).toList()
+            .forEach(id -> com.arcane.discovery.DiscoveryService.learnMastered(player, id)));
+      }
       GrimoireAttachments.updateManaMultiplier(player);
       com.arcane.network.ArcaneSync.sync(player, true);
       giveTutorialBook(player);

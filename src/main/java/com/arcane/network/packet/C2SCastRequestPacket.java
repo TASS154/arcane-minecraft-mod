@@ -27,9 +27,8 @@ public record C2SCastRequestPacket(UUID inscriptionId, boolean fromWorkbench) {
       ServerPlayer player = ctx.get().getSender();
       if (player == null) return;
       GrimoireAttachments.get(player).flatMap(g -> g.getInscription(packet.inscriptionId)).ifPresent(inscription -> {
-        // A precisao de bancada so vale se o jogador estiver de fato com a Bancada aberta.
-        boolean atWorkbench = packet.fromWorkbench && player.containerMenu instanceof com.arcane.menu.ArcaneWorkbenchMenu;
-        PrecisionSnapshot precision = atWorkbench ? PrecisionSnapshot.WORKBENCH : PrecisionSnapshot.FIELD;
+        // Potencia 100% so se a magia foi ESCRITA na Bancada; lancar de onde for nao muda isso.
+        PrecisionSnapshot precision = PrecisionSnapshot.of(inscription);
         var result = CastingService.tryCast(player, inscription, precision);
         if (!result.success() && !result.message().isEmpty()) {
           player.displayClientMessage(net.minecraft.network.chat.Component.translatable(result.message())

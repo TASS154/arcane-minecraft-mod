@@ -6,6 +6,7 @@ import com.arcane.client.ClientArcaneData.KnownGlyph;
 import com.arcane.client.ClientArcaneData.SpellEntry;
 import com.arcane.network.ModNetwork;
 import com.arcane.network.packet.C2SCopyToScrollPacket;
+import com.arcane.network.packet.C2SJournalNotePacket;
 import com.arcane.network.packet.C2SDeleteInscriptionPacket;
 import com.arcane.network.packet.C2SSelectInscriptionPacket;
 import net.minecraft.ChatFormatting;
@@ -76,6 +77,12 @@ public class GrimoireScreen extends Screen {
     copyButton = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.copy"), b -> copyToScroll())
         .bounds(left + 70, top + 176, 60, 20).tooltip(net.minecraft.client.gui.components.Tooltip.create(
             Component.translatable("gui.arcane.grimoire.copy.tooltip"))).build());
+    noteBox = new net.minecraft.client.gui.components.EditBox(font, left + 18, top + 176, 150, 18, Component.translatable("gui.arcane.grimoire.note"));
+    noteBox.setMaxLength(C2SJournalNotePacket.MAX);
+    noteBox.setHint(Component.translatable("gui.arcane.grimoire.note.hint"));
+    addRenderableWidget(noteBox);
+    noteButton = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.note.add"), b -> addNote())
+        .bounds(left + 172, top + 175, 60, 20).build());
     if (selectedSpell == null) selectedSpell = ClientArcaneData.active().orElse(null);
     updateButtons();
   }
@@ -86,7 +93,23 @@ public class GrimoireScreen extends Screen {
     updateButtons();
   }
 
+  private net.minecraft.client.gui.components.EditBox noteBox;
+  private Button noteButton;
+
+  private void addNote() {
+    String text = noteBox.getValue().trim();
+    if (text.isEmpty()) return;
+    ModNetwork.CHANNEL.sendToServer(new C2SJournalNotePacket(text));
+    noteBox.setValue("");
+    logScroll = 0;
+  }
+
   private void updateButtons() {
+    if (noteBox != null) {
+      noteBox.visible = tab == Tab.JOURNAL;
+      noteBox.setEditable(tab == Tab.JOURNAL);
+      noteButton.visible = tab == Tab.JOURNAL;
+    }
     boolean spells = tab == Tab.SPELLS && selectedSpellEntry().isPresent();
     activateButton.visible = spells;
     deleteButton.visible = spells;
@@ -372,6 +395,7 @@ public class GrimoireScreen extends Screen {
     if (colon < 0) return Component.literal(entry);
     String kind = entry.substring(0, colon);
     String rest = entry.substring(colon + 1);
+    if (kind.equals("note")) return Component.literal("✎ " + rest);
     ResourceLocation glyph = ResourceLocation.tryParse(rest);
     String key = "log.arcane." + kind;
     if (!I18n.exists(key)) return Component.literal(entry);

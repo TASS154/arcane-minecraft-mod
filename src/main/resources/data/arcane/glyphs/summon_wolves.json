@@ -11,8 +11,14 @@
     "count": {
       "type": "int",
       "default": 3.0,
-      "min": 2.0,
+      "min": 1.0,
       "max": 6.0
+    },
+    "size": {
+      "type": "int",
+      "default": 1.0,
+      "min": 1.0,
+      "max": 3.0
     },
     "duration": {
       "type": "int",

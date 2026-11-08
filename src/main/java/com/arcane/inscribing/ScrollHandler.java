@@ -23,7 +23,7 @@ public class ScrollHandler {
       if (serverPlayer.isShiftKeyDown()) {
         study(serverPlayer, stack, inscription);
       } else {
-        CastingService.tryCast(serverPlayer, inscription, PrecisionSnapshot.FIELD);
+        CastingService.tryCast(serverPlayer, inscription, PrecisionSnapshot.of(inscription));
       }
     }
     event.setCanceled(true);

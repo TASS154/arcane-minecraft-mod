@@ -48,6 +48,14 @@ public class ClientSetup {
     event.registerEntityRenderer(ModEntities.GRIMOIRE.get(), GrimoireRenderer::new);
     event.registerEntityRenderer(ModEntities.ARCANE_PROJECTILE.get(), ArcaneProjectileRenderer::new);
     event.registerEntityRenderer(ModEntities.NPC_MAGE.get(), NPCMageRenderer::new);
+    event.registerEntityRenderer(ModEntities.SPECTRAL_WOLF.get(), com.arcane.client.render.SummonRenderers.Wolf::new);
+    event.registerEntityRenderer(ModEntities.ARCANE_GOLEM.get(), com.arcane.client.render.SummonRenderers.Golem::new);
+  }
+
+  @SubscribeEvent
+  public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+    event.registerLayerDefinition(com.arcane.client.model.SummonModels.WOLF_LAYER, com.arcane.client.model.SummonLayers::wolf);
+    event.registerLayerDefinition(com.arcane.client.model.SummonModels.GOLEM_LAYER, com.arcane.client.model.SummonLayers::golem);
   }
 
   @SubscribeEvent

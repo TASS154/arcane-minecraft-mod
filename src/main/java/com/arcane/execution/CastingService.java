@@ -104,7 +104,7 @@ public final class CastingService {
                 inscription,
                 plan,
                 environment,
-                PrecisionSnapshot.WORKBENCH,
+                PrecisionSnapshot.of(inscription),
                 ExecutionContext.TriggerEvent.cast()
         );
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);

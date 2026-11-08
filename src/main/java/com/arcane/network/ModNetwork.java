@@ -3,6 +3,7 @@ package com.arcane.network;
 import com.arcane.ArcaneMod;
 import com.arcane.network.packet.C2SCastRequestPacket;
 import com.arcane.network.packet.C2SCopyToScrollPacket;
+import com.arcane.network.packet.C2SJournalNotePacket;
 import com.arcane.network.packet.C2SDeleteInscriptionPacket;
 import com.arcane.network.packet.C2SSaveInscriptionPacket;
 import com.arcane.network.packet.C2SSelectInscriptionPacket;
@@ -66,6 +67,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(C2SCopyToScrollPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SCopyToScrollPacket::encode).decoder(C2SCopyToScrollPacket::decode)
         .consumerMainThread(C2SCopyToScrollPacket::handle).add();
+    CHANNEL.messageBuilder(C2SJournalNotePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(C2SJournalNotePacket::encode).decoder(C2SJournalNotePacket::decode)
+        .consumerMainThread(C2SJournalNotePacket::handle).add();
   }
 
   /** Feixe 3D visivel para quem estiver a ate 96 blocos. */

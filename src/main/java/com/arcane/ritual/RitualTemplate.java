@@ -14,6 +14,10 @@ import java.util.Set;
 public final class RitualTemplate {
   /** Raios dos circulos: menor, medio e maior. */
   public static final int[] RADII = {4, 8, 16};
+  /** Circulos feitos a mao com a Pena: sem o Compasso o limite cai, ate 64 de raio (128x128). */
+  public static final int[] HAND_RADII = {4, 8, 16, 32, 64};
+  /** A mao gasta metade da tinta do Compasso por traco. */
+  public static final int HAND_TRACES_PER_INK = 32;
 
   private RitualTemplate() {}
 

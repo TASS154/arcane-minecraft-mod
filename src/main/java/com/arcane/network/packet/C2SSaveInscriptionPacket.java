@@ -77,6 +77,10 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs) {
       var draft = new com.arcane.inscription.Inscription(List.copyOf(menu.building()));
       var validation = com.arcane.inscription.InscriptionValidator.validate(draft,
           com.arcane.grimoire.GrimoireAttachments.get(player));
+      if (menu.penMode()) {
+        penInscribe(player, menu, validation);
+        return;
+      }
       var grimoire = com.arcane.grimoire.GrimoireAttachments.get(player);
       boolean replaces = grimoire.map(g -> g.findByName(menu.spellName()).isPresent()).orElse(false);
       boolean noPages = validation.valid() && !replaces && grimoire.map(g -> g.freePages() <= 0).orElse(false);
@@ -95,6 +99,28 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs) {
       DiscoveryService.onExperiment(player, used);
     });
     ctx.get().setPacketHandled(true);
+  }
+
+  /** Modo caneta: escreve a magia desenhada no bloco alvo (30% de potencia, gasta 1 tinta da mao secundaria). */
+  private static void penInscribe(ServerPlayer player, ArcaneWorkbenchMenu menu, com.arcane.inscription.InscriptionValidator.ValidationResult validation) {
+    if (!validation.valid()) {
+      player.displayClientMessage(Component.translatable("message.arcane.workbench.invalid", validation.message()).withStyle(ChatFormatting.RED), true);
+      return;
+    }
+    var ink = player.getOffhandItem();
+    if (!(ink.getItem() instanceof com.arcane.item.InkItem inkItem)) {
+      player.displayClientMessage(Component.translatable("message.arcane.pen.need_ink").withStyle(ChatFormatting.RED), true);
+      return;
+    }
+    var level = (net.minecraft.server.level.ServerLevel) player.level();
+    var pos = menu.targetPos();
+    String trigger = level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity
+        ? com.arcane.inscribing.InscribingService.TRIGGER_ON_OPEN : com.arcane.inscribing.InscribingService.TRIGGER_ON_TOUCH;
+    if (com.arcane.inscribing.InscribingService.inscribe(level, player, pos, menu.building(), new ResourceLocation("arcane", inkItem.inkId()), trigger, menu.spellName())) {
+      if (!player.getAbilities().instabuild) ink.shrink(1);
+      player.displayClientMessage(Component.translatable("message.arcane.pen.written." + trigger).withStyle(ChatFormatting.LIGHT_PURPLE), true);
+      player.closeContainer();
+    }
   }
 
   /** So parametros que o glifo declara, limitados ao intervalo dele; valores iguais ao padrao nem sao guardados. */

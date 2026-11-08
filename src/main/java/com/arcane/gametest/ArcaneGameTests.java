@@ -873,7 +873,14 @@ public class ArcaneGameTests {
 
     cast(h, caster, g("self"), g("activate"));
     h.assertTrue(caster.hasEffect(MobEffects.ABSORPTION), "o glifo Ativar deveria disparar o ritual armazenado");
-    h.assertTrue(!be.hasStored(), "o altar se esvazia depois de disparar");
+    h.assertTrue(be.hasStored(), "a magia guardada nao some: o altar dispara de novo (depois do descanso)");
+    h.assertTrue(be.cooldownUntil() > h.getLevel().getGameTime(), "o descanso do altar comeca ao disparar");
+    caster.removeEffect(MobEffects.ABSORPTION);
+    cast(h, caster, g("self"), g("activate"));
+    h.assertTrue(!caster.hasEffect(MobEffects.ABSORPTION), "durante o descanso o altar nao dispara de novo");
+    be.setCooldownUntil(0L);
+    cast(h, caster, g("self"), g("activate"));
+    h.assertTrue(caster.hasEffect(MobEffects.ABSORPTION), "passado o descanso, o altar dispara outra vez");
 
     // outro dono nao dispara
     Pig stranger = pigAt(h, 16, 14);
@@ -1485,5 +1492,63 @@ public class ArcaneGameTests {
         h.succeed();
       });
     });
+  }
+
+  // ------------------------------------------------------------------ rodada: potencia pela escrita, circulo a mao, invocados
+  @GameTest(template = "empty")
+  public static void powerComesFromWhereTheSpellWasWritten(GameTestHelper h) {
+    var bench = new Inscription(List.of(g("self"), g("heal")));
+    h.assertTrue(com.arcane.execution.PrecisionSnapshot.of(bench).powerMultiplier() == 1.0, "escrita na Bancada: 100%");
+    var field = bench.withMetadata(new com.arcane.inscription.InscriptionMetadata("x", new ResourceLocation("arcane", "common"),
+        new ResourceLocation("arcane", "arcane_pen"), com.arcane.execution.PrecisionSnapshot.FIELD_POWER, java.util.Optional.empty(), 0L,
+        com.arcane.inscription.InscriptionSourceKind.SCROLL));
+    h.assertTrue(Math.abs(com.arcane.execution.PrecisionSnapshot.of(field).powerMultiplier() - 0.3) < 1e-9, "escrita no campo (caneta): 30%");
+    h.assertTrue(com.arcane.execution.PrecisionSnapshot.of(field).manaCostMultiplier() == 1.0, "o custo de mana e o mesmo exibido (sem sobretaxa escondida)");
+    h.assertTrue(com.arcane.execution.PrecisionSnapshot.FIELD.manaCostMultiplier() == 1.0, "FIELD sem sobretaxa");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void handDrawnCirclesGoBeyondTheCompass(GameTestHelper h) {
+    int[] hand = com.arcane.ritual.RitualTemplate.HAND_RADII;
+    h.assertTrue(hand[hand.length - 1] == 64, "a mao chega a raio 64 (128x128)");
+    h.assertTrue(com.arcane.ritual.RitualTemplate.RADII[com.arcane.ritual.RitualTemplate.RADII.length - 1] == 16, "o Compasso continua em 16");
+    for (int r : hand) {
+      h.assertTrue(com.arcane.ritual.RitualService.handInkCost(r) * 2 <= com.arcane.ritual.RitualService.inkCost(r) + 1,
+          "a mao gasta cerca de metade da tinta (raio " + r + ")");
+    }
+    h.assertTrue(com.arcane.ritual.RitualLevel.forRadius(64) == com.arcane.ritual.RitualLevel.MAJOR, "raio acima de 16 conta como ritual maior");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void summonedCreaturesGrowWithTheirTier(GameTestHelper h) {
+    var small = ModEntities.SPECTRAL_WOLF.get().create(h.getLevel());
+    var big = ModEntities.SPECTRAL_WOLF.get().create(h.getLevel());
+    small.setTier(0);
+    big.setTier(2);
+    h.assertTrue(big.getMaxHealth() > small.getMaxHealth() * 2, "o lobo maior tem bem mais vida (" + small.getMaxHealth() + " -> " + big.getMaxHealth() + ")");
+    h.assertTrue(big.getBbHeight() > small.getBbHeight() * 2, "e e maior de fato (hitbox)");
+    h.assertTrue(big.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)
+        > small.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE), "e bate mais forte");
+    var g0 = ModEntities.ARCANE_GOLEM.get().create(h.getLevel());
+    var g2 = ModEntities.ARCANE_GOLEM.get().create(h.getLevel());
+    g0.setTier(0);
+    g2.setTier(2);
+    h.assertTrue(g2.getMaxHealth() > g0.getMaxHealth() * 2 && g2.getBbHeight() > g0.getBbHeight() * 1.5, "o golem maior tambem cresce");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena")
+  public static void summoningFormsHonourCountAndSize(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 8);
+    Pig caster = pigAt(h, 17, 14);
+    var result = ritual(h, caster, com.arcane.ritual.ComponentSource.unlimited(), false, new GlyphInstance(new ResourceLocation("arcane", "summon_golem"), Map.of("count", 2.0, "size", 3.0)));
+    h.assertTrue(result.success(), "ritual do golem: " + result.outcome());
+    var golems = h.getLevel().getEntitiesOfClass(com.arcane.entity.ArcaneGolemEntity.class, new net.minecraft.world.phys.AABB(altarAbs(h)).inflate(30));
+    h.assertTrue(golems.size() == 2, "dois golens, vieram " + golems.size());
+    h.assertTrue(golems.stream().allMatch(x -> x.tier() == 2), "todos do tamanho maximo");
+    h.succeed();
   }
 }

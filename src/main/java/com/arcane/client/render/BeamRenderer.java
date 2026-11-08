@@ -140,6 +140,7 @@ public class BeamRenderer {
     ring(c, pose, b, 0.62f * s, 0.05f * s, spin, 28, false, r, g, bl, 235);
     ring(c, pose, b, 0.40f * s, 0.04f * s, -spin * 1.4f, 20, true, 255, 255, 255, 230);
     disc(c, pose, b, 0.34f * s, r, g, bl, (int) (70 * grow));
+    RuneCircle.draw(c, pose, b.from, b.u, b.v, 0.95f * s, spin * 0.6f, r, g, bl, (int) (225 * grow));
   }
 
   /** Anel (ou anel tracejado) no plano perpendicular ao feixe. */

@@ -62,8 +62,11 @@ public final class RitualService {
   /** Mede o circulo em volta do altar: o maior raio (16, 8, 4) cuja completude passa do minimo; senao, o melhor relato. */
   public static CircleReport evaluate(ServerLevel level, BlockPos altar) {
     CircleReport best = new CircleReport(RitualLevel.NONE, 0, 0.0, 0, 1);
-    for (int i = RitualTemplate.RADII.length - 1; i >= 0; i--) {
-      int radius = RitualTemplate.RADII[i];
+    for (int i = RitualTemplate.HAND_RADII.length - 1; i >= 0; i--) {
+      int radius = RitualTemplate.HAND_RADII[i];
+      // circulos enormes: confere antes os quatro pontos cardeais (barato e nao carrega chunks longe)
+      if (radius > 16 && !(traceAt(level, altar, new RitualTemplate.Cell(radius, 0)) != null && traceAt(level, altar, new RitualTemplate.Cell(-radius, 0)) != null
+          && traceAt(level, altar, new RitualTemplate.Cell(0, radius)) != null && traceAt(level, altar, new RitualTemplate.Cell(0, -radius)) != null)) continue;
       Set<RitualTemplate.Cell> cells = RitualTemplate.cells(radius);
       int found = 0;
       for (RitualTemplate.Cell cell : cells) {
@@ -82,6 +85,7 @@ public final class RitualService {
   private static BlockPos traceAt(ServerLevel level, BlockPos altar, RitualTemplate.Cell cell) {
     for (int dy = -2; dy <= 2; dy++) {
       BlockPos pos = altar.offset(cell.dx(), dy, cell.dz());
+      if (!level.hasChunkAt(pos)) return null;
       if (level.getBlockState(pos).is(ModBlocks.ARCANE_TRACE.get())) return pos;
     }
     return null;
@@ -90,6 +94,11 @@ public final class RitualService {
   /** Tinta comum necessaria para desenhar o circulo (1 para cada 16 tracos). */
   public static int inkCost(int radius) {
     return (int) Math.ceil(RitualTemplate.cells(radius).size() / 16.0);
+  }
+
+  /** Tinta para desenhar a mao (metade do Compasso). */
+  public static int handInkCost(int radius) {
+    return (int) Math.ceil(RitualTemplate.cells(radius).size() / (double) RitualTemplate.HAND_TRACES_PER_INK);
   }
 
   /**
@@ -103,6 +112,7 @@ public final class RitualService {
       if (traceAt(level, altar, cell) != null) continue;
       for (int dy = 1; dy >= -2; dy--) {
         BlockPos pos = altar.offset(cell.dx(), dy, cell.dz());
+        if (!level.hasChunkAt(pos)) break;
         BlockState here = level.getBlockState(pos);
         boolean free = here.isAir() || (here.canBeReplaced() && here.getFluidState().isEmpty());
         if (free && trace.canSurvive(level, pos)) {
@@ -280,7 +290,14 @@ public final class RitualService {
       int effective = legendary ? RitualLevel.LEGENDARY.number() : circle.level().number();
       if (RitualRequirements.of(spell).level() > effective) continue;
       double power = circle.level().power() * circle.completeness();
-      altar.clearStored();
+      // A magia guardada nao some: o altar dispara de novo a cada ativacao, pagando a mana de cada vez.
+      if (activator instanceof net.minecraft.server.level.ServerPlayer sp && !sp.getAbilities().instabuild) {
+        var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(sp);
+        if (!mana.trySpend(CastingService.ritualCost(spell, legendary))) {
+          sp.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.arcane.mana.insufficient"), true);
+          continue;
+        }
+      }
       altar.setCooldownUntil(level.getGameTime() + RitualSettings.COOLDOWN_TICKS);
       CastingService.castRitual(activator, spell, level,
           new CastingService.RitualBonus(effective, power, circle.level().areaScale(), legendary));

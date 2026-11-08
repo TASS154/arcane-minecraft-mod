@@ -25,16 +25,26 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
   private final List<GlyphInstance> building = new ArrayList<>();
   private String spellName = "";
 
+  /** Modo caneta: mesma interface de desenho, mas o resultado e inscrito no bloco (nao no grimorio). */
+  private final boolean penMode;
+
   public ArcaneWorkbenchMenu(int id, Inventory inv, FriendlyByteBuf buf) {
-    this(id, inv, buf.readBlockPos());
+    this(id, inv, buf.readBlockPos(), buf.readBoolean());
   }
 
   public ArcaneWorkbenchMenu(int id, Inventory inv, BlockPos pos) {
+    this(id, inv, pos, false);
+  }
+
+  public ArcaneWorkbenchMenu(int id, Inventory inv, BlockPos pos, boolean penMode) {
     super(ModMenuTypes.ARCANE_WORKBENCH.get(), id);
+    this.penMode = penMode;
     this.workbenchPos = pos;
     this.access = ContainerLevelAccess.create(inv.player.level(), pos);
   }
 
+  public boolean penMode() { return penMode; }
+  public BlockPos targetPos() { return workbenchPos; }
   public List<GlyphInstance> building() { return building; }
   public String spellName() { return spellName; }
   public void setSpellName(String name) { this.spellName = name; }
@@ -77,6 +87,10 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
 
   @Override
   public boolean stillValid(Player player) {
+    if (penMode) {
+      return player.getMainHandItem().is(com.arcane.registry.ModItems.ARCANE_PEN.get())
+          && player.distanceToSqr(workbenchPos.getX() + 0.5, workbenchPos.getY() + 0.5, workbenchPos.getZ() + 0.5) < 100.0;
+    }
     return stillValid(access, player, com.arcane.registry.ModBlocks.ARCANE_WORKBENCH.get());
   }
 }

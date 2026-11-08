@@ -134,3 +134,11 @@ Um grimório flutuante sem dono (sobra de teste ou dado antigo) derrubava o logi
 ### Imunidade do conjurador, Explosão Destrutiva e Cadeia (esta rodada)
 - Imunidade: `SpellPipeline` tira o conjurador dos alvos de efeitos nocivos (exceto forma Eu); `SpellImmunity` poupa o dono de explosão, relâmpago e nuvem nociva (remoção do efeito um tick depois, pois o efeito só entra após o evento).
 - Novos glifos: `blast` (efeito) e `chain` (modificador), total 85. Testados por GameTest (95 passando) e JUnit; não vistos ainda num cliente real.
+
+### Rodada: potência pela escrita, caneta, círculo à mão, invocados, livro suave
+- `PrecisionSnapshot.of(inscription)`: potência vem de `metadata.precision` (Bancada 1.0; campo 0.3), sem sobretaxa de mana. Pergaminho via caneta (30%); inscrição em bloco via interface de desenho (`ArcaneWorkbenchMenu` em modo caneta, `C2SSaveInscriptionPacket.penInscribe`).
+- Círculo à mão: `RitualTemplate.HAND_RADII` (até 64), `RitualService.handInkCost`; avaliação de círculos >16 só confere os 4 pontos cardeais antes (não carrega chunks longe).
+- Altar mantém a magia guardada e cobra mana por disparo.
+- Visual: `RuneCircle` (círculo de runas), colunas descendo do céu (`ShapeFxRenderer`), livro com suavização no cliente (`GrimoireRenderer.follow`, dono sincronizado em `GrimoireEntity`).
+- Invocados: `SpectralWolfEntity`, `ArcaneGolemEntity` (+ `SummonTier`), modelos em `SummonLayers` (gerado) e `SummonModels`, renderizadores em `SummonRenderers`.
+- 99 GameTests + JUnit passando. NÃO verificado em tela real: aparência dos modelos/texturas, suavidade do livro, círculo de runas.

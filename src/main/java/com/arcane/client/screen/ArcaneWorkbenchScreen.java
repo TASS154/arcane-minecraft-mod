@@ -89,7 +89,7 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
       selected = -1;
       listScroll = 0;
     }).bounds(leftPos + 68, topPos + 168, 45, 20).build());
-    addRenderableWidget(Button.builder(Component.translatable("gui.arcane.save"), b -> save())
+    addRenderableWidget(Button.builder(Component.translatable(menu.penMode() ? "gui.arcane.inscribe" : "gui.arcane.save"), b -> save())
         .bounds(leftPos + 120, topPos + 168, 54, 20).tooltip(tip("gui.arcane.save.tooltip")).build());
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.cast"), b -> ClientSetup.tryCast(true))
         .bounds(leftPos + 177, topPos + 168, 54, 20).tooltip(tip("gui.arcane.cast.tooltip")).build());

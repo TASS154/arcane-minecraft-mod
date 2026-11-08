@@ -47,8 +47,8 @@ Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única
 | **Onda** | `arcane:wave` | 3 | 2 | Força | `range` 8 (2–16) | Forma: uma onda em cone a sua frente, afetando todas as criaturas que ela alcança. |
 | **Pilar** | `arcane:pillar` | 4 | 3 | Tempestade | `range` 24 (4–48), `radius` 2 (1–6) | Forma: uma coluna vertical no ponto que você mira (criaturas e o bloco atingido). |
 | **Barreira** | `arcane:barrier` | 4 | 3 | Terra | `duration` 200 (40–600), `radius` 3 (2–12) | Forma: ergue uma parede de energia a sua frente (3x3 com raio 3; Area e raio ampliam). Com Domo, Esfera ou Anel vira uma casca em volta do centro. Os glifos seguintes atingem os blocos e quem estiver dentro ou encostado. |
-| **Invocar Lobos** | `arcane:summon_wolves` | 4 | 2 | Terra | `count` 3 (2–6), `duration` 1200 (200–6000) | Forma de RITUAL (menor): invoca lobos domesticados que lutam por você por um tempo. Os lobos são os alvos do que vem depois. |
-| **Invocar Golem** | `arcane:summon_golem` | 6 | 3 | Terra | `duration` 2400 (400–12000) | Forma de RITUAL (médio): ergue um golem de ferro que protege você por um tempo. O golem é o alvo do que vem depois. |
+| **Invocar Lobos** | `arcane:summon_wolves` | 4 | 2 | Terra | `count` 3 (1–6), `size` 1 (1–3), `duration` 1200 (200–6000) | Forma de RITUAL (menor): invoca Lobos Espectrais domesticados que lutam por você por um tempo. Número (count) e tamanho (size 1–3) são escolha sua: maiores têm outro modelo (Alfa, Fenrir) e mais vida e dano. Os lobos são os alvos do que vem depois. |
+| **Invocar Golem** | `arcane:summon_golem` | 6 | 3 | Terra | `count` 1 (1–3), `size` 1 (1–3), `duration` 2400 (400–12000) | Forma de RITUAL (médio): ergue Golens Rúnicos que protegem você por um tempo. Número (count 1–3) e tamanho (size 1–3: Guardião, Colosso, Titã, cada um com modelo próprio). O golem é o alvo do que vem depois. |
 
 ## Filtros (13)
 

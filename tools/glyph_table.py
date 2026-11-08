@@ -346,16 +346,16 @@ glyph("standing_still", "condition", 0,
 # ================================================================== RITUAIS: glifos que SO existem como ritual
 # ritual: 1 menor, 2 medio, 3 maior, 4 lendario (nivel do circulo desenhado). components: itens consumidos ao conjurar.
 glyph("summon_wolves", "form", 4,
-      ("Invocar Lobos", "Forma de RITUAL (menor): invoca lobos domesticados que lutam por você por um tempo. Os lobos são os alvos do que vem depois."),
-      ("Summon Wolves", "RITUAL form (minor): summons tamed wolves that fight for you for a while. The wolves are the targets of what follows."),
+      ("Invocar Lobos", "Forma de RITUAL (menor): invoca Lobos Espectrais domesticados que lutam por você por um tempo. Número (count) e tamanho (size 1–3) são escolha sua: maiores têm outro modelo (Alfa, Fenrir) e mais vida e dano. Os lobos são os alvos do que vem depois."),
+      ("Summon Wolves", "RITUAL form (minor): summons tamed Spectral Wolves that fight for you for a while. You pick the number (count) and size (1-3): bigger ones use another model (Alpha, Fenrir) with more health and damage. The wolves are the targets of what follows."),
       ["#.#..#.#", "###..###", ".##..##.", "..####..", ".######.", "..#..#..", "..####..", "...##..."],
-      params={"count": (3.0, 2.0, 6.0, "int"), "duration": (1200.0, 200.0, 6000.0, "int")}, comp=FORM_COMP,
+      params={"count": (3.0, 1.0, 6.0, "int"), "size": (1.0, 1.0, 3.0, "int"), "duration": (1200.0, 200.0, 6000.0, "int")}, comp=FORM_COMP,
       tier=2, ritual=1, components=[("minecraft:bone", 6)])
 glyph("summon_golem", "form", 6,
-      ("Invocar Golem", "Forma de RITUAL (médio): ergue um golem de ferro que protege você por um tempo. O golem é o alvo do que vem depois."),
-      ("Summon Golem", "RITUAL form (medium): raises an iron golem that guards you for a while. The golem is the target of what follows."),
+      ("Invocar Golem", "Forma de RITUAL (médio): ergue Golens Rúnicos que protegem você por um tempo. Número (count 1–3) e tamanho (size 1–3: Guardião, Colosso, Titã, cada um com modelo próprio). O golem é o alvo do que vem depois."),
+      ("Summon Golem", "RITUAL form (medium): raises Runic Golems that guard you for a while. You pick the number (count 1-3) and size (1-3: Guardian, Colossus, Titan, each with its own model). The golem is the target of what follows."),
       ["..####..", ".######.", "##.##.##", "########", "..####..", ".##..##.", ".##..##.", ".##..##."],
-      params={"duration": (2400.0, 400.0, 12000.0, "int")}, comp=FORM_COMP,
+      params={"count": (1.0, 1.0, 3.0, "int"), "size": (1.0, 1.0, 3.0, "int"), "duration": (2400.0, 400.0, 12000.0, "int")}, comp=FORM_COMP,
       tier=3, ritual=2, components=[("minecraft:iron_block", 2), ("minecraft:carved_pumpkin", 1)])
 glyph("warp", "effect", 8,
       ("Dobrar", "Efeito de RITUAL (maior): leva todas as criaturas alvo para o ponto que você mira (até 48). Com Aura ou Pilar e um círculo grande, desloca uma região inteira."),

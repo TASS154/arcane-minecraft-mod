@@ -45,7 +45,7 @@ public final class InscribingService {
                                  ResourceLocation ink, String trigger, String name) {
     if (!PenRegistry.canWriteOnBlock(player, pos, level)) return false;
     Inscription inscription = new Inscription(new ArrayList<>(glyphs), new InscriptionMetadata(
-        name, ink, new ResourceLocation("arcane", "arcane_pen"), 1.0,
+        name, ink, new ResourceLocation("arcane", "arcane_pen"), com.arcane.execution.PrecisionSnapshot.FIELD_POWER,
         Optional.of(player.getUUID()), level.getGameTime(), InscriptionSourceKind.WORLD));
     WorldInscriptionIndex.get(level).put(new InscriptionAnchor(pos, inscription, trigger, ink));
     if (InkRegistry.isBloodInk(ink)) {

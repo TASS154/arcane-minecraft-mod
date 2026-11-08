@@ -37,6 +37,12 @@ public record C2SCopyToScrollPacket(UUID inscriptionId) {
         int paper = findPlainPaper(inv);
         int ink = findInk(inv);
         boolean creative = player.getAbilities().instabuild;
+        boolean hasPen = false;
+        for (int i = 0; i < inv.getContainerSize(); i++) if (inv.getItem(i).is(ModItems.ARCANE_PEN.get())) hasPen = true;
+        if (!creative && !hasPen) {
+          player.displayClientMessage(Component.translatable("message.arcane.scroll.need_pen").withStyle(ChatFormatting.RED), true);
+          return;
+        }
         if (!creative && (paper < 0 || ink < 0)) {
           player.displayClientMessage(Component.translatable("message.arcane.scroll.need_materials").withStyle(ChatFormatting.RED), true);
           return;
@@ -46,7 +52,11 @@ public record C2SCopyToScrollPacket(UUID inscriptionId) {
           inv.getItem(ink).shrink(1);
         }
         ItemStack scroll = new ItemStack(Items.PAPER);
-        ItemInscriptionHelper.write(scroll, spell);
+        // Escrita no campo com a caneta: so 30% da potencia (a da Bancada e 100%).
+        ItemInscriptionHelper.write(scroll, spell.withMetadata(new com.arcane.inscription.InscriptionMetadata(
+            spell.metadata().name(), spell.metadata().ink(), new net.minecraft.resources.ResourceLocation("arcane", "arcane_pen"),
+            com.arcane.execution.PrecisionSnapshot.FIELD_POWER, java.util.Optional.of(player.getUUID()), player.level().getGameTime(),
+            com.arcane.inscription.InscriptionSourceKind.SCROLL)));
         scroll.setHoverName(spell.metadata().name().isEmpty() ? Component.translatable("gui.arcane.unnamed") : Component.literal(spell.metadata().name()));
         if (!inv.add(scroll)) player.drop(scroll, false);
         player.displayClientMessage(Component.translatable("message.arcane.scroll.copied").withStyle(ChatFormatting.LIGHT_PURPLE), true);

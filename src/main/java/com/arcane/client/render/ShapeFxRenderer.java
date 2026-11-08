@@ -26,6 +26,8 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = ArcaneMod.MODID, value = Dist.CLIENT)
 public class ShapeFxRenderer {
   private static final float TAU = 6.2831855f;
+  /** Altura de onde a coluna cai (ceu). */
+  private static final float SKY = 48f;
   private static final List<Fx> FX = new ArrayList<>();
 
   private static final class Fx {
@@ -95,7 +97,7 @@ public class ShapeFxRenderer {
       case S2CShapeFxPacket.PILLAR -> {
         for (int i = 0; i < 6; i++) {
           double a = rnd.nextDouble() * TAU, r = f.size * 0.5 * rnd.nextDouble();
-          level.addParticle(particle, f.pos.x + Math.cos(a) * r, f.pos.y + rnd.nextDouble() * 9, f.pos.z + Math.sin(a) * r, 0, 0.08, 0);
+          level.addParticle(particle, f.pos.x + Math.cos(a) * r, f.pos.y + rnd.nextDouble() * 9, f.pos.z + Math.sin(a) * r, 0, -0.12, 0);
         }
       }
       case S2CShapeFxPacket.IMPACT -> {
@@ -113,7 +115,7 @@ public class ShapeFxRenderer {
           level.addParticle(particle, f.pos.x + Math.cos(a) * r, f.pos.y + 0.1, f.pos.z + Math.sin(a) * r, 0, 0.1, 0);
         }
         for (int i = 0; i < 4; i++) {
-          level.addParticle(particle, f.pos.x + (rnd.nextDouble() - 0.5) * 0.5, f.pos.y + rnd.nextDouble() * 16, f.pos.z + (rnd.nextDouble() - 0.5) * 0.5, 0, 0.1, 0);
+          level.addParticle(particle, f.pos.x + (rnd.nextDouble() - 0.5) * 0.5, f.pos.y + rnd.nextDouble() * 16, f.pos.z + (rnd.nextDouble() - 0.5) * 0.5, 0, -0.15, 0);
         }
       }
       default -> { }
@@ -161,16 +163,25 @@ public class ShapeFxRenderer {
         ring(c, pose, o.add(0, 0.1, 0), rad * 0.6f, 0.06f, yaw - half, yaw + half, 14, r, g, b, (int) (160 * fade));
       }
       case S2CShapeFxPacket.PILLAR -> {
-        float open = Math.min(1f, life * 6f);
-        float w = f.size * 0.5f * open * fade;
-        Vec3 top = f.pos.add(0, 10, 0);
-        BeamRenderer.box(c, pose, f.pos, top, new Vec3(1, 0, 0), new Vec3(0, 0, 1), Math.max(0.01f, w), r, g, b, 90);
-        BeamRenderer.box(c, pose, f.pos, top, new Vec3(1, 0, 0), new Vec3(0, 0, 1), Math.max(0.01f, w * 0.35f), 255, 255, 255, 255);
-        for (int i = 0; i < 3; i++) {
-          float h = ((life * 2.2f + i / 3f) % 1f) * 10f;
-          ring(c, pose, f.pos.add(0, h, 0), f.size * (0.6f + 0.4f * open) * fade + 0.1f, 0.08f, (life + i) * 3f, (life + i) * 3f + TAU, 28, 255, 255, 255, (int) (220 * fade));
+        // A coluna DESCE do ceu: a ponta cai do alto ate o chao (primeiros ~20%), depois fica e some. Circulo de runas na base.
+        float drop = Math.min(1f, life * 5f);
+        float top = SKY * (1f - 0f);
+        float headY = SKY * (1f - ease(drop));
+        float w = f.size * 0.5f * Math.min(1f, life * 8f) * fade;
+        Vec3 bottom = f.pos.add(0, headY, 0), topV = f.pos.add(0, top, 0);
+        Vec3 ux = new Vec3(1, 0, 0), vz = new Vec3(0, 0, 1);
+        if (w > 0.01f) {
+          BeamRenderer.box(c, pose, bottom, topV, ux, vz, w, r, g, b, 90);
+          BeamRenderer.box(c, pose, bottom, topV, ux, vz, w * 0.35f, 255, 255, 255, 255);
         }
-        ring(c, pose, f.pos.add(0, 0.05, 0), f.size * ease(Math.min(1f, life * 3f)), 0.1f, 0f, TAU, 32, r, g, b, (int) (230 * fade));
+        for (int i = 0; i < 3; i++) {
+          float h = (1f - ((life * 2.2f + i / 3f) % 1f)) * 10f; // aneis descendo junto com a luz
+          if (f.pos.y + h < f.pos.y + headY) continue;
+          ring(c, pose, f.pos.add(0, h, 0), f.size * 0.6f * fade + 0.1f, 0.08f, (life + i) * 3f, (life + i) * 3f + TAU, 28, 255, 255, 255, (int) (220 * fade));
+        }
+        float circle = Math.max(1.2f, f.size * 1.4f) * ease(Math.min(1f, life * 4f));
+        RuneCircle.draw(c, pose, f.pos.add(0, 0.07, 0), ux, vz, circle, life * 4f, r, g, b, (int) (235 * Math.min(1f, fade * 1.4f)));
+        if (drop >= 1f && life < 0.35f) ring(c, pose, f.pos.add(0, 0.05, 0), f.size * (0.5f + 2f * (life - 0.2f)), 0.1f, 0f, TAU, 32, 255, 255, 255, (int) (200 * (0.35f - life) * 6f));
       }
       case S2CShapeFxPacket.IMPACT -> {
         float rr = (0.25f + 0.9f * ease(life)) * f.size;
@@ -232,14 +243,16 @@ public class ShapeFxRenderer {
     float colT = Mth.clamp((life - 0.2f) / 0.2f, 0f, 1f);
     float height = 16f * ease(colT);
     float w = (0.35f + 0.25f * Mth.sin(life * 18f)) * fade;
-    if (height > 0.1f && w > 0.01f) {
-      Vec3 top = f.pos.add(0, height, 0);
-      BeamRenderer.box(c, pose, f.pos, top, new Vec3(1, 0, 0), new Vec3(0, 0, 1), w, r, g, b, 90);
-      BeamRenderer.box(c, pose, f.pos, top, new Vec3(1, 0, 0), new Vec3(0, 0, 1), w * 0.35f, 255, 255, 255, 255);
+    if (colT > 0f && w > 0.01f) {
+      // a coluna cai do ceu ate o altar
+      Vec3 bottom = f.pos.add(0, SKY * (1f - ease(colT)), 0), top = f.pos.add(0, SKY, 0);
+      BeamRenderer.box(c, pose, bottom, top, new Vec3(1, 0, 0), new Vec3(0, 0, 1), w, r, g, b, 90);
+      BeamRenderer.box(c, pose, bottom, top, new Vec3(1, 0, 0), new Vec3(0, 0, 1), w * 0.35f, 255, 255, 255, 255);
     }
-    // aneis de runas subindo pela coluna
+    RuneCircle.draw(c, pose, f.pos.add(0, 0.1, 0), new Vec3(1, 0, 0), new Vec3(0, 0, 1), Math.max(1.5f, f.size * 0.45f) * ease(Math.min(1f, life * 3f)), life * 3f, r, g, b, (int) (230 * fade));
+    // aneis de runas descendo pela coluna
     for (int i = 0; i < 4; i++) {
-      float h = ((life * 1.5f + i * 0.25f) % 1f) * height;
+      float h = (1f - ((life * 1.5f + i * 0.25f) % 1f)) * height;
       ring(c, pose, f.pos.add(0, h, 0), 1.0f * fade + 0.2f, 0.06f, life * 6f + i, life * 6f + i + TAU, 12, 255, 255, 255, (int) (200 * fade));
     }
   }

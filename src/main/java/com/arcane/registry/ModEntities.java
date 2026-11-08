@@ -26,6 +26,14 @@ public final class ModEntities {
             () -> EntityType.Builder.<NPCMageEntity>of(NPCMageEntity::new, MobCategory.MONSTER)
                     .sized(0.6f, 1.95f).clientTrackingRange(8).build("npc_mage"));
 
+    public static final RegistryObject<EntityType<com.arcane.entity.SpectralWolfEntity>> SPECTRAL_WOLF = ENTITIES.register("spectral_wolf",
+            () -> EntityType.Builder.<com.arcane.entity.SpectralWolfEntity>of(com.arcane.entity.SpectralWolfEntity::new, MobCategory.CREATURE)
+                    .sized(0.6f, 0.85f).clientTrackingRange(10).build("spectral_wolf"));
+
+    public static final RegistryObject<EntityType<com.arcane.entity.ArcaneGolemEntity>> ARCANE_GOLEM = ENTITIES.register("arcane_golem",
+            () -> EntityType.Builder.<com.arcane.entity.ArcaneGolemEntity>of(com.arcane.entity.ArcaneGolemEntity::new, MobCategory.MISC)
+                    .sized(1.4f, 2.7f).clientTrackingRange(10).build("arcane_golem"));
+
     private ModEntities() {}
 
     public static void register(IEventBus bus) {

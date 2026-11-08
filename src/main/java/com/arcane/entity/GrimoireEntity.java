@@ -20,13 +20,21 @@ public class GrimoireEntity extends Entity {
   private static final EntityDataAccessor<Integer> STAGE =
       SynchedEntityData.defineId(GrimoireEntity.class, EntityDataSerializers.INT);
 
+  /** Dono sincronizado: o cliente calcula sozinho a posicao suavizada do livro em volta dele. */
+  private static final EntityDataAccessor<java.util.Optional<UUID>> OWNER =
+      SynchedEntityData.defineId(GrimoireEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+
   public GrimoireEntity(EntityType<? extends GrimoireEntity> type, Level level) {
     super(type, level);
     this.noPhysics = true;
+    this.noCulling = true;
   }
+
+  public java.util.Optional<UUID> ownerUuid() { return this.entityData.get(OWNER); }
 
   public void bind(Player player, int stage) {
     this.ownerId = player.getUUID();
+    this.entityData.set(OWNER, java.util.Optional.of(ownerId));
     this.entityData.set(STAGE, Math.max(1, stage));
   }
 
@@ -60,11 +68,12 @@ public class GrimoireEntity extends Entity {
   @Override
   protected void defineSynchedData() {
     this.entityData.define(STAGE, 1);
+    this.entityData.define(OWNER, java.util.Optional.empty());
   }
 
   @Override
   protected void readAdditionalSaveData(CompoundTag tag) {
-    if (tag.hasUUID("owner")) ownerId = tag.getUUID("owner");
+    if (tag.hasUUID("owner")) { ownerId = tag.getUUID("owner"); this.entityData.set(OWNER, java.util.Optional.of(ownerId)); }
     this.entityData.set(STAGE, Math.max(1, tag.getInt("stage")));
   }
 

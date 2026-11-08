@@ -32,6 +32,13 @@ public class InscribingHandler {
   public void onPenUse(PlayerInteractEvent.RightClickBlock event) {
     Player player = event.getEntity();
     if (event.getHand() != InteractionHand.MAIN_HAND || !player.getMainHandItem().is(ModItems.ARCANE_PEN.get())) return;
+    // Caneta num Altar Arcano (sem agachar): desenha o circulo do ritual a mao, sem Compasso.
+    if (!player.isShiftKeyDown() && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof com.arcane.block.ArcaneAltarBlock) {
+      event.setCanceled(true);
+      event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+      if (!event.getLevel().isClientSide && player instanceof ServerPlayer sp) drawByHand(sp, (ServerLevel) event.getLevel(), event.getPos());
+      return;
+    }
     ItemStack ink = player.getOffhandItem();
     boolean erasing = player.isShiftKeyDown();
     if (!erasing && !(ink.getItem() instanceof InkItem)) {
@@ -53,26 +60,33 @@ public class InscribingHandler {
       return;
     }
 
-    Optional<Inscription> active = GrimoireAttachments.get(serverPlayer).flatMap(g -> g.activeInscriptionId().flatMap(g::getInscription));
-    if (active.isEmpty()) {
-      player.displayClientMessage(Component.translatable("hud.arcane.no_spell").withStyle(ChatFormatting.RED), true);
-      return;
-    }
-    InscriptionValidator.ValidationResult validation = InscriptionValidator.validate(active.get(), GrimoireAttachments.get(serverPlayer));
-    if (!validation.valid()) {
-      player.displayClientMessage(Component.translatable("message.arcane.workbench.invalid", validation.message())
-          .withStyle(ChatFormatting.RED), true);
-      return;
-    }
+    // Abre a interface de desenho: voce monta a magia que quer escrever neste bloco (nao usa a magia selecionada).
+    final BlockPos target = pos;
+    net.minecraftforge.network.NetworkHooks.openScreen(serverPlayer,
+        new net.minecraft.world.SimpleMenuProvider((id, inv, p) -> new com.arcane.menu.ArcaneWorkbenchMenu(id, inv, target, true),
+            Component.translatable("gui.arcane.pen_title")),
+        buf -> buf.writeBlockPos(target).writeBoolean(true));
+  }
 
-    BlockEntity be = level.getBlockEntity(pos);
-    String trigger = be instanceof ChestBlockEntity ? InscribingService.TRIGGER_ON_OPEN : InscribingService.TRIGGER_ON_TOUCH;
-    ResourceLocation inkId = new ResourceLocation("arcane", ((InkItem) ink.getItem()).inkId());
-    if (InscribingService.inscribe(level, player, pos, active.get().glyphs(), inkId, trigger, active.get().metadata().name())) {
-      if (!player.getAbilities().instabuild) ink.shrink(1);
-      player.displayClientMessage(Component.translatable("message.arcane.pen.written." + trigger)
-          .withStyle(ChatFormatting.LIGHT_PURPLE), true);
+  private static void drawByHand(ServerPlayer player, ServerLevel level, BlockPos altar) {
+    int radius = com.arcane.item.ArcanePenItem.radius(player.getMainHandItem());
+    int cost = com.arcane.ritual.RitualService.handInkCost(radius);
+    boolean creative = player.getAbilities().instabuild;
+    int have = 0;
+    for (ItemStack s : player.getInventory().items) if (s.is(ModItems.COMMON_INK.get())) have += s.getCount();
+    if (!creative && have < cost) {
+      player.displayClientMessage(Component.translatable("message.arcane.compass.need_ink", cost).withStyle(ChatFormatting.RED), true);
+      return;
     }
+    int placed = com.arcane.ritual.RitualService.drawCircle(level, altar, radius);
+    int used = creative ? 0 : Math.min(have, Math.max(placed > 0 ? 1 : 0, (int) Math.ceil(placed / (double) com.arcane.ritual.RitualTemplate.HAND_TRACES_PER_INK)));
+    int left = used;
+    for (ItemStack s : player.getInventory().items) {
+      if (left <= 0) break;
+      if (s.is(ModItems.COMMON_INK.get())) { int n = Math.min(left, s.getCount()); s.shrink(n); left -= n; }
+    }
+    level.playSound(null, altar, com.arcane.registry.ModSounds.PEN_STROKE.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 0.8f);
+    player.displayClientMessage(Component.translatable("message.arcane.compass.drawn", placed, used).withStyle(ChatFormatting.LIGHT_PURPLE), true);
   }
 
   /** Bau inscrito: abrir dispara a inscricao (custo e precisao de quem abre, comportamento original). */
@@ -89,7 +103,7 @@ public class InscribingHandler {
     if (InscribingService.TRIGGER_ON_OPEN.equals(anchor.get().triggerType())
         && event.getLevel().getBlockEntity(pos) instanceof ChestBlockEntity
         && player instanceof ServerPlayer serverPlayer) {
-      CastingService.tryCast(serverPlayer, inscription, PrecisionSnapshot.WORKBENCH);
+      CastingService.tryCast(serverPlayer, inscription, PrecisionSnapshot.of(inscription));
     }
   }
 

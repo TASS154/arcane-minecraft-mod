@@ -29,6 +29,7 @@ public class GrimoireLifecycleHandler {
             .forEach(id -> com.arcane.discovery.DiscoveryService.learnMastered(player, id)));
       }
       GrimoireAttachments.updateManaMultiplier(player);
+      com.arcane.execution.ManaBonuses.refresh(player);
       com.arcane.network.ArcaneSync.sync(player, true);
       giveTutorialBook(player);
     }
@@ -69,6 +70,7 @@ public class GrimoireLifecycleHandler {
           GrimoireAttachments.updateManaMultiplier(serverPlayer);
         }
       });
+      if (serverPlayer.tickCount % 20 == 0) com.arcane.execution.ManaBonuses.refresh(serverPlayer);
       if (serverPlayer.tickCount % 5 == 0) {
         com.arcane.network.ArcaneSync.sync(serverPlayer, false);
       }

@@ -142,3 +142,6 @@ Um grimório flutuante sem dono (sobra de teste ou dado antigo) derrubava o logi
 - Visual: `RuneCircle` (círculo de runas), colunas descendo do céu (`ShapeFxRenderer`), livro com suavização no cliente (`GrimoireRenderer.follow`, dono sincronizado em `GrimoireEntity`).
 - Invocados: `SpectralWolfEntity`, `ArcaneGolemEntity` (+ `SummonTier`), modelos em `SummonLayers` (gerado) e `SummonModels`, renderizadores em `SummonRenderers`.
 - 99 GameTests + JUnit passando. NÃO verificado em tela real: aparência dos modelos/texturas, suavidade do livro, círculo de runas.
+
+### Mana: base editável, glifos, poções
+- `ManaState` (base + `glyphBonus` + `potionBonus`, `regenMultiplier`), `ManaBonuses.refresh` (a cada segundo e ao logar), efeitos `ModEffects.MANA_SURGE/MANA_VESSEL`, item `ManaPotionItem`, comando `/arcane mana`. GameTest `maxManaGrowsWithGlyphsPotionsAndTheCommandBase` (100 GameTests + 93 unitários passando). Não testado: beber a poção no jogo, ícones/texturas na tela.

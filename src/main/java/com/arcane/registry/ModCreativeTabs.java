@@ -23,6 +23,8 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.ARCANE_CHALK.get());
                 output.accept(ModItems.ARCANE_PEN.get());
                 output.accept(ModItems.COMMON_INK.get());
+                output.accept(ModItems.MANA_SURGE_POTION.get());
+                output.accept(ModItems.MANA_VESSEL_POTION.get());
                 output.accept(ModItems.BLOOD_INK.get());
                 output.accept(ModItems.INVISIBLE_INK.get());
                 output.accept(ModItems.GRIMOIRE.get());

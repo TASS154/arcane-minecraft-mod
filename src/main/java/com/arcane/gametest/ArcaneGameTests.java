@@ -1551,4 +1551,43 @@ public class ArcaneGameTests {
     h.assertTrue(golems.stream().allMatch(x -> x.tier() == 2), "todos do tamanho maximo");
     h.succeed();
   }
+
+  // ------------------------------------------------------------------ mana: base editavel, glifos descobertos, pocoes
+  @GameTest(template = "empty")
+  public static void maxManaGrowsWithGlyphsPotionsAndTheCommandBase(GameTestHelper h) {
+    var player = h.makeMockPlayer();
+    var mana = com.arcane.grimoire.GrimoireAttachments.getMana(player).orElseThrow();
+    mana.setBaseMax(100f);
+    com.arcane.execution.ManaBonuses.refresh(player);
+    float start = mana.max();
+    int known0 = com.arcane.execution.ManaBonuses.discoveredGlyphs(player);
+    h.assertTrue(Math.abs(start - (100f + known0 * com.arcane.config.ArcaneConfig.MANA_PER_GLYPH.get().floatValue())) < 0.01f, "max = base + glifos (" + start + ")");
+
+    int learned = 0;
+    for (var id : com.arcane.glyph.GlyphRegistry.all().keySet()) {
+      if (learned >= 10) break;
+      com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow().learnGlyph(id, com.arcane.grimoire.GlyphKnowledge.MASTERED);
+      learned++;
+    }
+    com.arcane.execution.ManaBonuses.refresh(player);
+    h.assertTrue(mana.max() > start, "descobrir glifos aumenta o maximo (" + start + " -> " + mana.max() + ")");
+
+    float before = mana.max();
+    player.getActiveEffectsMap().put(com.arcane.registry.ModEffects.MANA_VESSEL.get(), new net.minecraft.world.effect.MobEffectInstance(com.arcane.registry.ModEffects.MANA_VESSEL.get(), 200));
+    com.arcane.execution.ManaBonuses.refresh(player);
+    h.assertTrue(Math.abs(mana.max() - (before + 50f)) < 0.01f, "pocao de vaso soma 50% da base (" + before + " -> " + mana.max() + ")");
+
+    mana.set(0f);
+    float regen1 = mana.regenPerTick();
+    player.getActiveEffectsMap().put(com.arcane.registry.ModEffects.MANA_SURGE.get(), new net.minecraft.world.effect.MobEffectInstance(com.arcane.registry.ModEffects.MANA_SURGE.get(), 200));
+    com.arcane.execution.ManaBonuses.refresh(player);
+    h.assertTrue(mana.regenPerTick() > regen1 * 3.9f, "pocao de fluxo multiplica a regeneracao (" + regen1 + " -> " + mana.regenPerTick() + ")");
+
+    mana.setBaseMax(300f);
+    com.arcane.execution.ManaBonuses.refresh(player);
+    h.assertTrue(mana.baseMax() == 300f && mana.max() > 300f, "o comando edita a base e os bonus continuam por cima");
+    mana.set(99999f);
+    h.assertTrue(mana.current() <= mana.max(), "a mana atual nunca passa do maximo");
+    h.succeed();
+  }
 }

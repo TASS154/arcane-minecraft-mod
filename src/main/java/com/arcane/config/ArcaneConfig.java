@@ -17,6 +17,11 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.DoubleValue ELEMENT_INTERACTION_STRENGTH;
   public static final ForgeConfigSpec.IntValue MAGE_CAST_INTERVAL_TICKS;
   public static final ForgeConfigSpec.IntValue GRIMOIRE_LOSS_DAYS;
+  public static final ForgeConfigSpec.DoubleValue MANA_PER_GLYPH;
+  public static final ForgeConfigSpec.DoubleValue MANA_SURGE_MULTIPLIER;
+  public static final ForgeConfigSpec.DoubleValue MANA_VESSEL_BONUS;
+  public static final ForgeConfigSpec.IntValue MANA_SURGE_TICKS;
+  public static final ForgeConfigSpec.IntValue MANA_VESSEL_TICKS;
   public static final ForgeConfigSpec.BooleanValue SCARS_ENABLED;
   public static final ForgeConfigSpec.IntValue SCAR_LIFETIME_TICKS;
   public static final ForgeConfigSpec.BooleanValue WORLD_ALTERING_SPELLS;
@@ -45,6 +50,11 @@ public class ArcaneConfig {
         .defineInRange("elementInteractionStrength", 1.0, 0.0, 3.0);
     MAGE_CAST_INTERVAL_TICKS = builder.comment("Ticks between NPC mage casts").defineInRange("mageCastIntervalTicks", 80, 10, 1200);
     GRIMOIRE_LOSS_DAYS = builder.comment("Days of reduced mana after losing the grimoire (PROVISIONAL)").defineInRange("grimoireLossDays", 3, 0, 30);
+    MANA_PER_GLYPH = builder.comment("Extra max mana per discovered glyph (partial knowledge or better) (PROVISIONAL)").defineInRange("manaPerGlyph", 1.5, 0.0, 50.0);
+    MANA_SURGE_MULTIPLIER = builder.comment("Mana regeneration multiplier while under the Mana Surge potion (PROVISIONAL)").defineInRange("manaSurgeMultiplier", 4.0, 1.0, 50.0);
+    MANA_VESSEL_BONUS = builder.comment("Max mana bonus of the Mana Vessel potion, as a fraction of the base max (PROVISIONAL)").defineInRange("manaVesselBonus", 0.5, 0.0, 10.0);
+    MANA_SURGE_TICKS = builder.comment("Duration of the Mana Surge potion, in ticks").defineInRange("manaSurgeTicks", 6000, 20, 1728000);
+    MANA_VESSEL_TICKS = builder.comment("Duration of the Mana Vessel potion, in ticks").defineInRange("manaVesselTicks", 6000, 20, 1728000);
     SCARS_ENABLED = builder.comment("Powerful spells leave temporary scars in the world").define("scarsEnabled", true);
     SCAR_LIFETIME_TICKS = builder.comment("How long a world scar lasts, in ticks (PROVISIONAL)").defineInRange("scarLifetimeTicks", 24000, 200, 1728000);
     WORLD_ALTERING_SPELLS = builder.comment("Spells may place or change blocks (barriers, fire, ice, growth...). Turn off on servers that want no terrain changes")

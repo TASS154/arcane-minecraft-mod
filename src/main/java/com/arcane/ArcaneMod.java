@@ -38,6 +38,7 @@ public class ArcaneMod {
         ModBlocks.register(modBus);
         com.arcane.registry.ModBlockEntities.register(modBus);
         ModItems.register(modBus);
+        com.arcane.registry.ModEffects.register(modBus);
         ModEntities.register(modBus);
         ModMenuTypes.register(modBus);
         ModCreativeTabs.register(modBus);

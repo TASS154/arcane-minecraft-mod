@@ -24,6 +24,10 @@ public final class ModItems {
             () -> new BlockItem(ModBlocks.ARCANE_WORKBENCH.get(), new Item.Properties()));
     public static final RegistryObject<Item> MANA_CRYSTAL = ITEMS.register("mana_crystal",
             () -> new BlockItem(ModBlocks.MANA_CRYSTAL.get(), new Item.Properties()));
+    public static final RegistryObject<Item> MANA_SURGE_POTION = ITEMS.register("mana_surge_potion",
+            () -> new com.arcane.item.ManaPotionItem(new Item.Properties(), com.arcane.item.ManaPotionItem.Kind.SURGE));
+    public static final RegistryObject<Item> MANA_VESSEL_POTION = ITEMS.register("mana_vessel_potion",
+            () -> new com.arcane.item.ManaPotionItem(new Item.Properties(), com.arcane.item.ManaPotionItem.Kind.VESSEL));
     public static final RegistryObject<Item> ARCANE_PEN = ITEMS.register("arcane_pen", () -> new ArcanePenItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> COMMON_INK = ITEMS.register("common_ink", () -> new InkItem(new Item.Properties(), "common"));
     public static final RegistryObject<Item> BLOOD_INK = ITEMS.register("blood_ink", () -> new InkItem(new Item.Properties(), "blood"));

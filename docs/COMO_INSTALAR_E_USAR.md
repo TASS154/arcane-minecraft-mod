@@ -407,3 +407,10 @@ Na bancada, **passe o mouse sobre a linha de estado** (Pronto / ⚠ Veja a prév
 - **Invocados próprios:** Invocar Lobos agora tem `count` (1–6) e `size` (1–3: Espectral, Alfa, Fenrir); Invocar Golem tem `count` (1–3) e `size` (1–3: Guardião, Colosso, Titã). Cada tamanho tem **modelo e textura próprios** (chifres, ombreiras, coroa, cristais), mais vida e dano. Gerados por `tools/gen_summon_models.py`.
 - **Diário:** campo para escrever suas próprias anotações na aba Diário do Grimório.
 - **Glifos novos no criativo:** ao entrar no mundo em modo criativo, glifos adicionados depois (como Explosão Destrutiva e Cadeia) entram no grimório sozinhos. Fora do criativo: `/arcane know all`.
+
+## Poções de mana e mana máxima
+- **Poção de Fluxo de Mana** (frasco + Cristal de Mana + pó de glowstone): regenera mana ×4 por 5 min.
+- **Poção de Vaso de Mana** (frasco + Cristal de Mana + fragmento de ametista + lápis-lazúli): +50% da mana base por 5 min.
+- Ambas aparecem como efeitos (com temporizador) e também estão na aba criativa. Valores e durações em `arcane-common.toml`: `manaSurgeMultiplier`, `manaVesselBonus`, `manaSurgeTicks`, `manaVesselTicks` (provisórios).
+- **Mana máxima = (base + glifos descobertos × `manaPerGlyph` [1,5] + poção) × (0,5 se perdeu o grimório).** Conta o glifo com conhecimento parcial ou maior.
+- **Comandos (operador):** `/arcane mana max <jogadores> <valor>` edita a base; `/arcane mana set <jogadores> <valor>` ajusta a mana atual; `/arcane mana get` mostra a decomposição.

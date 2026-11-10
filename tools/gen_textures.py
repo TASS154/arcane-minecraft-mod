@@ -645,6 +645,8 @@ def main():
     save(bottle(PAL["N"], PAL["n"]), "item/common_ink.png")
     save(bottle(PAL["R"], PAL["r"]), "item/blood_ink.png")
     save(bottle(PAL["I"], PAL["i"]), "item/invisible_ink.png")
+    save(bottle((90, 225, 255, 255), (30, 130, 200, 255)), "item/mana_surge_potion.png")
+    save(bottle((170, 120, 255, 255), (90, 50, 190, 255)), "item/mana_vessel_potion.png")
 
     save(workbench_top(), "block/arcane_workbench_top.png")
     save(workbench_side(), "block/arcane_workbench_side.png")

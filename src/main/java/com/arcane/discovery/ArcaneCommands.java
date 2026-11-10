@@ -15,6 +15,46 @@ public class ArcaneCommands {
   @SubscribeEvent
   public static void register(RegisterCommandsEvent event) {
     event.getDispatcher().register(Commands.literal("arcane")
+        .then(Commands.literal("mana")
+            .requires(src -> src.hasPermission(2))
+            .then(Commands.literal("max")
+                .then(Commands.argument("players", net.minecraft.commands.arguments.EntityArgument.players())
+                    .then(Commands.argument("value", com.mojang.brigadier.arguments.FloatArgumentType.floatArg(1f, 100000f))
+                        .executes(ctx -> {
+                          float value = com.mojang.brigadier.arguments.FloatArgumentType.getFloat(ctx, "value");
+                          int n = 0;
+                          for (ServerPlayer p : net.minecraft.commands.arguments.EntityArgument.getPlayers(ctx, "players")) {
+                            com.arcane.grimoire.GrimoireAttachments.getMana(p).ifPresent(m -> m.setBaseMax(value));
+                            com.arcane.execution.ManaBonuses.refresh(p);
+                            com.arcane.network.ArcaneSync.sync(p, true);
+                            n++;
+                          }
+                          final int count = n;
+                          ctx.getSource().sendSuccess(() -> Component.literal("Mana maxima base = " + value + " (" + count + " jogador(es)); os bonus de glifos e pocoes somam por cima"), true);
+                          return count;
+                        }))))
+            .then(Commands.literal("set")
+                .then(Commands.argument("players", net.minecraft.commands.arguments.EntityArgument.players())
+                    .then(Commands.argument("value", com.mojang.brigadier.arguments.FloatArgumentType.floatArg(0f, 100000f))
+                        .executes(ctx -> {
+                          float value = com.mojang.brigadier.arguments.FloatArgumentType.getFloat(ctx, "value");
+                          int n = 0;
+                          for (ServerPlayer p : net.minecraft.commands.arguments.EntityArgument.getPlayers(ctx, "players")) {
+                            com.arcane.grimoire.GrimoireAttachments.getMana(p).ifPresent(m -> m.set(value));
+                            com.arcane.network.ArcaneSync.sync(p, true);
+                            n++;
+                          }
+                          return n;
+                        }))))
+            .then(Commands.literal("get")
+                .executes(ctx -> {
+                  if (!(ctx.getSource().getEntity() instanceof ServerPlayer p)) return 0;
+                  com.arcane.execution.ManaBonuses.refresh(p);
+                  com.arcane.grimoire.GrimoireAttachments.getMana(p).ifPresent(m -> ctx.getSource().sendSuccess(() -> Component.literal(
+                      "Mana " + Math.round(m.current()) + "/" + Math.round(m.max()) + " (base " + Math.round(m.baseMax()) + " + glifos " + Math.round(m.glyphBonus())
+                      + " [" + com.arcane.execution.ManaBonuses.discoveredGlyphs(p) + " descobertos] + pocao " + Math.round(m.potionBonus()) + ", regen x" + m.regenMultiplier() + ")"), false));
+                  return 1;
+                })))
         .then(Commands.literal("know")
             .then(Commands.literal("all")
                 .requires(src -> src.hasPermission(2))

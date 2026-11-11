@@ -4,6 +4,8 @@ import com.arcane.ArcaneMod;
 import com.arcane.network.packet.C2SCastRequestPacket;
 import com.arcane.network.packet.C2SCopyToScrollPacket;
 import com.arcane.network.packet.C2SJournalNotePacket;
+import com.arcane.network.packet.C2SRenameInscriptionPacket;
+import com.arcane.network.packet.C2SOpenWritePacket;
 import com.arcane.network.packet.C2SDeleteInscriptionPacket;
 import com.arcane.network.packet.C2SSaveInscriptionPacket;
 import com.arcane.network.packet.C2SSelectInscriptionPacket;
@@ -34,6 +36,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(C2SCastRequestPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SCastRequestPacket::encode).decoder(C2SCastRequestPacket::decode)
         .consumerMainThread(C2SCastRequestPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.S2CInscriptionDecalsPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(com.arcane.network.packet.S2CInscriptionDecalsPacket::encode).decoder(com.arcane.network.packet.S2CInscriptionDecalsPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.S2CInscriptionDecalsPacket::handle).add();
     CHANNEL.messageBuilder(S2CSpellFxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CSpellFxPacket::encode).decoder(S2CSpellFxPacket::decode)
         .consumerMainThread(S2CSpellFxPacket::handle).add();
@@ -67,6 +72,12 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(C2SCopyToScrollPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SCopyToScrollPacket::encode).decoder(C2SCopyToScrollPacket::decode)
         .consumerMainThread(C2SCopyToScrollPacket::handle).add();
+    CHANNEL.messageBuilder(C2SRenameInscriptionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(C2SRenameInscriptionPacket::encode).decoder(C2SRenameInscriptionPacket::decode)
+        .consumerMainThread(C2SRenameInscriptionPacket::handle).add();
+    CHANNEL.messageBuilder(C2SOpenWritePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(C2SOpenWritePacket::encode).decoder(C2SOpenWritePacket::decode)
+        .consumerMainThread(C2SOpenWritePacket::handle).add();
     CHANNEL.messageBuilder(C2SJournalNotePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SJournalNotePacket::encode).decoder(C2SJournalNotePacket::decode)
         .consumerMainThread(C2SJournalNotePacket::handle).add();

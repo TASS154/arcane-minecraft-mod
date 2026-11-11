@@ -67,7 +67,9 @@ public final class CastingService {
     }
 
     /** Bonus de um ritual: nivel (1-4), poder multiplicado, escala de area e se foi lendario (sem sobretaxa). */
-    public record RitualBonus(int level, double power, double areaScale, boolean legendary) {}
+    public record RitualBonus(int level, double power, double areaScale, boolean legendary, double radius, net.minecraft.world.phys.Vec3 center) {
+        public RitualBonus(int level, double power, double areaScale, boolean legendary) { this(level, power, areaScale, legendary, 0.0, null); }
+    }
 
     /** Mana de um ritual: o custo normal; no lendario, sem a sobretaxa exponencial por tamanho. */
     public static int ritualCost(Inscription inscription, boolean legendary) {
@@ -79,12 +81,15 @@ public final class CastingService {
     /** Conjura dentro de um ritual (os componentes e a mana ja foram cobrados por RitualService). */
     public static ExecutionResult castRitual(LivingEntity caster, Inscription inscription, ServerLevel level, RitualBonus bonus) {
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
-        EnvironmentalSnapshot environment = AmbientFieldResolver.resolve(level, caster.blockPosition());
+        // O cristal vale onde o ritual acontece (o altar), nao onde o conjurador esta.
+        net.minecraft.core.BlockPos where = bonus.center() != null ? net.minecraft.core.BlockPos.containing(bonus.center()) : caster.blockPosition();
+        EnvironmentalSnapshot environment = AmbientFieldResolver.resolve(level, where);
         ExecutionContext context = new ExecutionContext(level, caster, inscription, plan, environment,
                 PrecisionSnapshot.WORKBENCH, ExecutionContext.TriggerEvent.cast());
         context.setGeometryBonus(bonus.power());
         context.setAreaScale(bonus.areaScale());
         context.setRitualLevel(bonus.level());
+        if (bonus.radius() > 0 && bonus.center() != null) context.setRitual(bonus.radius(), bonus.center());
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) castFx(level, caster, SpellElement.of(context.plan()));
         return result;

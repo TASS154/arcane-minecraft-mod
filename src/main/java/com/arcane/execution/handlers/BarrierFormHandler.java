@@ -28,7 +28,7 @@ public class BarrierFormHandler implements FormHandler {
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
     if (!Targeting.mayAlterWorld(context)) return DeliveryResult.of(TargetList.empty());
-    double radius = spec.parameters().getOrDefault("radius", 3.0) * context.areaScale();
+    double radius = context.coverRadius(spec.parameters().getOrDefault("radius", 3.0) * context.areaFactor());
     int life = (int) Math.max(1, Math.min(ArcaneBarrierBlock.MAX_LIFE, Math.round(spec.parameters().getOrDefault("duration", 200.0) / 40.0)));
     BlockState barrier = ModBlocks.ARCANE_BARRIER.get().defaultBlockState().setValue(ArcaneBarrierBlock.LIFE, life);
     Region region = Region.of(context, spec, ShapeGeometry.WALL, radius);

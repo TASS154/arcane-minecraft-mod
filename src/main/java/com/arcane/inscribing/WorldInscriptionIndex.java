@@ -38,8 +38,10 @@ public class WorldInscriptionIndex extends SavedData {
         BlockPos pos = BlockPos.of(anchorTag.getLong("pos"));
         Inscription.CODEC.parse(NbtOps.INSTANCE, anchorTag.get("inscription"))
             .result().ifPresent(inscription -> {
+              net.minecraft.core.Direction face = anchorTag.contains("face")
+                  ? net.minecraft.core.Direction.from3DDataValue(anchorTag.getInt("face")) : net.minecraft.core.Direction.UP;
               index.anchors.put(pos, new InscriptionAnchor(pos, inscription, anchorTag.getString("trigger"),
-                  new ResourceLocation(anchorTag.getString("ink"))));
+                  new ResourceLocation(anchorTag.getString("ink")), face));
               index.indexChunk(pos);
             });
       }
@@ -55,6 +57,7 @@ public class WorldInscriptionIndex extends SavedData {
       anchorTag.putLong("pos", pos.asLong());
       anchorTag.putString("trigger", anchor.triggerType());
       anchorTag.putString("ink", anchor.ink().toString());
+      anchorTag.putInt("face", anchor.face().get3DDataValue());
       Inscription.CODEC.encodeStart(NbtOps.INSTANCE, anchor.inscription())
           .result().ifPresent(encoded -> anchorTag.put("inscription", encoded));
       list.add(anchorTag);

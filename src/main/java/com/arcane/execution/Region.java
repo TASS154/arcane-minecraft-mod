@@ -45,6 +45,10 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
   /** Centro padrao de cada formato quando nenhum glifo de origem foi usado. */
   private static Vec3 defaultCenter(ExecutionContext ctx, DeliverySpec spec, int shape) {
     LivingEntity caster = ctx.caster();
+    // Num ritual, as formas de area ficam no centro do circulo (o altar) e cobrem tudo.
+    if (ctx.ritualCenter() != null && (shape == ShapeGeometry.SPHERE || shape == ShapeGeometry.DOME || shape == ShapeGeometry.RING || shape == ShapeGeometry.COLUMN)) {
+      return ctx.ritualCenter();
+    }
     switch (shape) {
       case ShapeGeometry.WALL: {
         Vec3 look = ctx.look();
@@ -65,7 +69,7 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
 
   public static Region of(ExecutionContext ctx, DeliverySpec spec, int naturalShape, double radius) {
     int shape = resolveShape(spec, naturalShape);
-    double r = Math.max(1.0, Math.min(48.0, radius));
+    double r = Math.max(1.0, Math.min(ctx.ritualRadius() > 0 ? 64.0 : 48.0, radius));
     double origin = spec.parameters().getOrDefault("origin", 0.0);
     Vec3 center;
     if (origin >= 0.5) center = Targeting.ray(ctx, Targeting.AIM_RANGE, false).end();
@@ -166,6 +170,39 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
         }
       }
       default -> { }
+    }
+    return out;
+  }
+
+  /**
+   * Blocos expostos (com ao menos uma face para o ar) dentro da regiao, dos mais proximos do centro para os mais
+   * distantes. Alcance de busca limitado a 20 blocos para nao varrer volumes enormes.
+   */
+  public List<TargetList.BlockTarget> exposedBlocks(ServerLevel level, int max) {
+    double scan = Math.min(radius, 20.0);
+    BlockPos base = BlockPos.containing(center);
+    int n = (int) Math.ceil(scan);
+    List<BlockPos> found = new ArrayList<>();
+    for (int dx = -n; dx <= n; dx++) {
+      for (int dy = -n; dy <= n; dy++) {
+        for (int dz = -n; dz <= n; dz++) {
+          if (dx * dx + dy * dy + dz * dz > scan * scan) continue;
+          BlockPos pos = base.offset(dx, dy, dz);
+          if (!level.hasChunkAt(pos) || level.getBlockState(pos).isAir()) continue;
+          if (!contains(Vec3.atCenterOf(pos))) continue;
+          boolean exposed = false;
+          for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+            if (level.getBlockState(pos.relative(d)).isAir()) { exposed = true; break; }
+          }
+          if (exposed) found.add(pos);
+        }
+      }
+    }
+    found.sort(java.util.Comparator.comparingDouble(p -> Vec3.atCenterOf(p).distanceToSqr(center)));
+    List<TargetList.BlockTarget> out = new ArrayList<>();
+    for (BlockPos p : found) {
+      if (out.size() >= max) break;
+      out.add(new TargetList.BlockTarget(p, level.getBlockState(p)));
     }
     return out;
   }

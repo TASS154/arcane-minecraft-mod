@@ -92,9 +92,13 @@ public class GrimoireState {
 
     /** Apaga uma magia do grimorio. Se era a ativa, passa para outra (ou nenhuma). */
     public boolean removeInscription(UUID id) {
+        List<UUID> order = new ArrayList<>(spellbook.keySet());
+        int index = order.indexOf(id);
         if (spellbook.remove(id) == null) return false;
         if (id.equals(activeInscriptionId)) {
-            activeInscriptionId = spellbook.keySet().stream().findFirst().orElse(null);
+            // Seleciona a que vinha depois (ou a anterior, se era a ultima).
+            order.remove(id);
+            activeInscriptionId = order.isEmpty() ? null : order.get(Math.min(index, order.size() - 1));
         }
         return true;
     }

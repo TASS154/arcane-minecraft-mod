@@ -113,6 +113,7 @@ public class GrimoireLifecycleHandler {
       GrimoireTransfer.restore(grimoire, contents);
       grimoire.setGrimoirePresent(true);
       grimoire.setGrimoireDestroyedUntilTick(0L);
+      grimoire.setVisualStage(GrimoireState.stageFor(grimoire.pages()));
     });
     event.getItem().discard();
     event.setCanceled(true);
@@ -187,7 +188,14 @@ public class GrimoireLifecycleHandler {
         .forEach(g -> g.bind(player, stage));
   }
 
-  private static void spawnGrimoire(ServerPlayer player) {
+  /** O dono escolheu entre as magias: o livro folheia uma vez (fora disso fica aberto e quieto). */
+  public static void flipPages(ServerPlayer player) {
+    player.serverLevel().getEntitiesOfClass(GrimoireEntity.class, player.getBoundingBox().inflate(32))
+        .stream().filter(g -> g.getPersistentData().hasUUID("owner") && player.getUUID().equals(g.getPersistentData().getUUID("owner")))
+        .forEach(GrimoireEntity::flip);
+  }
+
+  public static void spawnGrimoire(ServerPlayer player) {
     ServerLevel level = player.serverLevel();
     level.getEntitiesOfClass(GrimoireEntity.class, player.getBoundingBox().inflate(32))
         .stream().filter(g -> g.getPersistentData().hasUUID("owner") && player.getUUID().equals(g.getPersistentData().getUUID("owner")))

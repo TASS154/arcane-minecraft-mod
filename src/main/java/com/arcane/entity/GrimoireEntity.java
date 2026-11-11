@@ -24,6 +24,14 @@ public class GrimoireEntity extends Entity {
   private static final EntityDataAccessor<java.util.Optional<UUID>> OWNER =
       SynchedEntityData.defineId(GrimoireEntity.class, EntityDataSerializers.OPTIONAL_UUID);
 
+  /** Tick de jogo ate o qual o livro esta folheando (so folheia quando o dono escolhe entre as magias). */
+  private static final EntityDataAccessor<Long> FLIP_UNTIL =
+      SynchedEntityData.defineId(GrimoireEntity.class, EntityDataSerializers.LONG);
+  public static final int FLIP_TICKS = 16;
+
+  public long flipUntil() { return this.entityData.get(FLIP_UNTIL); }
+  public void flip() { this.entityData.set(FLIP_UNTIL, level().getGameTime() + FLIP_TICKS); }
+
   public GrimoireEntity(EntityType<? extends GrimoireEntity> type, Level level) {
     super(type, level);
     this.noPhysics = true;
@@ -69,6 +77,7 @@ public class GrimoireEntity extends Entity {
   protected void defineSynchedData() {
     this.entityData.define(STAGE, 1);
     this.entityData.define(OWNER, java.util.Optional.empty());
+    this.entityData.define(FLIP_UNTIL, 0L);
   }
 
   @Override

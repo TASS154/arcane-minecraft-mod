@@ -71,6 +71,6 @@ public record GlyphDefinition(
         double def = parameters.get(key.get()).defaultValue();
         if (def <= 0) return base;
         double ratio = resolveParam(key.get(), given) / def;
-        return base * Math.max(0.5, Math.min(6.0, ratio));
+        return base * com.arcane.inscription.SpellLimits.parameterFactor(ratio);
     }
 }

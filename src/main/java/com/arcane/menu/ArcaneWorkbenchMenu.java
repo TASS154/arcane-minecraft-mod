@@ -25,25 +25,33 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
   private final List<GlyphInstance> building = new ArrayList<>();
   private String spellName = "";
 
-  /** Modo caneta: mesma interface de desenho, mas o resultado e inscrito no bloco (nao no grimorio). */
-  private final boolean penMode;
+  /** Modos: 0 bancada (100%), 1 caneta num bloco, 2 escrever no campo (grimorio, 30%), 3 caneta num item da mao secundaria. */
+  public static final int BENCH = 0, BLOCK = 1, FIELD = 2, ITEM = 3;
+  private final int mode;
+  private net.minecraft.core.Direction face = net.minecraft.core.Direction.UP;
 
   public ArcaneWorkbenchMenu(int id, Inventory inv, FriendlyByteBuf buf) {
-    this(id, inv, buf.readBlockPos(), buf.readBoolean());
+    this(id, inv, buf.readBlockPos(), buf.readVarInt());
+    this.face = net.minecraft.core.Direction.from3DDataValue(buf.readVarInt());
   }
 
   public ArcaneWorkbenchMenu(int id, Inventory inv, BlockPos pos) {
-    this(id, inv, pos, false);
+    this(id, inv, pos, BENCH);
   }
 
-  public ArcaneWorkbenchMenu(int id, Inventory inv, BlockPos pos, boolean penMode) {
+  public ArcaneWorkbenchMenu(int id, Inventory inv, BlockPos pos, int mode) {
     super(ModMenuTypes.ARCANE_WORKBENCH.get(), id);
-    this.penMode = penMode;
+    this.mode = mode;
     this.workbenchPos = pos;
     this.access = ContainerLevelAccess.create(inv.player.level(), pos);
   }
 
-  public boolean penMode() { return penMode; }
+  public int mode() { return mode; }
+  public net.minecraft.core.Direction face() { return face; }
+  public ArcaneWorkbenchMenu withFace(net.minecraft.core.Direction face) { this.face = face; return this; }
+  /** Escreve fora do grimorio (num bloco ou num item) e por isso exige escolher uma tinta do inventario. */
+  public boolean penMode() { return mode == BLOCK || mode == ITEM; }
+  public boolean needsInk() { return penMode(); }
   public BlockPos targetPos() { return workbenchPos; }
   public List<GlyphInstance> building() { return building; }
   public String spellName() { return spellName; }
@@ -58,26 +66,36 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
   }
 
   /**
-   * Grava no grimorio e torna a magia ativa. Salvar com o nome de uma magia existente substitui
-   * a antiga (e assim que se edita uma magia); com nome novo ou vazio, cria outra.
+   * Grava uma magia NOVA no grimorio e a torna ativa (editar nunca altera a anterior). Na bancada a potencia
+   * e 100%; escrevendo no campo, 30%. Nome repetido ganha um numero.
    */
   public boolean saveToGrimoire(Player player) {
     if (building.isEmpty()) return false;
-    Inscription inscription = new Inscription(List.copyOf(building), new InscriptionMetadata(
-        spellName,
-        new ResourceLocation("arcane", "common"),
-        new ResourceLocation("arcane", "arcane_pen"),
-        1.0,
-        Optional.of(player.getUUID()),
-        player.level().getGameTime(),
-        InscriptionSourceKind.WORKBENCH
-    ));
+    boolean field = mode == FIELD;
     return GrimoireAttachments.get(player).map(grimoire -> {
-      grimoire.findByName(spellName).ifPresent(old -> grimoire.removeInscription(old.id()));
+      String name = uniqueName(grimoire, spellName);
+      Inscription inscription = new Inscription(List.copyOf(building), new InscriptionMetadata(
+          name,
+          new ResourceLocation("arcane", "common"),
+          new ResourceLocation("arcane", "arcane_pen"),
+          field ? com.arcane.execution.PrecisionSnapshot.FIELD_POWER : 1.0,
+          Optional.of(player.getUUID()),
+          player.level().getGameTime(),
+          field ? InscriptionSourceKind.SCROLL : InscriptionSourceKind.WORKBENCH
+      ));
       grimoire.addInscription(inscription);
       grimoire.setActiveInscription(inscription.id());
+      this.spellName = name;
       return true;
     }).orElse(false);
+  }
+
+  static String uniqueName(com.arcane.grimoire.GrimoireState grimoire, String wanted) {
+    if (wanted == null || wanted.isBlank()) return wanted == null ? "" : wanted;
+    String base = wanted.trim();
+    String candidate = base;
+    for (int n = 2; grimoire.findByName(candidate).isPresent() && n < 100; n++) candidate = base + " " + n;
+    return candidate.length() > 32 ? candidate.substring(0, 32) : candidate;
   }
 
   @Override
@@ -87,8 +105,10 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
 
   @Override
   public boolean stillValid(Player player) {
-    if (penMode) {
+    if (mode == FIELD) return true;
+    if (penMode()) {
       return player.getMainHandItem().is(com.arcane.registry.ModItems.ARCANE_PEN.get())
+          && (mode == ITEM ? !player.getOffhandItem().isEmpty() : true)
           && player.distanceToSqr(workbenchPos.getX() + 0.5, workbenchPos.getY() + 0.5, workbenchPos.getZ() + 0.5) < 100.0;
     }
     return stillValid(access, player, com.arcane.registry.ModBlocks.ARCANE_WORKBENCH.get());

@@ -465,6 +465,17 @@ glyph("chain", "modifier", 3,
       ["#......#", "##....##", ".##..##.", "..####..", "..####..", ".##..##.", "##....##", "#......#"],
       scope={"target": "previous_effect", "kind": "effect", "mutate": {"chain": {"op": "put", "value": 1.0}}})
 
+glyph("float", "effect", 5,
+      ("Flutuar", "Efeito: o alvo paira e voa com suavidade na direção do olhar, como se fosse erguido pela cabeça (a cabeça vai primeiro, as pernas seguem). W avança, Espaço sobe, Shift desce, Ctrl acelera; sem comandos, ele paira parado. Velocidade de 0,3 a 3 blocos por tick e duração em ticks."),
+      ("Float", "Effect: the target hovers and glides smoothly where it looks, as if lifted by the head (the head leads, the legs follow). W moves, Space rises, Shift sinks, Ctrl speeds up; with no input it hovers in place. Speed from 0.3 to 3 blocks per tick, plus duration in ticks."),
+      ["...##...", "..####..", "...##...", "..#..#..", ".#.##.#.", "#..##..#", "..#..#..", ".#....#."],
+      params={"duration": (200.0, 40.0, 1200.0, "int"), "speed": (0.6, 0.3, 3.0, "float")}, magnitude=["duration"])
+glyph("telekinesis", "effect", 6,
+      ("Telecinese", "Efeito: segura criaturas e blocos com a mente e os leva pairando diante da mira. O grupo de blocos é definido ao conjurar: um bloco; uma esfera (Esfera 1–6) ao redor do bloco mirado; ou, com Mesmo tipo, os blocos conectados do mesmo material (até 120), opcionalmente limitados pela esfera. Ao soltar, tudo cai com o embalo. Distância 2–16, duração até 20 s."),
+      ("Telekinesis", "Effect: holds creatures and blocks with your mind and carries them hovering in front of your aim. The block group is decided when you cast: one block; a sphere (Sphere 1-6) around the aimed block; or, with Same type, the connected blocks of the same material (up to 120), optionally limited by the sphere. When released, everything falls with its momentum. Distance 2-16, duration up to 20 s."),
+      ["#..##..#", ".#.##.#.", "..####..", "#.####.#", "#.####.#", "..####..", ".#.##.#.", "#..##..#"],
+      params={"duration": (100.0, 20.0, 400.0, "int"), "distance": (6.0, 2.0, 16.0, "float"), "sphere": (0.0, 0.0, 6.0, "int"), "same_type": (0.0, 0.0, 1.0, "int")}, magnitude=["duration"])
+
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
@@ -474,7 +485,7 @@ TIERS = {
         "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
         "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "chain"],
-    4: ["thunder", "gravity", "invisible", "blast"],
+    4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis"],
 }
 FAMILIES = {
     "fire": ["fire", "ignite", "explode", "blast"],
@@ -482,7 +493,7 @@ FAMILIES = {
     "storm": ["thunder", "ray", "pillar"],
     "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead"],
     "life": ["heal", "shield", "speed", "allies", "players", "animals"],
-    "force": ["chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
+    "force": ["float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],

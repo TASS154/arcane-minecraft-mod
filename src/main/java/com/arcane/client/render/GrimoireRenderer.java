@@ -54,13 +54,18 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
     pose.mulPose(Axis.YP.rotationDegrees(-time * 1.5f));
     pose.mulPose(Axis.ZP.rotationDegrees(80.0f));
     int stage = entity.visualStage();
-    float size = 0.8f + Math.min(5, Math.max(0, stage - 4)) * 0.05f;
+    // Nivel 1: livrinho. Nivel 2: livro normal. Do 3 em diante cresce aos poucos e ganha paginas em volta.
+    float size = stage <= 1 ? 0.5f : stage == 2 ? 0.8f : 0.8f + Math.min(5, Math.max(0, stage - 4)) * 0.05f;
     pose.scale(size, size, size);
 
-    float flipA = Mth.frac(time * 0.015f + 0.25f) * 1.6f - 0.3f;
-    float flipB = Mth.frac(time * 0.015f + 0.75f) * 1.6f - 0.3f;
-    float open = 0.9f + Mth.sin(time * 0.05f) * 0.08f;
-    book.setupAnim(time, Mth.clamp(flipA, 0f, 1f), Mth.clamp(flipB, 0f, 1f), open);
+    // Livro aberto e quieto; so folheia (uma vez) quando o dono escolhe entre as magias.
+    long left = entity.flipUntil() - (entity.level() == null ? 0L : entity.level().getGameTime());
+    float flipA = 0f;
+    if (left > 0) {
+      float p = 1f - (left - partialTick) / (float) GrimoireEntity.FLIP_TICKS;
+      flipA = Mth.clamp(p * 1.6f - 0.3f, 0f, 1f);
+    }
+    book.setupAnim(time, flipA, 0f, 0.95f);
 
     if (stage < 6) { // do estagio 6 em diante so ficam as paginas e os aneis (o livro "se desfaz")
       VertexConsumer consumer = buffers.getBuffer(book.renderType(cover(stage, time)));
@@ -114,6 +119,15 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
     // primeira pessoa: a frente e a direita, perto da mao; terceira: ao lado do ombro
     double side = first ? 0.85 : 1.05, ahead = first ? 0.95 : 0.25, up = first ? eye - 0.25 : eye * 0.9 + 0.1;
     double tx = ox + rightX * side + fwdX * ahead, ty = oy + up, tz = oz + rightZ * side + fwdZ * ahead;
+    // Paginas infinitas (nivel 7): giram em halo ACIMA da cabeca quando ha espaco livre; sem espaco, ao lado do ombro.
+    if (entity.visualStage() >= 7 && mc.level != null) {
+      var head = new net.minecraft.world.phys.AABB(ox - 0.6, oy + eye + 0.1, oz - 0.6, ox + 0.6, oy + eye + 1.7, oz + 0.6);
+      if (mc.level.noCollision(head)) {
+        tx = ox; ty = oy + eye + 0.95; tz = oz;
+      } else {
+        ty = oy + eye * 0.75; // sem espaco em cima: mais baixo, ao lado
+      }
+    }
     s.x += (tx - s.x) * k;
     s.y += (ty - s.y) * k;
     s.z += (tz - s.z) * k;
@@ -130,13 +144,14 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
   private void renderOrbit(GrimoireEntity entity, float time, PoseStack pose, MultiBufferSource buffers, int stage) {
     // perto da camera (primeira pessoa) as paginas tampariam a tela: so o livro aparece
     if (this.entityRenderDispatcher.distanceToSqr(entity) < 0.6 * 0.6) return;
-    int pages = 2 + stage * 2;
+    if (stage < 3) return; // niveis 1 e 2: so o livro
+    int pages = stage >= 7 ? 26 : 2 + (stage - 2) * 2;
     pose.pushPose();
     pose.translate(0.0, 0.45 + Mth.sin(time * 0.08f) * 0.08, 0.0);
     VertexConsumer pageBuf = buffers.getBuffer(RenderType.entityCutoutNoCull(PAGE));
     for (int i = 0; i < pages; i++) {
       float a = time * 0.035f + i * Mth.TWO_PI / pages;
-      float r = 0.75f + 0.08f * Mth.sin(time * 0.1f + i);
+      float r = (stage >= 7 ? 1.05f : 0.75f) + 0.08f * Mth.sin(time * 0.1f + i);
       float y = 0.15f * Mth.sin(time * 0.06f + i * 1.7f) + (i % 2 == 0 ? 0.12f : -0.1f);
       pose.pushPose();
       pose.translate(Mth.cos(a) * r, y, Mth.sin(a) * r);

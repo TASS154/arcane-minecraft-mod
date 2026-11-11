@@ -63,6 +63,8 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
   private int listScroll;
   private int selected = -1;
   private String previewSig = "";
+  /** Tinta escolhida (so nos modos de caneta); vazio = nenhuma, e salvar fica bloqueado. */
+  private String ink = "";
 
   public ArcaneWorkbenchScreen(ArcaneWorkbenchMenu menu, Inventory inv, Component title) {
     super(menu, inv, title);
@@ -89,14 +91,18 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
       selected = -1;
       listScroll = 0;
     }).bounds(leftPos + 68, topPos + 168, 45, 20).build());
-    addRenderableWidget(Button.builder(Component.translatable(menu.penMode() ? "gui.arcane.inscribe" : "gui.arcane.save"), b -> save())
-        .bounds(leftPos + 120, topPos + 168, 54, 20).tooltip(tip("gui.arcane.save.tooltip")).build());
-    addRenderableWidget(Button.builder(Component.translatable("gui.arcane.cast"), b -> ClientSetup.tryCast(true))
-        .bounds(leftPos + 177, topPos + 168, 54, 20).tooltip(tip("gui.arcane.cast.tooltip")).build());
+    String saveKey = menu.penMode() ? "gui.arcane.inscribe" : menu.mode() == ArcaneWorkbenchMenu.FIELD ? "gui.arcane.write" : "gui.arcane.save";
+    String saveTip = menu.penMode() ? "gui.arcane.save.tooltip.pen" : menu.mode() == ArcaneWorkbenchMenu.FIELD ? "gui.arcane.save.tooltip.field" : "gui.arcane.save.tooltip";
+    addRenderableWidget(Button.builder(Component.translatable(saveKey), b -> save())
+        .bounds(leftPos + 120, topPos + 168, menu.penMode() ? 111 : 54, 20).tooltip(tip(saveTip)).build());
+    if (!menu.penMode()) {
+      addRenderableWidget(Button.builder(Component.translatable("gui.arcane.cast"), b -> ClientSetup.tryCast(true))
+          .bounds(leftPos + 177, topPos + 168, 54, 20).tooltip(tip("gui.arcane.cast.tooltip")).build());
+    }
 
-    addRenderableWidget(Button.builder(Component.literal("◀"), b -> ClientSetup.cycleSpell(-1))
+    addRenderableWidget(Button.builder(Component.literal("◀"), b -> { if (menu.needsInk()) cycleInk(-1); else ClientSetup.cycleSpell(-1); })
         .bounds(leftPos + 8, topPos + 196, 18, 20).build());
-    addRenderableWidget(Button.builder(Component.literal("▶"), b -> ClientSetup.cycleSpell(1))
+    addRenderableWidget(Button.builder(Component.literal("▶"), b -> { if (menu.needsInk()) cycleInk(1); else ClientSetup.cycleSpell(1); })
         .bounds(leftPos + 28, topPos + 196, 18, 20).build());
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.edit"), b -> loadActive())
         .bounds(leftPos + 176, topPos + 196, 56, 20).tooltip(tip("gui.arcane.edit.tooltip")).build());
@@ -126,12 +132,37 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
   }
 
   private void save() {
+    if (menu.needsInk() && ink.isEmpty()) {
+      com.arcane.client.ClientStatus.set(Component.translatable("message.arcane.pen.pick_ink").withStyle(ChatFormatting.RED));
+      return;
+    }
     List<C2SSaveInscriptionPacket.Entry> entries = new ArrayList<>();
     for (Slot s : composition) entries.add(new C2SSaveInscriptionPacket.Entry(s.id.toString(), new HashMap<>(s.params)));
-    ModNetwork.CHANNEL.sendToServer(new C2SSaveInscriptionPacket(nameField.getValue(), entries));
+    ModNetwork.CHANNEL.sendToServer(new C2SSaveInscriptionPacket(nameField.getValue(), entries, ink));
   }
 
-  /** Carrega a magia ativa na composicao (e o nome no campo). Salvar com o mesmo nome a substitui. */
+  /** Tintas que o jogador tem no inventario (uma entrada por tipo). So estas podem ser escolhidas. */
+  private List<net.minecraft.world.item.ItemStack> inksInInventory() {
+    List<net.minecraft.world.item.ItemStack> found = new ArrayList<>();
+    if (minecraft == null || minecraft.player == null) return found;
+    var inv = minecraft.player.getInventory();
+    for (int i = 0; i < inv.getContainerSize(); i++) {
+      var stack = inv.getItem(i);
+      if (stack.getItem() instanceof com.arcane.item.InkItem k && found.stream().noneMatch(f -> ((com.arcane.item.InkItem) f.getItem()).inkId().equals(k.inkId()))) found.add(stack);
+    }
+    return found;
+  }
+
+  private void cycleInk(int dir) {
+    var inks = inksInInventory();
+    if (inks.isEmpty()) { ink = ""; return; }
+    int index = -1;
+    for (int i = 0; i < inks.size(); i++) if (((com.arcane.item.InkItem) inks.get(i).getItem()).inkId().equals(ink)) index = i;
+    index = index < 0 ? (dir > 0 ? 0 : inks.size() - 1) : Math.floorMod(index + dir, inks.size());
+    ink = ((com.arcane.item.InkItem) inks.get(index).getItem()).inkId();
+  }
+
+  /** Carrega a magia ativa na composicao (e o nome no campo). Salvar cria uma magia NOVA; a original nao muda. */
   private void loadActive() {
     ClientArcaneData.activeSpell().ifPresent(spell -> {
       composition.clear();
@@ -285,6 +316,7 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
     renderActiveSpell(g);
     renderGlyphTooltip(g, mouseX, mouseY);
     renderPreviewTooltip(g, mouseX, mouseY);
+    com.arcane.client.ClientStatus.render(g, font, leftPos + imageWidth / 2, topPos + imageHeight + 6);
   }
 
   private void renderGlyphGrid(GuiGraphics g, int mouseX, int mouseY) {
@@ -408,6 +440,15 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
   }
 
   private void renderActiveSpell(GuiGraphics g) {
+    if (menu.needsInk()) {
+      var inks = inksInInventory();
+      if (!inks.stream().anyMatch(i -> ((com.arcane.item.InkItem) i.getItem()).inkId().equals(ink))) ink = "";
+      Component label = ink.isEmpty()
+          ? Component.translatable(inks.isEmpty() ? "gui.arcane.ink.none" : "gui.arcane.ink.pick").withStyle(ChatFormatting.RED)
+          : inks.stream().filter(i -> ((com.arcane.item.InkItem) i.getItem()).inkId().equals(ink)).findFirst().get().getHoverName();
+      g.drawString(font, font.plainSubstrByWidth(Component.translatable("gui.arcane.ink", label).getString(), 124), leftPos + 50, topPos + 202, 0xD0B0FF, false);
+      return;
+    }
     Component label = ClientArcaneData.activeSpell()
         .map(s -> s.name().isEmpty() ? (Component) Component.translatable("gui.arcane.unnamed") : Component.literal(s.name()))
         .orElse(Component.translatable("hud.arcane.no_spell"));

@@ -26,6 +26,7 @@ public record C2SSelectInscriptionPacket(UUID inscriptionId) {
       GrimoireAttachments.get(player).ifPresent(grimoire -> {
         if (grimoire.getInscription(packet.inscriptionId).isPresent()) {
           grimoire.setActiveInscription(packet.inscriptionId);
+          com.arcane.grimoire.GrimoireLifecycleHandler.flipPages(player);
           ArcaneSync.sync(player, true);
         }
       });

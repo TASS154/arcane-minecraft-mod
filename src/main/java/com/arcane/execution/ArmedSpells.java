@@ -96,6 +96,7 @@ public final class ArmedSpells {
             old.precision(), new ExecutionContext.TriggerEvent(type, Optional.ofNullable(source), Optional.empty()));
         fresh.setGeometryBonus(old.geometryBonus());
         fresh.setAreaScale(old.areaScale());
+        fresh.setRitual(old.ritualRadius(), old.ritualCenter());
         fresh.setRitualLevel(old.ritualLevel());
         fire(fresh, armed.segment());
         old.level().sendParticles(ModParticles.ARCANE_SPARK.get(), victim.getX(), victim.getY() + 1.0, victim.getZ(), 10, 0.3, 0.5, 0.3, 0.05);

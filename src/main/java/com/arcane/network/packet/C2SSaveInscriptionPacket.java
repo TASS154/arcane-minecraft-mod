@@ -19,7 +19,9 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /** Bancada -> servidor: salva a composicao no grimorio. O servidor valida e limita todos os valores. */
-public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs) {
+public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String ink) {
+  public C2SSaveInscriptionPacket(String name, List<Entry> glyphs) { this(name, glyphs, ""); }
+
   public static final int MAX_GLYPHS = 24;
   private static final int MAX_PARAMS = 8;
 
@@ -27,6 +29,7 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs) {
 
   public static void encode(C2SSaveInscriptionPacket packet, FriendlyByteBuf buf) {
     buf.writeUtf(packet.name, 64);
+    buf.writeUtf(packet.ink, 32);
     buf.writeVarInt(packet.glyphs.size());
     for (Entry entry : packet.glyphs) {
       buf.writeUtf(entry.id, 128);
@@ -40,6 +43,7 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs) {
 
   public static C2SSaveInscriptionPacket decode(FriendlyByteBuf buf) {
     String name = buf.readUtf(64);
+    String ink = buf.readUtf(32);
     int count = Math.min(buf.readVarInt(), MAX_GLYPHS + 1);
     List<Entry> entries = new ArrayList<>();
     for (int i = 0; i < count; i++) {
@@ -51,7 +55,7 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs) {
       }
       entries.add(new Entry(id, params));
     }
-    return new C2SSaveInscriptionPacket(name, entries);
+    return new C2SSaveInscriptionPacket(name, entries, ink);
   }
 
   public static void handle(C2SSaveInscriptionPacket packet, Supplier<NetworkEvent.Context> ctx) {
@@ -78,17 +82,16 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs) {
       var validation = com.arcane.inscription.InscriptionValidator.validate(draft,
           com.arcane.grimoire.GrimoireAttachments.get(player));
       if (menu.penMode()) {
-        penInscribe(player, menu, validation);
+        penInscribe(player, menu, validation, packet.ink);
         return;
       }
       var grimoire = com.arcane.grimoire.GrimoireAttachments.get(player);
-      boolean replaces = grimoire.map(g -> g.findByName(menu.spellName()).isPresent()).orElse(false);
-      boolean noPages = validation.valid() && !replaces && grimoire.map(g -> g.freePages() <= 0).orElse(false);
+      boolean noPages = validation.valid() && grimoire.map(g -> g.freePages() <= 0).orElse(false);
       if (noPages) {
         player.displayClientMessage(Component.translatable("message.arcane.workbench.no_pages").withStyle(ChatFormatting.RED), true);
       } else if (validation.valid() && menu.saveToGrimoire(player)) {
-        player.displayClientMessage(Component.translatable("message.arcane.workbench.saved",
-            name.isBlank() ? Component.translatable("gui.arcane.unnamed") : Component.literal(name.trim()))
+        player.displayClientMessage(Component.translatable(menu.mode() == ArcaneWorkbenchMenu.FIELD ? "message.arcane.workbench.saved_field" : "message.arcane.workbench.saved",
+            menu.spellName().isBlank() ? Component.translatable("gui.arcane.unnamed") : Component.literal(menu.spellName()))
             .withStyle(ChatFormatting.LIGHT_PURPLE), true);
         player.level().playSound(null, player.blockPosition(), com.arcane.registry.ModSounds.WORKBENCH_SAVE.get(),
             net.minecraft.sounds.SoundSource.BLOCKS, 0.8f, 1.0f);
@@ -101,26 +104,59 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs) {
     ctx.get().setPacketHandled(true);
   }
 
-  /** Modo caneta: escreve a magia desenhada no bloco alvo (30% de potencia, gasta 1 tinta da mao secundaria). */
-  private static void penInscribe(ServerPlayer player, ArcaneWorkbenchMenu menu, com.arcane.inscription.InscriptionValidator.ValidationResult validation) {
+  /** Modos caneta: a tinta e escolhida na interface e tem de estar no inventario; gasta 1 (menos no criativo). */
+  private static void penInscribe(ServerPlayer player, ArcaneWorkbenchMenu menu, com.arcane.inscription.InscriptionValidator.ValidationResult validation, String inkChoice) {
     if (!validation.valid()) {
       player.displayClientMessage(Component.translatable("message.arcane.workbench.invalid", validation.message()).withStyle(ChatFormatting.RED), true);
       return;
     }
-    var ink = player.getOffhandItem();
-    if (!(ink.getItem() instanceof com.arcane.item.InkItem inkItem)) {
-      player.displayClientMessage(Component.translatable("message.arcane.pen.need_ink").withStyle(ChatFormatting.RED), true);
+    net.minecraft.world.item.ItemStack ink = findInk(player, inkChoice);
+    if (ink == null) {
+      player.displayClientMessage(Component.translatable("message.arcane.pen.pick_ink").withStyle(ChatFormatting.RED), true);
+      return;
+    }
+    ResourceLocation inkId = new ResourceLocation("arcane", ((com.arcane.item.InkItem) ink.getItem()).inkId());
+    if (menu.mode() == ArcaneWorkbenchMenu.ITEM) {
+      var held = player.getOffhandItem();
+      if (held.isEmpty() || held.getItem() instanceof com.arcane.item.InkItem || held.is(com.arcane.registry.ModItems.ARCANE_PEN.get())) {
+        player.displayClientMessage(Component.translatable("message.arcane.pen.need_item").withStyle(ChatFormatting.RED), true);
+        return;
+      }
+      var written = held.copyWithCount(1);
+      var inscription = new com.arcane.inscription.Inscription(List.copyOf(menu.building()), new com.arcane.inscription.InscriptionMetadata(
+          menu.spellName(), inkId, new ResourceLocation("arcane", "arcane_pen"), com.arcane.execution.PrecisionSnapshot.FIELD_POWER,
+          java.util.Optional.of(player.getUUID()), player.level().getGameTime(), com.arcane.inscription.InscriptionSourceKind.ITEM));
+      com.arcane.inscribing.ItemInscriptionHelper.write(written, inscription);
+      written.setHoverName(menu.spellName().isEmpty() ? Component.translatable("gui.arcane.unnamed")
+          : Component.literal(menu.spellName()).withStyle(ChatFormatting.LIGHT_PURPLE));
+      if (!player.getAbilities().instabuild) ink.shrink(1);
+      held.shrink(1);
+      if (held.isEmpty()) player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, written);
+      else if (!player.getInventory().add(written)) player.drop(written, false);
+      player.displayClientMessage(Component.translatable("message.arcane.pen.written.item").withStyle(ChatFormatting.LIGHT_PURPLE), true);
+      player.closeContainer();
       return;
     }
     var level = (net.minecraft.server.level.ServerLevel) player.level();
     var pos = menu.targetPos();
     String trigger = level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity
         ? com.arcane.inscribing.InscribingService.TRIGGER_ON_OPEN : com.arcane.inscribing.InscribingService.TRIGGER_ON_TOUCH;
-    if (com.arcane.inscribing.InscribingService.inscribe(level, player, pos, menu.building(), new ResourceLocation("arcane", inkItem.inkId()), trigger, menu.spellName())) {
+    if (com.arcane.inscribing.InscribingService.inscribe(level, player, pos, menu.building(), inkId, trigger, menu.spellName(), menu.face())) {
       if (!player.getAbilities().instabuild) ink.shrink(1);
       player.displayClientMessage(Component.translatable("message.arcane.pen.written." + trigger).withStyle(ChatFormatting.LIGHT_PURPLE), true);
       player.closeContainer();
     }
+  }
+
+  /** Procura no inventario uma tinta do tipo escolhido (vazio = nenhuma escolhida = recusa). */
+  public static net.minecraft.world.item.ItemStack findInk(ServerPlayer player, String inkChoice) {
+    if (inkChoice == null || inkChoice.isEmpty()) return null;
+    var inv = player.getInventory();
+    for (int i = 0; i < inv.getContainerSize(); i++) {
+      var s = inv.getItem(i);
+      if (s.getItem() instanceof com.arcane.item.InkItem k && k.inkId().equals(inkChoice) && !s.isEmpty()) return s;
+    }
+    return null;
   }
 
   /** So parametros que o glifo declara, limitados ao intervalo dele; valores iguais ao padrao nem sao guardados. */

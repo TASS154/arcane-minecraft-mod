@@ -75,6 +75,8 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("warp"), new com.arcane.execution.handlers.WorldRitualEffects.Warp());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("mark"), new MarkEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("gravity"), new GravityEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("float"), new com.arcane.execution.handlers.FloatEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("telekinesis"), new com.arcane.execution.handlers.TelekinesisEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("attract"), new AttractEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("cut"), new CutEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("freeze"), new FreezeEffectHandler());

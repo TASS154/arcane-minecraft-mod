@@ -39,14 +39,9 @@ public class InscribingHandler {
       if (!event.getLevel().isClientSide && player instanceof ServerPlayer sp) drawByHand(sp, (ServerLevel) event.getLevel(), event.getPos());
       return;
     }
-    ItemStack ink = player.getOffhandItem();
+    ItemStack held = player.getOffhandItem();
     boolean erasing = player.isShiftKeyDown();
-    if (!erasing && !(ink.getItem() instanceof InkItem)) {
-      if (!event.getLevel().isClientSide) {
-        player.displayClientMessage(Component.translatable("message.arcane.pen.need_ink").withStyle(ChatFormatting.GRAY), true);
-      }
-      return;
-    }
+    boolean itemMode = !erasing && !held.isEmpty() && !(held.getItem() instanceof InkItem);
     event.setCanceled(true);
     event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
     if (event.getLevel().isClientSide || !(player instanceof ServerPlayer serverPlayer)) return;
@@ -59,13 +54,29 @@ public class InscribingHandler {
           .withStyle(ChatFormatting.GRAY), true);
       return;
     }
+    // Item na mao secundaria: escreve nele. Senao, escreve no bloco. A tinta e escolhida na propria interface.
+    openPenMenu(serverPlayer, pos, itemMode ? com.arcane.menu.ArcaneWorkbenchMenu.ITEM : com.arcane.menu.ArcaneWorkbenchMenu.BLOCK, event.getFace());
+  }
 
-    // Abre a interface de desenho: voce monta a magia que quer escrever neste bloco (nao usa a magia selecionada).
-    final BlockPos target = pos;
-    net.minecraftforge.network.NetworkHooks.openScreen(serverPlayer,
-        new net.minecraft.world.SimpleMenuProvider((id, inv, p) -> new com.arcane.menu.ArcaneWorkbenchMenu(id, inv, target, true),
-            Component.translatable("gui.arcane.pen_title")),
-        buf -> buf.writeBlockPos(target).writeBoolean(true));
+  /** Caneta no ar com um item na mao secundaria: abre o menu de escrever no item. */
+  @SubscribeEvent
+  public void onPenUseInAir(PlayerInteractEvent.RightClickItem event) {
+    Player player = event.getEntity();
+    if (event.getHand() != InteractionHand.MAIN_HAND || !player.getMainHandItem().is(ModItems.ARCANE_PEN.get())) return;
+    ItemStack held = player.getOffhandItem();
+    if (held.isEmpty() || held.getItem() instanceof InkItem || player.isShiftKeyDown()) return;
+    event.setCanceled(true);
+    if (!event.getLevel().isClientSide && player instanceof ServerPlayer sp) {
+      openPenMenu(sp, sp.blockPosition(), com.arcane.menu.ArcaneWorkbenchMenu.ITEM, net.minecraft.core.Direction.UP);
+    }
+  }
+
+  private static void openPenMenu(ServerPlayer player, BlockPos target, int mode, net.minecraft.core.Direction clicked) {
+    final net.minecraft.core.Direction face = clicked == null ? net.minecraft.core.Direction.UP : clicked;
+    net.minecraftforge.network.NetworkHooks.openScreen(player,
+        new net.minecraft.world.SimpleMenuProvider((id, inv, p) -> new com.arcane.menu.ArcaneWorkbenchMenu(id, inv, target, mode).withFace(face),
+            Component.translatable(mode == com.arcane.menu.ArcaneWorkbenchMenu.ITEM ? "gui.arcane.pen_item_title" : "gui.arcane.pen_title")),
+        buf -> buf.writeBlockPos(target).writeVarInt(mode).writeVarInt(face.get3DDataValue()));
   }
 
   private static void drawByHand(ServerPlayer player, ServerLevel level, BlockPos altar) {

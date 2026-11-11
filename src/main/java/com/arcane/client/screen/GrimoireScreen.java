@@ -5,7 +5,8 @@ import com.arcane.client.ClientArcaneData.GlyphEntry;
 import com.arcane.client.ClientArcaneData.KnownGlyph;
 import com.arcane.client.ClientArcaneData.SpellEntry;
 import com.arcane.network.ModNetwork;
-import com.arcane.network.packet.C2SCopyToScrollPacket;
+import com.arcane.network.packet.C2SOpenWritePacket;
+import com.arcane.network.packet.C2SRenameInscriptionPacket;
 import com.arcane.network.packet.C2SJournalNotePacket;
 import com.arcane.network.packet.C2SDeleteInscriptionPacket;
 import com.arcane.network.packet.C2SSelectInscriptionPacket;
@@ -74,9 +75,16 @@ public class GrimoireScreen extends Screen {
         .bounds(left + 190, top + 176, 52, 20).build());
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.close"), b -> onClose())
         .bounds(left + 14, top + 176, 52, 20).build());
-    copyButton = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.copy"), b -> copyToScroll())
+    copyButton = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.write"), b -> openWrite())
         .bounds(left + 70, top + 176, 60, 20).tooltip(net.minecraft.client.gui.components.Tooltip.create(
-            Component.translatable("gui.arcane.grimoire.copy.tooltip"))).build());
+            Component.translatable("gui.arcane.grimoire.write.tooltip"))).build());
+    renameBox = new net.minecraft.client.gui.components.EditBox(font, left + 134, top + 25, 82, 14, Component.translatable("gui.arcane.name"));
+    renameBox.setMaxLength(32);
+    renameBox.setHint(Component.translatable("gui.arcane.name"));
+    addRenderableWidget(renameBox);
+    renameButton = addRenderableWidget(Button.builder(Component.literal("✔"), b -> rename())
+        .bounds(left + 218, top + 24, 22, 16).tooltip(net.minecraft.client.gui.components.Tooltip.create(
+            Component.translatable("gui.arcane.grimoire.rename.tooltip"))).build());
     noteBox = new net.minecraft.client.gui.components.EditBox(font, left + 18, top + 176, 150, 18, Component.translatable("gui.arcane.grimoire.note"));
     noteBox.setMaxLength(C2SJournalNotePacket.MAX);
     noteBox.setHint(Component.translatable("gui.arcane.grimoire.note.hint"));
@@ -93,6 +101,9 @@ public class GrimoireScreen extends Screen {
     updateButtons();
   }
 
+  private net.minecraft.client.gui.components.EditBox renameBox;
+  private Button renameButton;
+  private UUID renameShownFor;
   private net.minecraft.client.gui.components.EditBox noteBox;
   private Button noteButton;
 
@@ -104,7 +115,21 @@ public class GrimoireScreen extends Screen {
     logScroll = 0;
   }
 
+  private void rename() {
+    selectedSpellEntry().ifPresent(sp -> ModNetwork.CHANNEL.sendToServer(new C2SRenameInscriptionPacket(sp.id(), renameBox.getValue())));
+  }
+
   private void updateButtons() {
+    boolean renaming = tab == Tab.SPELLS && selectedSpellEntry().isPresent();
+    if (renameBox != null) {
+      renameBox.visible = renaming;
+      renameButton.visible = renaming;
+      UUID now = renaming ? selectedSpell : null;
+      if (!java.util.Objects.equals(now, renameShownFor)) {
+        renameShownFor = now;
+        renameBox.setValue(renaming ? selectedSpellEntry().get().name() : "");
+      }
+    }
     if (noteBox != null) {
       noteBox.visible = tab == Tab.JOURNAL;
       noteBox.setEditable(tab == Tab.JOURNAL);
@@ -113,7 +138,7 @@ public class GrimoireScreen extends Screen {
     boolean spells = tab == Tab.SPELLS && selectedSpellEntry().isPresent();
     activateButton.visible = spells;
     deleteButton.visible = spells;
-    copyButton.visible = spells;
+    copyButton.visible = tab == Tab.SPELLS;
     deleteButton.setMessage(Component.translatable(confirmDelete ? "gui.arcane.grimoire.confirm" : "gui.arcane.grimoire.delete")
         .withStyle(confirmDelete ? ChatFormatting.RED : ChatFormatting.WHITE));
     activateButton.active = selectedSpellEntry().map(s -> !ClientArcaneData.active().map(a -> a.equals(s.id())).orElse(false)).orElse(false);
@@ -128,8 +153,8 @@ public class GrimoireScreen extends Screen {
     selectedSpellEntry().ifPresent(s -> ModNetwork.CHANNEL.sendToServer(new C2SSelectInscriptionPacket(s.id())));
   }
 
-  private void copyToScroll() {
-    selectedSpellEntry().ifPresent(s -> ModNetwork.CHANNEL.sendToServer(new C2SCopyToScrollPacket(s.id())));
+  private void openWrite() {
+    ModNetwork.CHANNEL.sendToServer(new C2SOpenWritePacket());
   }
 
   private void delete() {
@@ -139,7 +164,11 @@ public class GrimoireScreen extends Screen {
       confirmDelete = true;
     } else {
       ModNetwork.CHANNEL.sendToServer(new C2SDeleteInscriptionPacket(spell.get().id()));
-      selectedSpell = null;
+      // Seleciona sozinho a que vinha depois (ou a anterior, se era a ultima).
+      List<SpellEntry> all = ClientArcaneData.spells();
+      int at = -1;
+      for (int i = 0; i < all.size(); i++) if (all.get(i).id().equals(spell.get().id())) at = i;
+      selectedSpell = all.size() <= 1 || at < 0 ? null : all.get(at + 1 < all.size() ? at + 1 : at - 1).id();
       confirmDelete = false;
     }
     updateButtons();
@@ -218,6 +247,7 @@ public class GrimoireScreen extends Screen {
       case GLYPHS -> renderGlyphs(g, mouseX, mouseY);
       case JOURNAL -> renderJournal(g);
     }
+    com.arcane.client.ClientStatus.render(g, font, left + W / 2, top + H + 6);
   }
 
   private static Component spellName(SpellEntry s) {
@@ -263,9 +293,8 @@ public class GrimoireScreen extends Screen {
         left + 134, top + 150, spells.size() >= ClientArcaneData.pages() ? 0xB04020 : 0x5A4630, false);
     g.drawString(font, font.plainSubstrByWidth(Component.translatable("gui.arcane.grimoire.stage", stageName).getString(), 106),
         left + 134, top + 160, 0x6A3F8F, false);
-    g.drawString(font, font.plainSubstrByWidth(spellName(spell).getString(), 106), left + 134, top + 28, 0x2A1A08, false);
     if (spell.cost() >= 0) {
-      g.drawString(font, Component.translatable("gui.arcane.glyph_cost", spell.cost()), left + 134, top + 40, 0x1F6F8F, false);
+      g.drawString(font, Component.translatable("gui.arcane.glyph_cost", spell.cost()), left + 134, top + 43, 0x1F6F8F, false);
     }
     List<Component> tip = null;
     for (int i = 0; i < spell.glyphs().size(); i++) {

@@ -214,4 +214,22 @@ class GrimoireStateTest {
     assertEquals(1, result.skippedNoPages());
     assertEquals(GlyphKnowledge.SUSPECTED, full.knowledge().get(new ResourceLocation("arcane", "thunder")));
   }
+
+  @Test
+  void deletingTheActiveSpellSelectsTheOneThatCameAfter() {
+    GrimoireState state = new GrimoireState();
+    Inscription a = named("a", g("self"), g("heal"));
+    Inscription b = named("b", g("self"), g("heal"));
+    Inscription c = named("c", g("self"), g("heal"));
+    state.addInscription(a);
+    state.addInscription(b);
+    state.addInscription(c);
+    state.setActiveInscription(b.id());
+    state.removeInscription(b.id());
+    assertEquals(c.id(), state.activeInscriptionId().orElseThrow(), "apagar a ativa seleciona a seguinte");
+    state.removeInscription(c.id());
+    assertEquals(a.id(), state.activeInscriptionId().orElseThrow(), "sendo a ultima, seleciona a anterior");
+    state.removeInscription(a.id());
+    assertTrue(state.activeInscriptionId().isEmpty(), "sem magias, nenhuma ativa");
+  }
 }

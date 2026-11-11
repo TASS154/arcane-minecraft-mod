@@ -43,11 +43,16 @@ public final class InscribingService {
 
   public static boolean inscribe(ServerLevel level, Player player, BlockPos pos, List<GlyphInstance> glyphs,
                                  ResourceLocation ink, String trigger, String name) {
+    return inscribe(level, player, pos, glyphs, ink, trigger, name, net.minecraft.core.Direction.UP);
+  }
+
+  public static boolean inscribe(ServerLevel level, Player player, BlockPos pos, List<GlyphInstance> glyphs,
+                                 ResourceLocation ink, String trigger, String name, net.minecraft.core.Direction face) {
     if (!PenRegistry.canWriteOnBlock(player, pos, level)) return false;
     Inscription inscription = new Inscription(new ArrayList<>(glyphs), new InscriptionMetadata(
         name, ink, new ResourceLocation("arcane", "arcane_pen"), com.arcane.execution.PrecisionSnapshot.FIELD_POWER,
         Optional.of(player.getUUID()), level.getGameTime(), InscriptionSourceKind.WORLD));
-    WorldInscriptionIndex.get(level).put(new InscriptionAnchor(pos, inscription, trigger, ink));
+    WorldInscriptionIndex.get(level).put(new InscriptionAnchor(pos, inscription, trigger, ink, face));
     if (InkRegistry.isBloodInk(ink)) {
       player.hurt(player.damageSources().magic(), 2f);
     }
@@ -57,6 +62,41 @@ public final class InscribingService {
         pos.getX() + 0.5, pos.getY() + 1.02, pos.getZ() + 0.5, 10, 0.3, 0.02, 0.3, 0.0);
     return true;
   }
+
+  private static final Map<java.util.UUID, Integer> SENT = new HashMap<>();
+
+  /** Envia ao jogador os desenhos de inscricao por perto (so quando mudam, ou a cada 10 s). */
+  public static void syncDecals(net.minecraft.server.level.ServerPlayer player) {
+    ServerLevel level = player.serverLevel();
+    WorldInscriptionIndex index = WorldInscriptionIndex.get(level);
+    List<com.arcane.network.packet.S2CInscriptionDecalsPacket.Decal> list = new ArrayList<>();
+    int cx = player.blockPosition().getX() >> 4, cz = player.blockPosition().getZ() >> 4;
+    for (int dx = -4; dx <= 4; dx++) {
+      for (int dz = -4; dz <= 4; dz++) {
+        for (BlockPos pos : index.getInChunk(cx + dx, cz + dz)) {
+          index.get(pos).ifPresent(a -> {
+            if ("invisible".equals(a.ink().getPath()) || list.size() >= 400) return;
+            List<ResourceLocation> glyphs = new ArrayList<>();
+            for (GlyphInstance g : a.inscription().glyphs()) glyphs.add(g.glyphId());
+            int color = switch (a.ink().getPath()) {
+              case "blood" -> 0xC02020;
+              case "prismatic" -> 0xE080FF;
+              case "core" -> 0xFFE070;
+              default -> 0x6AE0F0;
+            };
+            list.add(new com.arcane.network.packet.S2CInscriptionDecalsPacket.Decal(pos, a.face(), glyphs, color));
+          });
+        }
+      }
+    }
+    int hash = list.hashCode() * 31 + (int) (level.getGameTime() / 200);
+    Integer last = SENT.get(player.getUUID());
+    if (last != null && last == hash) return;
+    SENT.put(player.getUUID(), hash);
+    com.arcane.network.ModNetwork.sendToPlayer(player, new com.arcane.network.packet.S2CInscriptionDecalsPacket(list));
+  }
+
+  public static void forgetDecals(java.util.UUID player) { SENT.remove(player); }
 
   public static boolean erase(ServerLevel level, BlockPos pos) {
     boolean removed = WorldInscriptionIndex.get(level).remove(pos).isPresent();
@@ -79,11 +119,6 @@ public final class InscribingService {
     for (InscriptionAnchor anchor : List.copyOf(index.all())) {
       BlockPos pos = anchor.pos();
       if (!level.isLoaded(pos)) continue;
-
-      if (showParticles && !"invisible".equals(anchor.ink().getPath())) {
-        level.sendParticles(ModParticles.ARCANE_SPARK.get(),
-            pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 2, 0.3, 0.0, 0.3, 0.0);
-      }
 
       if (!TRIGGER_ON_TOUCH.equals(anchor.triggerType())) continue;
       Long last = cooldowns.get(pos);

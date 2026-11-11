@@ -38,16 +38,19 @@ public class BlastEffectHandler implements EffectHandler {
 
   @Override
   public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-    float cap = MAX_RADIUS * (float) Math.min(2.0, Math.max(1.0, context.areaScale()));
-    float radius = (float) Math.max(1.0, Math.min(cap, call.parameters().getOrDefault("radius", 3.0) * context.areaScale()));
+    float cap = MAX_RADIUS * (float) Math.min(4.0, Math.max(1.0, context.areaFactor()));
+    float radius = (float) Math.max(1.0, Math.min(cap, call.parameters().getOrDefault("radius", 3.0) * context.areaFactor()));
     Level.ExplosionInteraction interaction = Targeting.mayBreakBlocks(context) ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE;
     int count = 0;
     java.util.List<Vec3> centers = new java.util.ArrayList<>();
     for (var e : targets.entities()) centers.add(e.position().add(0, e.getBbHeight() * 0.5, 0));
     for (var b : targets.blocks()) centers.add(impact(context, b.pos()));
     centers.addAll(targets.points());
+    boolean cover = context.ritualRadius() > 0;
+    if (cover) centers = new java.util.ArrayList<>(com.arcane.execution.AreaCover.tile(context, radius, com.arcane.execution.AreaCover.MAX_BLASTS));
+    int limit = cover ? com.arcane.execution.AreaCover.MAX_BLASTS : MAX_EXPLOSIONS;
     for (Vec3 pos : centers) {
-      if (count++ >= MAX_EXPLOSIONS) break;
+      if (count++ >= limit) break;
       context.level().sendParticles(com.arcane.registry.ModParticles.ARCANE_SHOCK.get(), pos.x, pos.y + 0.3, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
       SpellImmunity.explodeAs(context.caster(), () -> context.level().explode(context.caster(), pos.x, pos.y, pos.z, radius, interaction));
       if (Chain.enabled(call)) {

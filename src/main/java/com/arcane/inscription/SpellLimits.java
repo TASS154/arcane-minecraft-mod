@@ -32,6 +32,16 @@ public final class SpellLimits {
   public static double growth() { return growth; }
   public static int freeGlyphs() { return freeGlyphs; }
 
+  /**
+   * Custo de um efeito conforme o parametro principal sobe acima do padrao: cresce de forma exponencial, mas com uma
+   * curva suave (x1,12 por unidade extra). Abaixo do padrao continua linear (minimo 0,5). Servidor e cliente usam esta.
+   */
+  public static double parameterFactor(double ratio) {
+    if (ratio <= 1.0) return Math.max(0.5, ratio);
+    double r = Math.min(12.0, ratio);
+    return Math.min(40.0, r * Math.pow(1.12, r - 1.0));
+  }
+
   public static double multiplier(int glyphCount) {
     return multiplier(glyphCount, growth, freeGlyphs);
   }

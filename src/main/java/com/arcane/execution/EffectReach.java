@@ -25,12 +25,13 @@ public final class EffectReach {
       Map.entry("shield", ALL), Map.entry("blind", ALL), Map.entry("wither", ALL), Map.entry("invisible", ALL),
       Map.entry("thunder", ALL), Map.entry("explode", ALL), Map.entry("freeze", ALL),
       Map.entry("blast", ALL), Map.entry("dig", BLOCK), Map.entry("gravity", ENTITY | BLOCK), Map.entry("attract", ENTITY), Map.entry("mark", ENTITY),
+      Map.entry("float", ENTITY), Map.entry("telekinesis", ENTITY | BLOCK),
       // Nao dependem dos alvos: agem sobre o conjurador ou o mundo.
       Map.entry("blink", ALL), Map.entry("weather", ALL), Map.entry("warp", ALL));
 
   /** Efeitos nocivos: o conjurador nao os sofre vindos de formas que nao sejam a forma Eu. */
   private static final java.util.Set<String> HARMFUL = java.util.Set.of("damage", "cut", "fire", "slow", "poison", "blind",
-      "wither", "freeze", "gravity", "push", "attract", "thunder", "blast", "explode");
+      "wither", "freeze", "gravity", "push", "attract", "thunder", "blast", "explode", "telekinesis");
 
   /** Efeitos que sabem encadear (modificador Cadeia). */
   private static final java.util.Set<String> CHAINABLE = java.util.Set.of("damage", "explode", "blast");

@@ -25,6 +25,11 @@ public final class ItemInscriptionHelper {
         .result().orElse(null);
   }
 
+  /** Qualquer item (papel, comida, ...) que carregue uma magia escrita. */
+  public static boolean hasInscription(ItemStack stack) {
+    return !stack.isEmpty() && stack.hasTag() && stack.getTag().contains(TAG);
+  }
+
   public static boolean isScroll(ItemStack stack) {
     return stack.is(Items.PAPER) && stack.hasTag() && stack.getTag().contains(TAG);
   }

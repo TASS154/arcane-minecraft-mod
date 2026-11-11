@@ -88,7 +88,10 @@ public class GrimoireItem extends Item {
       GrimoireTransfer.restore(grimoire.get(), contents);
       grimoire.get().setGrimoirePresent(true);
       grimoire.get().setGrimoireDestroyedUntilTick(0L);
+      grimoire.get().setVisualStage(GrimoireState.stageFor(grimoire.get().pages()));
       stack.shrink(1);
+      // O livro flutuante volta junto com o conteudo (antes so aparecia depois de relogar).
+      com.arcane.grimoire.GrimoireLifecycleHandler.spawnGrimoire(player);
       player.displayClientMessage(Component.translatable("message.arcane.grimoire.restored").withStyle(ChatFormatting.LIGHT_PURPLE), false);
     } else {
       GrimoireState source = new GrimoireState();

@@ -102,7 +102,7 @@ class CompilerSemanticsTest {
     int doubled = plan(g("self"), g("damage", "amount", 8.0)).baseManaCost(); // 1 + 4
     int half = plan(g("self"), g("damage", "amount", 2.0)).baseManaCost();    // 1 + 1
     assertEquals(3, base);
-    assertEquals(5, doubled);
+    assertEquals(6, doubled, "dobrar o parametro custa um pouco mais que o dobro (curva exponencial suave)");
     assertEquals(2, half);
     assertEquals(plan(g("self"), g("slow")).baseManaCost(), plan(g("self"), g("slow", "level", 3.0)).baseManaCost(),
         "so o parametro principal (duracao) escala o custo");

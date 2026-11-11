@@ -159,7 +159,7 @@ public final class ClientArcaneData {
         ParamDef p = k.primary().get();
         Double value = e.params().get(p.key());
         if (value != null && p.def() > 0) {
-          cost *= Math.max(0.5, Math.min(6.0, p.clamp(value) / p.def()));
+          cost *= com.arcane.inscription.SpellLimits.parameterFactor(p.clamp(value) / p.def());
         }
       }
       total += cost;

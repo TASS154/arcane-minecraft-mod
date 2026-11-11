@@ -56,6 +56,7 @@ public class ArcaneMod {
         MinecraftForge.EVENT_BUS.register(new GrimoireLifecycleHandler());
         MinecraftForge.EVENT_BUS.register(new InscribingHandler());
         MinecraftForge.EVENT_BUS.register(new com.arcane.world.ArcaneLootInjector());
+        MinecraftForge.EVENT_BUS.register(new com.arcane.world.SealedChambers());
     }
 
     private void onConfig(final net.minecraftforge.fml.event.config.ModConfigEvent event) {

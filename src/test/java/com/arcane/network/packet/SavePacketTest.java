@@ -52,6 +52,7 @@ class SavePacketTest {
     // Um cliente malicioso declara milhoes de glifos: o decodificador para no limite.
     FriendlyByteBuf evil = new FriendlyByteBuf(Unpooled.buffer());
     evil.writeUtf("x");
+    evil.writeUtf(""); // tinta escolhida
     evil.writeVarInt(5_000_000);
     for (int i = 0; i < C2SSaveInscriptionPacket.MAX_GLYPHS + 1; i++) {
       evil.writeUtf("arcane:self");

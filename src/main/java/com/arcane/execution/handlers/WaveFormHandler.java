@@ -16,10 +16,10 @@ import java.util.List;
 public class WaveFormHandler implements FormHandler {
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
-    double range = Math.max(2.0, Math.min(48.0, spec.range() * context.areaScale()));
+    double range = Math.max(2.0, Math.min(64.0, context.coverRadius(spec.range() * context.areaFactor())));
     com.arcane.execution.Region region = com.arcane.execution.Region.of(context, spec, com.arcane.execution.ShapeGeometry.CONE, range);
     List<Entity> found = region.entities(context.level(), context.caster(), false);
     region.playFx(context);
-    return DeliveryResult.of(new TargetList(found, List.of()));
+    return DeliveryResult.of(new TargetList(found, region.exposedBlocks(context.level(), 1500)));
   }
 }

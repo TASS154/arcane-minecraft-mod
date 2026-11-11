@@ -1,0 +1,30 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:float",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 200.0,
+      "min": 40.0,
+      "max": 1200.0
+    },
+    "speed": {
+      "type": "float",
+      "default": 0.6,
+      "min": 0.3,
+      "max": 3.0
+    }
+  },
+  "cost": {
+    "mana": 5
+  },
+  "tier": 4,
+  "families": [
+    "force"
+  ]
+}

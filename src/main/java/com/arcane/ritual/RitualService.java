@@ -47,7 +47,15 @@ public final class RitualService {
     SUCCESS, STORED, NO_ALTAR, NO_SPELL, CIRCLE_INCOMPLETE, LEVEL_TOO_LOW, MISSING_COMPONENT, NO_MANA, INVALID, COOLDOWN
   }
 
-  public record CircleReport(RitualLevel level, int radius, double completeness, int found, int expected) {}
+  /** symmetry: 1 = o desenho e identico nas 8 simetrias do quadrado; cai quanto mais torto ou desigual ficar. */
+  public record CircleReport(RitualLevel level, int radius, double completeness, int found, int expected, double symmetry) {
+    public CircleReport(RitualLevel level, int radius, double completeness, int found, int expected) {
+      this(level, radius, completeness, found, expected, 1.0);
+    }
+
+    /** Qualidade total do desenho: o que falta E o que esta fora de simetria diminuem o poder (teto: 1.0). */
+    public double quality() { return Math.max(0.0, Math.min(1.0, completeness * symmetry)); }
+  }
 
   public record Result(Outcome outcome, CircleReport circle, int effectiveLevel, String detail, int amount,
                        ExecutionResult cast, double power, double area) {
@@ -69,16 +77,41 @@ public final class RitualService {
           && traceAt(level, altar, new RitualTemplate.Cell(0, radius)) != null && traceAt(level, altar, new RitualTemplate.Cell(0, -radius)) != null)) continue;
       Set<RitualTemplate.Cell> cells = RitualTemplate.cells(radius);
       int found = 0;
+      Set<RitualTemplate.Cell> present = new java.util.HashSet<>();
       for (RitualTemplate.Cell cell : cells) {
-        if (traceAt(level, altar, cell) != null) found++;
+        if (traceAt(level, altar, cell) != null) { found++; present.add(cell); }
       }
       double completeness = found / (double) cells.size();
       if (completeness >= RitualSettings.minCompleteness()) {
-        return new CircleReport(RitualLevel.forRadius(radius), radius, completeness, found, cells.size());
+        return new CircleReport(RitualLevel.forRadius(radius), radius, completeness, found, cells.size(), symmetry(cells, present));
       }
       if (completeness > best.completeness()) best = new CircleReport(RitualLevel.NONE, radius, completeness, found, cells.size());
     }
     return best;
+  }
+
+  /**
+   * Simetria do desenho: cada celula tem ate 8 imagens (rotacoes e espelhos do quadrado). Uma orbita com algumas
+   * imagens presentes e outras ausentes esta fora de simetria; conta quantas celulas destoam e converte em 0..1.
+   */
+  static double symmetry(Set<RitualTemplate.Cell> cells, Set<RitualTemplate.Cell> present) {
+    Set<RitualTemplate.Cell> seen = new java.util.HashSet<>();
+    int crooked = 0;
+    for (RitualTemplate.Cell c : cells) {
+      if (!seen.add(c)) continue;
+      int x = c.dx(), z = c.dz();
+      int[][] images = {{-x, z}, {x, -z}, {-x, -z}, {z, x}, {-z, x}, {z, -x}, {-z, -x}};
+      Set<RitualTemplate.Cell> orbit = new java.util.HashSet<>();
+      orbit.add(c);
+      for (int[] img : images) {
+        var o = new RitualTemplate.Cell(img[0], img[1]);
+        if (cells.contains(o)) { orbit.add(o); seen.add(o); }
+      }
+      int p = 0;
+      for (var o : orbit) if (present.contains(o)) p++;
+      crooked += Math.min(p, orbit.size() - p);
+    }
+    return Math.max(0.0, 1.0 - 2.0 * crooked / Math.max(1, cells.size()));
   }
 
   /** Posicao do traco na celula (aceita ate 2 blocos abaixo e 2 acima do altar), ou null. */
@@ -121,6 +154,29 @@ public final class RitualService {
           break;
         }
       }
+    }
+    return placed;
+  }
+
+  /**
+   * Circulo PERFEITO (item do criativo): todas as celulas recebem traco, mesmo sem chao firme (um apoio de pedra e
+   * posto onde faltar). Simetria 1,0 garantida.
+   */
+  public static int drawPerfectCircle(ServerLevel level, BlockPos altar, int radius) {
+    int placed = 0;
+    BlockState trace = ModBlocks.ARCANE_TRACE.get().defaultBlockState();
+    for (RitualTemplate.Cell cell : RitualTemplate.cells(radius)) {
+      BlockPos at = altar.offset(cell.dx(), 0, cell.dz());
+      if (!level.hasChunkAt(at)) continue;
+      if (traceAt(level, altar, cell) != null) continue;
+      BlockPos floor = at.below();
+      if (!level.getBlockState(floor).isFaceSturdy(level, floor, net.minecraft.core.Direction.UP)) {
+        level.setBlock(floor, net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 3);
+      }
+      BlockState here = level.getBlockState(at);
+      if (!here.isAir() && !here.canBeReplaced()) level.destroyBlock(at, false);
+      level.setBlock(at, trace, 3);
+      placed++;
     }
     return placed;
   }
@@ -229,10 +285,10 @@ public final class RitualService {
       GrimoireAttachments.getManaOrCreate(player).trySpend(CastingService.ritualCost(spell, legendary));
     }
     int effective = legendary ? RitualLevel.LEGENDARY.number() : circle.level().number();
-    double power = circle.level().power() * circle.completeness();
+    double power = circle.level().power() * circle.quality();
     double area = circle.level().areaScale();
     ExecutionResult cast = CastingService.castRitual(performer, spell, level,
-        new CastingService.RitualBonus(effective, power, area, legendary));
+        new CastingService.RitualBonus(effective, power, area, legendary, circle.radius(), net.minecraft.world.phys.Vec3.atCenterOf(altar)));
     if (be != null) be.setCooldownUntil(level.getGameTime() + RitualSettings.COOLDOWN_TICKS);
     RitualFx.play(level, altar, circle, legendary);
     if (performer instanceof ServerPlayer sp) com.arcane.execution.PlayerAnims.play(sp, com.arcane.execution.PlayerAnims.RITUAL);
@@ -289,7 +345,7 @@ public final class RitualService {
       boolean legendary = altar.storedLegendary();
       int effective = legendary ? RitualLevel.LEGENDARY.number() : circle.level().number();
       if (RitualRequirements.of(spell).level() > effective) continue;
-      double power = circle.level().power() * circle.completeness();
+      double power = circle.level().power() * circle.quality();
       // A magia guardada nao some: o altar dispara de novo a cada ativacao, pagando a mana de cada vez.
       if (activator instanceof net.minecraft.server.level.ServerPlayer sp && !sp.getAbilities().instabuild) {
         var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(sp);
@@ -300,7 +356,7 @@ public final class RitualService {
       }
       altar.setCooldownUntil(level.getGameTime() + RitualSettings.COOLDOWN_TICKS);
       CastingService.castRitual(activator, spell, level,
-          new CastingService.RitualBonus(effective, power, circle.level().areaScale(), legendary));
+          new CastingService.RitualBonus(effective, power, circle.level().areaScale(), legendary, circle.radius(), net.minecraft.world.phys.Vec3.atCenterOf(altar.getBlockPos())));
       RitualFx.play(level, altar.getBlockPos(), circle, legendary);
       fired++;
     }

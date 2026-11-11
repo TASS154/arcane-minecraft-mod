@@ -16,7 +16,7 @@ public class ScrollHandler {
   @SubscribeEvent
   public static void onItemUse(PlayerInteractEvent.RightClickItem event) {
     ItemStack stack = event.getItemStack();
-    if (!ItemInscriptionHelper.isScroll(stack)) return;
+    if (!ItemInscriptionHelper.hasInscription(stack)) return;
     Inscription inscription = ItemInscriptionHelper.read(stack);
     if (inscription == null || event.getLevel().isClientSide) return;
     if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {

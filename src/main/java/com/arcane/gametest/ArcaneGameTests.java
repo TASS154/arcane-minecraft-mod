@@ -407,7 +407,7 @@ public class ArcaneGameTests {
 
   // ------------------------------------------------------------------ cristal e inscricoes no mundo
   /** O cristal deve ser achado em qualquer posicao relativa, nao so em multiplos de 8. */
-  @GameTest(template = "empty")
+  @GameTest(template = "empty", batch = "crystal")
   public static void crystalZoneDetectedAtAnyOffset(GameTestHelper helper) {
     BlockPos crystal = new BlockPos(1, 1, 1);
     BlockPos probe = new BlockPos(4, 2, 3); // distancia ~3,7: zona 5 (x32), com Mana Poisoning
@@ -424,6 +424,8 @@ public class ArcaneGameTests {
     EnvironmentalSnapshot mid = AmbientFieldResolver.resolve(helper.getLevel(), far);
     helper.assertTrue(mid.potencyMultiplier() == 4.0, "a ~20 blocos a potencia deveria ser 4, foi " + mid.potencyMultiplier());
     helper.assertTrue(mid.poisoningExposureRate() == 0, "a ~20 blocos nao deveria envenenar");
+    helper.setBlock(crystal, Blocks.AIR);
+    checkCrystalWidensReach(helper);
     helper.succeed();
   }
 
@@ -1588,6 +1590,164 @@ public class ArcaneGameTests {
     h.assertTrue(mana.baseMax() == 300f && mana.max() > 300f, "o comando edita a base e os bonus continuam por cima");
     mana.set(99999f);
     h.assertTrue(mana.current() <= mana.max(), "a mana atual nunca passa do maximo");
+    h.succeed();
+  }
+
+  // ------------------------------------------------------------------ rodada: area do ritual, simetria, cristal, glifos novos
+  @GameTest(template = "ritual_arena", timeoutTicks = 200)
+  public static void ritualAreaSpellsCoverTheWholeCircle(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 8);
+    Pig inside = pigAt(h, 24, 17);   // 7 blocos do altar: dentro do circulo, alem do raio normal do Pilar
+    Pig outside = pigAt(h, 30, 17);  // 13 blocos: fora do circulo
+    float insideHp = inside.getHealth(), outsideHp = outside.getHealth();
+    Pig caster = pigAt(h, 17, 22);
+    var result = ritual(h, caster, com.arcane.ritual.ComponentSource.unlimited(), false, g("pillar"), g("damage", "amount", 6.0));
+    h.assertTrue(result.success(), "ritual do pilar: " + result.outcome());
+    h.assertTrue(inside.getHealth() < insideHp, "o pilar do ritual cobre o circulo inteiro (vida " + inside.getHealth() + ")");
+    h.assertTrue(outside.getHealth() == outsideHp, "e nao passa do circulo");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 200)
+  public static void ritualExplosionsTileTheWholeCircle(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 8);
+    Pig edge = pigAt(h, 24, 17);
+    float hp = edge.getHealth();
+    Pig caster = pigAt(h, 17, 22);
+    var result = ritual(h, caster, com.arcane.ritual.ComponentSource.unlimited(), false, g("self"), g("explode", "radius", 2.0));
+    h.assertTrue(result.success(), "ritual da explosao: " + result.outcome());
+    h.assertTrue(edge.getHealth() < hp, "a explosao do ritual se espalha pelo circulo todo, nao so no alvo (vida " + edge.getHealth() + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 200)
+  public static void symmetryAndPatternShapeRitualPower(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 4);
+    var perfect = com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h));
+    h.assertTrue(perfect.symmetry() > 0.999 && perfect.quality() > 0.99, "circulo completo: simetria total, foi " + perfect);
+    var cell = new java.util.ArrayList<>(com.arcane.ritual.RitualTemplate.cells(4)).get(0);
+    h.setBlock(new BlockPos(17 + cell.dx(), 1, 17 + cell.dz()), Blocks.AIR);
+    var crooked = com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h));
+    h.assertTrue(crooked.level() == com.arcane.ritual.RitualLevel.MINOR, "um traco a menos ainda vale: " + crooked);
+    h.assertTrue(crooked.symmetry() < 1.0 && crooked.quality() < crooked.completeness(),
+        "fora de simetria diminui o poder alem do que falta (simetria " + crooked.symmetry() + ")");
+    com.arcane.ritual.RitualService.repairBySymmetry(h.getLevel(), altarAbs(h));
+    h.assertTrue(com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h)).symmetry() > 0.999, "o Espelho devolve a simetria");
+
+    // o Compasso Perfeito (criativo) nao depende do chao e e perfeito mesmo gigante
+    for (int x = 0; x < 35; x++) for (int z = 0; z < 35; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.AIR);
+    com.arcane.ritual.RitualService.drawPerfectCircle(h.getLevel(), altarAbs(h), 16);
+    var big = com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h));
+    h.assertTrue(big.level() == com.arcane.ritual.RitualLevel.MAJOR && big.symmetry() > 0.999 && big.completeness() > 0.999, "circulo perfeito no ar: " + big);
+    h.assertTrue(com.arcane.ritual.RitualLevel.MAJOR.power() >= 10.0 && big.quality() <= 1.0, "teto de 1000% (x10)");
+    h.succeed();
+  }
+
+  private static void checkCrystalWidensReach(GameTestHelper h) {
+    Pig caster = pig(h, 3, 3);
+    var spell = new Inscription(List.of(g("aura"), g("damage")));
+    var plan = com.arcane.inscription.CompiledPlanCache.getOrCompile(spell);
+    var far = AmbientFieldResolver.resolve(h.getLevel(), h.absolutePos(new BlockPos(3, 1, 3)));
+    var ctx0 = new com.arcane.execution.ExecutionContext(h.getLevel(), caster, spell, plan, far,
+        com.arcane.execution.PrecisionSnapshot.WORKBENCH, com.arcane.execution.ExecutionContext.TriggerEvent.cast());
+    h.assertTrue(ctx0.areaFactor() == 1.0, "sem cristal o alcance e normal");
+    h.setBlock(new BlockPos(1, 1, 1), ModBlocks.MANA_CRYSTAL.get());
+    var near = AmbientFieldResolver.resolve(h.getLevel(), h.absolutePos(new BlockPos(3, 1, 3)));
+    var ctx1 = new com.arcane.execution.ExecutionContext(h.getLevel(), caster, spell, plan, near,
+        com.arcane.execution.PrecisionSnapshot.WORKBENCH, com.arcane.execution.ExecutionContext.TriggerEvent.cast());
+    h.assertTrue(ctx1.areaFactor() > 2.9 && ctx1.areaFactor() <= 3.0, "perto do cristal o raio/area cresce (x" + ctx1.areaFactor() + ")");
+    }
+
+  @GameTest(template = "empty")
+  public static void auraReachesBlocksNotOnlyCreatures(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    int before = 0;
+    for (int x = 0; x < 7; x++) for (int z = 0; z < 7; z++) if (h.getBlockState(new BlockPos(x, 0, z)).is(Blocks.STONE)) before++;
+    cast(h, caster, g("aura", "radius", 3.0), g("dig", "power", 5.0));
+    int after = 0;
+    for (int x = 0; x < 7; x++) for (int z = 0; z < 7; z++) if (h.getBlockState(new BlockPos(x, 0, z)).is(Blocks.STONE)) after++;
+    h.assertTrue(after < before, "a Aura entrega os blocos ao redor aos efeitos (pedras " + before + " -> " + after + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void telekinesisHoldsCreaturesAndBlockGroups(GameTestHelper h) {
+    floor(h);
+    // grupos: mesmo tipo conectado, esfera e bloco unico
+    for (int x = 2; x <= 4; x++) for (int z = 2; z <= 4; z++) h.setBlock(new BlockPos(x, 1, z), Blocks.DIRT);
+    var seed = h.absolutePos(new BlockPos(3, 1, 3));
+    h.assertTrue(com.arcane.execution.Telekinesis.collect(h.getLevel(), seed, 0, true, 120).size() == 9, "9 blocos de terra conectados");
+    h.assertTrue(com.arcane.execution.Telekinesis.collect(h.getLevel(), seed, 1, false, 120).size() == 6, "esfera de raio 1: o bloco e 5 vizinhos solidos");
+    h.assertTrue(com.arcane.execution.Telekinesis.collect(h.getLevel(), seed, 0, false, 120).size() == 1, "sem grupo: so o bloco");
+    h.assertTrue(com.arcane.execution.Telekinesis.collect(h.getLevel(), seed, 1, true, 120).size() == 5, "mesmo tipo limitado pela esfera: terra dentro do raio 1");
+
+    // criatura: segurada e levada para onde o conjurador mira (tira a terra do caminho da mira)
+    for (int x = 2; x <= 4; x++) for (int z = 2; z <= 4; z++) h.setBlock(new BlockPos(x, 1, z), Blocks.AIR);
+    Pig caster = pig(h, 3, 1);
+    Pig target = pig(h, 3, 4);
+    double z0 = target.getZ();
+    cast(h, caster, g("ray"), g("telekinesis"));
+    h.assertTrue(com.arcane.execution.Telekinesis.heldCount(caster.getUUID()) >= 1, "a criatura foi segurada");
+    for (int i = 0; i < 20; i++) com.arcane.execution.Telekinesis.tick(h.getLevel().getServer());
+    h.assertTrue(target.getZ() > z0 + 0.5 && target.isNoGravity(), "e levada em direcao a mira, sem gravidade (z " + z0 + " -> " + target.getZ() + ")");
+    com.arcane.execution.Telekinesis.release(caster.getUUID());
+    h.assertTrue(!target.isNoGravity() && com.arcane.execution.Telekinesis.heldCount(caster.getUUID()) == 0, "soltar devolve a gravidade");
+
+    // bloco: o grupo vira entidades de bloco flutuantes
+    Pig caster2 = pig(h, 1, 1);
+    caster2.setYRot(0);
+    h.setBlock(new BlockPos(1, 1, 4), Blocks.STONE);
+    h.setBlock(new BlockPos(1, 2, 4), Blocks.STONE);
+    cast(h, caster2, g("ray"), g("telekinesis", "same_type", 1.0));
+    int blocks = h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.FallingBlockEntity.class, new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(1, 1, 4))).inflate(8)).size();
+    h.assertTrue(blocks >= 2, "os dois blocos de pedra viraram entidades flutuantes (" + blocks + ")");
+    com.arcane.execution.Telekinesis.release(caster2.getUUID());
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void floatGlyphGrantsTheFlightEffect(GameTestHelper h) {
+    Pig pig = pig(h, 3, 3);
+    cast(h, pig, g("self"), g("float", "speed", 1.5));
+    var effect = pig.getEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
+    h.assertTrue(effect != null, "o efeito Flutuar foi aplicado");
+    h.assertTrue(effect.getAmplifier() == 15, "a velocidade vai na amplificacao (x10): " + effect.getAmplifier());
+    h.assertTrue(effect.getDuration() >= 190, "duracao padrao ~200 ticks: " + effect.getDuration());
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 200)
+  public static void sealedChamberHoldsACreatureUntilTheAltarBreaks(GameTestHelper h) {
+    arena(h);
+    var altar = altarAbs(h);
+    com.arcane.world.SealedChambers.build(h.getLevel(), altar, net.minecraft.util.RandomSource.create(7));
+    h.assertTrue(h.getLevel().getBlockState(altar).getBlock() instanceof com.arcane.block.ArcaneAltarBlock, "altar no centro");
+    boolean chest = false;
+    for (int dx = -5; dx <= 5 && !chest; dx++) for (int dz = -5; dz <= 5 && !chest; dz++)
+      chest = h.getLevel().getBlockState(altar.offset(dx, 0, dz)).is(Blocks.CHEST);
+    h.assertTrue(chest, "bau com o que sobrou do ritual");
+    var box = new net.minecraft.world.phys.AABB(altar).inflate(6);
+    var sealed = h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, box, m -> m.getPersistentData().contains(com.arcane.world.SealedChambers.SEALED_TAG));
+    h.assertTrue(sealed.size() == 1, "uma criatura selada (" + sealed.size() + ")");
+    var mob = sealed.get(0);
+    h.assertTrue(mob.isNoAi() && mob.isInvulnerable() && mob.isCurrentlyGlowing() || (mob.isNoAi() && mob.isInvulnerable()), "selada: sem IA e invulneravel");
+    int freed = com.arcane.world.SealedChambers.free(h.getLevel(), altar);
+    h.assertTrue(freed == 1 && !mob.isNoAi() && !mob.isInvulnerable(), "quebrar o altar solta a criatura");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void inscriptionRemembersTheSurfaceItWasDrawnOn(GameTestHelper h) {
+    BlockPos abs = h.absolutePos(new BlockPos(3, 1, 3));
+    Inscription spell = new Inscription(List.of(g("self"), g("heal")));
+    var index = new WorldInscriptionIndex();
+    index.put(new InscriptionAnchor(abs, spell, InscribingService.TRIGGER_ON_TOUCH, new ResourceLocation("arcane", "common"), net.minecraft.core.Direction.NORTH));
+    var reloaded = WorldInscriptionIndex.load(index.save(new CompoundTag()));
+    h.assertTrue(reloaded.get(abs).orElseThrow().face() == net.minecraft.core.Direction.NORTH, "a face do desenho sobrevive ao salvar");
     h.succeed();
   }
 }

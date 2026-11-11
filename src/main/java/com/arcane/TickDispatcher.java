@@ -15,6 +15,7 @@ public final class TickDispatcher {
 
     public static void onServerTick(MinecraftServer server) {
         SpellTickScheduler.tick(server);
+        com.arcane.execution.Telekinesis.tick(server);
         if (server.getTickCount() % AMBIENT_INTERVAL_TICKS == 0) {
             tickAmbient(server);
         }
@@ -31,6 +32,7 @@ public final class TickDispatcher {
             EnvironmentalSnapshot environment = AmbientFieldResolver.resolve(player.serverLevel(), player.blockPosition());
             com.arcane.network.ArcaneSync.setEnvironment(player, environment);
             ManaPoisoningService.tick(player, environment);
+            com.arcane.inscribing.InscribingService.syncDecals(player);
         }
     }
 }

@@ -28,6 +28,8 @@ public class ExecutionContext {
     private double scaleFactor = 1.0;
     private int ritualLevel = 0;
     private double areaScale = 1.0;
+    private double ritualRadius = 0.0;
+    private Vec3 ritualCenter = null;
 
     public ExecutionContext(ServerLevel level, LivingEntity caster, Inscription inscription,
                             CompiledExecutionPlan plan, EnvironmentalSnapshot environment,
@@ -71,6 +73,25 @@ public class ExecutionContext {
     /** Quanto as formas crescem num ritual (raio da Aura, alcance da Onda, tamanho da Barreira...). */
     public double areaScale() { return areaScale; }
     public void setAreaScale(double areaScale) { this.areaScale = Math.max(1.0, areaScale); }
+    /** Raio do circulo do ritual em que a magia roda (0 = conjuracao comum) e o centro dele (o altar). */
+    public double ritualRadius() { return ritualRadius; }
+    public Vec3 ritualCenter() { return ritualCenter; }
+    public void setRitual(double radius, Vec3 center) { this.ritualRadius = Math.max(0.0, radius); this.ritualCenter = center; }
+
+    /**
+     * Crescimento das formas e explosoes: o Area do ritual vezes o efeito do cristal. O cristal multiplica a
+     * potencia por ate 32x; para o TAMANHO usamos a raiz (limitada a 3x), senao uma explosao viraria um buraco.
+     */
+    public double areaFactor() {
+        double crystal = Math.min(3.0, Math.sqrt(Math.max(1.0, environment.potencyMultiplier())));
+        return areaScale * crystal;
+    }
+
+    /** Num ritual, magias de area cobrem pelo menos o circulo inteiro. */
+    public double coverRadius(double radius) {
+        return ritualRadius > 0 ? Math.max(radius, ritualRadius) : radius;
+    }
+
     public void setScaleFactor(double scaleFactor) { this.scaleFactor = scaleFactor; }
 
     public double amplify(double value, java.util.List<String> magnitudeKeys, String key) {

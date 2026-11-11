@@ -17,6 +17,7 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.DoubleValue ELEMENT_INTERACTION_STRENGTH;
   public static final ForgeConfigSpec.IntValue MAGE_CAST_INTERVAL_TICKS;
   public static final ForgeConfigSpec.IntValue GRIMOIRE_LOSS_DAYS;
+  public static final ForgeConfigSpec.DoubleValue SEALED_CHAMBER_CHANCE;
   public static final ForgeConfigSpec.DoubleValue MANA_PER_GLYPH;
   public static final ForgeConfigSpec.DoubleValue MANA_SURGE_MULTIPLIER;
   public static final ForgeConfigSpec.DoubleValue MANA_VESSEL_BONUS;
@@ -50,6 +51,7 @@ public class ArcaneConfig {
         .defineInRange("elementInteractionStrength", 1.0, 0.0, 3.0);
     MAGE_CAST_INTERVAL_TICKS = builder.comment("Ticks between NPC mage casts").defineInRange("mageCastIntervalTicks", 80, 10, 1200);
     GRIMOIRE_LOSS_DAYS = builder.comment("Days of reduced mana after losing the grimoire (PROVISIONAL)").defineInRange("grimoireLossDays", 3, 0, 30);
+    SEALED_CHAMBER_CHANCE = builder.comment("Chance per newly generated Overworld chunk of an underground sealed-creature chamber (0 disables)").defineInRange("sealedChamberChance", 0.008, 0.0, 1.0);
     MANA_PER_GLYPH = builder.comment("Extra max mana per discovered glyph (partial knowledge or better) (PROVISIONAL)").defineInRange("manaPerGlyph", 1.5, 0.0, 50.0);
     MANA_SURGE_MULTIPLIER = builder.comment("Mana regeneration multiplier while under the Mana Surge potion (PROVISIONAL)").defineInRange("manaSurgeMultiplier", 4.0, 1.0, 50.0);
     MANA_VESSEL_BONUS = builder.comment("Max mana bonus of the Mana Vessel potion, as a fraction of the base max (PROVISIONAL)").defineInRange("manaVesselBonus", 0.5, 0.0, 10.0);

@@ -1,0 +1,42 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:telekinesis",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 100.0,
+      "min": 20.0,
+      "max": 400.0
+    },
+    "distance": {
+      "type": "float",
+      "default": 6.0,
+      "min": 2.0,
+      "max": 16.0
+    },
+    "sphere": {
+      "type": "int",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 6.0
+    },
+    "same_type": {
+      "type": "int",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "cost": {
+    "mana": 6
+  },
+  "tier": 4,
+  "families": [
+    "force"
+  ]
+}

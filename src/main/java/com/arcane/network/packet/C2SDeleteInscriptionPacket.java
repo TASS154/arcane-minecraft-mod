@@ -25,6 +25,7 @@ public record C2SDeleteInscriptionPacket(UUID inscriptionId) {
       if (player == null) return;
       GrimoireAttachments.get(player).ifPresent(grimoire -> {
         if (grimoire.removeInscription(packet.inscriptionId)) {
+          com.arcane.grimoire.GrimoireLifecycleHandler.flipPages(player);
           ArcaneSync.sync(player, true);
         }
       });

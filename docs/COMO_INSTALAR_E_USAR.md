@@ -414,3 +414,31 @@ Na bancada, **passe o mouse sobre a linha de estado** (Pronto / ⚠ Veja a prév
 - Ambas aparecem como efeitos (com temporizador) e também estão na aba criativa. Valores e durações em `arcane-common.toml`: `manaSurgeMultiplier`, `manaVesselBonus`, `manaSurgeTicks`, `manaVesselTicks` (provisórios).
 - **Mana máxima = (base + glifos descobertos × `manaPerGlyph` [1,5] + poção) × (0,5 se perdeu o grimório).** Conta o glifo com conhecimento parcial ou maior.
 - **Comandos (operador):** `/arcane mana max <jogadores> <valor>` edita a base; `/arcane mana set <jogadores> <valor>` ajusta a mana atual; `/arcane mana get` mostra a decomposição.
+
+## Rodada: grimório, escrita, ritual, voo e telecinese (substitui o que mudou acima)
+**Grimório e escrita**
+- **Editar cria uma magia NOVA.** Na Bancada, *Editar* só carrega a magia ativa como ponto de partida; *Salvar* nunca altera uma anterior (nome repetido ganha número: "Fogo 2").
+- **Escrever** (botão do Grimório, no lugar de "Escrever em papel"): abre a interface de desenho em qualquer lugar e **cria na hora uma magia nova no grimório, com 30% de potência**.
+- **Escrever em itens** (papel, comida, o que for): Pena na mão principal + o item na mão secundária (botão direito no ar ou num bloco) → abre o menu de desenho. Nele você **é obrigado a escolher a tinta** (◀ ▶), e só aparecem tintas que estão no seu inventário; gasta 1. O item sai com a magia (30%); botão direito conjura, agachado estuda. Sem item na outra mão, a Pena escreve no bloco (mesma escolha de tinta).
+- **Mensagens** ("Magia salva", etc.) agora também aparecem numa linha **dentro** das telas (Bancada e Grimório), por 5 s. Antes só se via depois de sair.
+- **Renomear** uma magia: aba Magias do Grimório, campo de nome ao lado + ✔. Funciona fora da Bancada.
+- **Apagar** seleciona sozinho a magia que vinha depois (ou a anterior, se era a última).
+**Livro**
+- Nível 1: livrinho. Nível 2: livro normal. **Só do nível 3** surgem as páginas voando em volta (e os anéis).
+- O livro fica **aberto e quieto**; **folheia uma vez** só quando você escolhe entre as magias (ativar, trocar, apagar).
+- **Páginas infinitas** (nível 7): halo de 26 páginas girando **acima da cabeça** quando há espaço livre; sem espaço, fica mais baixo ao lado do ombro.
+- Corrigido: ao recuperar o grimório (pegando do chão ou com Shift + botão direito) o livro flutuante **volta junto** (antes só depois de relogar).
+- **Desenhos da Pena nas superfícies:** a inscrição aparece **desenhada na face do bloco** onde foi escrita (glifo da forma no centro, os outros em volta; cor pela tinta), sem partículas. Tinta invisível não aparece. Servidor → cliente: `S2CInscriptionDecalsPacket`; renderizador `InscriptionDecals`.
+**Alcance, cristal e custo**
+- **Cristal de mana** agora também amplia **raio e área** (não só dano): fator = raiz da potência do cristal, limitado a **3x**, multiplicado ao Area do ritual. Vale para Aura, Onda, Pilar, Barreira, Congelar, Explodir e Explosão Destrutiva (o teto de raio das explosões sobe até 4x). Num ritual o cristal vale **onde está o altar**.
+- **Onda e Aura pegam blocos:** entregam também os blocos expostos da região (até 1500, os mais próximos primeiro; busca limitada a 20 blocos de raio), então Cavar/Fogo/Gelo agem neles.
+- **Custo**: parâmetros acima do padrão agora custam de forma **exponencial suave** (`SpellLimits.parameterFactor`: razão × 1,12^(razão-1), teto 40x; abaixo do padrão, linear, mínimo 0,5). Servidor e cliente usam a mesma fórmula.
+**Rituais**
+- **Magias de área cobrem o círculo inteiro:** num ritual, Aura, Pilar, Barreira (Domo/Esfera/Anel), Congelar e Onda usam **no mínimo o raio do círculo**, centradas no altar; Explodir e Explosão Destrutiva **ladrilham o círculo** com explosões (até 25).
+- **Sem Compasso:** círculos à mão (4 a 64) seguem o teto de **1000%** (x10, nível maior). O poder cai conforme o desenho sai do padrão: `qualidade = completude × simetria`. Simetria = quão iguais são as 8 imagens (rotações/espelhos) de cada traço; terreno irregular ou traço faltando derrubam. O **Espelho de Simetria** devolve a simetria.
+- **Compasso Perfeito** (só no criativo, aba Arcane): botão direito num Altar desenha um círculo **perfeito** de qualquer tamanho da mão (4 a 64), sem tinta e **mesmo sem chão** (põe apoio de pedra lisa). Agachado troca o raio.
+**Glifos novos (87 no total)**
+- **Flutuar** (`float`, efeito, custo 5; duração, velocidade 0,3–3 blocos/tick): voo suave guiado pelo olhar, **a cabeça vai primeiro e as pernas seguem** (o corpo se inclina com apoio na cabeça, com atraso). W avança, A/D deslocam, Espaço sobe, Shift desce, Ctrl acelera; sem comandos, paira. Mantém a permissão de voo enquanto dura (para o servidor não expulsar) e devolve depois.
+- **Telecinese** (`telekinesis`, efeito, custo 6; duração até 400 ticks, distância 2–16, esfera 0–6, mesmo tipo 0/1): segura **criaturas e blocos** e os leva pairando diante da mira. Grupo de blocos decidido **ao conjurar**: um bloco; esfera de raio N em volta do bloco mirado; ou **mesmo tipo conectado** (até 120), opcionalmente limitado pela esfera. Ao soltar (fim, nova conjuração ou morte) tudo cai com o embalo e os blocos pousam. Respeita `worldAlteringSpells`.
+**Câmaras seladas**
+- Ao gerar um chunk novo do Overworld, com chance `sealedChamberChance` (padrão 0,8%), surge uma **câmara de tijolos de ardosia** a 40 blocos de profundidade ou menos: altar no centro, círculo de ritual, **criatura selada** (sem IA, invulnerável, brilhando, com o dobro de vida) e um baú com tinta, cristal, página e notas. **Quebrar o altar** (jogador ou explosão) solta a criatura, hostil. `/arcane chamber` (operador) constrói uma onde você está.

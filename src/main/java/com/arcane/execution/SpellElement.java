@@ -46,7 +46,7 @@ public enum SpellElement {
       case "slow", "freeze" -> FROST;
       case "thunder", "weather" -> STORM;
       case "poison", "wither" -> VENOM;
-      case "gravity", "push", "attract", "levitate" -> FORCE;
+      case "gravity", "push", "attract", "levitate", "float", "telekinesis" -> FORCE;
       case "blink", "warp", "blind", "invisible" -> VOID;
       case "heal", "shield", "speed" -> LIFE;
       default -> ARCANE;

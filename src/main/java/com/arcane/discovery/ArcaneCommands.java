@@ -15,6 +15,16 @@ public class ArcaneCommands {
   @SubscribeEvent
   public static void register(RegisterCommandsEvent event) {
     event.getDispatcher().register(Commands.literal("arcane")
+        .then(Commands.literal("chamber")
+            .requires(src -> src.hasPermission(2))
+            .executes(ctx -> {
+              ServerPlayer p = ctx.getSource().getPlayerOrException();
+              var floor = p.blockPosition();
+              com.arcane.world.SealedChambers.build(p.serverLevel(), floor, p.getRandom());
+              p.teleportTo(floor.getX() + 0.5, floor.getY() + 1.0, floor.getZ() - 3.5);
+              ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("message.arcane.chamber.built"), true);
+              return 1;
+            }))
         .then(Commands.literal("mana")
             .requires(src -> src.hasPermission(2))
             .then(Commands.literal("max")

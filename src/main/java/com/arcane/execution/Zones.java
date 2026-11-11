@@ -125,6 +125,7 @@ public final class Zones {
         old.precision(), new ExecutionContext.TriggerEvent(type, Optional.empty(), Optional.empty()));
     c.setGeometryBonus(old.geometryBonus());
     c.setAreaScale(old.areaScale());
+    c.setRitual(old.ritualRadius(), old.ritualCenter());
     c.setRitualLevel(old.ritualLevel());
     c.freeze(zone.origin, zone.look, zone.position);
     return c;

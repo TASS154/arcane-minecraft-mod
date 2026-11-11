@@ -20,7 +20,7 @@ class InscriptionCompilerOrderTest {
 
   @Test
   void allGlyphDefinitionsParse() {
-    assertEquals(85, GlyphRegistry.size(), "todos os JSONs de glifo devem ser validos");
+    assertEquals(87, GlyphRegistry.size(), "todos os JSONs de glifo devem ser validos");
   }
 
   @Test

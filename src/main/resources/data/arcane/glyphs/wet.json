@@ -1,0 +1,25 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:wet",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 200.0,
+      "min": 40.0,
+      "max": 1200.0
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 1,
+  "families": [
+    "ice",
+    "storm"
+  ]
+}

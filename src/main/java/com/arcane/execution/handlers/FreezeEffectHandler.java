@@ -33,7 +33,9 @@ public class FreezeEffectHandler implements EffectHandler {
     for (Entity entity : targets.entities()) {
       if (entity instanceof LivingEntity living) {
         living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, 1), context.caster());
-        living.setTicksFrozen(Math.max(living.getTicksFrozen(), 140 + ticks / 2));
+        int bonus = com.arcane.execution.ElementInteractions.freezeBonus(context.level(), com.arcane.execution.SpellElement.FROST, living);
+        living.setTicksFrozen(Math.max(living.getTicksFrozen(), 140 + ticks / 2 + bonus));
+        if (bonus > 0) living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, 2), context.caster());
       }
       centers.add(entity.blockPosition());
     }

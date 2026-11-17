@@ -25,6 +25,13 @@ public class ThunderEffectHandler implements EffectHandler {
       if (context.caster() instanceof ServerPlayer player) bolt.setCause(player);
       bolt.getPersistentData().putUUID(com.arcane.execution.SpellImmunity.BOLT_TAG, context.caster().getUUID());
       context.level().addFreshEntity(bolt);
+      // Molhado (ou na chuva) conduz melhor: as regras de interacao somam dano de raio a quem esta no impacto.
+      var source = context.level().damageSources().indirectMagic(context.caster(), context.caster());
+      for (var e : context.level().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+          new net.minecraft.world.phys.AABB(pos, pos).inflate(3.0), x -> x.isAlive() && x != context.caster())) {
+        double extra = com.arcane.execution.ElementInteractions.damageMultiplier(context.level(), com.arcane.execution.SpellElement.STORM, e) - 1.0;
+        if (extra > 0.01) e.hurt(source, (float) (5.0 * extra));
+      }
       context.level().sendParticles(com.arcane.registry.ModParticles.ARCANE_BOLT_STRIKE.get(), pos.x, Math.floor(pos.y) + 2.0, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
     }
   }

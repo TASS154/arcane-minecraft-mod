@@ -15,6 +15,12 @@ public class FireEffectHandler implements EffectHandler {
     public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
         int duration = (int) context.amplify(call.parameters().getOrDefault("duration", 60.0), call.magnitudeKeys(), "duration");
         for (Entity entity : targets.entities()) {
+            // Molhado: o fogo vira vapor (regra "steam" do JSON) em vez de pegar.
+            if (com.arcane.execution.ElementInteractions.enabled()
+                    && com.arcane.execution.InteractionRules.matching(context.level(), com.arcane.execution.SpellElement.FIRE, entity).stream().anyMatch(r -> r.after().equals("steam"))) {
+                com.arcane.execution.ElementInteractions.afterHit(context.level(), com.arcane.execution.SpellElement.FIRE, entity);
+                continue;
+            }
             entity.setSecondsOnFire(Math.max(1, duration / 20));
         }
         if (!com.arcane.execution.Targeting.mayAlterWorld(context)) return;

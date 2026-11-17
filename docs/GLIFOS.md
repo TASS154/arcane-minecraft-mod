@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **90 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **110 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -71,7 +71,7 @@ Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para
 | **Madeira** | `arcane:wood` | 1 | 1 | Terra | — | Filtro: só blocos de madeira (troncos e tábuas). |
 | **Forasteiros** | `arcane:outsiders` | 2 | 3 | Arcano | — | Filtro: afeta só quem NÃO é você nem está na sua lista de convidados (comando /arcane guest add|remove|list). Animais domesticados e invocações de você ou dos seus convidados também ficam de fora. Útil em inscrições e zonas que protegem a sua casa. |
 
-## Efeitos (27)
+## Efeitos (39)
 
 O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro principal (o dobro do dano custa o dobro).
 
@@ -104,8 +104,20 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Explosão Destrutiva** | `arcane:blast` | 8 | 4 | Fogo | `radius` 3 (1–6) | Efeito: explode no alvo DESTRUINDO blocos (como TNT, com queda de itens) e ferindo quem está perto. Você é imune. Raio 1–6. Respeita as configs do servidor contra destruição de blocos. |
 | **Flutuar** | `arcane:float` | 5 | 4 | Força | `duration` 200 (40–1200), `speed` 0.6 (0.3–3), `glide` 0 (0–1) | Efeito: o alvo paira e voa com suavidade na direção do olhar, como se fosse erguido pela cabeça (a cabeça vai primeiro, as pernas seguem). W avança, Espaço sobe, Shift desce, Ctrl acelera; sem comandos, ele paira parado. Velocidade de 0,3 a 3 blocos por tick, duração em ticks e planagem (0 a 1: sem comandos, o corpo plana adiante como numa elytra e cai devagar em vez de parar). Custa mana a cada tick enquanto voa (mais em velocidade alta) e acaba sem mana; a primeira queda depois do voo não causa dano. No Grimório, o modo Segurar ou Alternar mantém o voo enquanto você canaliza. |
 | **Telecinese** | `arcane:telekinesis` | 6 | 4 | Força | `duration` 100 (20–400), `distance` 6 (2–16), `sphere` 0 (0–6), `same_type` 0 (0–1) | Efeito: segura criaturas e blocos com a mente e os leva pairando diante da mira. O grupo de blocos é definido ao conjurar: um bloco; uma esfera (Esfera 1–6) ao redor do bloco mirado; ou, com Mesmo tipo, os blocos conectados do mesmo material (até 120), opcionalmente limitados pela esfera. Ao soltar, tudo cai com o embalo. Distância 2–16, duração até 20 s. |
+| **Chuva** | `arcane:rain` | 2 | 2 | Gelo, Tempestade | `radius` 4 (1.5–10), `duration` 400 (40–1200) | Efeito: uma chuva local cai sobre o alvo: molha quem está na área (raio 1,5–10), apaga fogo e rega plantações. Não muda o clima do mundo (isso é o ritual Clima). |
+| **Investida** | `arcane:charge` | 3 | 2 | Força | `distance` 8 (3–16), `damage` 3 (0–12) | Efeito: você avança em linha reta contra o alvo (ou para onde olha), até 16 blocos, ferindo quem estiver no caminho. Diferente de Empurrão em si mesmo, que só dá um impulso, e de Salto, que teleporta. |
+| **Planar** | `arcane:glide` | 2 | 2 | Força | `duration` 200 (20–1200) | Efeito: o alvo cai devagar por um tempo (queda lenta), sem dano de queda. É a versão passiva; para voar de verdade, use Flutuar. |
+| **Provocar** | `arcane:taunt` | 1 | 1 | Força | — | Efeito: criaturas hostis passam a perseguir você, largando outro alvo e acordando do Sono ou do Medo. Não afeta jogadores. |
+| **Medo** | `arcane:fear` | 2 | 2 | Vazio | `duration` 100 (20–400) | Efeito: a criatura larga o alvo e foge de você; enquanto dura, não escolhe você como alvo (1 a 20 s). Jogadores ficam fracos e com as mãos pesadas. |
+| **Sono** | `arcane:sleep` | 3 | 3 | Vazio | `duration` 100 (20–600) | Efeito: a criatura larga o alvo e adormece, imóvel e fraca, por até 30 s. Qualquer dano a acorda. |
+| **Estrondo** | `arcane:rumble` | 3 | 2 | Tempestade, Força | `radius` 3 (1–8), `damage` 2 (0–12) | Efeito: um trovão seco no alvo: fere de leve, empurra para fora (raio 1–8) e deixa as criaturas zonzas por 1,5 s. Não quebra blocos nem causa fogo. |
+| **Escuridão** | `arcane:darkness` | 2 | 2 | Vazio | `duration` 200 (20–600) | Efeito: o alvo fica envolto em escuridão pulsante (efeito Escuridão do jogo): a visão some aos poucos e volta. Mais suave que Cegar. |
+| **Molhar** | `arcane:wet` | 1 | 1 | Gelo, Tempestade | `duration` 200 (40–1200) | Efeito: deixa a criatura molhada por até 60 s e apaga o fogo dela. Molhado: Trovão e Raio ferem mais, Gelo congela mais rápido e mais forte, e Fogo nem pega (vira vapor). As regras estão em data/arcane/interactions. |
+| **Roubo de Vida** | `arcane:lifesteal` | 3 | 2 | Sangue | `amount` 3 (1–16), `ratio` 0.6 (0.1–1) | Efeito: fere o alvo e devolve a você 60% do dano que realmente causou. Não funciona em si mesmo. Invertido, vira Transferir Vida. |
+| **Transferir Vida** | `arcane:life_transfer` | 2 | 2 | Sangue | `amount` 4 (1–16) | Efeito: você passa vida ao alvo (1–16), sem nunca cair abaixo de 1 coração. Invertido, vira Roubo de Vida. |
+| **Ler Item** | `arcane:read_item` | 1 | 1 | Conhecimento | — | Efeito: mostra no chat o item que a criatura segura (ou o item solto no chão): nome, quantidade, durabilidade e encantamentos. Só informa; não muda nada. |
 
-## Modificadores (24)
+## Modificadores (25)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -135,8 +147,9 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Mira** | `arcane:origin_aim` | 1 | 1 | Terra | — | Origem: o centro da forma passa a ser o ponto para onde voce olha (ate 32 blocos), em vez de voce. |
 | **Zona** | `arcane:zone` | 3 | 3 | Conhecimento | `seconds` 10 (2–60), `interval` 1 (0.5–5) | Torna a forma persistente: ela se repete do mesmo lugar a cada intervalo, durante o tempo escolhido, reaplicando os efeitos em quem está dentro (Aura + Fogo vira um campo em chamas; Barreira vira parede contínua; Projétil vira torre). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). No máximo 2 zonas suas ao mesmo tempo. Invocações ignoram a Zona. |
 | **Cadeia** | `arcane:chain` | 3 | 3 | Força | — | Modificador: o efeito anterior se propaga de criatura em criatura. Explosão e Explosão Destrutiva detonam de novo, menores, em quem estava perto (até 3 saltos, 8 extras); Dano salta em arco para a mais próxima, com 60% do dano a cada salto. Outros efeitos ignoram a Cadeia (a prévia avisa). |
+| **Inverter** | `arcane:invert` | 1 | 2 | Vazio | — | Modificador: troca o efeito anterior pelo seu oposto, com a mesma magnitude. Pares: Dano e Cura, Empurrão e Atrair, Lentidão e Velocidade, Fogo e Congelar, Levitação e Gravidade, Roubo e Transferir Vida, Cegar e Invisibilidade, Medo e Provocar. Efeito sem par ignora o Inverter. |
 
-## Condições (14)
+## Condições (21)
 
 Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira.
 
@@ -156,6 +169,13 @@ Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira
 | **Quando a Zona Acabar** | `arcane:on_zone_end` | 0 | 3 | Conhecimento | — | Condição: o que vem depois só acontece quando a zona desta magia terminar (uma vez). Sem o glifo Zona, nunca acontece. |
 | **Ao Entrar na Zona** | `arcane:on_zone_enter` | 0 | 3 | Arcano | — | Condição: o que vem depois só acontece nas criaturas que ENTRAM na zona desta magia (uma vez para cada entrada, conferida a cada pulso). Quem já estava dentro ao conjurar não conta. Sem o glifo Zona, nunca acontece. |
 | **Ao Sair da Zona** | `arcane:on_zone_exit` | 0 | 3 | Arcano | — | Condição: o que vem depois só acontece nas criaturas que SAEM da zona desta magia (uma vez para cada saída, conferida a cada pulso). Sem o glifo Zona, nunca acontece. |
+| **Ao Matar** | `arcane:on_kill` | 0 | 3 | Sangue | — | Condição: arma a magia em você: o que vem depois só acontece quando você matar uma criatura (uma vez, por até 60 s). Com forma Eu, age em você. |
+| **Ao Cair** | `arcane:on_fall` | 0 | 3 | Força | — | Condição: arma a magia em você: o que vem depois só acontece quando você aterrissar depois de cair 3 blocos ou mais (uma vez, por até 60 s). |
+| **Ao Pular** | `arcane:on_jump` | 0 | 2 | Força | — | Condição: arma a magia em você: o que vem depois só acontece quando você pular (uma vez, por até 60 s). |
+| **Vida do Alvo Abaixo de X** | `arcane:target_health` | 0 | 2 | Conhecimento | `percent` 30 (5–95) | Condição: o que vem depois só acontece se algum alvo criatura estiver com menos de X% da vida (X 5–95, padrão 30). Sem alvo criatura, não passa. |
+| **Bioma ou Dimensão** | `arcane:region` | 0 | 2 | Conhecimento | `kind` 1 (1–8) | Condição: só acontece no lugar escolhido (kind): 1 Superfície, 2 Nether, 3 End, 4 Quente (deserto, mesa, Nether), 5 Frio (neve), 6 Floresta (floresta, selva, taiga), 7 Oceano, 8 Pântano. |
+| **Segurando Item X** | `arcane:holding` | 0 | 2 | Conhecimento | `kind` 1 (0–7) | Condição: só acontece se o item na sua mão principal for do tipo escolhido (kind): 0 mão vazia, 1 espada ou machado, 2 ferramenta, 3 arco, besta ou tridente, 4 comida, 5 bloco, 6 poção, 7 qualquer item. |
+| **Chuva ou Tempestade** | `arcane:raining` | 0 | 2 | Tempestade | `storm` 0 (0–1) | Condição: só acontece com chuva ou tempestade no mundo (storm 1: só tempestade). |
 
 ## Ativadores (1)
 

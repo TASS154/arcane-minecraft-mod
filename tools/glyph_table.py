@@ -489,27 +489,129 @@ glyph("telekinesis", "effect", 6,
       ["#..##..#", ".#.##.#.", "..####..", "#.####.#", "#.####.#", "..####..", ".#.##.#.", "#..##..#"],
       params={"duration": (100.0, 20.0, 400.0, "int"), "distance": (6.0, 2.0, 16.0, "float"), "sphere": (0.0, 0.0, 6.0, "int"), "same_type": (0.0, 0.0, 1.0, "int")}, magnitude=["duration"])
 
+
+# ================================================================== FASE 3: glifos de custo baixo
+glyph("rain", "effect", 2,
+      ("Chuva", "Efeito: uma chuva local cai sobre o alvo: molha quem está na área (raio 1,5–10), apaga fogo e rega plantações. Não muda o clima do mundo (isso é o ritual Clima)."),
+      ("Rain", "Effect: a local rain falls on the target: wets everyone in the area (radius 1.5-10), puts out fire and waters crops. It does not change the world weather (that is the Weather ritual)."),
+      ["..####..", ".######.", "########", "........", ".#.#.#.#", "#.#.#.#.", ".#.#.#.#", "#.#.#.#."],
+      params={"radius": (4.0, 1.5, 10.0, "float"), "duration": (400.0, 40.0, 1200.0, "int")}, magnitude=["duration"])
+glyph("charge", "effect", 3,
+      ("Investida", "Efeito: você avança em linha reta contra o alvo (ou para onde olha), até 16 blocos, ferindo quem estiver no caminho. Diferente de Empurrão em si mesmo, que só dá um impulso, e de Salto, que teleporta."),
+      ("Charge", "Effect: you rush in a straight line at the target (or where you look), up to 16 blocks, hurting whoever is in the way. Unlike Push on yourself, which is only an impulse, and Blink, which teleports."),
+      ["#.......", "##......", "###.##..", "########", "########", "###.##..", "##......", "#......."],
+      params={"distance": (8.0, 3.0, 16.0, "float"), "damage": (3.0, 0.0, 12.0, "float")}, magnitude=["damage"])
+glyph("glide", "effect", 2,
+      ("Planar", "Efeito: o alvo cai devagar por um tempo (queda lenta), sem dano de queda. É a versão passiva; para voar de verdade, use Flutuar."),
+      ("Glide", "Effect: the target falls slowly for a while (slow falling), with no fall damage. This is the passive version; to really fly, use Float."),
+      ["...##...", "..####..", ".######.", "########", "#..##..#", "...##...", "..#..#..", ".#....#."],
+      params={"duration": (200.0, 20.0, 1200.0, "int")}, magnitude=["duration"])
+glyph("taunt", "effect", 1,
+      ("Provocar", "Efeito: criaturas hostis passam a perseguir você, largando outro alvo e acordando do Sono ou do Medo. Não afeta jogadores."),
+      ("Taunt", "Effect: hostile creatures start chasing you, dropping any other target and waking from Sleep or Fear. Does not affect players."),
+      ["..#..#..", ".##..##.", "##....##", "#.#..#.#", "#......#", ".#.##.#.", "..#..#..", "...##..."])
+glyph("fear", "effect", 2,
+      ("Medo", "Efeito: a criatura larga o alvo e foge de você; enquanto dura, não escolhe você como alvo (1 a 20 s). Jogadores ficam fracos e com as mãos pesadas."),
+      ("Fear", "Effect: the creature drops its target and flees from you; while it lasts it will not pick you as a target (1 to 20 s). Players become weak and heavy-handed."),
+      ["..####..", ".#....#.", "#.#..#.#", "#......#", "#..##..#", ".#.##.#.", "..####..", "...##..."],
+      params={"duration": (100.0, 20.0, 400.0, "int")}, magnitude=["duration"])
+glyph("sleep", "effect", 3,
+      ("Sono", "Efeito: a criatura larga o alvo e adormece, imóvel e fraca, por até 30 s. Qualquer dano a acorda."),
+      ("Sleep", "Effect: the creature drops its target and falls asleep, still and weak, for up to 30 s. Any damage wakes it."),
+      ["....###.", "......#.", ".....#..", "....###.", ".###....", "..#.....", ".#......", ".###...."],
+      params={"duration": (100.0, 20.0, 600.0, "int")}, magnitude=["duration"])
+glyph("rumble", "effect", 3,
+      ("Estrondo", "Efeito: um trovão seco no alvo: fere de leve, empurra para fora (raio 1–8) e deixa as criaturas zonzas por 1,5 s. Não quebra blocos nem causa fogo."),
+      ("Rumble", "Effect: a dry thunderclap on the target: hurts lightly, shoves outward (radius 1-8) and leaves creatures dazed for 1.5 s. Breaks no blocks and starts no fire."),
+      ["#..##..#", ".#.##.#.", "..####..", "###..###", "###..###", "..####..", ".#.##.#.", "#..##..#"],
+      params={"radius": (3.0, 1.0, 8.0, "float"), "damage": (2.0, 0.0, 12.0, "float")}, magnitude=["damage"])
+glyph("darkness", "effect", 2,
+      ("Escuridão", "Efeito: o alvo fica envolto em escuridão pulsante (efeito Escuridão do jogo): a visão some aos poucos e volta. Mais suave que Cegar."),
+      ("Darkness", "Effect: the target is wrapped in pulsing darkness (the game's Darkness effect): vision fades and returns. Softer than Blind."),
+      ["..####..", ".######.", "########", "########", "########", "########", ".######.", "..####.."],
+      params={"duration": (200.0, 20.0, 600.0, "int")}, magnitude=["duration"])
+glyph("wet", "effect", 1,
+      ("Molhar", "Efeito: deixa a criatura molhada por até 60 s e apaga o fogo dela. Molhado: Trovão e Raio ferem mais, Gelo congela mais rápido e mais forte, e Fogo nem pega (vira vapor). As regras estão em data/arcane/interactions."),
+      ("Soak", "Effect: leaves the creature wet for up to 60 s and puts out its fire. While wet: Thunder and storm spells hurt more, Frost freezes faster and harder, and Fire fizzles into steam. The rules live in data/arcane/interactions."),
+      ["...##...", "...##...", "..####..", ".######.", "########", "########", ".######.", "..####.."],
+      params={"duration": (200.0, 40.0, 1200.0, "int")}, magnitude=["duration"])
+glyph("lifesteal", "effect", 3,
+      ("Roubo de Vida", "Efeito: fere o alvo e devolve a você 60% do dano que realmente causou. Não funciona em si mesmo. Invertido, vira Transferir Vida."),
+      ("Life Steal", "Effect: hurts the target and gives you back 60% of the damage actually dealt. Does not work on yourself. Inverted, it becomes Life Transfer."),
+      ["..#..#..", ".######.", "########", "########", ".######.", "..####..", "...##...", "........"],
+      params={"amount": (3.0, 1.0, 16.0, "float"), "ratio": (0.6, 0.1, 1.0, "float")}, magnitude=["amount"])
+glyph("life_transfer", "effect", 2,
+      ("Transferir Vida", "Efeito: você passa vida ao alvo (1–16), sem nunca cair abaixo de 1 coração. Invertido, vira Roubo de Vida."),
+      ("Life Transfer", "Effect: you pass health to the target (1-16), never dropping below 1 heart. Inverted, it becomes Life Steal."),
+      ["........", "..#..#..", ".######.", "########", ".######.", "..####..", "...##...", "........"],
+      params={"amount": (4.0, 1.0, 16.0, "float")}, magnitude=["amount"])
+glyph("read_item", "effect", 1,
+      ("Ler Item", "Efeito: mostra no chat o item que a criatura segura (ou o item solto no chão): nome, quantidade, durabilidade e encantamentos. Só informa; não muda nada."),
+      ("Read Item", "Effect: shows in chat the item the creature is holding (or the dropped item): name, count, durability and enchantments. Informational only; changes nothing."),
+      ["..####..", ".#....#.", "#..##..#", "#.#..#.#", "#.#..#.#", "#..##..#", ".#....#.", "..####.."])
+glyph("invert", "modifier", 1,
+      ("Inverter", "Modificador: troca o efeito anterior pelo seu oposto, com a mesma magnitude. Pares: Dano e Cura, Empurrão e Atrair, Lentidão e Velocidade, Fogo e Congelar, Levitação e Gravidade, Roubo e Transferir Vida, Cegar e Invisibilidade, Medo e Provocar. Efeito sem par ignora o Inverter."),
+      ("Invert", "Modifier: swaps the previous effect for its opposite, with the same magnitude. Pairs: Damage and Heal, Push and Attract, Slow and Speed, Fire and Freeze, Levitate and Gravity, Life Steal and Transfer, Blind and Invisibility, Fear and Taunt. An effect with no pair ignores Invert."),
+      ["#......#", "##....##", "#.#..#.#", "#..##..#", "#..##..#", "#.#..#.#", "##....##", "#......#"],
+      scope={"target": "previous_effect", "kind": "effect", "mutate": {"invert": {"op": "put", "value": 1.0}}})
+
+glyph("on_kill", "condition", 0,
+      ("Ao Matar", "Condição: arma a magia em você: o que vem depois só acontece quando você matar uma criatura (uma vez, por até 60 s). Com forma Eu, age em você."),
+      ("On Kill", "Condition: arms the spell on you: what follows only happens when you kill a creature (once, for up to 60 s). With the Self form, it acts on you."),
+      ["#......#", ".#....#.", "..#..#..", "...##...", "..####..", ".#.##.#.", "#..##..#", "...##..."])
+glyph("on_fall", "condition", 0,
+      ("Ao Cair", "Condição: arma a magia em você: o que vem depois só acontece quando você aterrissar depois de cair 3 blocos ou mais (uma vez, por até 60 s)."),
+      ("On Fall", "Condition: arms the spell on you: what follows only happens when you land after falling 3 blocks or more (once, for up to 60 s)."),
+      ["...##...", "...##...", "...##...", "..####..", ".######.", "........", "########", "........"])
+glyph("on_jump", "condition", 0,
+      ("Ao Pular", "Condição: arma a magia em você: o que vem depois só acontece quando você pular (uma vez, por até 60 s)."),
+      ("On Jump", "Condition: arms the spell on you: what follows only happens when you jump (once, for up to 60 s)."),
+      ["........", "...##...", "..####..", ".#.##.#.", "...##...", "...##...", "..#..#..", "########"])
+glyph("target_health", "condition", 0,
+      ("Vida do Alvo Abaixo de X", "Condição: o que vem depois só acontece se algum alvo criatura estiver com menos de X% da vida (X 5–95, padrão 30). Sem alvo criatura, não passa."),
+      ("Target Health Below X", "Condition: what follows only happens if some creature target has less than X% health (X 5-95, default 30). With no creature target, it fails."),
+      ["#.#..#.#", "########", "########", ".######.", "..####..", "...##...", "........", "###..###"],
+      params={"percent": (30.0, 5.0, 95.0, "int")})
+glyph("region", "condition", 0,
+      ("Bioma ou Dimensão", "Condição: só acontece no lugar escolhido (kind): 1 Superfície, 2 Nether, 3 End, 4 Quente (deserto, mesa, Nether), 5 Frio (neve), 6 Floresta (floresta, selva, taiga), 7 Oceano, 8 Pântano."),
+      ("Biome or Dimension", "Condition: only happens in the chosen place (kind): 1 Overworld, 2 Nether, 3 End, 4 Hot (desert, badlands, Nether), 5 Cold (snow), 6 Forest (forest, jungle, taiga), 7 Ocean, 8 Swamp."),
+      ["..####..", ".######.", "##.##.##", "########", "..####..", ".#.##.#.", "#..##..#", "........"],
+      params={"kind": (1.0, 1.0, 8.0, "int")})
+glyph("holding", "condition", 0,
+      ("Segurando Item X", "Condição: só acontece se o item na sua mão principal for do tipo escolhido (kind): 0 mão vazia, 1 espada ou machado, 2 ferramenta, 3 arco, besta ou tridente, 4 comida, 5 bloco, 6 poção, 7 qualquer item."),
+      ("Holding Item X", "Condition: only happens if your main-hand item is of the chosen kind: 0 empty hand, 1 sword or axe, 2 tool, 3 bow, crossbow or trident, 4 food, 5 block, 6 potion, 7 any item."),
+      ["...##...", "..####..", "...##...", "..####..", ".######.", ".#....#.", "#......#", "........"],
+      params={"kind": (1.0, 0.0, 7.0, "int")})
+glyph("raining", "condition", 0,
+      ("Chuva ou Tempestade", "Condição: só acontece com chuva ou tempestade no mundo (storm 1: só tempestade)."),
+      ("Rain or Storm", "Condition: only happens while it rains or storms in the world (storm 1: storms only)."),
+      ["..####..", ".######.", "########", "........", ".#.#.#.#", "#.#.#.#.", ".#.#.#.#", "........"],
+      params={"storm": (0.0, 0.0, 1.0, "int")})
+
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
-        "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group"],
+        "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group",
+        "taunt", "wet", "read_item"],
     2: ["slow", "poison", "speed", "players", "animals", "undead", "nearest", "wounded", "allies", "delay", "lengthen",
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
-        "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave"],
+        "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave",
+        "rain", "charge", "glide", "fear", "rumble", "darkness", "lifesteal", "life_transfer", "invert", "on_jump",
+        "target_health", "region", "holding", "raining"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain"],
+        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain", "sleep", "on_kill", "on_fall"],
     4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis"],
 }
 FAMILIES = {
     "fire": ["fire", "ignite", "explode", "blast"],
-    "ice": ["slow", "freeze", "shield"],
-    "storm": ["thunder", "ray", "pillar"],
-    "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead"],
+    "ice": ["slow", "freeze", "shield", "wet", "rain"],
+    "storm": ["thunder", "ray", "pillar", "rain", "rumble", "raining", "wet"],
+    "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill"],
     "life": ["heal", "shield", "speed", "allies", "players", "animals"],
-    "force": ["float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
+    "force": ["charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
-                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end"],
-    "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter"],
+                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding"],
+    "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert"],
     "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():

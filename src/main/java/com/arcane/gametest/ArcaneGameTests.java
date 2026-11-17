@@ -305,6 +305,258 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+
+  // ------------------------------------------------------------------ Fase 3: glifos de custo baixo
+  @GameTest(template = "empty")
+  public static void rainSoaksPutsOutFireAndWatersFarmland(GameTestHelper h) {
+    floor(h);
+    h.setBlock(new BlockPos(5, 0, 3), Blocks.FARMLAND);
+    Pig caster = pig(h, 3, 3);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 4));
+    cow.setSecondsOnFire(10);
+    cast(h, caster, g("self"), g("rain", "radius", 4.0));
+    h.assertTrue(com.arcane.execution.Wetness.isSoaked(caster) && com.arcane.execution.Wetness.isSoaked(cow), "a chuva molha quem esta na area");
+    h.assertTrue(!cow.isOnFire(), "a chuva apaga o fogo");
+    int moisture = h.getLevel().getBlockState(h.absolutePos(new BlockPos(5, 0, 3))).getValue(net.minecraft.world.level.block.FarmBlock.MOISTURE);
+    h.assertTrue(moisture == 7, "a chuva rega a plantacao (umidade " + moisture + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void wetStatusFeedsTheJsonInteractionRules(GameTestHelper h) {
+    floor(h);
+    Pig wet = pig(h, 2, 3);
+    Pig dry = pig(h, 4, 3);
+    cast(h, wet, g("self"), g("wet"));
+    h.assertTrue(com.arcane.execution.Wetness.isSoaked(wet) && !com.arcane.execution.Wetness.isSoaked(dry), "so um esta molhado");
+    var level = h.getLevel();
+    double stormWet = com.arcane.execution.ElementInteractions.damageMultiplier(level, com.arcane.execution.SpellElement.STORM, wet);
+    double stormDry = com.arcane.execution.ElementInteractions.damageMultiplier(level, com.arcane.execution.SpellElement.STORM, dry);
+    h.assertTrue(stormWet > stormDry + 0.2, "molhado: raio fere mais (" + stormWet + " contra " + stormDry + ")");
+    cast(h, wet, g("self"), g("freeze", "duration", 60.0));
+    cast(h, dry, g("self"), g("freeze", "duration", 60.0));
+    h.assertTrue(wet.getTicksFrozen() > dry.getTicksFrozen() + 60, "molhado: gelo congela mais (" + wet.getTicksFrozen() + " contra " + dry.getTicksFrozen() + ")");
+    wet.setSecondsOnFire(0);
+    cast(h, wet, g("self"), g("fire"));
+    h.assertTrue(!wet.isOnFire(), "molhado: o fogo nem pega");
+    h.assertTrue(!com.arcane.execution.Wetness.isSoaked(wet), "o vapor seca a criatura");
+    cast(h, dry, g("self"), g("fire"));
+    h.assertTrue(dry.isOnFire(), "seco: o fogo pega");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void invertSwapsEffectsForTheirOpposites(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    p.setHealth(5.0f);
+    cast(h, p, g("self"), g("damage", "amount", 3.0), g("invert"));
+    h.assertTrue(p.getHealth() > 5.0f, "Dano invertido cura (vida " + p.getHealth() + ")");
+    float before = p.getHealth();
+    cast(h, p, g("self"), g("heal", "amount", 3.0), g("invert"));
+    h.assertTrue(p.getHealth() < before, "Cura invertida fere");
+    cast(h, p, g("self"), g("slow"), g("invert"));
+    h.assertTrue(p.hasEffect(MobEffects.MOVEMENT_SPEED) && !p.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "Lentidao invertida vira Velocidade");
+    cast(h, p, g("self"), g("blind"));
+    h.assertTrue(p.hasEffect(MobEffects.BLINDNESS), "sem Inverter, Cegar cega");
+    cast(h, p, g("self"), g("glide"), g("invert"));
+    h.assertTrue(p.hasEffect(MobEffects.SLOW_FALLING), "efeito sem par ignora o Inverter");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void lifeStealHealsTheCasterAndTransferGivesLifeAway(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 4));
+    caster.setHealth(4.0f);
+    cast(h, caster, g("aura", "radius", 3.0), g("lifesteal", "amount", 4.0));
+    h.assertTrue(cow.getHealth() < cow.getMaxHealth(), "Roubo fere o alvo");
+    h.assertTrue(Math.abs(caster.getHealth() - 6.4f) < 0.05f, "devolve 60% do dano real (vida " + caster.getHealth() + ")");
+    caster.setHealth(8.0f);
+    cow.setHealth(4.0f);
+    cast(h, caster, g("aura", "radius", 3.0), g("life_transfer", "amount", 3.0));
+    h.assertTrue(Math.abs(caster.getHealth() - 5.0f) < 0.05f && Math.abs(cow.getHealth() - 7.0f) < 0.05f,
+        "Transferir passa 3 de vida (caster " + caster.getHealth() + ", vaca " + cow.getHealth() + ")");
+    caster.setHealth(3.0f);
+    cow.setHealth(4.0f);
+    cast(h, caster, g("aura", "radius", 3.0), g("life_transfer", "amount", 8.0));
+    h.assertTrue(caster.getHealth() >= com.arcane.execution.handlers.LowCostEffects.LifeTransfer.KEEP - 0.01f, "nunca derruba abaixo de 1 coracao (vida " + caster.getHealth() + ")");
+    caster.setHealth(8.0f);
+    cow.setHealth(10.0f);
+    float casterBefore = caster.getHealth();
+    cow.invulnerableTime = 0; // o golpe anterior dela ainda vale na mesma tick
+    cast(h, caster, g("aura", "radius", 3.0), g("life_transfer", "amount", 3.0), g("invert"));
+    h.assertTrue(cow.getHealth() < 10.0f && caster.getHealth() > casterBefore, "Transferir invertido e Roubo de Vida");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void tauntFearAndSleepControlWhoAMobTargets(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 2);
+    var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 4));
+    cast(h, caster, g("aura", "radius", 4.0), g("taunt"));
+    h.assertTrue(zombie.getTarget() == caster, "Provocar faz o zumbi perseguir o conjurador");
+    cast(h, caster, g("aura", "radius", 4.0), g("fear", "duration", 100.0));
+    h.assertTrue(zombie.getTarget() == null, "Medo faz largar o alvo");
+    zombie.setTarget(caster);
+    h.assertTrue(zombie.getTarget() == null, "com medo, nao escolhe o conjurador como alvo");
+    cast(h, caster, g("aura", "radius", 4.0), g("taunt"));
+    h.assertTrue(zombie.getTarget() == caster, "Provocar quebra o Medo");
+    cast(h, caster, g("aura", "radius", 4.0), g("sleep", "duration", 200.0));
+    h.assertTrue(com.arcane.execution.MindStates.isAsleep(zombie) && zombie.getTarget() == null, "Sono: dorme sem alvo");
+    h.assertTrue(zombie.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "dormindo, nao anda");
+    zombie.setTarget(caster);
+    h.assertTrue(zombie.getTarget() == null, "dormindo, nao escolhe alvo");
+    zombie.hurt(h.getLevel().damageSources().generic(), 1.0f);
+    h.assertTrue(!com.arcane.execution.MindStates.isAsleep(zombie) && !zombie.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "o dano acorda");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void rumbleHurtsShovesAndDazes(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 4));
+    float before = cow.getHealth();
+    cast(h, caster, g("ray", "range", 8.0), g("rumble", "radius", 3.0));
+    h.assertTrue(cow.getHealth() < before, "Estrondo fere");
+    h.assertTrue(cow.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "e deixa zonzo");
+    h.assertTrue(caster.getHealth() >= caster.getMaxHealth(), "o conjurador nao sofre");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void chargeRushesForwardHurtingWhoIsInTheWay(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 4));
+    float before = cow.getHealth();
+    cast(h, caster, g("self"), g("charge", "distance", 8.0));
+    h.assertTrue(caster.getDeltaMovement().z > 0.5, "o conjurador avanca (vz " + caster.getDeltaMovement().z + ")");
+    h.assertTrue(cow.getHealth() < before, "ferindo quem esta no caminho");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void glideAndDarknessApplyTheirEffects(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    cast(h, p, g("self"), g("glide", "duration", 100.0));
+    cast(h, p, g("self"), g("darkness", "duration", 100.0));
+    h.assertTrue(p.hasEffect(MobEffects.SLOW_FALLING), "Planar: queda lenta");
+    h.assertTrue(p.hasEffect(MobEffects.DARKNESS), "Escuridao");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void readItemDescribesTheHeldItem(GameTestHelper h) {
+    floor(h);
+    var stack = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD);
+    stack.enchant(net.minecraft.world.item.enchantment.Enchantments.SHARPNESS, 2);
+    stack.setDamageValue(10);
+    var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+    var msg = com.arcane.execution.handlers.LowCostEffects.ReadItem.describe(zombie, stack);
+    var content = (net.minecraft.network.chat.contents.TranslatableContents) msg.getContents();
+    h.assertTrue(content.getArgs()[2] instanceof net.minecraft.network.chat.Component name && name.getString().equals(stack.getHoverName().getString()), "traz o nome do item");
+    h.assertTrue(msg.getSiblings().size() >= 2, "traz durabilidade e encantamentos");
+    var empty = com.arcane.execution.handlers.LowCostEffects.ReadItem.describe(zombie, net.minecraft.world.item.ItemStack.EMPTY);
+    h.assertTrue(((net.minecraft.network.chat.contents.TranslatableContents) empty.getContents()).getKey().endsWith("empty"), "mao vazia");
+    var before = stack.copy();
+    h.assertTrue(net.minecraft.world.item.ItemStack.matches(before, stack), "ler nao muda o item");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void targetHealthConditionGatesOnTheTargetsLife(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 2);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 4));
+    cow.setHealth(2.0f);
+    cast(h, caster, g("aura", "radius", 4.0), g("target_health", "percent", 50.0), g("damage", "amount", 1.0));
+    h.assertTrue(cow.getHealth() < 2.0f, "vaca ferida (20%) passa em 50%");
+    cow.setHealth(10.0f);
+    cast(h, caster, g("aura", "radius", 4.0), g("target_health", "percent", 50.0), g("damage", "amount", 1.0));
+    h.assertTrue(cow.getHealth() >= 10.0f, "vaca saudavel nao passa");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void regionAndHoldingConditionsGateTheCast(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    cast(h, p, g("self"), g("region", "kind", 2.0), g("shield"));
+    h.assertTrue(!p.hasEffect(MobEffects.ABSORPTION), "no Overworld, a condicao Nether nao passa");
+    cast(h, p, g("self"), g("region", "kind", 1.0), g("shield"));
+    h.assertTrue(p.hasEffect(MobEffects.ABSORPTION), "no Overworld, a condicao Superficie passa");
+    p.removeAllEffects();
+    p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD));
+    cast(h, p, g("self"), g("holding", "kind", 4.0), g("speed"));
+    h.assertTrue(!p.hasEffect(MobEffects.MOVEMENT_SPEED), "espada nao e comida");
+    cast(h, p, g("self"), g("holding", "kind", 1.0), g("speed"));
+    h.assertTrue(p.hasEffect(MobEffects.MOVEMENT_SPEED), "espada passa em arma");
+    p.removeAllEffects();
+    p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, net.minecraft.world.item.ItemStack.EMPTY);
+    cast(h, p, g("self"), g("holding", "kind", 0.0), g("speed"));
+    h.assertTrue(p.hasEffect(MobEffects.MOVEMENT_SPEED), "mao vazia passa em kind 0");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase3_weather")
+  public static void rainingConditionFollowsTheWorldWeather(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    h.getLevel().setWeatherParameters(6000, 0, false, false);
+    h.getLevel().setRainLevel(0.0f);
+    cast(h, p, g("self"), g("raining"), g("speed"));
+    h.assertTrue(!p.hasEffect(MobEffects.MOVEMENT_SPEED), "tempo limpo: nao passa");
+    h.getLevel().setWeatherParameters(0, 6000, true, false);
+    h.getLevel().setRainLevel(1.0f); // a chuva sobe aos poucos; aqui ja vale cheia
+    cast(h, p, g("self"), g("raining"), g("speed"));
+    h.assertTrue(p.hasEffect(MobEffects.MOVEMENT_SPEED), "chovendo: passa");
+    p.removeAllEffects();
+    cast(h, p, g("self"), g("raining", "storm", 1.0), g("speed"));
+    h.assertTrue(!p.hasEffect(MobEffects.MOVEMENT_SPEED), "so chuva: a variante tempestade nao passa");
+    h.getLevel().setWeatherParameters(6000, 0, false, false);
+    h.getLevel().setRainLevel(0.0f);
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void onKillArmsAndFiresOnlyOnTheCastersOwnKill(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(1, 1, 1));
+    cast(h, caster, g("self"), g("on_kill"), g("shield"));
+    h.assertTrue(!caster.hasEffect(MobEffects.ABSORPTION) && com.arcane.execution.ArmedSpells.armedCount(caster.getUUID()) == 1, "arma sem disparar");
+    cow.hurt(h.getLevel().damageSources().genericKill(), 1000.0f);
+    h.assertTrue(!caster.hasEffect(MobEffects.ABSORPTION), "morte alheia nao dispara");
+    var sheep = h.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(5, 1, 5));
+    sheep.hurt(h.getLevel().damageSources().mobAttack(caster), 1000.0f);
+    h.assertTrue(caster.hasEffect(MobEffects.ABSORPTION), "matar dispara");
+    h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(caster.getUUID()) == 0, "dispara uma vez");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void onFallAndOnJumpFireFromTheirEvents(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    cast(h, p, g("self"), g("on_fall"), g("shield"));
+    p.causeFallDamage(2.0f, 1.0f, h.getLevel().damageSources().fall());
+    h.assertTrue(!p.hasEffect(MobEffects.ABSORPTION), "queda curta nao dispara");
+    p.causeFallDamage(6.0f, 1.0f, h.getLevel().damageSources().fall());
+    h.assertTrue(p.hasEffect(MobEffects.ABSORPTION), "queda de 3+ blocos dispara");
+    p.removeAllEffects();
+    cast(h, p, g("self"), g("on_jump"), g("speed"));
+    h.assertTrue(!p.hasEffect(MobEffects.MOVEMENT_SPEED), "conjurar nao pula");
+    net.minecraftforge.common.ForgeHooks.onLivingJump(p);
+    h.assertTrue(p.hasEffect(MobEffects.MOVEMENT_SPEED), "pular dispara");
+    h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(p.getUUID()) == 0, "dispara uma vez");
+    h.succeed();
+  }
+
   private static Pig pig(GameTestHelper h, int x, int z) {
     Pig pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(x, 1, z));
     pig.setYRot(0);

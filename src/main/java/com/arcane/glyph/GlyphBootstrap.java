@@ -84,6 +84,20 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("wither"), new PotionEffectHandler(MobEffects.WITHER, 300));
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("invisible"), new PotionEffectHandler(MobEffects.INVISIBILITY, 2400));
 
+        // Fase 3: efeitos baratos
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("rain"), new com.arcane.execution.handlers.LowCostEffects.Rain());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("charge"), new com.arcane.execution.handlers.LowCostEffects.Charge());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("glide"), new PotionEffectHandler(MobEffects.SLOW_FALLING, 1200));
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("taunt"), new com.arcane.execution.handlers.LowCostEffects.Taunt());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("fear"), new com.arcane.execution.handlers.LowCostEffects.Fear());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("sleep"), new com.arcane.execution.handlers.LowCostEffects.Sleep());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("rumble"), new com.arcane.execution.handlers.LowCostEffects.Rumble());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("darkness"), new PotionEffectHandler(MobEffects.DARKNESS, 600));
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("wet"), new com.arcane.execution.handlers.LowCostEffects.Soak());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("lifesteal"), new com.arcane.execution.handlers.LowCostEffects.LifeSteal());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("life_transfer"), new com.arcane.execution.handlers.LowCostEffects.LifeTransfer());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("read_item"), new com.arcane.execution.handlers.LowCostEffects.ReadItem());
+
         // Filtros
         GlyphHandlerRegistry.registerFilter(ArcaneIds.HOSTILE, new HostileFilterResolver());
         GlyphHandlerRegistry.registerFilter(ArcaneIds.SELF_FILTER, new SelfFilterResolver());
@@ -131,6 +145,15 @@ public final class GlyphBootstrap {
             double dx = e.getX() - e.xo, dz = e.getZ() - e.zo;
             return e.onGround() && dx * dx + dz * dz < 1.0e-4;
         }));
+
+        // Fase 3: gatilhos e condicoes de estado
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_kill"), new PredicateCondition(c -> "kill".equals(c.trigger().type())));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_fall"), new PredicateCondition(c -> "fall".equals(c.trigger().type())));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_jump"), new PredicateCondition(c -> "jump".equals(c.trigger().type())));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("target_health"), new com.arcane.execution.handlers.StateConditions.TargetHealth());
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("region"), new com.arcane.execution.handlers.StateConditions.Region());
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("holding"), new com.arcane.execution.handlers.StateConditions.Holding());
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("raining"), new com.arcane.execution.handlers.StateConditions.Raining());
 
         // Ativador
         GlyphHandlerRegistry.registerActivator(ArcaneIds.ACTIVATE, new ActivateHandler());

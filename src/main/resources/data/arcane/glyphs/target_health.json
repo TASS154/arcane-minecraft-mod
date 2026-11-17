@@ -1,0 +1,21 @@
+{
+  "category": "condition",
+  "behavior": {
+    "handler": "arcane:target_health"
+  },
+  "parameters": {
+    "percent": {
+      "type": "int",
+      "default": 30.0,
+      "min": 5.0,
+      "max": 95.0
+    }
+  },
+  "cost": {
+    "mana": 0
+  },
+  "tier": 2,
+  "families": [
+    "knowledge"
+  ]
+}

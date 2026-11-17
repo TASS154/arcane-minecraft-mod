@@ -26,12 +26,16 @@ public final class EffectReach {
       Map.entry("thunder", ALL), Map.entry("explode", ALL), Map.entry("freeze", ALL),
       Map.entry("blast", ALL), Map.entry("dig", BLOCK), Map.entry("gravity", ENTITY | BLOCK), Map.entry("attract", ENTITY), Map.entry("mark", ENTITY),
       Map.entry("float", ENTITY), Map.entry("telekinesis", ENTITY | BLOCK),
+      Map.entry("rain", ALL), Map.entry("charge", ALL), Map.entry("glide", ENTITY), Map.entry("taunt", ENTITY),
+      Map.entry("fear", ENTITY), Map.entry("sleep", ENTITY), Map.entry("rumble", ALL), Map.entry("darkness", ALL),
+      Map.entry("wet", ENTITY), Map.entry("lifesteal", ENTITY), Map.entry("life_transfer", ENTITY), Map.entry("read_item", ENTITY),
       // Nao dependem dos alvos: agem sobre o conjurador ou o mundo.
       Map.entry("blink", ALL), Map.entry("weather", ALL), Map.entry("warp", ALL));
 
   /** Efeitos nocivos: o conjurador nao os sofre vindos de formas que nao sejam a forma Eu. */
   private static final java.util.Set<String> HARMFUL = java.util.Set.of("damage", "cut", "fire", "slow", "poison", "blind",
-      "wither", "freeze", "gravity", "push", "attract", "thunder", "blast", "explode", "telekinesis");
+      "wither", "freeze", "gravity", "push", "attract", "thunder", "blast", "explode", "telekinesis",
+      "taunt", "fear", "sleep", "rumble", "darkness", "lifesteal");
 
   /** Efeitos que sabem encadear (modificador Cadeia). */
   private static final java.util.Set<String> CHAINABLE = java.util.Set.of("damage", "explode", "blast");

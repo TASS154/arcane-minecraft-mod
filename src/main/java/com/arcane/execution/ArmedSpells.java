@@ -31,7 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ArmedSpells {
   public static final long EXPIRE_TICKS = 1200L;
   public static final int MAX_ARMED = 3;
-  private static final Set<ResourceLocation> TRIGGER_CONDITIONS = Set.of(new ResourceLocation("arcane", "on_hurt"), new ResourceLocation("arcane", "on_death"));
+  private static final Set<ResourceLocation> TRIGGER_CONDITIONS = Set.of(
+      new ResourceLocation("arcane", "on_hurt"), new ResourceLocation("arcane", "on_death"), new ResourceLocation("arcane", "on_kill"),
+      new ResourceLocation("arcane", "on_fall"), new ResourceLocation("arcane", "on_jump"));
 
   private record Armed(ExecutionContext context, CompiledExecutionPlan.ExecutionSegment segment, long expiresAt) {}
 
@@ -73,6 +75,26 @@ public final class ArmedSpells {
   @SubscribeEvent
   public static void onDeath(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
     trigger(event.getEntity(), "death", "on_death", event.getSource().getEntity());
+  }
+
+  /** Ao Matar: quem armou e o autor do golpe fatal (direto ou por magia); o morto vira o "outro" do gatilho. */
+  @SubscribeEvent
+  public static void onKill(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
+    if (event.getSource().getEntity() instanceof LivingEntity killer && killer != event.getEntity()) {
+      trigger(killer, "kill", "on_kill", event.getEntity());
+    }
+  }
+
+  /** Ao Cair: dispara quando quem armou toca o chao depois de cair 3 blocos ou mais (antes do dano da queda). */
+  @SubscribeEvent
+  public static void onFall(net.minecraftforge.event.entity.living.LivingFallEvent event) {
+    if (event.getDistance() >= 3.0f) trigger(event.getEntity(), "fall", "on_fall", null);
+  }
+
+  /** Ao Pular. */
+  @SubscribeEvent
+  public static void onJump(net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent event) {
+    trigger(event.getEntity(), "jump", "on_jump", null);
   }
 
   private static void trigger(LivingEntity victim, String type, String conditionPath, net.minecraft.world.entity.Entity source) {

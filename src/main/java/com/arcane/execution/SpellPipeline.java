@@ -97,15 +97,17 @@ public final class SpellPipeline {
 
     private void applyEffects(ExecutionContext context, ExecutionSegment segment, TargetList targets) {
         for (EffectCallCompiled effectCompiled : segment.effects()) {
-            EffectHandler handler = GlyphHandlerRegistry.getEffect(effectCompiled.handler()).orElse(null);
+            // Inverter troca o efeito pelo oposto (Dano <-> Cura, Empurrao <-> Atrair...).
+            EffectCall call = Inversion.resolve(EffectCall.fromCompiled(effectCompiled));
+            EffectHandler handler = GlyphHandlerRegistry.getEffect(call.handler()).orElse(null);
             if (handler != null) {
                 TargetList effective = targets;
                 // O conjurador nao sofre os efeitos nocivos das proprias formas de area (so a forma Eu o atinge).
-                if (EffectReach.harmful(effectCompiled.glyphId().getPath()) && !"self".equals(context.plan().delivery().formId().getPath())
+                if (EffectReach.harmful(call.glyphId().getPath()) && !"self".equals(context.plan().delivery().formId().getPath())
                         && targets.entities().contains(context.caster())) {
                     effective = new TargetList(targets.entities().stream().filter(e -> e != context.caster()).toList(), targets.blocks(), targets.points());
                 }
-                handler.apply(context, EffectCall.fromCompiled(effectCompiled), effective);
+                handler.apply(context, call, effective);
             }
         }
     }

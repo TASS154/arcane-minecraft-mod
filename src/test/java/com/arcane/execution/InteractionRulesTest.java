@@ -37,7 +37,9 @@ class InteractionRulesTest {
       List<String> problems = new ArrayList<>();
       var rules = InteractionRules.parse(json, problems);
       assertTrue(problems.isEmpty(), problems.toString());
-      assertEquals(7, rules.size());
+      assertEquals(8, rules.size());
+      assertTrue(rules.stream().anyMatch(r -> r.element() == SpellElement.FROST && r.when().equals(List.of("wet")) && r.freezeAdd() > 0), "molhado: gelo congela mais");
+      assertTrue(rules.stream().anyMatch(r -> r.element() == SpellElement.FIRE && r.when().equals(List.of("wet")) && r.after().equals("steam")), "molhado: fogo vira vapor");
     }
   }
 

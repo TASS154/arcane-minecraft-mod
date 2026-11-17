@@ -34,14 +34,14 @@ import java.util.function.BiPredicate;
 public final class InteractionRules {
   private static final Logger LOG = LogUtils.getLogger();
 
-  public record Rule(SpellElement element, List<String> when, double damageAdd, String after) {}
+  public record Rule(SpellElement element, List<String> when, double damageAdd, String after, int freezeAdd) {}
 
   private static volatile List<Rule> rules = List.of();
   private static volatile List<String> problems = List.of();
 
   private static final Map<String, BiPredicate<ServerLevel, Entity>> CONDITIONS = Map.of(
       "raining", (level, e) -> level.isRainingAt(e.blockPosition().above()),
-      "wet", (level, e) -> e.isInWaterOrRain(),
+      "wet", (level, e) -> e.isInWaterOrRain() || Wetness.isSoaked(e),
       "frozen", (level, e) -> e instanceof LivingEntity living && living.getTicksFrozen() > 0,
       "on_fire", (level, e) -> e.isOnFire(),
       "hot_biome", (level, e) -> {
@@ -114,8 +114,9 @@ public final class InteractionRules {
         }
       }
       String after = o.has("after") ? o.get("after").getAsString() : "";
-      if (!after.isEmpty() && !after.equals("extinguish")) { problemsOut.add("regra " + index + ": acao desconhecida '" + after + "'"); ok = false; }
-      if (ok) out.add(new Rule(element, List.copyOf(when), o.has("damage_add") ? o.get("damage_add").getAsDouble() : 0.0, after));
+      if (!after.isEmpty() && !after.equals("extinguish") && !after.equals("steam")) { problemsOut.add("regra " + index + ": acao desconhecida '" + after + "'"); ok = false; }
+      int freezeAdd = o.has("freeze_add") ? Math.max(0, Math.min(400, o.get("freeze_add").getAsInt())) : 0;
+      if (ok) out.add(new Rule(element, List.copyOf(when), o.has("damage_add") ? o.get("damage_add").getAsDouble() : 0.0, after, freezeAdd));
     }
     return out;
   }

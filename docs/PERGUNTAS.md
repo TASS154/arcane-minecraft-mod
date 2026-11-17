@@ -16,3 +16,13 @@
 - **Glifo novo ou Flutuar?** Reaproveitei Flutuar (já era voo, "puxado pela cabeça"). Se quiser um glifo separado "Voo", é só renomear/duplicar com a tabela; o comportamento fica igual.
 - **Custo:** 0,25 mana por tick por bloco/tick de velocidade (ex.: velocidade 1 = 5 mana/s; velocidade 3 = 15 mana/s). Provisório, em `flightManaPerTick`.
 - **Queda segura:** uma queda, até 60 s depois do voo. Se quiser dano normal ao cair de grandes alturas quando faltar mana (punição), é uma linha.
+
+## Dúvidas registradas na Fase 3
+- **Chuva vs. Clima:** Clima já existe como ritual global. Criei Chuva como efeito local (molha, apaga fogo, rega). Se a intenção era "chuva de verdade no mundo", isso já é o Clima.
+- **Investida vs. Empurrão em si mesmo:** o Empurrão em si mesmo já dá impulso para a frente. Investida difere por mirar o alvo, ter alcance (3 a 16) e ferir quem está no caminho. Se achar redundante, posso remover.
+- **Planar vs. Flutuar:** Planar é queda lenta passiva (poção); Flutuar continua sendo o voo.
+- **Inverter:** par Cegar/Invisibilidade e Medo/Provocar foram escolha minha; Levitação/Gravidade mapeia duração para força (usa o padrão da força). Confirmar a lista de pares.
+- **Sono:** acordar por qualquer dano remove Lentidão/Fraqueza do alvo, inclusive as de outras fontes. Valores provisórios (duração máx. 30 s).
+- **Ao Cair:** só dispara com queda de 3 blocos ou mais (o limite é fixo, não tem parâmetro).
+- **Chuva ou Tempestade:** lê o clima do mundo (não exige estar sob o céu). Segurando Item X: só a mão principal.
+- **Molhar na regra do Fogo:** o Fogo em alvo molhado ou na chuva "nem pega" (vira vapor), por regra JSON; mudei o dano do Raio com alvo molhado de +0,3 para +0,5.

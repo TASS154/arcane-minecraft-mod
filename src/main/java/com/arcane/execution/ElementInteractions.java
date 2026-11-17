@@ -30,11 +30,25 @@ public final class ElementInteractions {
   public static void afterHit(ServerLevel level, SpellElement element, Entity target) {
     if (!enabled()) return;
     for (InteractionRules.Rule rule : InteractionRules.matching(level, element, target)) {
-      if (rule.after().equals("extinguish") && target.isOnFire()) {
+      if (rule.after().equals("steam")) {
+        // Fogo em alvo molhado: vira vapor, apaga o fogo e seca a criatura.
+        target.clearFire();
+        Wetness.dry(target);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, target.getX(), target.getY() + 1.0, target.getZ(), 10, 0.3, 0.4, 0.3, 0.04);
+      } else if (rule.after().equals("extinguish") && target.isOnFire()) {
         target.clearFire();
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, target.getX(), target.getY() + 1.0, target.getZ(), 6, 0.2, 0.3, 0.2, 0.02);
       }
     }
+  }
+
+  /** Ticks de gelo extras que as regras dao a um alvo (ex.: molhado congela mais rapido). */
+  public static int freezeBonus(ServerLevel level, SpellElement element, Entity target) {
+    if (!enabled()) return 0;
+    double strength = ArcaneConfig.ELEMENT_INTERACTION_STRENGTH.get();
+    int bonus = 0;
+    for (InteractionRules.Rule rule : InteractionRules.matching(level, element, target)) bonus += (int) Math.round(rule.freezeAdd() * strength);
+    return bonus;
   }
 
   /** Fogo nao pega com chuva caindo sobre o bloco. */

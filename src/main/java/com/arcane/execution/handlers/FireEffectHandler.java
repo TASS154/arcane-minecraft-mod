@@ -53,9 +53,11 @@ public class FireEffectHandler implements EffectHandler {
             }
         } else if (state.is(net.minecraft.world.level.block.Blocks.ICE)) {
             level.setBlockAndUpdate(pos, net.minecraft.world.level.block.Blocks.WATER.defaultBlockState());
+            com.arcane.restore.BlockJournal.record(level, pos, state);
         } else if (state.is(net.minecraft.world.level.block.Blocks.SNOW) || state.is(net.minecraft.world.level.block.Blocks.SNOW_BLOCK)
                 || state.is(net.minecraft.world.level.block.Blocks.POWDER_SNOW)) {
             level.removeBlock(pos, false);
+            com.arcane.restore.BlockJournal.record(level, pos, state);
         }
     }
 }

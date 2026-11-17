@@ -34,7 +34,7 @@ public final class EffectReach {
       Map.entry("reanimate", ALL), Map.entry("sense", ALL), Map.entry("arcane_sight", ALL), Map.entry("emit_signal", ALL),
       Map.entry("dispel", ENTITY), Map.entry("reflect", ENTITY), Map.entry("silence", ENTITY), Map.entry("drain_mana", ENTITY),
       Map.entry("swap", ENTITY), Map.entry("reveal", ALL), Map.entry("decoy", ALL), Map.entry("curse", ENTITY),
-      Map.entry("wet", ENTITY), Map.entry("lifesteal", ENTITY), Map.entry("life_transfer", ENTITY), Map.entry("read_item", ENTITY), Map.entry("pocket", ALL),
+      Map.entry("wet", ENTITY), Map.entry("lifesteal", ENTITY), Map.entry("life_transfer", ENTITY), Map.entry("read_item", ENTITY), Map.entry("pocket", ALL), Map.entry("restore", ALL),
       // Nao dependem dos alvos: agem sobre o conjurador ou o mundo.
       Map.entry("blink", ALL), Map.entry("weather", ALL), Map.entry("warp", ALL));
 

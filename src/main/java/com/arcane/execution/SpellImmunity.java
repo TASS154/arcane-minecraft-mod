@@ -26,12 +26,21 @@ public final class SpellImmunity {
 
   private SpellImmunity() {}
 
+  /** Se a explosao em andamento destroi blocos (ExplosionInteraction diferente de NONE). */
+  private static final ThreadLocal<Boolean> EXPLOSION_BREAKS = new ThreadLocal<>();
+
   public static void explodeAs(LivingEntity caster, Runnable explosion) {
+    explodeAs(caster, net.minecraft.world.level.Level.ExplosionInteraction.NONE, explosion);
+  }
+
+  public static void explodeAs(LivingEntity caster, net.minecraft.world.level.Level.ExplosionInteraction interaction, Runnable explosion) {
     EXPLOSION_CASTER.set(caster);
+    EXPLOSION_BREAKS.set(interaction != net.minecraft.world.level.Level.ExplosionInteraction.NONE);
     try {
       explosion.run();
     } finally {
       EXPLOSION_CASTER.remove();
+      EXPLOSION_BREAKS.remove();
     }
   }
 
@@ -39,6 +48,18 @@ public final class SpellImmunity {
   public static void onDetonate(ExplosionEvent.Detonate event) {
     LivingEntity caster = EXPLOSION_CASTER.get();
     if (caster != null) event.getAffectedEntities().remove(caster);
+    // Explosoes de magia que destroem blocos: por padrao nao soltam item e entram no diario do Restaurar.
+    // Com blastDropsLoot ligado seguem o caminho do vanilla (com loot) e ficam fora do diario.
+    if (caster != null && Boolean.TRUE.equals(EXPLOSION_BREAKS.get()) && !com.arcane.config.ArcaneConfig.BLAST_DROPS_LOOT.get()
+        && event.getLevel() instanceof net.minecraft.server.level.ServerLevel level) {
+      for (net.minecraft.core.BlockPos pos : new java.util.ArrayList<>(event.getAffectedBlocks())) {
+        var before = level.getBlockState(pos);
+        if (before.isAir()) continue;
+        level.removeBlock(pos, false);
+        com.arcane.restore.BlockJournal.record(level, pos, before);
+      }
+      event.getAffectedBlocks().clear();
+    }
   }
 
   @SubscribeEvent

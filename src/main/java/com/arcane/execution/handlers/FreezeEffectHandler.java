@@ -55,10 +55,14 @@ public class FreezeEffectHandler implements EffectHandler {
             BlockPos pos = center.offset(x, y, z);
             FluidState fluid = level.getFluidState(pos);
             if (fluid.is(FluidTags.WATER) && fluid.isSource()) {
+              var before = level.getBlockState(pos);
               level.setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
+              com.arcane.restore.BlockJournal.record(level, pos, before);
               changed++;
             } else if (fluid.is(FluidTags.LAVA)) {
+              var before = level.getBlockState(pos);
               level.setBlockAndUpdate(pos, fluid.isSource() ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState());
+              com.arcane.restore.BlockJournal.record(level, pos, before);
               changed++;
             } else if (level.getBlockState(pos).is(Blocks.FIRE)) {
               level.removeBlock(pos, false);

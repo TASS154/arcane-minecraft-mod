@@ -364,6 +364,9 @@
   "container.arcane.pocket.other": "%s's Arcane Pocket",
   "message.arcane.pocket.listed": "%s's pocket: %s item(s) in %s slot(s)",
   "message.arcane.pocket.cleared": "%s's pocket emptied (%s item(s))",
+  "message.arcane.restore.disabled": "Restore is disabled on this server",
+  "message.arcane.restore.done": "Restore: %s block(s) recomposed",
+  "message.arcane.restore.nothing": "Nothing to restore here",
   "glyph.arcane.self": "Self",
   "glyph.arcane.self.desc": "Form: the spell happens on you.",
   "glyph.arcane.touch": "Touch",
@@ -645,5 +648,7 @@
   "glyph.arcane.bind": "Bind",
   "glyph.arcane.bind.desc": "Modifier: ties the previous effect to you: if it is a potion-type effect (Slow, Poison, Blind, Speed...) on another creature, it ends when you die or move more than 40 blocks away. Other effect types ignore Bind.",
   "glyph.arcane.pocket": "Arcane Pocket",
-  "glyph.arcane.pocket.desc": "Effect: opens your Arcane Pocket, a 13-item space only yours (like an Ender Chest) that stays with you when you die. It will not open during recent combat nor accept shulkers, the grimoire or pages."
+  "glyph.arcane.pocket.desc": "Effect: opens your Arcane Pocket, a 13-item space only yours (like an Ender Chest) that stays with you when you die. It will not open during recent combat nor accept shulkers, the grimoire or pages.",
+  "glyph.arcane.restore": "Restore",
+  "glyph.arcane.restore.desc": "Effect: recomposes, within 2-12 blocks, the blocks spells destroyed in the last 2 minutes (explosions, Cut, Damage, ice and fire), where nobody has built since. It returns no items: explosions drop no loot (configurable). Charges a little mana per block that comes back."
 }

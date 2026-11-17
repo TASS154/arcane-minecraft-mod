@@ -40,7 +40,7 @@ public class CutEffectHandler implements EffectHandler {
       if (cut >= MAX_BLOCKS) break;
       BlockState state = context.level().getBlockState(block.pos());
       if (state.is(BlockTags.SWORD_EFFICIENT) || state.is(Blocks.COBWEB)) {
-        if (context.level().destroyBlock(block.pos(), true, context.caster())) cut++;
+        if (com.arcane.restore.BlockJournal.destroy(context.level(), block.pos(), context.caster())) cut++;
       }
     }
   }

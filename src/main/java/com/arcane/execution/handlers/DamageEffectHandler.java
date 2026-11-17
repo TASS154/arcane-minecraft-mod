@@ -37,7 +37,7 @@ public class DamageEffectHandler implements EffectHandler {
             var state = context.level().getBlockState(block.pos());
             float hardness = state.getDestroySpeed(context.level(), block.pos());
             if (!state.isAir() && hardness >= 0.0f && hardness <= 0.3f) {
-                context.level().destroyBlock(block.pos(), false, context.caster());
+                com.arcane.restore.BlockJournal.destroy(context.level(), block.pos(), context.caster());
                 broken++;
             }
         }

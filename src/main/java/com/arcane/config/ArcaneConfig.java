@@ -39,6 +39,7 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue RESTORE_MAX_BLOCKS;
   public static final ForgeConfigSpec.IntValue RESTORE_JOURNAL_CAP;
   public static final ForgeConfigSpec.BooleanValue BLAST_DROPS_LOOT;
+  public static final ForgeConfigSpec.DoubleValue RESTORE_MANA_PER_BLOCK;
   public static final ForgeConfigSpec.BooleanValue CHORUS_ENABLED;
   public static final ForgeConfigSpec.DoubleValue CHORUS_RADIUS;
   public static final ForgeConfigSpec.IntValue CHORUS_WINDOW_TICKS;
@@ -91,6 +92,7 @@ public class ArcaneConfig {
     RESTORE_WINDOW_SECONDS = builder.comment("How long a destroyed block stays restorable (PROVISIONAL)").defineInRange("restoreWindowSeconds", 120, 5, 3600);
     RESTORE_MAX_BLOCKS = builder.comment("Max blocks one Restore cast recomposes (PROVISIONAL)").defineInRange("restoreMaxBlocksPerCast", 256, 1, 4096);
     RESTORE_JOURNAL_CAP = builder.comment("Max journal entries per dimension; the oldest are dropped first").defineInRange("restoreJournalCap", 4096, 64, 65536);
+    RESTORE_MANA_PER_BLOCK = builder.comment("Extra mana per block actually recomposed by Restore, on top of the glyph cost (PROVISIONAL)").defineInRange("restoreManaPerBlock", 0.3, 0.0, 20.0);
     BLAST_DROPS_LOOT = builder.comment("If true, blocks destroyed by explosions and other destructive spells drop items (Dig always does). Those blocks are then NOT recorded for Restore, to avoid a loot exploit")
         .define("blastDropsLoot", false);
     CHORUS_ENABLED = builder.comment("Chorus modifier: spells that need several players casting together").define("chorusEnabled", true);

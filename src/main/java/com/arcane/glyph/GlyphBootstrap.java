@@ -101,6 +101,8 @@ public final class GlyphBootstrap {
         // Fase 5
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("pocket"), new com.arcane.execution.handlers.Phase5Effects.Pocket());
 
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("restore"), new com.arcane.execution.handlers.Phase5Effects.Restore());
+
         // Fase 4: glifos medios
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("satellites"), new com.arcane.execution.handlers.ControlEffects.Satellites());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("link"), new com.arcane.execution.handlers.ControlEffects.Link());

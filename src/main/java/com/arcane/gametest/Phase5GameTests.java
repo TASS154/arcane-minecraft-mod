@@ -5,6 +5,9 @@ import com.arcane.execution.CastingService;
 import com.arcane.inscription.GlyphInstance;
 import com.arcane.inscription.Inscription;
 import com.arcane.pocket.ArcanePocket;
+import com.arcane.restore.BlockJournal;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -140,6 +143,166 @@ public class Phase5GameTests {
     int n = ArcanePocket.clear(p);
     h.assertTrue(n == 9, "limpar devolveu a contagem: " + n);
     h.assertTrue(ArcanePocket.container(p).getItem(3).isEmpty(), "ficou vazio");
+    h.succeed();
+  }
+
+  // ------------------------------------------------------------------ Restaurar
+  private static net.minecraft.server.level.ServerLevel lvl(GameTestHelper h) { return h.getLevel(); }
+
+  private static int itemsOnGround(GameTestHelper h) {
+    return h.getLevel().getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(h.absolutePos(BlockPos.ZERO), h.absolutePos(new BlockPos(7, 5, 7)))).size();
+  }
+
+  @GameTest(template = "empty", batch = "phase5_restore")
+  public static void blastLeavesNoLootAndRestoreBringsTheBlocksBack(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    var pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+    List<BlockPos> ring = new java.util.ArrayList<>();
+    for (int x = 1; x <= 5; x++) for (int z = 1; z <= 5; z++) {
+      if (x == 3 && z == 3) continue;
+      BlockPos rel = new BlockPos(x, 1, z);
+      h.setBlock(rel, Blocks.DIRT);
+      ring.add(rel);
+    }
+    cast(h, pig, g("self"), g("blast", "radius", 3.0));
+    long gone = ring.stream().filter(r -> h.getBlockState(r).isAir()).count();
+    h.assertTrue(gone >= 8, "a explosao destruiu blocos (" + gone + ")");
+    h.assertTrue(itemsOnGround(h) == 0, "sem loot: nenhum item no chao (" + itemsOnGround(h) + ")");
+    h.assertTrue(BlockJournal.size(lvl(h)) >= gone, "o diario registrou os blocos (" + BlockJournal.size(lvl(h)) + ")");
+    cast(h, pig, g("self"), g("restore", "radius", 8.0));
+    long still = ring.stream().filter(r -> h.getBlockState(r).isAir()).count();
+    h.assertTrue(still == 0, "o Restaurar devolveu todos os blocos (faltam " + still + ")");
+    h.assertTrue(ring.stream().allMatch(r -> h.getBlockState(r).is(Blocks.DIRT)), "voltaram como terra");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase5_restore")
+  public static void restoreNeverOverwritesWhatWasBuiltAfterwards(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    BlockPos rel = new BlockPos(2, 1, 2), other = new BlockPos(4, 1, 4);
+    h.setBlock(rel, Blocks.DIRT);
+    h.setBlock(other, Blocks.DIRT);
+    BlockJournal.destroy(lvl(h), h.absolutePos(rel), null);
+    BlockJournal.destroy(lvl(h), h.absolutePos(other), null);
+    h.setBlock(rel, Blocks.OAK_PLANKS); // alguem construiu ali depois
+    int n = BlockJournal.restore(lvl(h), h.absoluteVec(new Vec3(3.5, 1.5, 3.5)), 8, 256);
+    h.assertTrue(n == 1, "so um bloco volta (voltaram " + n + ")");
+    h.assertTrue(h.getBlockState(rel).is(Blocks.OAK_PLANKS), "a construcao nova foi preservada");
+    h.assertTrue(h.getBlockState(other).is(Blocks.DIRT), "o bloco livre voltou");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase5_restore")
+  public static void restoreRespectsRadiusAndPerCastCap(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    for (int x = 0; x < 6; x++) {
+      BlockPos rel = new BlockPos(x, 1, 1);
+      h.setBlock(rel, Blocks.DIRT);
+      BlockJournal.destroy(lvl(h), h.absolutePos(rel), null);
+    }
+    var center = h.absoluteVec(new Vec3(0.5, 1.5, 1.5));
+    h.assertTrue(BlockJournal.restore(lvl(h), center, 2.2, 256) == 3, "o raio 2,2 alcanca 3 blocos (0, 1 e 2)");
+    h.assertTrue(BlockJournal.restore(lvl(h), center, 20, 2) == 2, "o teto por conjuracao limita a 2");
+    h.assertTrue(BlockJournal.restore(lvl(h), center, 20, 256) == 1, "sobra 1 depois dos outros");
+    h.assertTrue(BlockJournal.restore(lvl(h), center, 20, 256) == 0, "nada mais a restaurar");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase5_restore")
+  public static void digIsNotJournaledAndStillDrops(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    var pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 2));
+    h.setBlock(new BlockPos(3, 1, 4), Blocks.DIRT);
+    cast(h, pig, g("ray"), g("dig"));
+    h.assertTrue(h.getBlockState(new BlockPos(3, 1, 4)).isAir(), "o Escavar quebrou o bloco");
+    h.assertTrue(BlockJournal.size(lvl(h)) == 0, "o Escavar nao entra no diario");
+    h.assertTrue(itemsOnGround(h) >= 1, "o Escavar continua soltando item");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase5_restore")
+  public static void chestComesBackEmptyAndItsContentsFell(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    BlockPos rel = new BlockPos(3, 1, 3);
+    h.setBlock(rel, Blocks.CHEST);
+    var chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) h.getBlockEntity(rel);
+    chest.setItem(0, new ItemStack(Items.DIAMOND, 4));
+    BlockJournal.destroy(lvl(h), h.absolutePos(rel), null);
+    int dropped = h.getLevel().getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(h.absolutePos(BlockPos.ZERO), h.absolutePos(new BlockPos(7, 5, 7))))
+        .stream().filter(i -> i.getItem().is(Items.DIAMOND)).mapToInt(i -> i.getItem().getCount()).sum();
+    h.assertTrue(dropped == 4, "o conteudo caiu no chao (" + dropped + ")");
+    BlockJournal.restore(lvl(h), h.absoluteVec(new Vec3(3.5, 1.5, 3.5)), 4, 256);
+    h.assertTrue(h.getBlockState(rel).is(Blocks.CHEST), "o bau voltou");
+    var back = (net.minecraft.world.level.block.entity.ChestBlockEntity) h.getBlockEntity(rel);
+    h.assertTrue(back.isEmpty(), "o bau voltou vazio");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase5_restore")
+  public static void restoreChargesManaPerBlockAndAnyPlayerCanUseIt(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    var p = player(h, 3.5, 3.5, "self", "restore");
+    for (int x = 0; x < 5; x++) {
+      BlockPos rel = new BlockPos(x, 1, 5);
+      h.setBlock(rel, Blocks.DIRT);
+      BlockJournal.destroy(lvl(h), h.absolutePos(rel), null); // autor nenhum: qualquer um restaura
+    }
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(p);
+    mana.set(100f);
+    var result = cast(h, p, g("self"), g("restore", "radius", 8.0));
+    h.assertTrue(result.success(), "a conjuracao falhou: " + result.message());
+    for (int x = 0; x < 5; x++) h.assertTrue(h.getBlockState(new BlockPos(x, 1, 5)).is(Blocks.DIRT), "bloco " + x + " voltou");
+    // custo do glifo + 5 blocos x 0,3
+    h.assertTrue(mana.current() < 100f - 5 * 0.3f + 0.01f, "cobrou mana (sobrou " + mana.current() + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase5_restore")
+  public static void withoutManaRestoreOnlyBringsBackWhatItCanPay(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    var p = player(h, 3.5, 3.5, "self", "restore");
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(p);
+    // mede o custo do glifo sozinho (diario vazio: nada volta)
+    mana.set(100f);
+    cast(h, p, g("self"), g("restore", "radius", 8.0));
+    float glyphCost = 100f - mana.current();
+    for (int x = 0; x < 6; x++) {
+      BlockPos rel = new BlockPos(x, 1, 5);
+      h.setBlock(rel, Blocks.DIRT);
+      BlockJournal.destroy(lvl(h), h.absolutePos(rel), null);
+    }
+    // so sobra mana para ~2 blocos alem do custo do glifo
+    mana.set(glyphCost + 0.7f);
+    cast(h, p, g("self"), g("restore", "radius", 8.0));
+    long back = 0;
+    for (int x = 0; x < 6; x++) if (h.getBlockState(new BlockPos(x, 1, 5)).is(Blocks.DIRT)) back++;
+    h.assertTrue(back >= 1 && back < 6, "voltou so parte (" + back + " de 6, custo do glifo " + glyphCost + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase5_loot")
+  public static void blastDropsLootConfigKeepsThoseBlocksOutOfTheJournal(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    var cfg = com.arcane.config.ArcaneConfig.BLAST_DROPS_LOOT;
+    boolean old = cfg.get();
+    try {
+      cfg.set(true);
+      BlockPos rel = new BlockPos(3, 1, 3);
+      h.setBlock(rel, Blocks.STONE);
+      BlockJournal.destroy(lvl(h), h.absolutePos(rel), null);
+      h.assertTrue(BlockJournal.size(lvl(h)) == 0, "com loot ligado, nada entra no diario");
+      h.assertTrue(itemsOnGround(h) >= 1, "com loot ligado, o bloco solta item");
+    } finally {
+      cfg.set(old);
+    }
     h.succeed();
   }
 }

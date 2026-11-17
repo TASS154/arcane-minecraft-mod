@@ -750,6 +750,11 @@ _g("pocket", "effect", 2,
    ("Bolso Arcano", "Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas."),
    ("Arcane Pocket", "Effect: opens your Arcane Pocket, a 13-item space only yours (like an Ender Chest) that stays with you when you die. It will not open during recent combat nor accept shulkers, the grimoire or pages."),
    ["..####..", ".#....#.", "..####..", ".######.", "##.##.##", "##.##.##", ".######.", "..####.."])
+_g("restore", "effect", 4,
+   ("Restaurar", "Efeito: recompõe, num raio de 2–12 blocos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta."),
+   ("Restore", "Effect: recomposes, within 2-12 blocks, the blocks spells destroyed in the last 2 minutes (explosions, Cut, Damage, ice and fire), where nobody has built since. It returns no items: explosions drop no loot (configurable). Charges a little mana per block that comes back."),
+   ["#.####.#", "#.#..#.#", "..#.##..", "###..###", "###..###", "..##.#..", "#.#..#.#", "#.####.#"],
+   params={"radius": (6.0, 2.0, 12.0, "float")}, magnitude=["radius"])
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
@@ -777,7 +782,7 @@ FAMILIES = {
     "knowledge": ["pocket", "mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert", "phase", "recall", "swap", "link", "silence", "drain_mana", "decoy", "stealth", "false_trace", "bind"],
-    "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
+    "earth": ["restore", "summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():
     for _gid in _ids:

@@ -364,6 +364,9 @@
   "container.arcane.pocket.other": "Bolso Arcano de %s",
   "message.arcane.pocket.listed": "Bolso de %s: %s item(ns) em %s espaço(s)",
   "message.arcane.pocket.cleared": "Bolso de %s esvaziado (%s item(ns))",
+  "message.arcane.restore.disabled": "O Restaurar está desligado neste servidor",
+  "message.arcane.restore.done": "Restaurar: %s bloco(s) recomposto(s)",
+  "message.arcane.restore.nothing": "Nada para restaurar aqui",
   "glyph.arcane.self": "Eu",
   "glyph.arcane.self.desc": "Forma: o feitiço acontece em você.",
   "glyph.arcane.touch": "Toque",
@@ -645,5 +648,7 @@
   "glyph.arcane.bind": "Vincular",
   "glyph.arcane.bind.desc": "Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular.",
   "glyph.arcane.pocket": "Bolso Arcano",
-  "glyph.arcane.pocket.desc": "Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas."
+  "glyph.arcane.pocket.desc": "Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas.",
+  "glyph.arcane.restore": "Restaurar",
+  "glyph.arcane.restore.desc": "Efeito: recompõe, num raio de 2–12 blocos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta."
 }

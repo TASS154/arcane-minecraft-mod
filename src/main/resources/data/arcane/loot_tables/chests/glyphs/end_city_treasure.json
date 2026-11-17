@@ -1525,6 +1525,17 @@
               "tag": "{glyph:\"arcane:pocket\"}"
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:restore\"}"
+            }
+          ]
         }
       ]
     },

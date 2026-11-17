@@ -15,6 +15,37 @@ public class ArcaneCommands {
   @SubscribeEvent
   public static void register(RegisterCommandsEvent event) {
     event.getDispatcher().register(Commands.literal("arcane")
+        .then(Commands.literal("guest")
+            .then(Commands.literal("add")
+                .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+                    .executes(ctx -> {
+                      ServerPlayer me = ctx.getSource().getPlayerOrException();
+                      ServerPlayer other = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+                      boolean ok = com.arcane.execution.GuestLists.get(ctx.getSource().getServer()).add(me.getUUID(), other.getUUID());
+                      ctx.getSource().sendSuccess(() -> Component.translatable(ok ? "message.arcane.guest.added" : "message.arcane.guest.unchanged", other.getDisplayName()), false);
+                      return ok ? 1 : 0;
+                    })))
+            .then(Commands.literal("remove")
+                .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+                    .executes(ctx -> {
+                      ServerPlayer me = ctx.getSource().getPlayerOrException();
+                      ServerPlayer other = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+                      boolean ok = com.arcane.execution.GuestLists.get(ctx.getSource().getServer()).remove(me.getUUID(), other.getUUID());
+                      ctx.getSource().sendSuccess(() -> Component.translatable(ok ? "message.arcane.guest.removed" : "message.arcane.guest.unchanged", other.getDisplayName()), false);
+                      return ok ? 1 : 0;
+                    })))
+            .then(Commands.literal("list")
+                .executes(ctx -> {
+                  ServerPlayer me = ctx.getSource().getPlayerOrException();
+                  var set = com.arcane.execution.GuestLists.get(ctx.getSource().getServer()).of(me.getUUID());
+                  var names = new java.util.ArrayList<String>();
+                  for (java.util.UUID id : set) {
+                    ServerPlayer p = ctx.getSource().getServer().getPlayerList().getPlayer(id);
+                    names.add(p != null ? p.getGameProfile().getName() : id.toString().substring(0, 8));
+                  }
+                  ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.guest.list", set.size(), String.join(", ", names)), false);
+                  return set.size();
+                })))
         .then(Commands.literal("chamber")
             .requires(src -> src.hasPermission(2))
             .executes(ctx -> {

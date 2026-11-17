@@ -454,6 +454,19 @@ glyph("on_zone_end", "condition", 0,
       ("When the Zone Ends", "Condition: what follows only happens when this spell's zone ends (once). Without the Zone glyph, it never happens."),
       ["..####..", ".#....#.", "#..##..#", "#.####.#", "#.####.#", "#..##..#", ".#....#.", "..####.."])
 
+glyph("on_zone_enter", "condition", 0,
+      ("Ao Entrar na Zona", "Condição: o que vem depois só acontece nas criaturas que ENTRAM na zona desta magia (uma vez para cada entrada, conferida a cada pulso). Quem já estava dentro ao conjurar não conta. Sem o glifo Zona, nunca acontece."),
+      ("On Zone Enter", "Condition: what follows only happens to creatures that ENTER this spell's zone (once per entry, checked every pulse). Whoever was already inside when cast does not count. Without the Zone glyph, it never happens."),
+      ["..####..", ".#....#.", "#.#....#", "#.####.#", "#.####.#", "#.#....#", ".#....#.", "..####.."])
+glyph("on_zone_exit", "condition", 0,
+      ("Ao Sair da Zona", "Condição: o que vem depois só acontece nas criaturas que SAEM da zona desta magia (uma vez para cada saída, conferida a cada pulso). Sem o glifo Zona, nunca acontece."),
+      ("On Zone Exit", "Condition: what follows only happens to creatures that LEAVE this spell's zone (once per exit, checked every pulse). Without the Zone glyph, it never happens."),
+      ["..####..", ".#....#.", "#....#.#", "#.####.#", "#.####.#", "#....#.#", ".#....#.", "..####.."])
+glyph("outsiders", "filter", 2,
+      ("Forasteiros", "Filtro: afeta só quem NÃO é você nem está na sua lista de convidados (comando /arcane guest add|remove|list). Animais domesticados e invocações de você ou dos seus convidados também ficam de fora. Útil em inscrições e zonas que protegem a sua casa."),
+      ("Outsiders", "Filter: affects only those who are NOT you nor on your guest list (command /arcane guest add|remove|list). Tamed animals and summons of you or your guests are also left out. Handy for inscriptions and zones that guard your home."),
+      ["..####..", ".#....#.", "#.#..#.#", "#..##..#", "#..##..#", "#.#..#.#", ".#....#.", "..####.."])
+
 glyph("blast", "effect", 8,
       ("Explosão Destrutiva", "Efeito: explode no alvo DESTRUINDO blocos (como TNT, com queda de itens) e ferindo quem está perto. Você é imune. Raio 1–6. Respeita as configs do servidor contra destruição de blocos."),
       ("Destructive Blast", "Effect: explodes at the target DESTROYING blocks (like TNT, dropping items) and hurting nearby creatures. You are immune. Radius 1-6. Respects the server configs against block destruction."),
@@ -484,7 +497,7 @@ TIERS = {
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
         "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "chain"],
+        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain"],
     4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis"],
 }
 FAMILIES = {

@@ -87,6 +87,7 @@ public final class GlyphBootstrap {
         // Filtros
         GlyphHandlerRegistry.registerFilter(ArcaneIds.HOSTILE, new HostileFilterResolver());
         GlyphHandlerRegistry.registerFilter(ArcaneIds.SELF_FILTER, new SelfFilterResolver());
+        GlyphHandlerRegistry.registerFilter(ArcaneIds.of("outsiders"), new com.arcane.execution.handlers.OutsidersFilterResolver());
         GlyphHandlerRegistry.registerFilter(ArcaneIds.BLOCKS, new BlocksFilterResolver());
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("players"), new PredicateFilter((c, e) -> e instanceof Player));
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("animals"), new PredicateFilter((c, e) -> e instanceof Animal));
@@ -119,6 +120,8 @@ public final class GlyphBootstrap {
 
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_death"), new PredicateCondition(c -> "death".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_zone_end"), new PredicateCondition(c -> "zone_end".equals(c.trigger().type())));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_zone_enter"), new PredicateCondition(c -> "zone_enter".equals(c.trigger().type())));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_zone_exit"), new PredicateCondition(c -> "zone_exit".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_hurt"), new PredicateCondition(c -> "hurt".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("low_mana"), new PredicateCondition(c ->
             c.caster() instanceof Player p && com.arcane.grimoire.GrimoireAttachments.getMana(p)

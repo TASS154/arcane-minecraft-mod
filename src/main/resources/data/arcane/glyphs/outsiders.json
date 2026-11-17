@@ -1,0 +1,13 @@
+{
+  "category": "filter",
+  "behavior": {
+    "handler": "arcane:outsiders"
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 3,
+  "families": [
+    "arcane"
+  ]
+}

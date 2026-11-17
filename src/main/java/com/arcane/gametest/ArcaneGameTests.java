@@ -60,6 +60,87 @@ public class ArcaneGameTests {
     for (int x = 0; x < 7; x++) for (int z = 0; z < 7; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
   }
 
+
+  // ------------------------------------------------------------------ Fase 0: persistencia, zonas, convidados
+  @GameTest(template = "empty")
+  public static void scarsSurviveASaveAndReload(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.WorldScars.clearAll();
+    Pig caster = pig(h, 3, 1);
+    h.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(3, 1, 4));
+    cast(h, caster, g("ray"), g("damage"));
+    var store = com.arcane.execution.WorldScars.store(h.getLevel());
+    var before = com.arcane.execution.WorldScars.all(h.getLevel());
+    h.assertTrue(!before.isEmpty(), "ha cicatriz para salvar");
+    var reloaded = com.arcane.execution.WorldScars.ScarStore.load(store.save(new net.minecraft.nbt.CompoundTag()));
+    h.assertTrue(reloaded.size() == before.size(), "a cicatriz volta do NBT (" + reloaded.size() + " de " + before.size() + ")");
+    com.arcane.execution.WorldScars.clearAll();
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 80, batch = "zone_restore")
+  public static void zonesAreSavedAndComeBackAfterARestart(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var victim = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 4));
+    com.arcane.execution.Zones.clearAll();
+    cast(h, caster, g("aura"), g("zone", "seconds", 6.0), g("damage", "amount", 1.0));
+    h.assertTrue(com.arcane.execution.Zones.savedCount() == 1, "a zona foi salva: " + com.arcane.execution.Zones.savedCount());
+    com.arcane.execution.Zones.reloadFromStore(h.getLevel().getServer());
+    h.assertTrue(com.arcane.execution.Zones.activeFor(caster.getUUID()) == 1, "a zona voltou depois do 'restart'");
+    float afterReload = victim.getHealth();
+    h.runAfterDelay(30, () -> {
+      h.assertTrue(victim.getHealth() < afterReload, "a zona restaurada continua ferindo (vida " + victim.getHealth() + ")");
+      com.arcane.execution.Zones.clearAll();
+      h.assertTrue(com.arcane.execution.Zones.savedCount() == 0, "limpar apaga o salvo");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 100)
+  public static void zoneEnterAndExitConditionsFireOnlyOnTransitions(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var walker = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(0, 1, 0));
+    com.arcane.execution.Zones.clearFor(caster.getUUID());
+    cast(h, caster, g("aura", "radius", 1.5), g("zone", "seconds", 8.0), g("on_zone_enter"), g("damage", "amount", 2.0), g("on_zone_exit"), g("damage", "amount", 3.0));
+    float start = walker.getHealth();
+    h.runAfterDelay(5, () -> { var p = h.absoluteVec(new net.minecraft.world.phys.Vec3(3.5, 1, 4.0)); walker.moveTo(p.x, p.y, p.z); });
+    h.runAfterDelay(28, () -> {
+      h.assertTrue(walker.getHealth() == start - 2.0f, "entrar fere uma vez com 2 (vida " + walker.getHealth() + " de " + start + ")");
+      var p = h.absoluteVec(new net.minecraft.world.phys.Vec3(0.5, 1, 0.5)); walker.moveTo(p.x, p.y, p.z);
+    });
+    h.runAfterDelay(60, () -> {
+      h.assertTrue(walker.getHealth() == start - 5.0f, "sair fere uma vez com 3 e ficar dentro nao repete (vida " + walker.getHealth() + ")");
+      com.arcane.execution.Zones.clearFor(caster.getUUID());
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty")
+  public static void outsidersFilterSparesTheOwnerGuestsAndTheirPets(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    var guest = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 4));
+    var stranger = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(4, 1, 3));
+    var lists = com.arcane.execution.GuestLists.get(h.getLevel().getServer());
+    lists.remove(caster.getUUID(), guest.getUUID());
+    lists.add(caster.getUUID(), guest.getUUID());
+    float gh = guest.getHealth(), sh = stranger.getHealth(), ch = caster.getHealth();
+    cast(h, caster, g("aura"), g("outsiders"), g("damage", "amount", 3.0));
+    h.assertTrue(guest.getHealth() == gh, "o convidado nao e ferido");
+    h.assertTrue(caster.getHealth() == ch, "o dono nao e ferido");
+    h.assertTrue(stranger.getHealth() < sh, "o forasteiro e ferido");
+    lists.remove(caster.getUUID(), guest.getUUID());
+    var reloaded = com.arcane.execution.GuestLists.load(lists.save(new net.minecraft.nbt.CompoundTag()));
+    h.assertTrue(reloaded.of(caster.getUUID()).isEmpty(), "lista vazia apos remover, salva e relida");
+    lists.add(caster.getUUID(), guest.getUUID());
+    reloaded = com.arcane.execution.GuestLists.load(lists.save(new net.minecraft.nbt.CompoundTag()));
+    h.assertTrue(reloaded.of(caster.getUUID()).contains(guest.getUUID()), "o convidado persiste no NBT");
+    lists.remove(caster.getUUID(), guest.getUUID());
+    h.succeed();
+  }
+
   private static Pig pig(GameTestHelper h, int x, int z) {
     Pig pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(x, 1, z));
     pig.setYRot(0);

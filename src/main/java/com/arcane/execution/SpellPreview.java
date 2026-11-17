@@ -70,8 +70,8 @@ public final class SpellPreview {
     for (CompiledExecutionPlan.ExecutionSegment segment : plan.segments()) {
       int mask = reach;
       for (var filter : segment.filters()) mask = EffectReach.afterFilter(path(filter.filterId()), mask);
-      if (Zones.isEndSegment(segment) && !(zone && !form.startsWith("summon_"))) {
-        warnings.add(Component.translatable("gui.arcane.preview.warn.zone_end_without_zone").withStyle(ChatFormatting.GOLD));
+      if (Zones.isZoneEventSegment(segment) && !(zone && !form.startsWith("summon_"))) {
+        warnings.add(Component.translatable("gui.arcane.preview.warn.zone_event_without_zone").withStyle(ChatFormatting.GOLD));
       }
       segment.condition().ifPresent(c -> lines.add(Component.translatable("gui.arcane.preview.condition", name(c.conditionId())).withStyle(ChatFormatting.GRAY)));
       for (var effect : segment.effects()) {

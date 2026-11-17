@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **87 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **90 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -50,7 +50,7 @@ Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única
 | **Invocar Lobos** | `arcane:summon_wolves` | 4 | 2 | Terra | `count` 3 (1–6), `size` 1 (1–3), `duration` 1200 (200–6000) | Forma de RITUAL (menor): invoca Lobos Espectrais domesticados que lutam por você por um tempo. Número (count) e tamanho (size 1–3) são escolha sua: maiores têm outro modelo (Alfa, Fenrir) e mais vida e dano. Os lobos são os alvos do que vem depois. |
 | **Invocar Golem** | `arcane:summon_golem` | 6 | 3 | Terra | `count` 1 (1–3), `size` 1 (1–3), `duration` 2400 (400–12000) | Forma de RITUAL (médio): ergue Golens Rúnicos que protegem você por um tempo. Número (count 1–3) e tamanho (size 1–3: Guardião, Colosso, Titã, cada um com modelo próprio). O golem é o alvo do que vem depois. |
 
-## Filtros (13)
+## Filtros (14)
 
 Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para os trechos seguintes.
 
@@ -69,6 +69,7 @@ Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para
 | **Não Marcados** | `arcane:unmarked` | 1 | 1 | Conhecimento | — | Filtro: só criaturas que NÃO foram Marcadas. |
 | **Aliados** | `arcane:allies` | 1 | 2 | Vida | — | Filtro: jogadores, animais domesticados, aldeões e golens de ferro. |
 | **Madeira** | `arcane:wood` | 1 | 1 | Terra | — | Filtro: só blocos de madeira (troncos e tábuas). |
+| **Forasteiros** | `arcane:outsiders` | 2 | 3 | Arcano | — | Filtro: afeta só quem NÃO é você nem está na sua lista de convidados (comando /arcane guest add|remove|list). Animais domesticados e invocações de você ou dos seus convidados também ficam de fora. Útil em inscrições e zonas que protegem a sua casa. |
 
 ## Efeitos (27)
 
@@ -135,7 +136,7 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Zona** | `arcane:zone` | 3 | 3 | Conhecimento | `seconds` 10 (2–60), `interval` 1 (0.5–5) | Torna a forma persistente: ela se repete do mesmo lugar a cada intervalo, durante o tempo escolhido, reaplicando os efeitos em quem está dentro (Aura + Fogo vira um campo em chamas; Barreira vira parede contínua; Projétil vira torre). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). No máximo 2 zonas suas ao mesmo tempo. Invocações ignoram a Zona. |
 | **Cadeia** | `arcane:chain` | 3 | 3 | Força | — | Modificador: o efeito anterior se propaga de criatura em criatura. Explosão e Explosão Destrutiva detonam de novo, menores, em quem estava perto (até 3 saltos, 8 extras); Dano salta em arco para a mais próxima, com 60% do dano a cada salto. Outros efeitos ignoram a Cadeia (a prévia avisa). |
 
-## Condições (12)
+## Condições (14)
 
 Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira.
 
@@ -153,6 +154,8 @@ Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira
 | **Parado** | `arcane:standing_still` | 0 | 2 | Conhecimento | — | Condição: o que vem depois só acontece se você estiver parado no chão. |
 | **Ao Morrer** | `arcane:on_death` | 0 | 3 | Vazio | — | Condição: arma a magia em você: o que vem depois só acontece quando você morrer (uma vez, por até 60 s). |
 | **Quando a Zona Acabar** | `arcane:on_zone_end` | 0 | 3 | Conhecimento | — | Condição: o que vem depois só acontece quando a zona desta magia terminar (uma vez). Sem o glifo Zona, nunca acontece. |
+| **Ao Entrar na Zona** | `arcane:on_zone_enter` | 0 | 3 | Arcano | — | Condição: o que vem depois só acontece nas criaturas que ENTRAM na zona desta magia (uma vez para cada entrada, conferida a cada pulso). Quem já estava dentro ao conjurar não conta. Sem o glifo Zona, nunca acontece. |
+| **Ao Sair da Zona** | `arcane:on_zone_exit` | 0 | 3 | Arcano | — | Condição: o que vem depois só acontece nas criaturas que SAEM da zona desta magia (uma vez para cada saída, conferida a cada pulso). Sem o glifo Zona, nunca acontece. |
 
 ## Ativadores (1)
 

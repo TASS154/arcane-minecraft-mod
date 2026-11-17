@@ -16,7 +16,7 @@ public class ExplodeEffectHandler implements EffectHandler {
 
   @Override
   public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-    float cap = MAX_RADIUS * (float) Math.min(4.0, Math.max(1.0, context.areaFactor()));
+    float cap = Math.min(40f, MAX_RADIUS * (float) Math.max(1.0, context.areaFactor()));
     float radius = (float) Math.max(1.0, Math.min(cap, call.parameters().getOrDefault("radius", 2.0) * context.areaFactor()));
     int count = 0;
     boolean cover = context.ritualRadius() > 0;

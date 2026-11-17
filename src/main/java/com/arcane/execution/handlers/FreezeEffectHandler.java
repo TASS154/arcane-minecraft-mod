@@ -41,7 +41,7 @@ public class FreezeEffectHandler implements EffectHandler {
     for (net.minecraft.world.phys.Vec3 point : targets.points()) centers.add(net.minecraft.core.BlockPos.containing(point));
     if (!Targeting.mayAlterWorld(context)) return;
 
-    int radius = (int) Math.max(1, Math.min(context.ritualRadius() > 0 ? 24 : 10, Math.round(context.coverRadius(call.parameters().getOrDefault("radius", 1.0) * context.areaFactor()))));
+    int radius = (int) Math.max(1, Math.min(context.ritualRadius() > 0 || context.areaFactor() > 1.0 ? 24 : 10, Math.round(context.coverRadius(call.parameters().getOrDefault("radius", 1.0) * context.areaFactor()))));
     ServerLevel level = context.level();
     int changed = 0;
     for (BlockPos center : centers) {

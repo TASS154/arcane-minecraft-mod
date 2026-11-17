@@ -173,6 +173,7 @@
   "ritual.arcane.level.2": "Medium",
   "ritual.arcane.level.3": "Major",
   "ritual.arcane.level.4": "Legendary",
+  "message.arcane.wild_cast": "Raw mana fires a spell on its own!",
   "message.arcane.requires_ritual": "This spell only works as a ritual (level %s): cast it at the Arcane Altar",
   "message.arcane.ritual.no_altar": "There is no Arcane Altar here",
   "message.arcane.ritual.no_spell": "Pick an active spell in the grimoire before the ritual",

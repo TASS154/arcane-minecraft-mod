@@ -173,6 +173,7 @@
   "ritual.arcane.level.2": "Médio",
   "ritual.arcane.level.3": "Maior",
   "ritual.arcane.level.4": "Lendário",
+  "message.arcane.wild_cast": "A mana bruta dispara uma magia sozinha!",
   "message.arcane.requires_ritual": "Esta magia só funciona como ritual (nível %s): conjure no Altar Arcano",
   "message.arcane.ritual.no_altar": "Não há Altar Arcano aqui",
   "message.arcane.ritual.no_spell": "Escolha uma magia ativa no grimório antes do ritual",

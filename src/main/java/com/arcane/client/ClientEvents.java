@@ -17,6 +17,21 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber(modid = ArcaneMod.MODID, value = Dist.CLIENT)
 public class ClientEvents {
+  /** Perto de um cristal de mana (potencia > 1) os coracoes ficam azuis. */
+  @SubscribeEvent
+  public static void blueHeartsPre(net.minecraftforge.client.event.RenderGuiOverlayEvent.Pre event) {
+    if (event.getOverlay().id().equals(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.PLAYER_HEALTH.id()) && ClientArcaneData.potency() > 1.0) {
+      com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.35f, 0.6f, 1.0f, 1.0f);
+    }
+  }
+
+  @SubscribeEvent
+  public static void blueHeartsPost(net.minecraftforge.client.event.RenderGuiOverlayEvent.Post event) {
+    if (event.getOverlay().id().equals(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.PLAYER_HEALTH.id())) {
+      com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+    }
+  }
+
   @SubscribeEvent
   public static void onKey(InputEvent.Key event) {
     if (ClientSetup.CAST_KEY != null) {

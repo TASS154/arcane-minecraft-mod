@@ -31,7 +31,7 @@ public final class AmbientFieldResolver {
       }
     }
     double stability = zone >= 3 ? Math.max(0.5, 1.0 - zone * 0.1) : 1.0;
-    double poison = zone >= 3 ? (zone - 2) * 0.15 : 0.0;
+    double poison = zone >= 3 ? (zone - 2) * 0.3 : 0.0;
     return new EnvironmentalSnapshot(bestMultiplier, stability, zone * 0.02, poison,
         java.util.List.of("zone:" + zone));
   }

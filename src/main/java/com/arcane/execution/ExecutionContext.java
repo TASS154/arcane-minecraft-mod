@@ -83,7 +83,7 @@ public class ExecutionContext {
      * potencia por ate 32x; para o TAMANHO usamos a raiz (limitada a 3x), senao uma explosao viraria um buraco.
      */
     public double areaFactor() {
-        double crystal = Math.min(3.0, Math.sqrt(Math.max(1.0, environment.potencyMultiplier())));
+        double crystal = Math.min(com.arcane.config.ArcaneConfig.CRYSTAL_AREA_CAP.get(), Math.max(1.0, environment.potencyMultiplier()));
         return areaScale * crystal;
     }
 

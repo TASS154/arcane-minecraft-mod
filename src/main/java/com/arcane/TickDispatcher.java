@@ -32,6 +32,7 @@ public final class TickDispatcher {
             EnvironmentalSnapshot environment = AmbientFieldResolver.resolve(player.serverLevel(), player.blockPosition());
             com.arcane.network.ArcaneSync.setEnvironment(player, environment);
             ManaPoisoningService.tick(player, environment);
+            ManaPoisoningService.wildCast(player, environment);
             com.arcane.inscribing.InscribingService.syncDecals(player);
         }
     }

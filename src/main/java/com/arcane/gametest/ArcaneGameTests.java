@@ -1658,7 +1658,11 @@ public class ArcaneGameTests {
     var near = AmbientFieldResolver.resolve(h.getLevel(), h.absolutePos(new BlockPos(3, 1, 3)));
     var ctx1 = new com.arcane.execution.ExecutionContext(h.getLevel(), caster, spell, plan, near,
         com.arcane.execution.PrecisionSnapshot.WORKBENCH, com.arcane.execution.ExecutionContext.TriggerEvent.cast());
-    h.assertTrue(ctx1.areaFactor() > 2.9 && ctx1.areaFactor() <= 3.0, "perto do cristal o raio/area cresce (x" + ctx1.areaFactor() + ")");
+    h.assertTrue(ctx1.areaFactor() == 32.0, "perto do cristal o raio/area usa o multiplicador da zona (x" + ctx1.areaFactor() + ")");
+    h.assertTrue(com.arcane.ambient.ManaPoisoningService.zoneOf(near) == 5, "zona 5");
+    h.assertTrue(near.poisoningExposureRate() >= 0.9 - 1e-9, "veneno forte na zona 5: " + near.poisoningExposureRate());
+    h.assertTrue(com.arcane.ambient.ManaPoisoningService.wildCastCeiling(5) > com.arcane.ambient.ManaPoisoningService.wildCastCeiling(2)
+        && com.arcane.ambient.ManaPoisoningService.wildCastCeiling(0) == 0.0, "a chance de magia aleatoria cresce com a zona");
     }
 
   @GameTest(template = "empty")

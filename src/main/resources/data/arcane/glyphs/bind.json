@@ -1,0 +1,23 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:bind"
+  },
+  "modifier_scope": {
+    "target": "previous_effect",
+    "kind": "effect",
+    "mutate": {
+      "bind": {
+        "op": "put",
+        "value": 1.0
+      }
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 2,
+  "families": [
+    "void"
+  ]
+}

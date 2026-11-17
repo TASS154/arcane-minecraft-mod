@@ -1,0 +1,24 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:drain_mana",
+    "magnitude_keys": [
+      "amount"
+    ]
+  },
+  "parameters": {
+    "amount": {
+      "type": "float",
+      "default": 20.0,
+      "min": 5.0,
+      "max": 100.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 2,
+  "families": [
+    "void"
+  ]
+}

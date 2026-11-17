@@ -588,30 +588,190 @@ glyph("raining", "condition", 0,
       ["..####..", ".######.", "########", "........", ".#.#.#.#", "#.#.#.#.", ".#.#.#.#", "........"],
       params={"storm": (0.0, 0.0, 1.0, "int")})
 
+
+# ================================================================== FASE 4: glifos medios
+def _g(gid, cat, cost, pt, en, icon, **kw):
+    glyph(gid, cat, cost, pt, en, icon, **kw)
+
+_g("satellites", "effect", 4,
+   ("Satélites", "Efeito: orbes giram ao redor do alvo (1–4, 2 blocos de raio) ferindo quem encostar neles, menos o dono. Duração até 30 s."),
+   ("Satellites", "Effect: orbs circle the target (1-4, 2-block radius) hurting whoever touches them, except the owner. Lasts up to 30 s."),
+   ["...##...", "#......#", "........", "##.##.##", "........", "#......#", "...##...", "........"],
+   params={"count": (2.0, 1.0, 4.0, "int"), "duration": (200.0, 40.0, 600.0, "int"), "damage": (2.0, 0.5, 8.0, "float")}, magnitude=["damage"])
+_g("link", "effect", 3,
+   ("Elo", "Efeito: liga as duas primeiras criaturas alvo (ou você e o alvo): metade do dano que uma sofre passa para a outra, por até 60 s."),
+   ("Link", "Effect: links the first two target creatures (or you and the target): half the damage one takes passes to the other, for up to 60 s."),
+   [".##..##.", "#..##..#", "#.####.#", "#..##..#", ".##..##.", "........", "........", "........"],
+   params={"duration": (300.0, 40.0, 1200.0, "int")}, magnitude=["duration"])
+_g("trail", "effect", 3,
+   ("Rastro", "Efeito: o alvo deixa para trás um rastro de brasas (até 24 pontos, 6 s cada) que fere e atrasa quem pisar, menos o dono."),
+   ("Trail", "Effect: the target leaves a trail of embers behind (up to 24 points, 6 s each) that hurts and slows whoever steps on it, except the owner."),
+   ["........", "......#.", ".....##.", "...###..", "..###...", ".##.....", "##......", "#......."],
+   params={"duration": (200.0, 40.0, 600.0, "int"), "damage": (1.5, 0.5, 6.0, "float")}, magnitude=["damage"])
+_g("hook", "effect", 2,
+   ("Gancho", "Efeito: você é puxado em linha reta até o alvo (criatura, bloco ou ponto), como um cabo preso nele; a queda é anulada. Não puxa o alvo (isso é Atrair)."),
+   ("Hook", "Effect: you are pulled in a straight line to the target (creature, block or point), like a cable anchored to it; fall damage is cancelled. It does not pull the target (that is Attract)."),
+   ["....###.", "....#.#.", "....###.", "...#....", "..#.....", ".#......", "#.......", "#......."],
+   params={"strength": (1.2, 0.5, 3.0, "float")}, magnitude=["strength"])
+_g("climb", "effect", 2,
+   ("Escalar", "Efeito: por um tempo, quem avança contra uma parede sobe por ela (jogadores: segurando para frente ou pulo; agache para parar). Anula a queda."),
+   ("Climb", "Effect: for a while, whoever pushes against a wall climbs it (players: holding forward or jump; sneak to stop). Cancels falling."),
+   ["#.......", "#..##...", "#.####..", "#..##...", "#..##...", "#.#..#..", "#.......", "#......."],
+   params={"duration": (200.0, 40.0, 1200.0, "int")}, magnitude=["duration"])
+_g("phase", "effect", 4,
+   ("Atravessar", "Efeito: você atravessa uma parede de até 6 blocos na direção em que olha e sai do outro lado, onde houver espaço para você. Sem espaço, nada acontece."),
+   ("Phase", "Effect: you pass through a wall up to 6 blocks thick in the direction you look and come out the other side, where there is room. With no room, nothing happens."),
+   ["##....##", "##....##", "##.##.##", "##.##.##", "##.##.##", "##.##.##", "##....##", "##....##"],
+   params={"thickness": (4.0, 1.0, 6.0, "int")})
+_g("recall", "effect", 3,
+   ("Retorno", "Efeito: o primeiro uso marca o lugar onde você está (10 min); o segundo leva você de volta, se estiver na mesma dimensão. Cada uso gasta a mana da magia."),
+   ("Recall", "Effect: the first use marks where you stand (10 min); the second takes you back, if in the same dimension. Each use spends the spell's mana."),
+   ["..####..", ".#....#.", "#..##..#", "#.#..#.#", "#..##.#.", ".#...##.", "..####..", "........"])
+_g("imbue", "effect", 3,
+   ("Encantar", "Efeito: a arma na mão do alvo ganha por um tempo (até 5 min) e por poucos golpes (1–10) +2 de dano e um efeito: kind 1 fogo, 2 gelo, 3 raio (+3), 4 veneno. Só vale golpe corpo a corpo."),
+   ("Imbue", "Effect: the weapon in the target's hand gains for a while (up to 5 min) and for a few hits (1-10) +2 damage and an effect: kind 1 fire, 2 frost, 3 lightning (+3), 4 venom. Melee only."),
+   ["....##..", "...###..", "..###...", ".###....", "###.#...", "##.###..", "#...#...", "........"],
+   params={"duration": (1200.0, 200.0, 6000.0, "int"), "kind": (1.0, 1.0, 4.0, "int"), "hits": (6.0, 1.0, 10.0, "int")}, magnitude=["duration"])
+_g("petrify", "effect", 4,
+   ("Petrificar", "Efeito: o alvo vira pedra por até 15 s: imóvel, sem escolher alvos e com metade do dano recebido. O dano não quebra o efeito (diferente do Sono)."),
+   ("Petrify", "Effect: the target turns to stone for up to 15 s: immobile, picking no targets and taking half damage. Damage does not break it (unlike Sleep)."),
+   ["..####..", ".######.", "##.##.##", "########", "#.#..#.#", "########", ".######.", "..####.."],
+   params={"duration": (60.0, 20.0, 300.0, "int")}, magnitude=["duration"])
+_g("acid", "effect", 3,
+   ("Ácido", "Efeito: fere ignorando a armadura e corrói as peças de armadura do alvo (até 60 pontos de durabilidade cada, nunca as quebra)."),
+   ("Acid", "Effect: hurts ignoring armor and corrodes the target's armor pieces (up to 60 durability points each, never breaking them)."),
+   ["...##...", "...##...", "..####..", ".######.", ".######.", ".######.", "..####..", "...##..."],
+   params={"amount": (3.0, 1.0, 12.0, "float"), "corrode": (8.0, 0.0, 60.0, "int")}, magnitude=["amount"])
+_g("electrify", "effect", 3,
+   ("Eletrificar", "Efeito: mode 0 (Eletrificar): o dano que o alvo sofre salta 35% para até 2 criaturas num raio de 4. mode 1 (Condutor): raios que caírem a 24 blocos caem no alvo. Dura até 30 s."),
+   ("Electrify", "Effect: mode 0 (Electrify): damage the target takes arcs 35% to up to 2 creatures within 4 blocks. mode 1 (Conductor): lightning striking within 24 blocks lands on the target instead. Lasts up to 30 s."),
+   ["...###..", "..###...", ".###....", "#######.", "...###..", "..###...", ".##.....", "##......"],
+   params={"duration": (200.0, 40.0, 600.0, "int"), "mode": (0.0, 0.0, 1.0, "int")}, magnitude=["duration"])
+_g("contagion", "effect", 3,
+   ("Contágio", "Efeito: os efeitos nocivos do alvo (e o fogo) passam para as criaturas num raio de 1,5–8, com 60% da duração. Sem efeito nocivo no alvo, nada acontece."),
+   ("Contagion", "Effect: the target's harmful effects (and fire) spread to creatures within 1.5-8 blocks, at 60% duration. With no harmful effect on the target, nothing happens."),
+   ["..#..#..", ".#.##.#.", "#.####.#", "..####..", "..####..", "#.####.#", ".#.##.#.", "..#..#.."],
+   params={"radius": (4.0, 1.5, 8.0, "float")})
+_g("reanimate", "effect", 6,
+   ("Reanimar Aliado", "Efeito: ergue, perto do alvo, uma criatura que morreu há pouco (até 2 min, não jogador nem chefe), com metade da vida, que luta por você: nunca ataca você nem outros aliados seus e vai atrás de quem agrediu você ou de quem você agrediu. Máximo de 2 por vez e duração de até 2 min."),
+   ("Reanimate Ally", "Effect: raises, near the target, a creature that died recently (up to 2 min ago, not a player or boss) at half health, fighting for you: it never attacks you or your other allies and goes after whoever hurt you or whoever you hurt. At most 2 at a time, lasting up to 2 min."),
+   ["..####..", ".######.", "##.##.##", "########", "..####..", ".#.##.#.", "#......#", "#......#"],
+   params={"duration": (600.0, 100.0, 2400.0, "int")}, magnitude=["duration"])
+_g("sense", "effect", 1,
+   ("Sentir", "Efeito: só você percebe as criaturas vivas num raio de 4–32 blocos, mesmo atrás de paredes ou invisíveis (partículas só para você) e vê quantas são e quantas hostis."),
+   ("Sense", "Effect: only you perceive living creatures within 4-32 blocks, even behind walls or invisible (particles for you only), and see how many there are and how many hostile."),
+   ["........", "..####..", ".#.##.#.", "#..##..#", "#..##..#", ".#.##.#.", "..####..", "........"],
+   params={"radius": (16.0, 4.0, 32.0, "float")})
+_g("arcane_sight", "effect", 2,
+   ("Visão Arcana", "Efeito: visão noturna por um tempo e mostra, só para você, resíduos de magia e inscrições num raio de até 32 blocos, com a contagem."),
+   ("Arcane Sight", "Effect: night vision for a while and shows, for you only, magic residues and inscriptions within up to 32 blocks, with the count."),
+   ["..####..", ".#....#.", "#.#..#.#", "#.####.#", "#.####.#", "#.#..#.#", ".#....#.", "..####.."],
+   params={"duration": (400.0, 100.0, 1200.0, "int"), "radius": (24.0, 8.0, 32.0, "float")}, magnitude=["duration"])
+_g("emit_signal", "effect", 1,
+   ("Emitir Sinal", "Efeito: acende por instantes (0,5 a 10 s) um bloco de Sinal Arcano no ar onde o alvo está, que emite redstone 15 e some sozinho. Só ocupa espaço vazio; máximo 4 por conjuração."),
+   ("Emit Signal", "Effect: briefly lights (0.5 to 10 s) an Arcane Signal block in the air where the target is; it emits redstone 15 and vanishes on its own. Only fills empty space; at most 4 per cast."),
+   ["...##...", "..#..#..", ".#.##.#.", "#.#..#.#", "#.#..#.#", ".#.##.#.", "..#..#..", "...##..."],
+   params={"duration": (40.0, 10.0, 200.0, "int")})
+_g("dispel", "effect", 3,
+   ("Dissipar", "Efeito: nos outros, tira efeitos benéficos e estados mágicos (Refletir, Eletrificar, Elo, Molhado, Marca); em você, tira os nocivos (Maldição, Silêncio, Petrificar, Medo, Sono) e o fogo."),
+   ("Dispel", "Effect: on others, removes beneficial effects and magic states (Reflect, Electrify, Link, Wet, Mark); on yourself, removes harmful ones (Curse, Silence, Petrify, Fear, Sleep) and fire."),
+   ["#......#", ".#....#.", "..#..#..", "...##...", "...##...", "..#..#..", ".#....#.", "#......#"])
+_g("reflect", "effect", 3,
+   ("Refletir", "Efeito: por até 20 s, projéteis que acertam o alvo voltam para quem os lançou e 40% do dano de perto volta ao agressor. Vale para você também."),
+   ("Reflect", "Effect: for up to 20 s, projectiles hitting the target fly back at their shooter and 40% of melee damage returns to the attacker. Works on you too."),
+   ["...##...", "..####..", ".##..##.", "##.##.##", "##.##.##", ".##..##.", "..####..", "...##..."],
+   params={"duration": (100.0, 20.0, 400.0, "int")}, magnitude=["duration"])
+_g("silence", "effect", 3,
+   ("Silêncio", "Efeito: o alvo não consegue conjurar por até 30 s (jogadores e magos). Não afeta golpes comuns."),
+   ("Silence", "Effect: the target cannot cast for up to 30 s (players and mages). Does not affect ordinary attacks."),
+   ["..####..", ".#....#.", "#.#..#.#", "#......#", "#.####.#", ".#....#.", "..####..", "#......#"],
+   params={"duration": (100.0, 20.0, 600.0, "int")}, magnitude=["duration"])
+_g("drain_mana", "effect", 2,
+   ("Drenar Mana", "Efeito: tira até 5–100 de mana de jogadores alvo e passa para você. Não afeta criaturas sem mana."),
+   ("Drain Mana", "Effect: takes 5-100 mana from target players and gives it to you. Does not affect creatures without mana."),
+   ["..####..", ".######.", "#.####.#", "########", "########", ".######.", "..####..", "...##..."],
+   params={"amount": (20.0, 5.0, 100.0, "float")}, magnitude=["amount"])
+_g("swap", "effect", 3,
+   ("Troca", "Efeito: você e a primeira criatura alvo trocam de lugar (mesma dimensão)."),
+   ("Swap", "Effect: you and the first target creature trade places (same dimension)."),
+   ["..###...", ".#...#..", "#.....#.", ".#...#..", "..#####.", "..#...#.", "...#.#..", "....#..."])
+_g("reveal", "effect", 2,
+   ("Revelar", "Efeito: tira a invisibilidade e faz brilhar por 5 s as criaturas num raio de 3–24 blocos, e conta quantas estavam escondidas."),
+   ("Reveal", "Effect: removes invisibility and makes creatures within 3-24 blocks glow for 5 s, counting how many were hidden."),
+   ["...##...", "#..##..#", ".#.##.#.", "..####..", "########", "..####..", ".#.##.#.", "#..##..#"],
+   params={"radius": (12.0, 3.0, 24.0, "float")})
+_g("decoy", "effect", 2,
+   ("Chamariz", "Efeito: uma ilusão no ponto mirado atrai criaturas num raio de 20 blocos e elas deixam de te escolher como alvo por até 15 s."),
+   ("Decoy", "Effect: an illusion at the aimed spot draws creatures within 20 blocks and they stop picking you as a target for up to 15 s."),
+   ["..####..", ".#....#.", "#.#..#.#", "#......#", "#.####.#", ".#....#.", "..####..", "........"],
+   params={"duration": (100.0, 20.0, 300.0, "int")}, magnitude=["duration"])
+_g("curse", "effect", 3,
+   ("Maldição", "Efeito: por até 2 min o alvo leva 25% a mais de dano e não recupera vida. Dissipar em si mesmo tira."),
+   ("Curse", "Effect: for up to 2 min the target takes 25% more damage and cannot recover health. Dispel on yourself removes it."),
+   ["#..##..#", ".#.##.#.", "..####..", "########", "#.####.#", "..#..#..", ".#.##.#.", "#..##..#"],
+   params={"duration": (300.0, 60.0, 2400.0, "int")}, magnitude=["duration"])
+
+_g("after_hits", "condition", 0,
+   ("Após N Acertos", "Condição: arma a magia em você: o que vem depois só acontece depois de você acertar N golpes em outras criaturas (N 2–10, padrão 3; por até 60 s)."),
+   ("After N Hits", "Condition: arms the spell on you: what follows only happens after you land N hits on other creatures (N 2-10, default 3; for up to 60 s)."),
+   ["#.#.#.#.", "#.#.#.#.", "#.#.#.#.", "#.#.#.#.", "........", "########", "........", "........"],
+   params={"n": (3.0, 2.0, 10.0, "int")})
+_g("on_signal", "condition", 0,
+   ("Ativar por Sinal", "Condição: em uma inscrição no mundo, troca o gatilho: ela dispara quando o bloco recebe sinal de redstone (na subida do sinal), tendo como origem a criatura mais perto (6 blocos). Fora de inscrições, não faz nada."),
+   ("Activate on Signal", "Condition: in a world inscription, changes the trigger: it fires when the block receives a redstone signal (on the rising edge), using the nearest creature (6 blocks) as origin. Outside inscriptions it does nothing."),
+   ["...##...", "...##...", "..####..", "...##...", "...##...", "...##...", "..####..", "...##..."])
+
+_g("stealth", "modifier", 2,
+   ("Furtivo", "Modificador: a magia deixa menos rastro: o resíduo no mundo dura 1/4 do tempo e a conjuração não faz som nem partículas. Não esconde o efeito em si."),
+   ("Stealth", "Modifier: the spell leaves less trace: the world residue lasts 1/4 as long and casting makes no sound or particles. It does not hide the effect itself."),
+   ["........", "..####..", ".#....#.", "#......#", "#.#..#.#", "#......#", ".#....#.", "........"],
+   scope={"target": "flag", "kind": "effect", "mutate": {}})
+_g("false_trace", "modifier", 2,
+   ("Falso Rastro", "Modificador: o resíduo no mundo leva uma assinatura falsa (que não é a sua) e a magia deixa um segundo resíduo isca a até 10 blocos. Quem analisa o resíduo é enganado."),
+   ("False Trace", "Modifier: the world residue carries a false signature (not yours) and the spell leaves a second decoy residue up to 10 blocks away. Whoever analyzes the residue is fooled."),
+   ["#......#", ".#....#.", "..#..#..", "...##...", "...##...", "..#..#..", ".#....#.", "#......#"],
+   scope={"target": "flag", "kind": "effect", "mutate": {}})
+_g("overcharge", "modifier", 3,
+   ("Sobrecarga", "Modificador: dobra a força do efeito anterior (dano, cura, empurrão, raio, potência) e 50% de duração, mas você sofre 1 coração de dano mágico a cada efeito sobrecarregado (nunca fatal: só se você tiver mais de 1,5 coração). Mais forte que Potência, com preço."),
+   ("Overcharge", "Modifier: doubles the previous effect's strength (damage, heal, push, radius, power) and 50% more duration, but you take 1 heart of magic damage per overcharged effect (never fatal: only if you have more than 1.5 hearts). Stronger than Power, with a price."),
+   ["...##...", "..####..", ".######.", "...##...", ".######.", "..####..", "...##...", "........"],
+   scope={"target": "previous_effect", "kind": "effect",
+          "mutate": {"amount": {"op": "multiply", "value": 2.0}, "strength": {"op": "multiply", "value": 2.0},
+                     "power": {"op": "multiply", "value": 2.0}, "radius": {"op": "multiply", "value": 1.5},
+                     "duration": {"op": "multiply", "value": 1.5}, "overcharge": {"op": "put", "value": 1.0}}})
+_g("bind", "modifier", 2,
+   ("Vincular", "Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular."),
+   ("Bind", "Modifier: ties the previous effect to you: if it is a potion-type effect (Slow, Poison, Blind, Speed...) on another creature, it ends when you die or move more than 40 blocks away. Other effect types ignore Bind."),
+   ["..####..", ".#....#.", ".#....#.", "########", "########", ".#....#.", ".#....#.", "..####.."],
+   scope={"target": "previous_effect", "kind": "effect", "mutate": {"bind": {"op": "put", "value": 1.0}}})
+
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
         "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group",
-        "taunt", "wet", "read_item"],
+        "taunt", "wet", "read_item", "sense", "emit_signal"],
     2: ["slow", "poison", "speed", "players", "animals", "undead", "nearest", "wounded", "allies", "delay", "lengthen",
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
         "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave",
         "rain", "charge", "glide", "fear", "rumble", "darkness", "lifesteal", "life_transfer", "invert", "on_jump",
-        "target_health", "region", "holding", "raining"],
+        "target_health", "region", "holding", "raining",
+        "hook", "climb", "arcane_sight", "reveal", "decoy", "drain_mana", "stealth", "false_trace", "bind", "on_signal"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain", "sleep", "on_kill", "on_fall"],
-    4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis"],
+        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain", "sleep", "on_kill", "on_fall",
+        "satellites", "link", "trail", "recall", "imbue", "acid", "electrify", "contagion", "dispel", "reflect", "silence", "swap",
+        "curse", "overcharge", "after_hits"],
+    4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis", "phase", "petrify", "reanimate"],
 }
 FAMILIES = {
     "fire": ["fire", "ignite", "explode", "blast"],
-    "ice": ["slow", "freeze", "shield", "wet", "rain"],
-    "storm": ["thunder", "ray", "pillar", "rain", "rumble", "raining", "wet"],
-    "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill"],
+    "ice": ["slow", "freeze", "shield", "wet", "rain", "petrify"],
+    "storm": ["thunder", "ray", "pillar", "rain", "rumble", "raining", "wet", "electrify", "on_signal", "emit_signal"],
+    "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill", "acid", "curse", "reanimate", "contagion", "overcharge", "after_hits"],
     "life": ["heal", "shield", "speed", "allies", "players", "animals"],
-    "force": ["charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
+    "force": ["hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
-                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding"],
-    "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert"],
+                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
+    "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert", "phase", "recall", "swap", "link", "silence", "drain_mana", "decoy", "stealth", "false_trace", "bind"],
     "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():

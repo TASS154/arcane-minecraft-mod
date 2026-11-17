@@ -98,6 +98,32 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("life_transfer"), new com.arcane.execution.handlers.LowCostEffects.LifeTransfer());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("read_item"), new com.arcane.execution.handlers.LowCostEffects.ReadItem());
 
+        // Fase 4: glifos medios
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("satellites"), new com.arcane.execution.handlers.ControlEffects.Satellites());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("link"), new com.arcane.execution.handlers.ControlEffects.Link());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("trail"), new com.arcane.execution.handlers.ControlEffects.Trail());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("hook"), new com.arcane.execution.handlers.UtilityEffects.Hook());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("climb"), new com.arcane.execution.handlers.UtilityEffects.Climb());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("phase"), new com.arcane.execution.handlers.UtilityEffects.Phase());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("recall"), new com.arcane.execution.handlers.UtilityEffects.Recall());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("imbue"), new com.arcane.execution.handlers.ControlEffects.Imbue());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("petrify"), new com.arcane.execution.handlers.ControlEffects.Petrify());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("acid"), new com.arcane.execution.handlers.ControlEffects.Acid());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("electrify"), new com.arcane.execution.handlers.ControlEffects.Electrify());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("contagion"), new com.arcane.execution.handlers.ControlEffects.Contagion());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("reanimate"), new com.arcane.execution.handlers.ControlEffects.Reanimate());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("sense"), new com.arcane.execution.handlers.UtilityEffects.Sense());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("arcane_sight"), new com.arcane.execution.handlers.UtilityEffects.ArcaneSight());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("emit_signal"), new com.arcane.execution.handlers.UtilityEffects.EmitSignal());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("dispel"), new com.arcane.execution.handlers.ControlEffects.Dispel());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("reflect"), new com.arcane.execution.handlers.ControlEffects.Reflect());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("silence"), new com.arcane.execution.handlers.ControlEffects.Silence());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("drain_mana"), new com.arcane.execution.handlers.ControlEffects.DrainMana());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("swap"), new com.arcane.execution.handlers.UtilityEffects.Swap());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("reveal"), new com.arcane.execution.handlers.UtilityEffects.Reveal());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("decoy"), new com.arcane.execution.handlers.UtilityEffects.Decoy());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("curse"), new com.arcane.execution.handlers.ControlEffects.Curse());
+
         // Filtros
         GlyphHandlerRegistry.registerFilter(ArcaneIds.HOSTILE, new HostileFilterResolver());
         GlyphHandlerRegistry.registerFilter(ArcaneIds.SELF_FILTER, new SelfFilterResolver());
@@ -154,6 +180,9 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("region"), new com.arcane.execution.handlers.StateConditions.Region());
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("holding"), new com.arcane.execution.handlers.StateConditions.Holding());
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("raining"), new com.arcane.execution.handlers.StateConditions.Raining());
+
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("after_hits"), new PredicateCondition(c -> "hits".equals(c.trigger().type())));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_signal"), new PredicateCondition(c -> true));
 
         // Ativador
         GlyphHandlerRegistry.registerActivator(ArcaneIds.ACTIVATE, new ActivateHandler());

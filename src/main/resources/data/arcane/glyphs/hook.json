@@ -1,0 +1,24 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:hook",
+    "magnitude_keys": [
+      "strength"
+    ]
+  },
+  "parameters": {
+    "strength": {
+      "type": "float",
+      "default": 1.2,
+      "min": 0.5,
+      "max": 3.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 2,
+  "families": [
+    "force"
+  ]
+}

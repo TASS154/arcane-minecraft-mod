@@ -31,6 +31,7 @@ import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -554,6 +555,427 @@ public class ArcaneGameTests {
     net.minecraftforge.common.ForgeHooks.onLivingJump(p);
     h.assertTrue(p.hasEffect(MobEffects.MOVEMENT_SPEED), "pular dispara");
     h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(p.getUUID()) == 0, "dispara uma vez");
+    h.succeed();
+  }
+
+
+  // ------------------------------------------------------------------ Fase 4: glifos medios
+  @GameTest(template = "empty")
+  public static void everyEffectAndConditionGlyphHasAHandler(GameTestHelper h) {
+    for (var entry : GlyphRegistry.all().entrySet()) {
+      var def = entry.getValue();
+      var handler = def.behavior().handler();
+      boolean ok = switch (def.category()) {
+        case EFFECT -> GlyphHandlerRegistry.getEffect(handler).isPresent();
+        case CONDITION -> GlyphHandlerRegistry.getCondition(handler).isPresent();
+        case FILTER -> GlyphHandlerRegistry.getFilter(handler).isPresent();
+        case FORM -> GlyphHandlerRegistry.getForm(handler).isPresent();
+        default -> true;
+      };
+      h.assertTrue(ok, "glifo sem handler: " + entry.getKey());
+    }
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void hookPullsTheCasterTowardTheTarget(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 6));
+    cast(h, caster, g("ray", "range", 12.0), g("hook"));
+    h.assertTrue(caster.getDeltaMovement().z > 0.3, "o gancho puxa para o alvo (vz " + caster.getDeltaMovement().z + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void phaseCrossesAThinWallButNotWithoutRoom(GameTestHelper h) {
+    floor(h);
+    for (int y = 1; y <= 2; y++) for (int x = 2; x <= 4; x++) h.setBlock(new BlockPos(x, y, 3), Blocks.STONE);
+    Pig caster = pig(h, 3, 1);
+    double wallZ = h.absolutePos(new BlockPos(3, 1, 3)).getZ() + 1.0;
+    cast(h, caster, g("self"), g("phase", "thickness", 3.0));
+    h.assertTrue(caster.getZ() > wallZ, "atravessou a parede (z " + caster.getZ() + " contra " + wallZ + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void recallMarksThenReturns(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 1, 1);
+    Vec3 start = caster.position();
+    cast(h, caster, g("self"), g("recall"));
+    h.assertTrue(caster.getPersistentData().contains(com.arcane.execution.Phase4State.RECALL), "marcou");
+    caster.teleportTo(start.x + 3.0, start.y, start.z + 3.0);
+    cast(h, caster, g("self"), g("recall"));
+    h.assertTrue(caster.position().distanceTo(start) < 1.5, "voltou ao lugar marcado (a " + caster.position().distanceTo(start) + ")");
+    h.assertTrue(!caster.getPersistentData().contains(com.arcane.execution.Phase4State.RECALL), "a marca foi gasta");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void swapTradesPlacesWithTheTarget(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 1, 1);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(5, 1, 1));
+    Vec3 a = caster.position(), b = cow.position();
+    cast(h, caster, g("aura", "radius", 6.0), g("swap"));
+    h.assertTrue(caster.position().distanceTo(b) < 1.5 && cow.position().distanceTo(a) < 1.5, "trocaram de lugar");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 100, batch = "phase4_orbit")
+  public static void satellitesAndTrailHurtThoseWhoTouchThem(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.Phase4Service.clearAll();
+    Pig caster = pig(h, 3, 3);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(5, 1, 3));
+    float before = cow.getHealth();
+    cast(h, caster, g("self"), g("satellites", "count", 4.0, "damage", 3.0));
+    h.assertTrue(com.arcane.execution.Phase4Service.hasSatellites(caster.getUUID()), "satelites ativos");
+    cast(h, caster, g("self"), g("trail", "damage", 2.0));
+    h.assertTrue(com.arcane.execution.Phase4Service.trailOf(caster.getUUID()) != null, "rastro ativo");
+    h.runAfterDelay(40, () -> {
+      h.assertTrue(cow.getHealth() < before, "o satelite feriu a vaca (vida " + cow.getHealth() + ")");
+      h.assertTrue(caster.getHealth() >= caster.getMaxHealth(), "o dono nao e ferido (vida " + caster.getHealth() + " de " + caster.getMaxHealth() + ")");
+      com.arcane.execution.Phase4Service.clearAll();
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty")
+  public static void climbIsRegisteredAndEnds(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    cast(h, p, g("self"), g("climb", "duration", 100.0));
+    h.assertTrue(com.arcane.execution.Phase4Service.isClimber(p.getUUID()), "escalada ativa");
+    com.arcane.execution.Phase4Service.dispelRegistries(p.getUUID());
+    h.assertTrue(!com.arcane.execution.Phase4Service.isClimber(p.getUUID()), "dissipar encerra");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void linkSharesDamageWithThePartner(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var a = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(2, 1, 3));
+    var b = h.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(4, 1, 3));
+    cast(h, caster, g("aura", "radius", 5.0), g("link"));
+    float before = b.getHealth();
+    a.hurt(h.getLevel().damageSources().generic(), 4.0f);
+    h.assertTrue(Math.abs((before - b.getHealth()) - 2.0f) < 0.1f, "o parceiro sofre metade (" + (before - b.getHealth()) + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void curseAmplifiesDamageAndBlocksHealing(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    cast(h, caster, g("aura", "radius", 4.0), g("curse"));
+    cow.hurt(h.getLevel().damageSources().generic(), 4.0f);
+    h.assertTrue(Math.abs((cow.getMaxHealth() - cow.getHealth()) - 5.0f) < 0.1f, "25% a mais de dano (" + (cow.getMaxHealth() - cow.getHealth()) + ")");
+    float hurt = cow.getHealth();
+    cow.heal(3.0f);
+    h.assertTrue(cow.getHealth() == hurt, "nao cura");
+    cast(h, cow, g("self"), g("dispel"));
+    cow.heal(3.0f);
+    h.assertTrue(cow.getHealth() > hurt, "Dissipar em si mesmo tira a maldicao");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void silenceBlocksCastingUntilDispelled(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    Pig victim = pig(h, 3, 3);
+    cast(h, caster, g("aura", "radius", 4.0), g("silence"));
+    var blocked = CastingService.tryCast(victim, new Inscription(List.of(g("self"), g("shield"))), h.getLevel());
+    h.assertTrue(!blocked.success() && blocked.message().contains("silenced"), "silenciado nao conjura: " + blocked.message());
+    var selfDispel = CastingService.tryCast(victim, new Inscription(List.of(g("self"), g("dispel"))), h.getLevel());
+    h.assertTrue(!selfDispel.success(), "o silenciado nao consegue nem se dissipar");
+    com.arcane.execution.Phase4State.clear(victim, com.arcane.execution.Phase4State.SILENCE); // como se o tempo passasse
+    var ok = CastingService.tryCast(victim, new Inscription(List.of(g("self"), g("shield"))), h.getLevel());
+    h.assertTrue(ok.success(), "passado o tempo, conjura de novo");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void petrifyHalvesDamageAndHoldsTheMob(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+    cast(h, caster, g("aura", "radius", 4.0), g("petrify", "duration", 100.0));
+    h.assertTrue(zombie.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "imovel");
+    zombie.setTarget(caster);
+    h.assertTrue(zombie.getTarget() == null, "nao escolhe alvo");
+    float before = zombie.getHealth();
+    zombie.hurt(h.getLevel().damageSources().generic(), 4.0f);
+    h.assertTrue(Math.abs((before - zombie.getHealth()) - 2.0f) < 0.1f, "metade do dano (" + (before - zombie.getHealth()) + ")");
+    h.assertTrue(zombie.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "dano nao quebra a pedra");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void acidIgnoresArmorAndCorrodesIt(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+    var plate = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_CHESTPLATE);
+    zombie.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, plate);
+    float before = zombie.getHealth();
+    cast(h, caster, g("aura", "radius", 4.0), g("acid", "amount", 4.0, "corrode", 20.0));
+    h.assertTrue(Math.abs((before - zombie.getHealth()) - 4.0f) < 0.1f, "o acido ignora a armadura (" + (before - zombie.getHealth()) + ")");
+    h.assertTrue(plate.getDamageValue() >= 20, "corroeu a peca (" + plate.getDamageValue() + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void electrifyArcsDamageToNeighbours(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 1, 1);
+    var a = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    var b = h.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(4, 1, 3));
+    cast(h, a, g("self"), g("electrify"));
+    float before = b.getHealth();
+    a.hurt(h.getLevel().damageSources().generic(), 4.0f);
+    h.assertTrue(b.getHealth() < before, "o dano saltou para a vizinha (" + b.getHealth() + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "isolated_thunder")
+  public static void conductorRedirectsNearbyLightning(GameTestHelper h) {
+    floor(h);
+    Pig conductor = pig(h, 1, 1);
+    cast(h, conductor, g("self"), g("electrify", "mode", 1.0));
+    var bolt = EntityType.LIGHTNING_BOLT.create(h.getLevel());
+    bolt.setVisualOnly(true);
+    Vec3 far = h.absoluteVec(new Vec3(6.5, 1, 6.5));
+    bolt.moveTo(far.x, far.y, far.z);
+    h.getLevel().addFreshEntity(bolt);
+    h.assertTrue(bolt.position().distanceTo(conductor.position()) < 1.0, "o raio caiu no condutor (a " + bolt.position().distanceTo(conductor.position()) + ")");
+    com.arcane.execution.Phase4Service.clearAll();
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void contagionSpreadsHarmfulEffectsToNeighbours(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 1, 1);
+    var a = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    var b = h.spawnWithNoFreeWill(EntityType.SHEEP, new BlockPos(4, 1, 3));
+    a.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.POISON, 200, 0));
+    cast(h, caster, g("aura", "radius", 6.0), g("contagion"));
+    h.assertTrue(b.hasEffect(MobEffects.POISON), "o veneno passou para a vizinha");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void reanimateRaisesARecentCorpseAsAnAlly(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.Phase4Service.clearAll();
+    Pig caster = pig(h, 3, 2);
+    var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 4));
+    zombie.hurt(h.getLevel().damageSources().genericKill(), 1000.0f);
+    cast(h, caster, g("self"), g("reanimate"));
+    var minions = com.arcane.execution.Phase4Service.minionsOf(caster.getUUID());
+    h.assertTrue(minions.size() == 1, "um aliado reanimado");
+    var ally = (net.minecraft.world.entity.Mob) h.getLevel().getEntity(minions.get(0));
+    h.assertTrue(ally != null && ally.isAlive() && ally.getType() == EntityType.ZOMBIE, "e um zumbi vivo");
+    h.assertTrue(ally.getHealth() <= ally.getMaxHealth() * 0.51f, "com metade da vida");
+    ally.setTarget(caster);
+    h.assertTrue(ally.getTarget() == null, "nunca ataca o dono");
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(1, 1, 1));
+    cow.hurt(h.getLevel().damageSources().mobAttack(caster), 1.0f);
+    h.assertTrue(ally.getTarget() == cow, "vai atras de quem o dono atacou");
+    cast(h, caster, g("self"), g("reanimate"));
+    h.assertTrue(com.arcane.execution.Phase4Service.minionsOf(caster.getUUID()).size() == 1, "sem outro corpo, nao ergue mais");
+    com.arcane.execution.Phase4Service.clearAll();
+    ally.discard();
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void dispelStripsBeneficialEffectsFromOthers(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    cow.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.MOVEMENT_SPEED, 200, 0));
+    cow.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.POISON, 200, 0));
+    cast(h, cow, g("self"), g("electrify"));
+    cast(h, caster, g("aura", "radius", 4.0), g("dispel"));
+    h.assertTrue(!cow.hasEffect(MobEffects.MOVEMENT_SPEED) && cow.hasEffect(MobEffects.POISON), "tira o benefico e deixa o nocivo");
+    h.assertTrue(!com.arcane.execution.Phase4State.active(cow, com.arcane.execution.Phase4State.CHARGED), "e o estado magico");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void reflectSendsDamageBackToTheAttacker(GameTestHelper h) {
+    floor(h);
+    Pig victim = pig(h, 3, 3);
+    var attacker = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 4));
+    cast(h, victim, g("self"), g("reflect"));
+    float before = attacker.getHealth();
+    victim.hurt(h.getLevel().damageSources().mobAttack(attacker), 5.0f);
+    h.assertTrue(Math.abs((before - attacker.getHealth()) - 2.0f) < 0.1f, "o agressor sente 40% (" + (before - attacker.getHealth()) + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void imbueAddsDamageAndAnEffectForAFewHits(GameTestHelper h) {
+    floor(h);
+    var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+    zombie.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD));
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(4, 1, 3));
+    cast(h, zombie, g("self"), g("imbue", "kind", 3.0, "hits", 2.0));
+    h.assertTrue(zombie.getMainHandItem().getTagElement("arcane_imbue") != null, "arma encantada");
+    float before = cow.getHealth();
+    cow.hurt(h.getLevel().damageSources().mobAttack(zombie), 2.0f);
+    h.assertTrue(before - cow.getHealth() >= 6.9f, "+2 de dano e +3 do raio (" + (before - cow.getHealth()) + ")");
+    cow.invulnerableTime = 0;
+    cow.hurt(h.getLevel().damageSources().mobAttack(zombie), 1.0f);
+    h.assertTrue(zombie.getMainHandItem().getTagElement("arcane_imbue") == null, "acabaram os golpes");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void drainManaMovesManaBetweenPlayers(GameTestHelper h) {
+    floor(h);
+    var victim = casterWith(h);
+    h.getLevel().addNewPlayer(victim);
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(victim);
+    float before = mana.current();
+    Pig thief = pig(h, 1, 1);
+    cast(h, thief, g("aura", "radius", 6.0), g("drain_mana", "amount", 30.0));
+    h.assertTrue(Math.abs((before - mana.current()) - 30.0f) < 0.5f, "tirou 30 de mana (" + (before - mana.current()) + ")");
+    victim.discard();
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 80)
+  public static void emitSignalPowersAnAirBlockThenVanishes(GameTestHelper h) {
+    floor(h);
+    Pig p = pig(h, 3, 3);
+    BlockPos at = new BlockPos(3, 1, 3);
+    cast(h, p, g("self"), g("emit_signal", "duration", 20.0));
+    var state = h.getLevel().getBlockState(h.absolutePos(at));
+    h.assertTrue(state.is(com.arcane.registry.ModBlocks.ARCANE_SIGNAL.get()), "bloco de sinal no ar");
+    h.assertTrue(state.getSignal(h.getLevel(), h.absolutePos(at), net.minecraft.core.Direction.UP) == 15, "forca 15");
+    h.runAfterDelay(40, () -> {
+      h.assertTrue(h.getLevel().getBlockState(h.absolutePos(at)).isAir(), "sumiu sozinho");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 100)
+  public static void signalInscriptionFiresOnTheRisingRedstoneEdge(GameTestHelper h) {
+    floor(h);
+    BlockPos stone = new BlockPos(3, 1, 3);
+    h.setBlock(stone, Blocks.STONE);
+    BlockPos abs = h.absolutePos(stone);
+    Inscription spell = new Inscription(List.of(g("self"), g("on_signal"), g("shield")));
+    WorldInscriptionIndex.get(h.getLevel()).put(new InscriptionAnchor(abs, spell, InscribingService.TRIGGER_ON_SIGNAL, new ResourceLocation("arcane", "common")));
+    Pig pig = h.spawnWithNoFreeWill(EntityType.PIG, stone.above());
+    h.runAfterDelay(25, () -> {
+      h.assertTrue(!pig.hasEffect(MobEffects.ABSORPTION), "sem sinal, nao dispara");
+      h.setBlock(new BlockPos(3, 1, 4), Blocks.REDSTONE_BLOCK);
+    });
+    h.succeedWhen(() -> {
+      h.assertTrue(pig.hasEffect(MobEffects.ABSORPTION), "com sinal, dispara");
+      InscribingService.erase(h.getLevel(), abs);
+    });
+  }
+
+  @GameTest(template = "empty")
+  public static void afterHitsFiresOnTheNthHit(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    cast(h, caster, g("self"), g("after_hits", "n", 2.0), g("shield"));
+    h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(caster.getUUID()) == 1, "armada");
+    cow.hurt(h.getLevel().damageSources().mobAttack(caster), 1.0f);
+    h.assertTrue(!caster.hasEffect(MobEffects.ABSORPTION), "um acerto ainda nao dispara");
+    cow.invulnerableTime = 0;
+    cow.hurt(h.getLevel().damageSources().mobAttack(caster), 1.0f);
+    h.assertTrue(caster.hasEffect(MobEffects.ABSORPTION), "o segundo acerto dispara");
+    h.assertTrue(com.arcane.execution.ArmedSpells.armedCount(caster.getUUID()) == 0, "uma vez so");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase4_scars")
+  public static void stealthShortensAndFalseTraceForgesTheResidue(GameTestHelper h) {
+    floor(h);
+    h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 5));
+    Pig plain = pig(h, 1, 1);
+    Pig sneaky = pig(h, 5, 1);
+    Pig liar = pig(h, 3, 1);
+    var level = h.getLevel();
+    java.util.function.Function<Pig, List<com.arcane.execution.WorldScars.Scar>> mine = pig -> {
+      var all = com.arcane.execution.WorldScars.all(level);
+      return all.stream().filter(sc -> sc.pos().distanceToSqr(pig.position()) < 900.0).toList();
+    };
+    int base = mine.apply(plain).size();
+    cast(h, plain, g("ray", "range", 8.0), g("damage"));
+    cast(h, sneaky, g("ray", "range", 8.0), g("damage"), g("stealth"));
+    cast(h, liar, g("ray", "range", 8.0), g("damage"), g("false_trace"));
+    var scars = com.arcane.execution.WorldScars.all(level);
+    var normal = scars.stream().filter(sc -> sc.caster().equals(plain.getUUID())).findFirst();
+    var quiet = scars.stream().filter(sc -> sc.caster().equals(sneaky.getUUID())).findFirst();
+    h.assertTrue(normal.isPresent() && quiet.isPresent(), "ambos deixaram residuo");
+    h.assertTrue(quiet.get().expiresAt() - level.getGameTime() < (normal.get().expiresAt() - level.getGameTime()) / 2, "Furtivo: dura bem menos");
+    h.assertTrue(scars.stream().noneMatch(sc -> sc.caster().equals(liar.getUUID())), "Falso Rastro: a assinatura nao e a do conjurador");
+    h.assertTrue(scars.size() >= base + 4, "Falso Rastro deixa um residuo isca a mais");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void overchargeDoublesTheEffectAtAPrice(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    float before = cow.getHealth(), mine = caster.getHealth();
+    cast(h, caster, g("aura", "radius", 4.0), g("damage", "amount", 2.0), g("overcharge"));
+    h.assertTrue(Math.abs((before - cow.getHealth()) - 4.0f) < 0.2f, "dano dobrado (" + (before - cow.getHealth()) + ")");
+    h.assertTrue(mine - caster.getHealth() >= 1.9f, "o conjurador paga 1 coracao");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void bindEndsPotionEffectsWhenTheCasterDies(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    cast(h, caster, g("aura", "radius", 4.0), g("slow", "duration", 400.0), g("bind"));
+    h.assertTrue(cow.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "lentidao aplicada");
+    caster.hurt(h.getLevel().damageSources().genericKill(), 1000.0f);
+    h.assertTrue(!cow.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "o conjurador morreu: o efeito vinculado acabou");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void decoyDistractsMobsFromTheCaster(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+    zombie.setTarget(caster);
+    cast(h, caster, g("self"), g("decoy", "duration", 100.0));
+    h.assertTrue(zombie.getTarget() == null, "largou o alvo");
+    zombie.setTarget(caster);
+    h.assertTrue(zombie.getTarget() == null, "distraido: nao escolhe o conjurador");
+    com.arcane.execution.Phase4Service.clearAll();
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void revealStripsInvisibilityAndSenseAndSightRun(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    cow.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.INVISIBILITY, 400, 0));
+    cast(h, caster, g("self"), g("sense", "radius", 8.0));
+    cast(h, caster, g("self"), g("arcane_sight", "duration", 100.0));
+    h.assertTrue(caster.hasEffect(MobEffects.NIGHT_VISION), "Visao Arcana da visao noturna");
+    cast(h, caster, g("self"), g("reveal", "radius", 8.0));
+    h.assertTrue(!cow.hasEffect(MobEffects.INVISIBILITY), "Revelar tira a invisibilidade");
     h.succeed();
   }
 

@@ -1,0 +1,30 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:electrify",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 200.0,
+      "min": 40.0,
+      "max": 600.0
+    },
+    "mode": {
+      "type": "int",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "storm"
+  ]
+}

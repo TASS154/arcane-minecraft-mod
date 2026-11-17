@@ -293,6 +293,28 @@
               "tag": "{glyph:\"arcane:read_item\"}"
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:sense\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:emit_signal\"}"
+            }
+          ]
         }
       ]
     },

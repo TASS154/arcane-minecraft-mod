@@ -1,0 +1,43 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:overcharge"
+  },
+  "modifier_scope": {
+    "target": "previous_effect",
+    "kind": "effect",
+    "mutate": {
+      "amount": {
+        "op": "multiply",
+        "value": 2.0
+      },
+      "strength": {
+        "op": "multiply",
+        "value": 2.0
+      },
+      "power": {
+        "op": "multiply",
+        "value": 2.0
+      },
+      "radius": {
+        "op": "multiply",
+        "value": 1.5
+      },
+      "duration": {
+        "op": "multiply",
+        "value": 1.5
+      },
+      "overcharge": {
+        "op": "put",
+        "value": 1.0
+      }
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "blood"
+  ]
+}

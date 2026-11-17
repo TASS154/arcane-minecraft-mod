@@ -1,0 +1,36 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:imbue",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 1200.0,
+      "min": 200.0,
+      "max": 6000.0
+    },
+    "kind": {
+      "type": "int",
+      "default": 1.0,
+      "min": 1.0,
+      "max": 4.0
+    },
+    "hits": {
+      "type": "int",
+      "default": 6.0,
+      "min": 1.0,
+      "max": 10.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "force"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "category": "condition",
+  "behavior": {
+    "handler": "arcane:after_hits"
+  },
+  "parameters": {
+    "n": {
+      "type": "int",
+      "default": 3.0,
+      "min": 2.0,
+      "max": 10.0
+    }
+  },
+  "cost": {
+    "mana": 0
+  },
+  "tier": 3,
+  "families": [
+    "blood"
+  ]
+}

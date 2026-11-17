@@ -1,0 +1,24 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:petrify",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 60.0,
+      "min": 20.0,
+      "max": 300.0
+    }
+  },
+  "cost": {
+    "mana": 4
+  },
+  "tier": 4,
+  "families": [
+    "ice"
+  ]
+}

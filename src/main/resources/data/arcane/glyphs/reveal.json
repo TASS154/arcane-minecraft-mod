@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:reveal"
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 12.0,
+      "min": 3.0,
+      "max": 24.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 2,
+  "families": [
+    "knowledge"
+  ]
+}

@@ -799,6 +799,138 @@
               "tag": "{glyph:\"arcane:raining\"}"
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:hook\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:climb\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:sense\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:arcane_sight\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:emit_signal\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:drain_mana\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:reveal\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:decoy\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:on_signal\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:stealth\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:false_trace\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:bind\"}"
+            }
+          ]
         }
       ]
     },

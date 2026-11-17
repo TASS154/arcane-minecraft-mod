@@ -141,6 +141,9 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String i
     var pos = menu.targetPos();
     String trigger = level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity
         ? com.arcane.inscribing.InscribingService.TRIGGER_ON_OPEN : com.arcane.inscribing.InscribingService.TRIGGER_ON_TOUCH;
+    if (menu.building().stream().anyMatch(g -> g.glyphId().getPath().equals("on_signal"))) {
+      trigger = com.arcane.inscribing.InscribingService.TRIGGER_ON_SIGNAL; // Ativar por Sinal troca o gatilho
+    }
     if (com.arcane.inscribing.InscribingService.inscribe(level, player, pos, menu.building(), inkId, trigger, menu.spellName(), menu.face())) {
       if (!player.getAbilities().instabuild) ink.shrink(1);
       player.displayClientMessage(Component.translatable("message.arcane.pen.written." + trigger).withStyle(ChatFormatting.LIGHT_PURPLE), true);

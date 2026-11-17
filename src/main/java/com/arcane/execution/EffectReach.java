@@ -28,6 +28,12 @@ public final class EffectReach {
       Map.entry("float", ENTITY), Map.entry("telekinesis", ENTITY | BLOCK),
       Map.entry("rain", ALL), Map.entry("charge", ALL), Map.entry("glide", ENTITY), Map.entry("taunt", ENTITY),
       Map.entry("fear", ENTITY), Map.entry("sleep", ENTITY), Map.entry("rumble", ALL), Map.entry("darkness", ALL),
+      Map.entry("satellites", ENTITY), Map.entry("link", ENTITY), Map.entry("trail", ENTITY), Map.entry("hook", ALL),
+      Map.entry("climb", ENTITY), Map.entry("phase", ALL), Map.entry("recall", ALL), Map.entry("imbue", ENTITY),
+      Map.entry("petrify", ENTITY), Map.entry("acid", ENTITY), Map.entry("electrify", ENTITY), Map.entry("contagion", ENTITY),
+      Map.entry("reanimate", ALL), Map.entry("sense", ALL), Map.entry("arcane_sight", ALL), Map.entry("emit_signal", ALL),
+      Map.entry("dispel", ENTITY), Map.entry("reflect", ENTITY), Map.entry("silence", ENTITY), Map.entry("drain_mana", ENTITY),
+      Map.entry("swap", ENTITY), Map.entry("reveal", ALL), Map.entry("decoy", ALL), Map.entry("curse", ENTITY),
       Map.entry("wet", ENTITY), Map.entry("lifesteal", ENTITY), Map.entry("life_transfer", ENTITY), Map.entry("read_item", ENTITY),
       // Nao dependem dos alvos: agem sobre o conjurador ou o mundo.
       Map.entry("blink", ALL), Map.entry("weather", ALL), Map.entry("warp", ALL));
@@ -35,7 +41,8 @@ public final class EffectReach {
   /** Efeitos nocivos: o conjurador nao os sofre vindos de formas que nao sejam a forma Eu. */
   private static final java.util.Set<String> HARMFUL = java.util.Set.of("damage", "cut", "fire", "slow", "poison", "blind",
       "wither", "freeze", "gravity", "push", "attract", "thunder", "blast", "explode", "telekinesis",
-      "taunt", "fear", "sleep", "rumble", "darkness", "lifesteal");
+      "taunt", "fear", "sleep", "rumble", "darkness", "lifesteal",
+      "petrify", "acid", "curse", "silence", "drain_mana", "swap", "contagion");
 
   /** Efeitos que sabem encadear (modificador Cadeia). */
   private static final java.util.Set<String> CHAINABLE = java.util.Set.of("damage", "explode", "blast");
@@ -47,7 +54,10 @@ public final class EffectReach {
   private static final java.util.Set<String> REGION_FORMS = java.util.Set.of("aura", "wave", "pillar", "barrier");
 
   /** Efeitos que nao dependem dos alvos (agem sobre o conjurador ou o mundo). */
-  public static boolean independent(String path) { return path.equals("blink") || path.equals("weather") || path.equals("warp"); }
+  public static boolean independent(String path) {
+    return path.equals("blink") || path.equals("weather") || path.equals("warp") || path.equals("recall") || path.equals("phase")
+        || path.equals("sense") || path.equals("arcane_sight");
+  }
   public static int ofForm(String path) { return FORMS.getOrDefault(path, ALL); }
   public static int ofEffect(String path) { return EFFECTS.getOrDefault(path, ALL); }
   public static boolean usesRegion(String formPath) { return REGION_FORMS.contains(formPath); }

@@ -104,8 +104,18 @@ public final class WorldScars {
     List<Scar> list = store.scars;
     synchronized (list) {
       while (list.size() >= MAX_PER_LEVEL) list.remove(0);
-      list.add(new Scar(pos, SpellElement.of(ctx.plan()), ctx.inscription().glyphs().stream().map(g -> g.glyphId()).toList(),
-          ctx.caster().getUUID(), level.getGameTime() + ArcaneConfig.SCAR_LIFETIME_TICKS.get()));
+      long life = ArcaneConfig.SCAR_LIFETIME_TICKS.get();
+      if (Traces.stealthy(ctx.inscription())) life /= Traces.STEALTH_LIFETIME_DIVISOR; // Furtivo: o residuo some depressa
+      boolean fake = Traces.falsified(ctx.inscription());
+      var glyphs = ctx.inscription().glyphs().stream().map(g -> g.glyphId()).toList();
+      java.util.UUID signer = fake ? Traces.fakeSigner(level.getGameTime(), (int) pos.x, (int) pos.z) : ctx.caster().getUUID();
+      list.add(new Scar(pos, SpellElement.of(ctx.plan()), glyphs, signer, level.getGameTime() + life));
+      if (fake) { // Falso Rastro: um segundo residuo isca, por perto, com outra assinatura
+        var rnd = ctx.caster().getRandom();
+        Vec3 decoy = pos.add((rnd.nextDouble() - 0.5) * 20.0, 0, (rnd.nextDouble() - 0.5) * 20.0);
+        while (list.size() >= MAX_PER_LEVEL) list.remove(0);
+        list.add(new Scar(decoy, SpellElement.of(ctx.plan()), glyphs, Traces.fakeSigner(level.getGameTime() + 1, (int) decoy.x, (int) decoy.z), level.getGameTime() + life));
+      }
     }
     store.setDirty();
   }

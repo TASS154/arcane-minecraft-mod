@@ -9,7 +9,7 @@ import net.minecraft.world.entity.Entity;
  * "wet" das regras de interacao (data/arcane/interactions/*.json): raio fere mais, gelo congela mais rapido e fogo apaga.
  */
 public final class Wetness {
-  private static final String KEY = "arcane_wet_until";
+  public static final String KEY = "arcane_wet_until";
   public static final int MAX_TICKS = 1200;
 
   private Wetness() {}

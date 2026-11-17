@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:contagion"
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 4.0,
+      "min": 1.5,
+      "max": 8.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "blood"
+  ]
+}

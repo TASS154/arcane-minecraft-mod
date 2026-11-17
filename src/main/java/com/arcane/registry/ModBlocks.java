@@ -30,6 +30,10 @@ public final class ModBlocks {
                     .strength(0.1f).noCollission().noOcclusion().noLootTable()
                     .lightLevel(s -> s.getValue(com.arcane.block.ArcaneTraceBlock.LIT) ? 12 : 0)
                     .pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY)));
+    public static final RegistryObject<Block> ARCANE_SIGNAL = BLOCKS.register("arcane_signal",
+            () -> new com.arcane.block.ArcaneSignalBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+                    .strength(0.0f).noCollission().noOcclusion().noLootTable().lightLevel(s -> 10)
+                    .pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY)));
     public static final RegistryObject<Block> ARCANE_ALTAR = BLOCKS.register("arcane_altar",
             () -> new com.arcane.block.ArcaneAltarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
                     .strength(4.0f, 1200.0f).requiresCorrectToolForDrops().lightLevel(s -> 7).noOcclusion()));

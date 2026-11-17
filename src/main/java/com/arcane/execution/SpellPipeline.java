@@ -108,6 +108,10 @@ public final class SpellPipeline {
                     effective = new TargetList(targets.entities().stream().filter(e -> e != context.caster()).toList(), targets.blocks(), targets.points());
                 }
                 handler.apply(context, call, effective);
+                // Sobrecarga: o excesso de forca cobra seu preco (nunca mata: so ate sobrar 1,5 coracao).
+                if (call.parameters().getOrDefault("overcharge", 0.0) > 0.0 && context.caster().getHealth() > 3.0f) {
+                    context.caster().hurt(context.level().damageSources().magic(), 2.0f);
+                }
             }
         }
     }

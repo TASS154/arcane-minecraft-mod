@@ -1,0 +1,30 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:trail",
+    "magnitude_keys": [
+      "damage"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 200.0,
+      "min": 40.0,
+      "max": 600.0
+    },
+    "damage": {
+      "type": "float",
+      "default": 1.5,
+      "min": 0.5,
+      "max": 6.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "force"
+  ]
+}

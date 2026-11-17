@@ -33,9 +33,10 @@ public final class ArmedSpells {
   public static final int MAX_ARMED = 3;
   private static final Set<ResourceLocation> TRIGGER_CONDITIONS = Set.of(
       new ResourceLocation("arcane", "on_hurt"), new ResourceLocation("arcane", "on_death"), new ResourceLocation("arcane", "on_kill"),
-      new ResourceLocation("arcane", "on_fall"), new ResourceLocation("arcane", "on_jump"));
+      new ResourceLocation("arcane", "on_fall"), new ResourceLocation("arcane", "on_jump"),
+      new ResourceLocation("arcane", "after_hits"));
 
-  private record Armed(ExecutionContext context, CompiledExecutionPlan.ExecutionSegment segment, long expiresAt) {}
+  private record Armed(ExecutionContext context, CompiledExecutionPlan.ExecutionSegment segment, long expiresAt, int[] hits) {}
 
   private static final Map<UUID, List<Armed>> ARMED = new ConcurrentHashMap<>();
   private static final ThreadLocal<Boolean> FIRING = ThreadLocal.withInitial(() -> false);
@@ -50,7 +51,7 @@ public final class ArmedSpells {
     List<Armed> list = ARMED.computeIfAbsent(context.caster().getUUID(), id -> new ArrayList<>());
     synchronized (list) {
       while (list.size() >= MAX_ARMED) list.remove(0);
-      list.add(new Armed(context, segment, context.level().getGameTime() + EXPIRE_TICKS));
+      list.add(new Armed(context, segment, context.level().getGameTime() + EXPIRE_TICKS, new int[1]));
     }
     if (context.caster() instanceof Player player) {
       player.displayClientMessage(Component.translatable("message.arcane.armed"), true);
@@ -75,6 +76,14 @@ public final class ArmedSpells {
   @SubscribeEvent
   public static void onDeath(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
     trigger(event.getEntity(), "death", "on_death", event.getSource().getEntity());
+  }
+
+  /** Apos N Acertos: conta cada golpe que quem armou da em outra criatura (a magia usa a vitima como "outro"). */
+  @SubscribeEvent
+  public static void onHitDealt(LivingHurtEvent event) {
+    if (event.getSource().getEntity() instanceof LivingEntity attacker && attacker != event.getEntity()) {
+      trigger(attacker, "hits", "after_hits", event.getEntity());
+    }
   }
 
   /** Ao Matar: quem armou e o autor do golpe fatal (direto ou por magia); o morto vira o "outro" do gatilho. */
@@ -107,7 +116,11 @@ public final class ArmedSpells {
       long now = victim.level().getGameTime();
       list.removeIf(a -> a.expiresAt() < now);
       toFire = list.stream().filter(a -> a.segment().condition()
-          .map(c -> c.conditionId().getPath().equals(conditionPath)).orElse(false)).toList();
+          .map(c -> c.conditionId().getPath().equals(conditionPath)).orElse(false))
+          // Apos N Acertos: cada acerto conta; so dispara no N-esimo.
+          .filter(a -> !conditionPath.equals("after_hits")
+              || ++a.hits()[0] >= (int) Math.round(a.segment().condition().get().parameters().getOrDefault("n", 3.0)))
+          .toList();
       list.removeAll(toFire);
     }
     FIRING.set(true);

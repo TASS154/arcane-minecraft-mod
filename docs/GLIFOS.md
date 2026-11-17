@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **110 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **140 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -71,7 +71,7 @@ Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para
 | **Madeira** | `arcane:wood` | 1 | 1 | Terra | — | Filtro: só blocos de madeira (troncos e tábuas). |
 | **Forasteiros** | `arcane:outsiders` | 2 | 3 | Arcano | — | Filtro: afeta só quem NÃO é você nem está na sua lista de convidados (comando /arcane guest add|remove|list). Animais domesticados e invocações de você ou dos seus convidados também ficam de fora. Útil em inscrições e zonas que protegem a sua casa. |
 
-## Efeitos (39)
+## Efeitos (63)
 
 O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro principal (o dobro do dano custa o dobro).
 
@@ -116,8 +116,32 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Roubo de Vida** | `arcane:lifesteal` | 3 | 2 | Sangue | `amount` 3 (1–16), `ratio` 0.6 (0.1–1) | Efeito: fere o alvo e devolve a você 60% do dano que realmente causou. Não funciona em si mesmo. Invertido, vira Transferir Vida. |
 | **Transferir Vida** | `arcane:life_transfer` | 2 | 2 | Sangue | `amount` 4 (1–16) | Efeito: você passa vida ao alvo (1–16), sem nunca cair abaixo de 1 coração. Invertido, vira Roubo de Vida. |
 | **Ler Item** | `arcane:read_item` | 1 | 1 | Conhecimento | — | Efeito: mostra no chat o item que a criatura segura (ou o item solto no chão): nome, quantidade, durabilidade e encantamentos. Só informa; não muda nada. |
+| **Satélites** | `arcane:satellites` | 4 | 3 | Força | `count` 2 (1–4), `duration` 200 (40–600), `damage` 2 (0.5–8) | Efeito: orbes giram ao redor do alvo (1–4, 2 blocos de raio) ferindo quem encostar neles, menos o dono. Duração até 30 s. |
+| **Elo** | `arcane:link` | 3 | 3 | Vazio | `duration` 300 (40–1200) | Efeito: liga as duas primeiras criaturas alvo (ou você e o alvo): metade do dano que uma sofre passa para a outra, por até 60 s. |
+| **Rastro** | `arcane:trail` | 3 | 3 | Força | `duration` 200 (40–600), `damage` 1.5 (0.5–6) | Efeito: o alvo deixa para trás um rastro de brasas (até 24 pontos, 6 s cada) que fere e atrasa quem pisar, menos o dono. |
+| **Gancho** | `arcane:hook` | 2 | 2 | Força | `strength` 1.2 (0.5–3) | Efeito: você é puxado em linha reta até o alvo (criatura, bloco ou ponto), como um cabo preso nele; a queda é anulada. Não puxa o alvo (isso é Atrair). |
+| **Escalar** | `arcane:climb` | 2 | 2 | Força | `duration` 200 (40–1200) | Efeito: por um tempo, quem avança contra uma parede sobe por ela (jogadores: segurando para frente ou pulo; agache para parar). Anula a queda. |
+| **Atravessar** | `arcane:phase` | 4 | 4 | Vazio | `thickness` 4 (1–6) | Efeito: você atravessa uma parede de até 6 blocos na direção em que olha e sai do outro lado, onde houver espaço para você. Sem espaço, nada acontece. |
+| **Retorno** | `arcane:recall` | 3 | 3 | Vazio | — | Efeito: o primeiro uso marca o lugar onde você está (10 min); o segundo leva você de volta, se estiver na mesma dimensão. Cada uso gasta a mana da magia. |
+| **Encantar** | `arcane:imbue` | 3 | 3 | Força | `duration` 1200 (200–6000), `kind` 1 (1–4), `hits` 6 (1–10) | Efeito: a arma na mão do alvo ganha por um tempo (até 5 min) e por poucos golpes (1–10) +2 de dano e um efeito: kind 1 fogo, 2 gelo, 3 raio (+3), 4 veneno. Só vale golpe corpo a corpo. |
+| **Petrificar** | `arcane:petrify` | 4 | 4 | Gelo | `duration` 60 (20–300) | Efeito: o alvo vira pedra por até 15 s: imóvel, sem escolher alvos e com metade do dano recebido. O dano não quebra o efeito (diferente do Sono). |
+| **Ácido** | `arcane:acid` | 3 | 3 | Sangue | `amount` 3 (1–12), `corrode` 8 (0–60) | Efeito: fere ignorando a armadura e corrói as peças de armadura do alvo (até 60 pontos de durabilidade cada, nunca as quebra). |
+| **Eletrificar** | `arcane:electrify` | 3 | 3 | Tempestade | `duration` 200 (40–600), `mode` 0 (0–1) | Efeito: mode 0 (Eletrificar): o dano que o alvo sofre salta 35% para até 2 criaturas num raio de 4. mode 1 (Condutor): raios que caírem a 24 blocos caem no alvo. Dura até 30 s. |
+| **Contágio** | `arcane:contagion` | 3 | 3 | Sangue | `radius` 4 (1.5–8) | Efeito: os efeitos nocivos do alvo (e o fogo) passam para as criaturas num raio de 1,5–8, com 60% da duração. Sem efeito nocivo no alvo, nada acontece. |
+| **Reanimar Aliado** | `arcane:reanimate` | 6 | 4 | Sangue | `duration` 600 (100–2400) | Efeito: ergue, perto do alvo, uma criatura que morreu há pouco (até 2 min, não jogador nem chefe), com metade da vida, que luta por você: nunca ataca você nem outros aliados seus e vai atrás de quem agrediu você ou de quem você agrediu. Máximo de 2 por vez e duração de até 2 min. |
+| **Sentir** | `arcane:sense` | 1 | 1 | Conhecimento | `radius` 16 (4–32) | Efeito: só você percebe as criaturas vivas num raio de 4–32 blocos, mesmo atrás de paredes ou invisíveis (partículas só para você) e vê quantas são e quantas hostis. |
+| **Visão Arcana** | `arcane:arcane_sight` | 2 | 2 | Conhecimento | `duration` 400 (100–1200), `radius` 24 (8–32) | Efeito: visão noturna por um tempo e mostra, só para você, resíduos de magia e inscrições num raio de até 32 blocos, com a contagem. |
+| **Emitir Sinal** | `arcane:emit_signal` | 1 | 1 | Tempestade | `duration` 40 (10–200) | Efeito: acende por instantes (0,5 a 10 s) um bloco de Sinal Arcano no ar onde o alvo está, que emite redstone 15 e some sozinho. Só ocupa espaço vazio; máximo 4 por conjuração. |
+| **Dissipar** | `arcane:dispel` | 3 | 3 | Conhecimento | — | Efeito: nos outros, tira efeitos benéficos e estados mágicos (Refletir, Eletrificar, Elo, Molhado, Marca); em você, tira os nocivos (Maldição, Silêncio, Petrificar, Medo, Sono) e o fogo. |
+| **Refletir** | `arcane:reflect` | 3 | 3 | Força | `duration` 100 (20–400) | Efeito: por até 20 s, projéteis que acertam o alvo voltam para quem os lançou e 40% do dano de perto volta ao agressor. Vale para você também. |
+| **Silêncio** | `arcane:silence` | 3 | 3 | Vazio | `duration` 100 (20–600) | Efeito: o alvo não consegue conjurar por até 30 s (jogadores e magos). Não afeta golpes comuns. |
+| **Drenar Mana** | `arcane:drain_mana` | 2 | 2 | Vazio | `amount` 20 (5–100) | Efeito: tira até 5–100 de mana de jogadores alvo e passa para você. Não afeta criaturas sem mana. |
+| **Troca** | `arcane:swap` | 3 | 3 | Vazio | — | Efeito: você e a primeira criatura alvo trocam de lugar (mesma dimensão). |
+| **Revelar** | `arcane:reveal` | 2 | 2 | Conhecimento | `radius` 12 (3–24) | Efeito: tira a invisibilidade e faz brilhar por 5 s as criaturas num raio de 3–24 blocos, e conta quantas estavam escondidas. |
+| **Chamariz** | `arcane:decoy` | 2 | 2 | Vazio | `duration` 100 (20–300) | Efeito: uma ilusão no ponto mirado atrai criaturas num raio de 20 blocos e elas deixam de te escolher como alvo por até 15 s. |
+| **Maldição** | `arcane:curse` | 3 | 3 | Sangue | `duration` 300 (60–2400) | Efeito: por até 2 min o alvo leva 25% a mais de dano e não recupera vida. Dissipar em si mesmo tira. |
 
-## Modificadores (25)
+## Modificadores (29)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -148,8 +172,12 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Zona** | `arcane:zone` | 3 | 3 | Conhecimento | `seconds` 10 (2–60), `interval` 1 (0.5–5) | Torna a forma persistente: ela se repete do mesmo lugar a cada intervalo, durante o tempo escolhido, reaplicando os efeitos em quem está dentro (Aura + Fogo vira um campo em chamas; Barreira vira parede contínua; Projétil vira torre). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). No máximo 2 zonas suas ao mesmo tempo. Invocações ignoram a Zona. |
 | **Cadeia** | `arcane:chain` | 3 | 3 | Força | — | Modificador: o efeito anterior se propaga de criatura em criatura. Explosão e Explosão Destrutiva detonam de novo, menores, em quem estava perto (até 3 saltos, 8 extras); Dano salta em arco para a mais próxima, com 60% do dano a cada salto. Outros efeitos ignoram a Cadeia (a prévia avisa). |
 | **Inverter** | `arcane:invert` | 1 | 2 | Vazio | — | Modificador: troca o efeito anterior pelo seu oposto, com a mesma magnitude. Pares: Dano e Cura, Empurrão e Atrair, Lentidão e Velocidade, Fogo e Congelar, Levitação e Gravidade, Roubo e Transferir Vida, Cegar e Invisibilidade, Medo e Provocar. Efeito sem par ignora o Inverter. |
+| **Furtivo** | `arcane:stealth` | 2 | 2 | Vazio | — | Modificador: a magia deixa menos rastro: o resíduo no mundo dura 1/4 do tempo e a conjuração não faz som nem partículas. Não esconde o efeito em si. |
+| **Falso Rastro** | `arcane:false_trace` | 2 | 2 | Vazio | — | Modificador: o resíduo no mundo leva uma assinatura falsa (que não é a sua) e a magia deixa um segundo resíduo isca a até 10 blocos. Quem analisa o resíduo é enganado. |
+| **Sobrecarga** | `arcane:overcharge` | 3 | 3 | Sangue | — | Modificador: dobra a força do efeito anterior (dano, cura, empurrão, raio, potência) e 50% de duração, mas você sofre 1 coração de dano mágico a cada efeito sobrecarregado (nunca fatal: só se você tiver mais de 1,5 coração). Mais forte que Potência, com preço. |
+| **Vincular** | `arcane:bind` | 2 | 2 | Vazio | — | Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular. |
 
-## Condições (21)
+## Condições (23)
 
 Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira.
 
@@ -176,6 +204,8 @@ Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira
 | **Bioma ou Dimensão** | `arcane:region` | 0 | 2 | Conhecimento | `kind` 1 (1–8) | Condição: só acontece no lugar escolhido (kind): 1 Superfície, 2 Nether, 3 End, 4 Quente (deserto, mesa, Nether), 5 Frio (neve), 6 Floresta (floresta, selva, taiga), 7 Oceano, 8 Pântano. |
 | **Segurando Item X** | `arcane:holding` | 0 | 2 | Conhecimento | `kind` 1 (0–7) | Condição: só acontece se o item na sua mão principal for do tipo escolhido (kind): 0 mão vazia, 1 espada ou machado, 2 ferramenta, 3 arco, besta ou tridente, 4 comida, 5 bloco, 6 poção, 7 qualquer item. |
 | **Chuva ou Tempestade** | `arcane:raining` | 0 | 2 | Tempestade | `storm` 0 (0–1) | Condição: só acontece com chuva ou tempestade no mundo (storm 1: só tempestade). |
+| **Após N Acertos** | `arcane:after_hits` | 0 | 3 | Sangue | `n` 3 (2–10) | Condição: arma a magia em você: o que vem depois só acontece depois de você acertar N golpes em outras criaturas (N 2–10, padrão 3; por até 60 s). |
+| **Ativar por Sinal** | `arcane:on_signal` | 0 | 2 | Tempestade | — | Condição: em uma inscrição no mundo, troca o gatilho: ela dispara quando o bloco recebe sinal de redstone (na subida do sinal), tendo como origem a criatura mais perto (6 blocos). Fora de inscrições, não faz nada. |
 
 ## Ativadores (1)
 

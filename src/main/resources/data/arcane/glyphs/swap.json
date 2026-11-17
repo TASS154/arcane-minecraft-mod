@@ -1,0 +1,13 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:swap"
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "void"
+  ]
+}

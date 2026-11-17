@@ -1,0 +1,30 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:arcane_sight",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 400.0,
+      "min": 100.0,
+      "max": 1200.0
+    },
+    "radius": {
+      "type": "float",
+      "default": 24.0,
+      "min": 8.0,
+      "max": 32.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 2,
+  "families": [
+    "knowledge"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:phase"
+  },
+  "parameters": {
+    "thickness": {
+      "type": "int",
+      "default": 4.0,
+      "min": 1.0,
+      "max": 6.0
+    }
+  },
+  "cost": {
+    "mana": 4
+  },
+  "tier": 4,
+  "families": [
+    "void"
+  ]
+}

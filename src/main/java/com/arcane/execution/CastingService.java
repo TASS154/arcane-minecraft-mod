@@ -44,6 +44,9 @@ public final class CastingService {
             return ExecutionResult.fail("message.arcane.requires_ritual");
         }
 
+        if (Phase4State.active(player, Phase4State.SILENCE)) {
+            return ExecutionResult.fail("message.arcane.silenced");
+        }
         String broken = Vows.violation(player, inscription);
         if (broken != null) {
             return ExecutionResult.fail(broken);
@@ -77,7 +80,7 @@ public final class CastingService {
             Vows.pay(player, inscription);
             PlayerAnims.onCast(player, plan);
             ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint(), SpellElement.of(plan).ordinal()));
-            castFx((ServerLevel) player.level(), player, SpellElement.of(plan));
+            if (!Traces.stealthy(inscription)) castFx((ServerLevel) player.level(), player, SpellElement.of(plan));
         }
         return new ExecutionResult(result.success(), result.message(), manaCost);
     }
@@ -107,7 +110,7 @@ public final class CastingService {
         context.setRitualLevel(bonus.level());
         if (bonus.radius() > 0 && bonus.center() != null) context.setRitual(bonus.radius(), bonus.center());
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
-        if (result.success()) castFx(level, caster, SpellElement.of(context.plan()));
+        if (result.success() && !Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()));
         return result;
     }
 
@@ -115,6 +118,7 @@ public final class CastingService {
         if (com.arcane.ritual.RitualRequirements.of(inscription).needsRitual()) {
             return ExecutionResult.fail("message.arcane.requires_ritual");
         }
+        if (Phase4State.active(caster, Phase4State.SILENCE)) return ExecutionResult.fail("message.arcane.silenced");
         String broken = Vows.violation(caster, inscription);
         if (broken != null) return ExecutionResult.fail(broken);
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
@@ -131,7 +135,7 @@ public final class CastingService {
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
             Vows.pay(caster, inscription);
-            castFx(level, caster, SpellElement.of(context.plan()));
+            if (!Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()));
         }
         return result;
     }

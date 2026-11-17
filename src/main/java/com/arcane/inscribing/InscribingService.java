@@ -29,6 +29,9 @@ import java.util.WeakHashMap;
 public final class InscribingService {
   public static final String TRIGGER_ON_OPEN = "on_open";
   public static final String TRIGGER_ON_TOUCH = "on_touch";
+  /** Dispara quando o bloco recebe sinal de redstone (glifo Ativar por Sinal). */
+  public static final String TRIGGER_ON_SIGNAL = "on_signal";
+  private static final Map<ServerLevel, java.util.Set<BlockPos>> POWERED = new WeakHashMap<>();
   /** Intervalo minimo entre dois disparos do mesmo bloco por toque (provisorio). */
   public static final int TOUCH_COOLDOWN_TICKS = 40;
 
@@ -120,6 +123,17 @@ public final class InscribingService {
       BlockPos pos = anchor.pos();
       if (!level.isLoaded(pos)) continue;
 
+      if (TRIGGER_ON_SIGNAL.equals(anchor.triggerType())) {
+        java.util.Set<BlockPos> powered = POWERED.computeIfAbsent(level, l -> new java.util.HashSet<>());
+        boolean on = level.hasNeighborSignal(pos);
+        if (!on) { powered.remove(pos); continue; }
+        if (!powered.add(pos)) continue; // so na subida do sinal
+        // A criatura mais perto (ate 6 blocos) e a origem, como no gatilho de toque.
+        LivingEntity near = level.getEntitiesOfClass(LivingEntity.class, new AABB(pos).inflate(6.0), e -> e.isAlive() && !e.isSpectator())
+            .stream().min(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5))).orElse(null);
+        if (near != null) CastingService.tryCast(near, anchor.inscription(), level);
+        continue;
+      }
       if (!TRIGGER_ON_TOUCH.equals(anchor.triggerType())) continue;
       Long last = cooldowns.get(pos);
       if (last != null && now - last < TOUCH_COOLDOWN_TICKS) continue;

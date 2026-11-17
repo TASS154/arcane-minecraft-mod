@@ -26,3 +26,15 @@
 - **Ao Cair:** só dispara com queda de 3 blocos ou mais (o limite é fixo, não tem parâmetro).
 - **Chuva ou Tempestade:** lê o clima do mundo (não exige estar sob o céu). Segurando Item X: só a mão principal.
 - **Molhar na regra do Fogo:** o Fogo em alvo molhado ou na chuva "nem pega" (vira vapor), por regra JSON; mudei o dano do Raio com alvo molhado de +0,3 para +0,5.
+
+## Dúvidas registradas na Fase 4
+- **Não duplicados:** Telecinese já existe; Persistente é igual a Duração (dobra o tempo); Runa de Chão é Zona + Ao Entrar na Zona. Se quiser uma Runa com visual próprio, posso criar só a casca.
+- **Eletrificar/Condutor:** um glifo só, com `mode` 0 (arcos de dano) ou 1 (condutor de raios). Se preferir dois glifos, é só dividir a tabela.
+- **Reanimar Aliado:** interpretei como "erguer uma criatura que morreu há pouco" (até 2 min, não jogador nem chefe, máx. 2), com metade da vida e IA de apoio. Se queria reviver um aliado/jogador, é outra mecânica.
+- **Encantar:** é um encanto temporário de golpes (tag no item), não um encantamento permanente do jogo; só corpo a corpo.
+- **Vincular:** o significado não estava claro; escolhi "o efeito de poção acaba se o conjurador morrer ou se afastar". Confirmar.
+- **Sobrecarga vs. Potência:** Potência (+50%) já existia; Sobrecarga dobra a força mas cobra 1 coração de dano mágico por efeito (nunca letal). Valores provisórios.
+- **Furtivo e Falso Rastro:** só atuam no resíduo de mundo (cicatrizes) e no alarde da conjuração; não tornam a conjuração invisível a quem está olhando.
+- **Ativar por Sinal:** vale em inscrições no mundo; dispara na subida do sinal e usa a criatura mais perto (6 blocos) como origem. Sem criatura por perto, nada acontece.
+- **Silêncio:** quem está silenciado não consegue nem se dissipar; só o tempo (ou outro meio futuro) resolve. Dissipar em outros não tira Silêncio.
+- **Escalada e Gancho no jogador:** dependem de velocidade/entrada aplicadas no servidor; podem precisar de ajuste fino no cliente.

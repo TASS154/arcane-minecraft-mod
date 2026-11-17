@@ -7,7 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 /** Marcas arcanas: guardadas na propria entidade (some ao expirar), lidas pelos filtros Marcados e Nao Marcados. */
 public final class Marks {
-  private static final String KEY = "arcane_marked_until";
+  public static final String KEY = "arcane_marked_until";
 
   private Marks() {}
 

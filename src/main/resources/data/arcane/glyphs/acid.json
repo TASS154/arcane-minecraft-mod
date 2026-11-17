@@ -1,0 +1,30 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:acid",
+    "magnitude_keys": [
+      "amount"
+    ]
+  },
+  "parameters": {
+    "amount": {
+      "type": "float",
+      "default": 3.0,
+      "min": 1.0,
+      "max": 12.0
+    },
+    "corrode": {
+      "type": "int",
+      "default": 8.0,
+      "min": 0.0,
+      "max": 60.0
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "blood"
+  ]
+}

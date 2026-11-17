@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:sense"
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 16.0,
+      "min": 4.0,
+      "max": 32.0
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 1,
+  "families": [
+    "knowledge"
+  ]
+}

@@ -27,6 +27,10 @@ public class PotionEffectHandler implements EffectHandler {
     for (Entity entity : targets.entities()) {
       if (entity instanceof LivingEntity living) {
         living.addEffect(new MobEffectInstance(effect, ticks, level), context.caster());
+        // Vincular: o efeito acaba se o conjurador morrer ou se afastar.
+        if (call.parameters().getOrDefault("bind", 0.0) > 0.0 && living != context.caster()) {
+          com.arcane.execution.Phase4Service.bind(context.caster(), living, effect);
+        }
       }
     }
     // Chao ou ponto vazio: o efeito fica numa nuvem que paira ali por alguns segundos (no maximo 2 nuvens).

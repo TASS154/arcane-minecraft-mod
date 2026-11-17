@@ -8,29 +8,32 @@ Custo em "unidades": P ≈ 0,5 dia, M ≈ 1 dia, G ≈ 2 a 3 dias de trabalho, c
 
 ## 1. Restaurar (recompor blocos destruídos recentemente)
 
+**Decisões fechadas com Everton:** glifo **raro** (tier 3); **qualquer jogador** pode restaurar estrago de qualquer autor; **sem recarga**; explosões e afins **não dropam item por padrão** (config para ligar; ligada, os blocos daquela conjuração não entram no diário); **Dig fora do diário** e sempre dropa; **Cortar entra** no diário e não dropa; baús e fornalhas podem ser destruídos e soltam o conteúdo, o Restaurar devolve só o bloco vazio; diário só em memória na v1.
+
 ### O que é
 Glifo de efeito que reconstrói, dentro de um raio, os blocos que **magias** destruíram há pouco, a partir de um snapshot guardado no momento da destruição.
 
 ### Desenho
-- **Registro.** Um `BlockJournal` por dimensão guarda entradas `(pos, BlockState, NBT do bloco-entidade opcional, tempo, autor)`. Só entram blocos destruídos por código do mod: Explosão Destrutiva, Escavar, Dano em blocos frágeis, Congelar/Derreter, Cortar folhas. Hoje há cerca de 8 pontos de escrita no mundo (`BlastEffectHandler`, `DigEffectHandler`, `CutEffectHandler`, `DamageEffectHandler`, `FreezeEffectHandler`, `FireEffectHandler`, `IgniteEffectHandler`, `BarrierFormHandler`); cada um passa a chamar `BlockJournal.record(level, pos, oldState, cause)` **antes** de alterar o bloco.
-- **Limites duros (segurança do servidor).** Teto de entradas por dimensão (padrão 4.096, as mais antigas saem primeiro), janela de validade (padrão 120 s), teto de blocos por conjuração (padrão 256, configurável), raio máximo 12.
-- **Restaurar.** Percorre o diário no raio, do mais antigo para o mais novo, e recoloca o bloco só se a posição **ainda estiver no estado em que a magia a deixou** (ar, fluido ou o bloco-resíduo). Se alguém construiu ali, a entrada é descartada sem sobrescrever. Itens que a explosão já soltou no chão não são recolhidos: o jogador pode duplicar itens recolocando blocos e guardando os drops. Mitigação proposta: Restaurar apaga do mundo os `ItemEntity` recém-criados de cada bloco restaurado no mesmo ponto (raio 1,5, últimos 120 s) e ignora blocos com inventário (baús, fornalhas) na versão 1.
-- **Persistência.** Opcional. Proposta v1: o diário vive só em memória (some ao reiniciar o servidor, janela de 2 min torna isso aceitável). Salvar em `SavedData` custa M a mais e só vale se quisermos restauração entre sessões.
-- **Config.** `restoreEnabled`, `restoreWindowSeconds`, `restoreMaxBlocksPerCast`, `restoreJournalCap`; respeita as configs atuais contra destruição de blocos.
-- **Interação com o resto.** Ritual de tier alto (consistente com Dobrar/Clima) ou glifo de tier 3 com custo de mana proporcional aos blocos recompostos? **Pergunta 1** abaixo.
+- **Registro.** Um `BlockJournal` por dimensão guarda `(pos, BlockState, tempo, autor)`. Entram blocos destruídos por Explosão Destrutiva, Cortar, Dano em blocos frágeis, Congelar/Derreter, Fogo/Ignição e barreiras. **Escavar não entra.** Cada ponto de escrita chama `BlockJournal.record(level, pos, oldState, cause)` **antes** de alterar o bloco.
+- **Sem loot.** Os efeitos que entram no diário destroem sem soltar item (`destroyBlock(pos, false)`). Config `blastDropsLoot` (padrão `false`): se ligada, esses efeitos dropam e **não registram** no diário. O conteúdo de blocos com inventário cai normalmente (são itens que já existiam).
+- **Limites duros.** Teto de entradas por dimensão (4.096, as mais antigas saem primeiro), janela de validade (120 s), teto de blocos por conjuração (256), raio máximo 12 (escala com a magnitude).
+- **Restaurar.** Percorre o diário no raio, do mais antigo para o mais novo, em lotes de 32 por tick, e recoloca o bloco só se a posição **ainda estiver no estado pós-magia** (ar, fluido ou resíduo). Se alguém construiu ali, a entrada é descartada. Só o estado simples do bloco volta; bloco com inventário volta vazio, sem NBT.
+- **Custo e recarga.** Mana = custo base + valor pequeno por bloco efetivamente restaurado; se nada for restaurado, não cobra. **Sem recarga.** Efeito visual: partículas subindo.
+- **Persistência.** Só em memória na v1 (some ao reiniciar).
+- **Config.** `restoreEnabled`, `restoreWindowSeconds`, `restoreMaxBlocksPerCast`, `restoreJournalCap`, `blastDropsLoot`.
 
 ### Riscos
 | Risco | Gravidade | Mitigação |
 |---|---|---|
-| Duplicação de itens (drops + bloco restaurado) | alta | apagar drops do ponto; sem blocos com inventário na v1 |
-| Sobrescrever construção de terceiros | alta | só restaura se o estado atual for o "pós-magia"; respeita proteção (`PenRegistry`/claims se existirem) |
-| Custo de memória/tick em explosões grandes | média | tetos por dimensão e por conjuração; restauração em lotes de 32 blocos por tick |
-| Blocos com NBT (placas, cabeças) | baixa | v1 só restaura estados simples; NBT de bloco-entidade fica fora |
-| Interação com outros mods que protegem terreno | média | usar o mesmo caminho `mayAlterWorld` que os outros efeitos |
+| Loot de explosão virar exploit | média | padrão sem loot; com loot ligado, fora do diário |
+| Sobrescrever construção de terceiros | alta | só restaura se o estado atual for o "pós-magia"; mesmo caminho `mayAlterWorld` dos outros efeitos |
+| Sem recarga, uso como "pincel" ou spam | baixa | o custo em mana e o teto por conjuração limitam; reavaliar em jogo |
+| Memória/tick em explosões grandes | média | tetos por dimensão e por conjuração; lotes de 32 por tick |
+| Mudança de gameplay (explosão sem loot) | média | aprovada por Everton; configurável |
 
-### Custo: **M a G** (M sem persistência; G com `SavedData` e lotes).
+### Custo: **M** (sem persistência, sem NBT, sem rastreio de drops).
 ### Testes planejados
-GameTests: registro em cada ponto de escrita; restauração exata; recusa quando há construção por cima; teto por conjuração; expiração da janela; sem duplicar drops. JUnit: política de teto/expiração do diário (lógica pura).
+GameTests: registro em cada ponto de escrita (e Dig **não** registra); restauração exata; recusa com construção por cima; teto por conjuração; expiração da janela; sem drops por padrão e com `blastDropsLoot` fora do diário; baú volta vazio; qualquer jogador restaura; sem recarga. JUnit: política de teto/expiração do diário.
 
 ---
 
@@ -94,15 +97,15 @@ GameTests: guardar e abrir, sobreviver a salvar/recarregar, bloqueio de itens pr
 ## Ordem e custo total sugeridos
 
 1. **Bolso Arcano** (M): isolado e de menor risco; bom para validar o padrão de menu/anexo.
-2. **Restaurar** (M a G): maior risco de exploit, mas de escopo fechado nos pontos de escrita.
+2. **Restaurar** (M): maior risco de exploit, mas de escopo fechado nos pontos de escrita.
 3. **Coro** (G): o mais caro e o único que depende de dois clientes para a verificação em jogo.
 
 Total estimado: 4 a 7 dias de trabalho. Cada um fecha com commit próprio, docs regeradas e honestidade no `ESTADO_DO_MOD.md`.
 
 ## Perguntas que precisam de resposta antes de começar
 
-1. **Restaurar:** glifo comum (tier 3, custo de mana por bloco recomposto) ou ritual como Dobrar? Recomendo glifo comum com tetos.
+1. ~~Restaurar: glifo vs ritual~~ **Fechado:** glifo raro (tier 3).
 2. **Bolso:** os itens ficam com o jogador na morte (recomendado, é um bolso mágico) ou caem como o inventário?
-3. **Restaurar:** diário só em memória na v1 (recomendado) ou salvo no mundo?
+3. ~~Restaurar: diário~~ **Fechado:** só em memória na v1.
 4. **Coro:** os participantes precisam ter a mesma magia equipada (recomendado, evita adesão acidental) ou basta estarem no raio?
 5. **Todos:** posso cortar algum dos três ou mudar a ordem?

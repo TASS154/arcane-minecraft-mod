@@ -5,6 +5,7 @@ import com.arcane.client.ClientArcaneData.GlyphEntry;
 import com.arcane.client.ClientArcaneData.KnownGlyph;
 import com.arcane.client.ClientArcaneData.SpellEntry;
 import com.arcane.network.ModNetwork;
+import com.arcane.network.packet.C2SGrimoireOrgPacket;
 import com.arcane.network.packet.C2SOpenWritePacket;
 import com.arcane.network.packet.C2SRenameInscriptionPacket;
 import com.arcane.network.packet.C2SJournalNotePacket;
@@ -36,6 +37,7 @@ public class GrimoireScreen extends Screen {
   private static final int H = 200;
   private static final int ROW = 12;
   private static final int LIST_ROWS = 11;
+  private static final int SPELL_ROWS = 8;
   private static final int COLS = 5;
   private static final int GRID_ROWS = 7;
   private static final int CELL = 20;
@@ -45,7 +47,11 @@ public class GrimoireScreen extends Screen {
   private int left;
   private int top;
   private Tab tab = Tab.SPELLS;
-  private int spellScroll;
+  private int spellPage;
+  private int filterMode;
+  private net.minecraft.client.gui.components.EditBox searchBox, folderBox;
+  private Button prevPage, nextPage, filterButton, favButton, modeButton, folderOk, gearButton;
+  private final Button[] loadoutButtons = new Button[com.arcane.grimoire.SpellPrefs.LOADOUTS];
   private int logScroll;
   private int glyphScroll;
   private UUID selectedSpell;
@@ -91,7 +97,108 @@ public class GrimoireScreen extends Screen {
     addRenderableWidget(noteBox);
     noteButton = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.note.add"), b -> addNote())
         .bounds(left + 172, top + 175, 60, 20).build());
+    searchBox = new net.minecraft.client.gui.components.EditBox(font, left + 14, top + 24, 110, 12, Component.translatable("gui.arcane.search"));
+    searchBox.setMaxLength(24);
+    searchBox.setHint(Component.translatable("gui.arcane.search.hint"));
+    searchBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.search.tip")));
+    searchBox.setResponder(v -> { spellPage = 0; });
+    addRenderableWidget(searchBox);
+    prevPage = addRenderableWidget(Button.builder(Component.literal("◀"), b -> turnPage(-1)).bounds(left + 14, top + 136, 18, 14).build());
+    nextPage = addRenderableWidget(Button.builder(Component.literal("▶"), b -> turnPage(1)).bounds(left + 106, top + 136, 18, 14).build());
+    filterButton = addRenderableWidget(Button.builder(filterLabel(), b -> { filterMode = (filterMode + 1) % (4 + folders().size()); spellPage = 0; updateButtons(); })
+        .bounds(left + 14, top + 152, 110, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.filter.tip"))).build());
+    favButton = addRenderableWidget(Button.builder(Component.literal("☆"), b -> selectedSpellEntry().ifPresent(sp ->
+        ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.FAVORITE, sp.id(), sp.favorite() ? 0 : 1, ""))))
+        .bounds(left + 134, top + 94, 52, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.favorite.tip"))).build());
+    modeButton = addRenderableWidget(Button.builder(Component.literal("-"), b -> selectedSpellEntry().ifPresent(sp ->
+        ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.MODE, sp.id(), nextMode(sp), ""))))
+        .bounds(left + 190, top + 94, 52, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.mode.tip"))).build());
+    folderBox = new net.minecraft.client.gui.components.EditBox(font, left + 134, top + 110, 82, 12, Component.translatable("gui.arcane.folder"));
+    folderBox.setMaxLength(com.arcane.grimoire.SpellPrefs.MAX_FOLDER);
+    folderBox.setHint(Component.translatable("gui.arcane.folder"));
+    addRenderableWidget(folderBox);
+    folderOk = addRenderableWidget(Button.builder(Component.literal("✔"), b -> selectedSpellEntry().ifPresent(sp ->
+        ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.FOLDER, sp.id(), 0, folderBox.getValue()))))
+        .bounds(left + 218, top + 109, 22, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.folder.tip"))).build());
+    for (int i = 0; i < loadoutButtons.length; i++) {
+      final int set = i;
+      loadoutButtons[i] = addRenderableWidget(Button.builder(Component.literal("C" + (i + 1)), b -> selectedSpellEntry().ifPresent(sp ->
+          ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.LOADOUT_TOGGLE, sp.id(), set, ""))))
+          .bounds(left + 134 + i * 27, top + 126, 25, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.loadout.tip"))).build());
+    }
+    gearButton = addRenderableWidget(Button.builder(Component.literal("⚙"), b -> minecraft.setScreen(new ArcaneOptionsScreen(this)))
+        .bounds(left + 232, top + 2, 18, 18).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.options"))).build());
     if (selectedSpell == null) selectedSpell = ClientArcaneData.active().orElse(null);
+    updateButtons();
+  }
+
+  // ------------------------------------------------------------------ lista por pagina, busca e filtros
+  private List<String> folders() {
+    return ClientArcaneData.spells().stream().map(SpellEntry::folder).filter(f -> !f.isEmpty()).distinct().sorted().toList();
+  }
+
+  private Component filterLabel() {
+    int folderCount = folders().size();
+    if (filterMode >= 4 + folderCount) filterMode = 0;
+    return switch (filterMode) {
+      case 0 -> Component.translatable("gui.arcane.filter.all");
+      case 1 -> Component.translatable("gui.arcane.filter.favorites");
+      case 2 -> Component.translatable("gui.arcane.filter.recent");
+      case 3 -> Component.translatable("gui.arcane.filter.set", ClientArcaneData.activeLoadout() + 1);
+      default -> Component.translatable("gui.arcane.filter.folder", folders().get(filterMode - 4));
+    };
+  }
+
+  private static int nextMode(SpellEntry sp) {
+    boolean toggle = sp.glyphs().stream().anyMatch(g -> com.arcane.execution.CastChannels.TOGGLE_GLYPHS.contains(g.id().getPath()));
+    int n = sp.mode();
+    do { n = (n + 1) % 4; } while (n == 3 && !toggle);
+    return n;
+  }
+
+  /** Magias que passam pela busca e pelo filtro, favoritas primeiro. Busca: texto no nome ou num glifo (id ou nome), ou ">5" / "<5" para o custo. */
+  private List<SpellEntry> filtered() {
+    String q = searchBox == null ? "" : searchBox.getValue().trim().toLowerCase(java.util.Locale.ROOT);
+    List<SpellEntry> all = ClientArcaneData.spells();
+    List<UUID> set = ClientArcaneData.loadouts().isEmpty() ? List.of() : ClientArcaneData.loadouts().get(Math.floorMod(ClientArcaneData.activeLoadout(), ClientArcaneData.loadouts().size()));
+    List<String> folders = folders();
+    List<SpellEntry> out = new ArrayList<>();
+    for (SpellEntry sp : all) {
+      boolean ok = switch (filterMode) {
+        case 0 -> true;
+        case 1 -> sp.favorite();
+        case 2 -> sp.lastUsed() > 0;
+        case 3 -> set.contains(sp.id());
+        default -> filterMode - 4 < folders.size() && sp.folder().equals(folders.get(filterMode - 4));
+      };
+      if (ok && !q.isEmpty() && !matches(sp, q)) ok = false;
+      if (ok) out.add(sp);
+    }
+    if (filterMode == 2) out.sort((a, b) -> Long.compare(b.lastUsed(), a.lastUsed()));
+    else out.sort((a, b) -> Boolean.compare(b.favorite(), a.favorite()));
+    return out;
+  }
+
+  private static boolean matches(SpellEntry sp, String q) {
+    if ((q.startsWith(">") || q.startsWith("<")) && q.length() > 1) {
+      try {
+        int n = Integer.parseInt(q.substring(1).trim());
+        return q.startsWith(">") ? sp.cost() > n : sp.cost() >= 0 && sp.cost() < n;
+      } catch (NumberFormatException e) {
+        return false;
+      }
+    }
+    if (sp.name().toLowerCase(java.util.Locale.ROOT).contains(q) || sp.folder().toLowerCase(java.util.Locale.ROOT).contains(q)) return true;
+    for (GlyphEntry g : sp.glyphs()) {
+      if (g.id().getPath().contains(q) || ArcaneWorkbenchScreen.glyphName(g.id()).getString().toLowerCase(java.util.Locale.ROOT).contains(q)) return true;
+    }
+    return false;
+  }
+
+  private int pageCount() { return Math.max(1, (filtered().size() + SPELL_ROWS - 1) / SPELL_ROWS); }
+
+  private void turnPage(int d) {
+    spellPage = Math.max(0, Math.min(pageCount() - 1, spellPage + d));
     updateButtons();
   }
 
@@ -104,6 +211,7 @@ public class GrimoireScreen extends Screen {
   private net.minecraft.client.gui.components.EditBox renameBox;
   private Button renameButton;
   private UUID renameShownFor;
+  private UUID folderShownFor;
   private net.minecraft.client.gui.components.EditBox noteBox;
   private Button noteButton;
 
@@ -134,6 +242,28 @@ public class GrimoireScreen extends Screen {
       noteBox.visible = tab == Tab.JOURNAL;
       noteBox.setEditable(tab == Tab.JOURNAL);
       noteButton.visible = tab == Tab.JOURNAL;
+    }
+    boolean onSpells = tab == Tab.SPELLS;
+    if (searchBox != null) {
+      spellPage = Math.max(0, Math.min(pageCount() - 1, spellPage));
+      searchBox.visible = onSpells;
+      prevPage.visible = onSpells; nextPage.visible = onSpells; filterButton.visible = onSpells;
+      prevPage.active = spellPage > 0; nextPage.active = spellPage < pageCount() - 1;
+      filterButton.setMessage(filterLabel());
+      var sel = selectedSpellEntry();
+      boolean has = onSpells && sel.isPresent();
+      favButton.visible = has; modeButton.visible = has; folderBox.visible = has; folderOk.visible = has;
+      for (Button lb : loadoutButtons) lb.visible = has;
+      if (has) {
+        SpellEntry sp = sel.get();
+        favButton.setMessage(Component.literal(sp.favorite() ? "★ " : "☆ ").append(Component.translatable("gui.arcane.favorite")));
+        modeButton.setMessage(Component.translatable("gui.arcane.mode." + sp.mode()));
+        if (!java.util.Objects.equals(sp.id(), folderShownFor)) { folderShownFor = sp.id(); folderBox.setValue(sp.folder()); }
+        for (int i = 0; i < loadoutButtons.length; i++) {
+          boolean in = i < ClientArcaneData.loadouts().size() && ClientArcaneData.loadouts().get(i).contains(sp.id());
+          loadoutButtons[i].setMessage(Component.literal((in ? "§a" : "§7") + "C" + (i + 1)));
+        }
+      }
     }
     boolean spells = tab == Tab.SPELLS && selectedSpellEntry().isPresent();
     activateButton.visible = spells;
@@ -184,10 +314,10 @@ public class GrimoireScreen extends Screen {
   public boolean mouseClicked(double mx, double my, int button) {
     if (button == 0) {
       if (tab == Tab.SPELLS) {
-        int row = (int) ((my - (top + 28)) / ROW);
-        if (mx >= left + 14 && mx <= left + 124 && row >= 0 && row < LIST_ROWS) {
-          List<SpellEntry> spells = ClientArcaneData.spells();
-          int index = spellScroll + row;
+        int row = (int) ((my - (top + 38)) / ROW);
+        if (mx >= left + 14 && mx <= left + 124 && row >= 0 && row < SPELL_ROWS) {
+          List<SpellEntry> spells = filtered();
+          int index = spellPage * SPELL_ROWS + row;
           if (index < spells.size()) {
             selectedSpell = spells.get(index).id();
             confirmDelete = false;
@@ -210,7 +340,7 @@ public class GrimoireScreen extends Screen {
   public boolean mouseScrolled(double mx, double my, double delta) {
     int step = delta > 0 ? -1 : 1;
     switch (tab) {
-      case SPELLS -> spellScroll = Math.max(0, Math.min(spellScroll + step, Math.max(0, ClientArcaneData.spells().size() - LIST_ROWS)));
+      case SPELLS -> turnPage(step);
       case JOURNAL -> logScroll = Math.max(0, Math.min(logScroll + step * LIST_ROWS, Math.max(0, ClientArcaneData.log().size() - 1)));
       case GLYPHS -> {
         int rows = (slotCount() + COLS - 1) / COLS;
@@ -255,32 +385,35 @@ public class GrimoireScreen extends Screen {
   }
 
   private void renderSpells(GuiGraphics g, int mouseX, int mouseY) {
-    List<SpellEntry> spells = ClientArcaneData.spells();
-    if (spells.isEmpty()) {
-      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.empty_spells"), left + 18, top + 30, 100, 0x5A4630);
+    updateButtons();
+    List<SpellEntry> spells = filtered();
+    if (ClientArcaneData.spells().isEmpty()) {
+      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.empty_spells"), left + 18, top + 40, 100, 0x5A4630);
       return;
     }
+    if (spells.isEmpty()) {
+      g.drawWordWrap(font, Component.translatable("gui.arcane.search.none"), left + 18, top + 42, 100, 0x5A4630);
+    }
     Optional<UUID> active = ClientArcaneData.active();
-    for (int r = 0; r < LIST_ROWS; r++) {
-      int index = spellScroll + r;
+    for (int r = 0; r < SPELL_ROWS; r++) {
+      int index = spellPage * SPELL_ROWS + r;
       if (index >= spells.size()) break;
       SpellEntry s = spells.get(index);
-      int y = top + 28 + r * ROW;
+      int y = top + 38 + r * ROW;
       boolean selected = s.id().equals(selectedSpell);
       if (selected) g.fill(left + 14, y - 1, left + 124, y + ROW - 1, 0x55A07830);
       boolean isActive = active.map(a -> a.equals(s.id())).orElse(false);
-      if (isActive) g.drawString(font, "★", left + 16, y + 1, 0xC08000, false);
-      String name = font.plainSubstrByWidth(spellName(s).getString(), 78);
-      g.drawString(font, name, left + 26, y + 1, selected ? 0x2A1A08 : 0x4A3820, false);
+      if (isActive) g.drawString(font, "▶", left + 15, y + 1, 0x6A3F8F, false);
+      if (s.favorite()) g.drawString(font, "★", left + 23, y + 1, 0xC08000, false);
+      String name = font.plainSubstrByWidth(spellName(s).getString(), 70);
+      g.drawString(font, name, left + 33, y + 1, selected ? 0x2A1A08 : 0x4A3820, false);
       if (s.cost() >= 0) {
         String cost = String.valueOf(s.cost());
         g.drawString(font, cost, left + 122 - font.width(cost), y + 1, 0x1F6F8F, false);
       }
     }
-    if (spells.size() > LIST_ROWS) {
-      g.drawString(font, (spellScroll + 1) + "-" + Math.min(spells.size(), spellScroll + LIST_ROWS) + "/" + spells.size(),
-          left + 14, top + 162, 0x7A6A50, false);
-    }
+    String pageText = (spellPage + 1) + "/" + pageCount();
+    g.drawString(font, pageText, left + 69 - font.width(pageText) / 2, top + 139, 0x5A4630, false);
 
     Optional<SpellEntry> sel = selectedSpellEntry();
     if (sel.isEmpty()) {
@@ -307,7 +440,7 @@ public class GrimoireScreen extends Screen {
       }
     }
     // Selo geometrico: cada glifo envolve o anterior (design). Unico por composicao.
-    com.arcane.client.SealRenderer.draw(g, spell.glyphs().stream().map(GlyphEntry::id).toList(), left + 188, top + 118, 28);
+    com.arcane.client.SealRenderer.draw(g, spell.glyphs().stream().map(GlyphEntry::id).toList(), left + 228, top + 151, 9);
     if (tip != null) g.renderComponentTooltip(font, tip, mouseX, mouseY);
   }
 

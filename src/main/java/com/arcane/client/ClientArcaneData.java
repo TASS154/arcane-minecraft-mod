@@ -46,7 +46,9 @@ public final class ClientArcaneData {
     public GlyphEntry(ResourceLocation id) { this(id, Map.of()); }
   }
 
-  public record SpellEntry(UUID id, String name, int cost, List<GlyphEntry> glyphs) {}
+  public record SpellEntry(UUID id, String name, int cost, List<GlyphEntry> glyphs, int mode, boolean favorite, String folder, long lastUsed) {
+    public SpellEntry(UUID id, String name, int cost, List<GlyphEntry> glyphs) { this(id, name, cost, glyphs, 0, false, "", 0L); }
+  }
 
   private static float mana;
   private static float maxMana = 100f;
@@ -63,6 +65,8 @@ public final class ClientArcaneData {
   private static List<SpellEntry> spells = List.of();
   private static List<String> log = List.of();
   private static UUID active;
+  private static List<List<UUID>> loadouts = List.of();
+  private static int activeLoadout;
   private static boolean hasData;
 
   private ClientArcaneData() {}
@@ -114,10 +118,20 @@ public final class ClientArcaneData {
         for (String key : p.getAllKeys()) params.put(key, p.getDouble(key));
         entries.add(new GlyphEntry(new ResourceLocation(e.getString("id")), Map.copyOf(params)));
       }
-      s.add(new SpellEntry(c.getUUID("id"), c.getString("name"), c.getInt("cost"), List.copyOf(entries)));
+      s.add(new SpellEntry(c.getUUID("id"), c.getString("name"), c.getInt("cost"), List.copyOf(entries),
+          c.getInt("mode"), c.getBoolean("fav"), c.getString("folder"), c.getLong("used")));
     }
     spells = Collections.unmodifiableList(s);
     active = full.hasUUID("active") ? full.getUUID("active") : null;
+    List<List<UUID>> sets = new ArrayList<>();
+    ListTag setTags = full.getList("loadouts", Tag.TAG_COMPOUND);
+    for (int i = 0; i < setTags.size(); i++) {
+      List<UUID> one = new ArrayList<>();
+      for (Tag st : setTags.getCompound(i).getList("slots", Tag.TAG_INT_ARRAY)) one.add(net.minecraft.nbt.NbtUtils.loadUUID(st));
+      sets.add(List.copyOf(one));
+    }
+    loadouts = List.copyOf(sets);
+    activeLoadout = full.getInt("activeLoadout");
 
     List<String> lines = new ArrayList<>();
     ListTag logTag = full.getList("log", Tag.TAG_STRING);
@@ -143,6 +157,8 @@ public final class ClientArcaneData {
     spells = List.of();
     log = List.of();
     active = null;
+    loadouts = List.of();
+    activeLoadout = 0;
     mana = 0f;
     totalGlyphs = 0;
   }
@@ -188,6 +204,18 @@ public final class ClientArcaneData {
   public static float maxMana() { return maxMana; }
   public static double potency() { return potency; }
   public static double poison() { return poison; }
+  public static List<List<UUID>> loadouts() { return loadouts; }
+  public static int activeLoadout() { return activeLoadout; }
+
+  /** Magias do conjunto ativo que ainda existem, na ordem dos slots. */
+  public static List<SpellEntry> activeLoadoutSpells() {
+    if (loadouts.isEmpty()) return List.of();
+    List<SpellEntry> out = new ArrayList<>();
+    for (UUID id : loadouts.get(Math.floorMod(activeLoadout, loadouts.size()))) {
+      spells.stream().filter(s -> s.id().equals(id)).findFirst().ifPresent(out::add);
+    }
+    return out;
+  }
   public static boolean grimoirePresent() { return grimoirePresent; }
   public static int totalGlyphs() { return totalGlyphs; }
   public static List<KnownGlyph> glyphs() { return glyphs; }

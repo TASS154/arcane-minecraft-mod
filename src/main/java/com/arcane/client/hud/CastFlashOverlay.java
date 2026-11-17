@@ -19,7 +19,8 @@ public class CastFlashOverlay implements IGuiOverlay {
   @Override
   public void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
     long elapsed = System.currentTimeMillis() - startMs;
-    if (elapsed >= DURATION_MS || Minecraft.getInstance().options.hideGui) return;
+    boolean calm = com.arcane.client.ClientPrefs.reduceFlashes();
+    if (calm || elapsed >= DURATION_MS || Minecraft.getInstance().options.hideGui) return; // 'reduzir flashes' desliga o clarao
     float t = 1f - elapsed / (float) DURATION_MS;
     int alpha = (int) (110 * t * t);
     int edge = (alpha << 24) | (rgb & 0xFFFFFF);

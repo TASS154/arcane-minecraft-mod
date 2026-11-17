@@ -47,6 +47,7 @@ public class ArcaneMod {
         ModParticles.register(modBus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ArcaneConfig.SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, com.arcane.client.ClientPrefs.SPEC, "arcane-client.toml");
 
         modBus.addListener(this::commonSetup);
         modBus.addListener(this::onConfig);

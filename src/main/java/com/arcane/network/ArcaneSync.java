@@ -103,6 +103,11 @@ public final class ArcaneSync {
         // glifo removido por datapack: a magia fica listada, sem custo
       }
       s.putInt("cost", cost);
+      var pref = grimoire.prefs().get(id);
+      s.putInt("mode", pref.mode.ordinal());
+      s.putBoolean("fav", pref.favorite);
+      s.putString("folder", pref.folder);
+      s.putLong("used", pref.lastUsed);
       ListTag entries = new ListTag();
       inscription.glyphs().forEach(gi -> {
         CompoundTag e = new CompoundTag();
@@ -117,6 +122,16 @@ public final class ArcaneSync {
     });
     full.put("spells", spells);
     grimoire.activeInscriptionId().ifPresent(id -> full.putUUID("active", id));
+    ListTag sets = new ListTag();
+    for (int i = 0; i < com.arcane.grimoire.SpellPrefs.LOADOUTS; i++) {
+      ListTag one = new ListTag();
+      grimoire.prefs().loadout(i).forEach(id -> one.add(net.minecraft.nbt.NbtUtils.createUUID(id)));
+      CompoundTag holder = new CompoundTag();
+      holder.put("slots", one);
+      sets.add(holder);
+    }
+    full.put("loadouts", sets);
+    full.putInt("activeLoadout", grimoire.prefs().activeLoadout());
 
     ListTag log = new ListTag();
     grimoire.discoveryLog().forEach(entry -> log.add(StringTag.valueOf(entry)));

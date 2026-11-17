@@ -16,6 +16,7 @@ public final class TickDispatcher {
     public static void onServerTick(MinecraftServer server) {
         SpellTickScheduler.tick(server);
         com.arcane.execution.Telekinesis.tick(server);
+        com.arcane.execution.CastChannels.tick(server);
         if (server.getTickCount() % AMBIENT_INTERVAL_TICKS == 0) {
             tickAmbient(server);
         }

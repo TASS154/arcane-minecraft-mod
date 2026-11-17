@@ -442,3 +442,18 @@ Na bancada, **passe o mouse sobre a linha de estado** (Pronto / ⚠ Veja a prév
 - **Telecinese** (`telekinesis`, efeito, custo 6; duração até 400 ticks, distância 2–16, esfera 0–6, mesmo tipo 0/1): segura **criaturas e blocos** e os leva pairando diante da mira. Grupo de blocos decidido **ao conjurar**: um bloco; esfera de raio N em volta do bloco mirado; ou **mesmo tipo conectado** (até 120), opcionalmente limitado pela esfera. Ao soltar (fim, nova conjuração ou morte) tudo cai com o embalo e os blocos pousam. Respeita `worldAlteringSpells`.
 **Câmaras seladas**
 - Ao gerar um chunk novo do Overworld, com chance `sealedChamberChance` (padrão 0,8%), surge uma **câmara de tijolos de ardosia** a 40 blocos de profundidade ou menos: altar no centro, círculo de ritual, **criatura selada** (sem IA, invulnerável, brilhando, com o dobro de vida) e um baú com tinta, cristal, página e notas. **Quebrar o altar** (jogador ou explosão) solta a criatura, hostil. `/arcane chamber` (operador) constrói uma onde você está.
+
+## Fase 1: usabilidade do grimório
+**Como escolher a magia (Opções ⚙ no canto do Grimório; modo salvo em `config/arcane-client.toml`)**
+- **Roda radial** (padrão): segure **R**, aponte o mouse para a magia (o selo geométrico é o ícone) e solte. Mostra o conjunto ativo; sem conjunto, as favoritas (ou as 12 mais recentes).
+- **Conjuntos:** 4 conjuntos de até 6 magias (botões C1 a C4 na página da magia, no Grimório). Neste modo **R** troca o conjunto e **B** troca de magia dentro dele. A faixa do conjunto aparece acima da hotbar.
+- **Conjurador:** as teclas **1 a 9** escolhem a magia (do conjunto ativo, ou favoritas). Substituem a hotbar enquanto o modo estiver ligado.
+**Grimório por página**
+- A lista de magias agora é **paginada** (◀ ▶ e roda do mouse viram a página), sem rolagem.
+- **Busca:** nome, pasta ou glifo contido (nome ou id, ex.: "fogo"); `>5` / `<5` filtram pelo custo.
+- **Filtros** (botão abaixo da lista): todas, favoritas, usadas recentemente (por uso), conjunto ativo e cada pasta. **Favoritas** vão para o topo. **Pastas:** nome livre de até 12 letras, por magia.
+**Modo de conjuração por magia** (botão ao lado de Favorita; V conjura)
+- **Toque:** uma vez (como antes). **Carregar:** segurar drena mana (1,5x o custo na carga cheia, 3 s) e soltar lança **uma vez, mais forte** (até 3x os parâmetros de efeito), barra de carga no HUD. **Segurar:** conjura e repete a cada 0,5 s enquanto apertada, pagando o custo normal a cada vez; para sem mana. **Alternar:** só para Flutuar e Telecinese; liga no primeiro toque e desliga no segundo. Tudo no servidor (`CastChannels`); o cliente só avisa "apertou/soltou".
+**HUD e acessibilidade**
+- HUD: magia ativa com custo e modo (custo em vermelho se faltar mana), faixa do conjunto com número, selo e letra do modo (T/C/H/A), barra de carga, mensagem de falha em vermelho.
+- Opções: **alternar em vez de segurar** (aperta uma vez para começar e outra para terminar: roda, carregar, segurar), **paleta para daltonismo** (Okabe-Ito nos selos; o modo vai também em letra), **reduzir flashes** (desliga o clarão da conjuração). As teclas são configuráveis em Controles > Arcane.

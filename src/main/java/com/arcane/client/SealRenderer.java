@@ -10,6 +10,18 @@ public final class SealRenderer {
   private SealRenderer() {}
 
   private static int colorFor(String category) {
+    if (ClientPrefs.colorblind()) {
+      // Paleta Okabe-Ito (distinguivel em deuteranopia/protanopia/tritanopia), escurecida para ler no pergaminho
+      return switch (category) {
+        case "form" -> 0xFF0072B2;
+        case "effect" -> 0xFFD55E00;
+        case "filter" -> 0xFF009E73;
+        case "modifier" -> 0xFF997F00;
+        case "condition" -> 0xFFCC79A7;
+        case "activator" -> 0xFF444444;
+        default -> 0xFF7A6A50;
+      };
+    }
     return switch (category) {
       case "form" -> 0xFF1E82AA;
       case "effect" -> 0xFFBE4628;

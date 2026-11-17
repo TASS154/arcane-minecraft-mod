@@ -35,6 +35,7 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = ArcaneMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup {
   public static KeyMapping CAST_KEY;
+  public static KeyMapping RADIAL_KEY;
   public static KeyMapping CYCLE_KEY;
   public static KeyMapping GRIMOIRE_KEY;
 
@@ -75,6 +76,7 @@ public class ClientSetup {
   @SubscribeEvent
   public static void registerOverlays(RegisterGuiOverlaysEvent event) {
     event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "mana", new ManaHudOverlay());
+    event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "spell_bar", new com.arcane.client.hud.SpellBarOverlay());
     event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "cast_flash", new com.arcane.client.hud.CastFlashOverlay());
   }
 
@@ -83,9 +85,11 @@ public class ClientSetup {
     CAST_KEY = new KeyMapping("key.arcane.cast", GLFW.GLFW_KEY_V, "key.categories.arcane");
     CYCLE_KEY = new KeyMapping("key.arcane.cycle", GLFW.GLFW_KEY_B, "key.categories.arcane");
     GRIMOIRE_KEY = new KeyMapping("key.arcane.grimoire", GLFW.GLFW_KEY_G, "key.categories.arcane");
+    RADIAL_KEY = new KeyMapping("key.arcane.radial", GLFW.GLFW_KEY_R, "key.categories.arcane");
     event.register(CAST_KEY);
     event.register(CYCLE_KEY);
     event.register(GRIMOIRE_KEY);
+    event.register(RADIAL_KEY);
   }
 
   /** Conjura a inscricao ativa. O id vem do servidor (ClientArcaneData); o servidor revalida tudo. */
@@ -102,6 +106,7 @@ public class ClientSetup {
     Minecraft mc = Minecraft.getInstance();
     if (mc.player == null || mc.getConnection() == null) return;
     List<ClientArcaneData.SpellEntry> spells = ClientArcaneData.spells();
+    if (ClientPrefs.mode() == ClientPrefs.UseMode.LOADOUT && !ClientArcaneData.activeLoadoutSpells().isEmpty()) spells = ClientArcaneData.activeLoadoutSpells();
     if (spells.isEmpty()) return;
     UUID current = ClientArcaneData.active().orElse(null);
     int index = 0;

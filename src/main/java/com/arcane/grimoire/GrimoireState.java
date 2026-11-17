@@ -20,10 +20,12 @@ public class GrimoireState {
     private boolean grimoirePresent = true;
     private long grimoireDestroyedUntilTick = 0L;
     private UUID activeInscriptionId = null;
+    private final SpellPrefs prefs = new SpellPrefs();
 
     public Map<ResourceLocation, GlyphKnowledge> knowledge() { return knowledge; }
     public Map<UUID, Inscription> spellbook() { return spellbook; }
     public List<String> discoveryLog() { return discoveryLog; }
+    public SpellPrefs prefs() { return prefs; }
     public int visualStage() { return visualStage; }
 
     /** Capacidade: quantas magias cabem. Cresce com Paginas Arcanas (e, no futuro, rituais). */
@@ -59,6 +61,7 @@ public class GrimoireState {
         other.spellbook.forEach((id, spell) -> {
             if (!spellbook.containsKey(id) && !hasSameSpell(spell)) spellbook.put(id, spell);
         });
+        prefs.copyFrom(other.prefs, spellbook.keySet());
         pages = Math.max(pages, other.pages);
         visualStage = stageFor(pages);
         other.discoveryLog.forEach(this::logDiscovery);
@@ -95,6 +98,7 @@ public class GrimoireState {
         List<UUID> order = new ArrayList<>(spellbook.keySet());
         int index = order.indexOf(id);
         if (spellbook.remove(id) == null) return false;
+        prefs.forget(id);
         if (id.equals(activeInscriptionId)) {
             // Seleciona a que vinha depois (ou a anterior, se era a ultima).
             order.remove(id);
@@ -144,6 +148,7 @@ public class GrimoireState {
         if (activeInscriptionId != null) {
             tag.putUUID("activeInscription", activeInscriptionId);
         }
+        prefs.save(tag);
     }
 
     public void load(CompoundTag tag) {
@@ -174,6 +179,7 @@ public class GrimoireState {
         grimoirePresent = !tag.contains("grimoirePresent") || tag.getBoolean("grimoirePresent");
         grimoireDestroyedUntilTick = tag.getLong("destroyedUntil");
         activeInscriptionId = tag.hasUUID("activeInscription") ? tag.getUUID("activeInscription") : null;
+        prefs.load(tag);
     }
 
     public static GrimoireState createDefault() {

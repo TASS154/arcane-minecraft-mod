@@ -47,7 +47,10 @@ public class ManaHudOverlay implements IGuiOverlay {
     Component spell = ClientArcaneData.activeSpell()
         .map(s -> s.name().isEmpty() ? (Component) Component.translatable("gui.arcane.unnamed") : Component.literal(s.name()))
         .orElse(Component.translatable("hud.arcane.no_spell"));
-    g.drawString(font, spell, x, y - 10, 0xD0B0FF, true);
+    var activeEntry = ClientArcaneData.activeSpell();
+    Component line = activeEntry.map(a -> (Component) spell.copy().append(Component.literal(" · " + Math.max(0, a.cost()) + " · ")
+        .append(Component.translatable("gui.arcane.mode." + a.mode())))).orElse(spell);
+    g.drawString(font, line, x, y - 10, activeEntry.isPresent() && activeEntry.get().cost() > mana ? 0xFF7070 : 0xD0B0FF, true);
 
     int infoY = y - 20;
     if (!ClientArcaneData.grimoirePresent()) {

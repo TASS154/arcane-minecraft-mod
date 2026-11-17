@@ -34,11 +34,6 @@ public class ClientEvents {
 
   @SubscribeEvent
   public static void onKey(InputEvent.Key event) {
-    if (ClientSetup.CAST_KEY != null) {
-      while (ClientSetup.CAST_KEY.consumeClick()) {
-        ClientSetup.tryCast(false);
-      }
-    }
     if (ClientSetup.GRIMOIRE_KEY != null) {
       while (ClientSetup.GRIMOIRE_KEY.consumeClick()) {
         ClientHooks.openGrimoire();
@@ -54,7 +49,12 @@ public class ClientEvents {
   /** Segurando o Compasso Arcano: holograma de faiscas do circulo ao redor do bloco mirado (o altar). */
   @SubscribeEvent
   public static void onClientTick(TickEvent.ClientTickEvent event) {
+    if (event.phase == TickEvent.Phase.START) {
+      ClientCasting.tickStart();
+      return;
+    }
     if (event.phase != TickEvent.Phase.END) return;
+    ClientCasting.tick();
     var mc = net.minecraft.client.Minecraft.getInstance();
     if (mc.player == null || mc.level == null || mc.level.getGameTime() % 4 != 0) return;
     ItemStack held = mc.player.getMainHandItem().getItem() instanceof com.arcane.item.ArcaneCompassItem ? mc.player.getMainHandItem()

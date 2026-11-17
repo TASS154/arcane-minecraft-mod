@@ -141,6 +141,121 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+
+  // ------------------------------------------------------------------ Fase 1: modos de conjuracao
+  private static net.minecraft.server.level.ServerPlayer casterWith(GameTestHelper h) {
+    // Jogador de verdade (ServerPlayer) com um canal embutido: o helper do GameTest nao serve na 1.20.1 (sem canal de rede).
+    var server = h.getLevel().getServer();
+    var player = new net.minecraft.server.level.ServerPlayer(server, h.getLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "arcane-test"));
+    var link = new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
+    new io.netty.channel.embedded.EmbeddedChannel(link);
+    new net.minecraft.server.network.ServerGamePacketListenerImpl(server, link, player);
+    var pos = h.absoluteVec(new net.minecraft.world.phys.Vec3(3.5, 1, 3.5));
+    player.moveTo(pos.x, pos.y, pos.z);
+    player.setYRot(0);
+    player.setXRot(0);
+    var grimoire = com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow(() -> new RuntimeException("sem grimorio"));
+    for (String id : List.of("self", "aura", "damage", "float", "telekinesis"))
+      grimoire.learnGlyph(new ResourceLocation("arcane", id), com.arcane.grimoire.GlyphKnowledge.MASTERED);
+    com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(player).set(500f);
+    return player;
+  }
+
+  private static Inscription addSpell(net.minecraft.server.level.ServerPlayer player, com.arcane.grimoire.SpellPrefs.CastMode mode, GlyphInstance... glyphs) {
+    var spell = new Inscription(List.of(glyphs));
+    var grimoire = com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow();
+    grimoire.addInscription(spell);
+    grimoire.prefs().setMode(spell.id(), mode);
+    return spell;
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 100)
+  public static void holdModeRepeatsWhileHeldAndStopsOnRelease(GameTestHelper h) {
+    floor(h);
+    var player = casterWith(h);
+    var victim = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 4));
+    var spell = addSpell(player, com.arcane.grimoire.SpellPrefs.CastMode.HOLD, g("aura", "radius", 2.5), g("damage", "amount", 0.5));
+    float start = victim.getHealth();
+    com.arcane.execution.CastChannels.press(player, spell.id());
+    h.assertTrue(victim.getHealth() < start, "segurar conjura na hora");
+    h.assertTrue(com.arcane.execution.CastChannels.isActive(player.getUUID()), "o canal ficou ativo");
+    h.runAfterDelay(32, () -> {
+      float held = victim.getHealth();
+      h.assertTrue(held <= start - 1.0f, "repetiu enquanto segurava (vida " + held + " de " + start + ")");
+      com.arcane.execution.CastChannels.release(player);
+      h.assertTrue(!com.arcane.execution.CastChannels.isActive(player.getUUID()), "soltar encerra o canal");
+      h.runAfterDelay(25, () -> {
+        h.assertTrue(victim.getHealth() >= held, "nao repete depois de soltar");
+        h.succeed();
+      });
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 100)
+  public static void chargeModeCastsStrongerTheLongerItCharges(GameTestHelper h) {
+    floor(h);
+    var player = casterWith(h);
+    var tapSpell = addSpell(player, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("aura", "radius", 1.5), g("damage", "amount", 2.0));
+    var chargeSpell = addSpell(player, com.arcane.grimoire.SpellPrefs.CastMode.CHARGE, g("aura", "radius", 1.5), g("damage", "amount", 2.0));
+    var first = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 4));
+    float a0 = first.getHealth();
+    com.arcane.execution.CastChannels.press(player, tapSpell.id());
+    float tapDamage = a0 - first.getHealth();
+    h.assertTrue(tapDamage > 0, "o toque fere");
+    first.discard();
+    var second = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 4));
+    float b0 = second.getHealth();
+    float mana0 = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(player).current();
+    com.arcane.execution.CastChannels.press(player, chargeSpell.id());
+    h.assertTrue(second.getHealth() == b0, "carregar nao lanca ao apertar");
+    h.runAfterDelay(30, () -> {
+      h.assertTrue(com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(player).current() < mana0, "carregar drena mana aos poucos");
+      com.arcane.execution.CastChannels.release(player);
+      float chargedDamage = b0 - second.getHealth();
+      h.assertTrue(chargedDamage > tapDamage * 1.4f, "carga de 0,5 s rende mais que o toque (" + chargedDamage + " contra " + tapDamage + ")");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 60)
+  public static void toggleModeStartsAndStopsTheFlight(GameTestHelper h) {
+    floor(h);
+    var player = casterWith(h);
+    var spell = addSpell(player, com.arcane.grimoire.SpellPrefs.CastMode.TOGGLE, g("self"), g("float"));
+    com.arcane.execution.CastChannels.press(player, spell.id());
+    h.assertTrue(player.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get()), "o primeiro toque liga o voo");
+    com.arcane.execution.CastChannels.press(player, spell.id());
+    h.assertTrue(!player.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get()), "o segundo toque desliga");
+    var plain = addSpell(player, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("aura"), g("damage"));
+    com.arcane.network.packet.C2SGrimoireOrgPacket.apply(player, new com.arcane.network.packet.C2SGrimoireOrgPacket(com.arcane.network.packet.C2SGrimoireOrgPacket.MODE, plain.id(), com.arcane.grimoire.SpellPrefs.CastMode.TOGGLE.ordinal(), ""));
+    var prefs = com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow().prefs();
+    h.assertTrue(prefs.mode(plain.id()) == com.arcane.grimoire.SpellPrefs.CastMode.TAP, "Alternar nao vale para magia comum");
+    com.arcane.network.packet.C2SGrimoireOrgPacket.apply(player, new com.arcane.network.packet.C2SGrimoireOrgPacket(com.arcane.network.packet.C2SGrimoireOrgPacket.MODE, spell.id(), com.arcane.grimoire.SpellPrefs.CastMode.CHARGE.ordinal(), ""));
+    h.assertTrue(prefs.mode(spell.id()) == com.arcane.grimoire.SpellPrefs.CastMode.CHARGE, "o modo muda no servidor");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty")
+  public static void loadoutsFavoritesAndFoldersAreValidatedAndSynced(GameTestHelper h) {
+    var player = casterWith(h);
+    var spell = addSpell(player, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("self"), g("damage"));
+    var prefs = com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow().prefs();
+    var none = new java.util.UUID(0, 0);
+    com.arcane.network.packet.C2SGrimoireOrgPacket.apply(player, new com.arcane.network.packet.C2SGrimoireOrgPacket(com.arcane.network.packet.C2SGrimoireOrgPacket.FAVORITE, spell.id(), 1, ""));
+    com.arcane.network.packet.C2SGrimoireOrgPacket.apply(player, new com.arcane.network.packet.C2SGrimoireOrgPacket(com.arcane.network.packet.C2SGrimoireOrgPacket.FOLDER, spell.id(), 0, "  uma pasta com nome enorme demais  "));
+    com.arcane.network.packet.C2SGrimoireOrgPacket.apply(player, new com.arcane.network.packet.C2SGrimoireOrgPacket(com.arcane.network.packet.C2SGrimoireOrgPacket.LOADOUT_TOGGLE, spell.id(), 2, ""));
+    com.arcane.network.packet.C2SGrimoireOrgPacket.apply(player, new com.arcane.network.packet.C2SGrimoireOrgPacket(com.arcane.network.packet.C2SGrimoireOrgPacket.LOADOUT_SWITCH, none, 2, ""));
+    h.assertTrue(prefs.get(spell.id()).favorite, "favorita");
+    h.assertTrue(prefs.get(spell.id()).folder.length() <= com.arcane.grimoire.SpellPrefs.MAX_FOLDER, "pasta limitada: " + prefs.get(spell.id()).folder);
+    h.assertTrue(prefs.loadout(2).contains(spell.id()) && prefs.activeLoadout() == 2, "conjunto 3 ativo com a magia");
+    com.arcane.network.packet.C2SGrimoireOrgPacket.apply(player, new com.arcane.network.packet.C2SGrimoireOrgPacket(com.arcane.network.packet.C2SGrimoireOrgPacket.FAVORITE, java.util.UUID.randomUUID(), 1, ""));
+    com.arcane.network.packet.C2SGrimoireOrgPacket.apply(player, new com.arcane.network.packet.C2SGrimoireOrgPacket(com.arcane.network.packet.C2SGrimoireOrgPacket.LOADOUT_SWITCH, none, 99, ""));
+    h.assertTrue(prefs.activeLoadout() >= 0 && prefs.activeLoadout() < com.arcane.grimoire.SpellPrefs.LOADOUTS, "indice normalizado");
+    com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow().removeInscription(spell.id());
+    h.assertTrue(!prefs.loadout(2).contains(spell.id()), "magia apagada sai dos conjuntos");
+    h.succeed();
+  }
+
   private static Pig pig(GameTestHelper h, int x, int z) {
     Pig pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(x, 1, z));
     pig.setYRot(0);

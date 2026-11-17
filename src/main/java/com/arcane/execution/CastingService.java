@@ -20,6 +20,20 @@ public final class CastingService {
     private CastingService() {}
 
     public static ExecutionResult tryCast(ServerPlayer player, Inscription inscription, PrecisionSnapshot precision) {
+        return cast(player, inscription, precision, 1.0, false);
+    }
+
+    /** Custo de mana de uma conjuracao normal (o mesmo cobrado por tryCast). */
+    public static int manaCostOf(Inscription inscription, PrecisionSnapshot precision) {
+        CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
+        return (int) Math.ceil(plan.baseManaCost() * precision.manaCostMultiplier() * InkRegistry.getManaMultiplier(inscription.metadata().ink()));
+    }
+
+    /**
+     * Conjura como o jogador. `scale` multiplica os parametros de efeito (magias carregadas); com `free` a mana ja foi
+     * paga (carga gradual) e nada e cobrado agora.
+     */
+    public static ExecutionResult cast(ServerPlayer player, Inscription inscription, PrecisionSnapshot precision, double scale, boolean free) {
         Optional<GrimoireState> grimoire = GrimoireAttachments.get(player);
         InscriptionValidator.ValidationResult validation = InscriptionValidator.validate(inscription, grimoire);
         if (!validation.valid()) {
@@ -41,7 +55,7 @@ public final class CastingService {
         int manaCost = (int) Math.ceil(baseCost * precision.manaCostMultiplier() * inkMultiplier);
 
         ManaState mana = GrimoireAttachments.getManaOrCreate(player);
-        if (!mana.trySpend(manaCost)) {
+        if (!free && !mana.trySpend(manaCost)) {
             return ExecutionResult.fail("message.arcane.mana.insufficient");
         }
 
@@ -55,9 +69,11 @@ public final class CastingService {
                 precision,
                 ExecutionContext.TriggerEvent.cast()
         );
+        context.setScaleFactor(scale);
 
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
+            GrimoireAttachments.get(player).ifPresent(g -> g.prefs().touch(inscription.id(), player.level().getGameTime()));
             Vows.pay(player, inscription);
             PlayerAnims.onCast(player, plan);
             ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint(), SpellElement.of(plan).ordinal()));

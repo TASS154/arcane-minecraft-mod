@@ -12,29 +12,29 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public record C2SCastRequestPacket(UUID inscriptionId, boolean fromWorkbench) {
+public record C2SCastRequestPacket(UUID inscriptionId, boolean fromWorkbench, boolean release) {
+  public C2SCastRequestPacket(UUID inscriptionId, boolean fromWorkbench) { this(inscriptionId, fromWorkbench, false); }
+
   public static void encode(C2SCastRequestPacket packet, FriendlyByteBuf buf) {
     buf.writeUUID(packet.inscriptionId);
     buf.writeBoolean(packet.fromWorkbench);
+    buf.writeBoolean(packet.release);
   }
 
   public static C2SCastRequestPacket decode(FriendlyByteBuf buf) {
-    return new C2SCastRequestPacket(buf.readUUID(), buf.readBoolean());
+    return new C2SCastRequestPacket(buf.readUUID(), buf.readBoolean(), buf.readBoolean());
   }
 
   public static void handle(C2SCastRequestPacket packet, Supplier<NetworkEvent.Context> ctx) {
     ctx.get().enqueueWork(() -> {
       ServerPlayer player = ctx.get().getSender();
       if (player == null) return;
-      GrimoireAttachments.get(player).flatMap(g -> g.getInscription(packet.inscriptionId)).ifPresent(inscription -> {
-        // Potencia 100% so se a magia foi ESCRITA na Bancada; lancar de onde for nao muda isso.
-        PrecisionSnapshot precision = PrecisionSnapshot.of(inscription);
-        var result = CastingService.tryCast(player, inscription, precision);
-        if (!result.success() && !result.message().isEmpty()) {
-          player.displayClientMessage(net.minecraft.network.chat.Component.translatable(result.message())
-              .withStyle(net.minecraft.ChatFormatting.RED), true);
-        }
-      });
+      if (packet.release) {
+        com.arcane.execution.CastChannels.release(player);
+      } else {
+        // O modo (toque, carregar, segurar, alternar) e a potencia (so a Bancada da 100%) sao decididos no servidor.
+        com.arcane.execution.CastChannels.press(player, packet.inscriptionId);
+      }
     });
     ctx.get().setPacketHandled(true);
   }

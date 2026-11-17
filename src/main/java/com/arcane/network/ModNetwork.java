@@ -33,6 +33,9 @@ public final class ModNetwork {
   private ModNetwork() {}
 
   public static void register() {
+    CHANNEL.messageBuilder(com.arcane.network.packet.C2SGrimoireOrgPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(com.arcane.network.packet.C2SGrimoireOrgPacket::encode).decoder(com.arcane.network.packet.C2SGrimoireOrgPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.C2SGrimoireOrgPacket::handle).add();
     CHANNEL.messageBuilder(C2SCastRequestPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SCastRequestPacket::encode).decoder(C2SCastRequestPacket::decode)
         .consumerMainThread(C2SCastRequestPacket::handle).add();

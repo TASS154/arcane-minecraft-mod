@@ -224,6 +224,7 @@
   "hud.arcane.keys": "Teclas 1-9",
   "hud.arcane.charging": "Carregando…",
   "hud.arcane.charged": "Carga máxima! Solte",
+  "message.arcane.flight_exhausted": "Sem mana: o voo acabou.",
   "message.arcane.requires_ritual": "Esta magia só funciona como ritual (nível %s): conjure no Altar Arcano",
   "message.arcane.ritual.no_altar": "Não há Altar Arcano aqui",
   "message.arcane.ritual.no_spell": "Escolha uma magia ativa no grimório antes do ritual",
@@ -515,7 +516,7 @@
   "glyph.arcane.chain": "Cadeia",
   "glyph.arcane.chain.desc": "Modificador: o efeito anterior se propaga de criatura em criatura. Explosão e Explosão Destrutiva detonam de novo, menores, em quem estava perto (até 3 saltos, 8 extras); Dano salta em arco para a mais próxima, com 60% do dano a cada salto. Outros efeitos ignoram a Cadeia (a prévia avisa).",
   "glyph.arcane.float": "Flutuar",
-  "glyph.arcane.float.desc": "Efeito: o alvo paira e voa com suavidade na direção do olhar, como se fosse erguido pela cabeça (a cabeça vai primeiro, as pernas seguem). W avança, Espaço sobe, Shift desce, Ctrl acelera; sem comandos, ele paira parado. Velocidade de 0,3 a 3 blocos por tick e duração em ticks.",
+  "glyph.arcane.float.desc": "Efeito: o alvo paira e voa com suavidade na direção do olhar, como se fosse erguido pela cabeça (a cabeça vai primeiro, as pernas seguem). W avança, Espaço sobe, Shift desce, Ctrl acelera; sem comandos, ele paira parado. Velocidade de 0,3 a 3 blocos por tick, duração em ticks e planagem (0 a 1: sem comandos, o corpo plana adiante como numa elytra e cai devagar em vez de parar). Custa mana a cada tick enquanto voa (mais em velocidade alta) e acaba sem mana; a primeira queda depois do voo não causa dano. No Grimório, o modo Segurar ou Alternar mantém o voo enquanto você canaliza.",
   "glyph.arcane.telekinesis": "Telecinese",
   "glyph.arcane.telekinesis.desc": "Efeito: segura criaturas e blocos com a mente e os leva pairando diante da mira. O grupo de blocos é definido ao conjurar: um bloco; uma esfera (Esfera 1–6) ao redor do bloco mirado; ou, com Mesmo tipo, os blocos conectados do mesmo material (até 120), opcionalmente limitados pela esfera. Ao soltar, tudo cai com o embalo. Distância 2–16, duração até 20 s."
 }

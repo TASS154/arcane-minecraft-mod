@@ -457,3 +457,10 @@ Na bancada, **passe o mouse sobre a linha de estado** (Pronto / ⚠ Veja a prév
 **HUD e acessibilidade**
 - HUD: magia ativa com custo e modo (custo em vermelho se faltar mana), faixa do conjunto com número, selo e letra do modo (T/C/H/A), barra de carga, mensagem de falha em vermelho.
 - Opções: **alternar em vez de segurar** (aperta uma vez para começar e outra para terminar: roda, carregar, segurar), **paleta para daltonismo** (Okabe-Ito nos selos; o modo vai também em letra), **reduzir flashes** (desliga o clarão da conjuração). As teclas são configuráveis em Controles > Arcane.
+
+## Fase 2: Voo (glifo Flutuar, estendido)
+O voo **já existia** como o glifo **Flutuar** (feito na rodada anterior); em vez de criar um glifo duplicado, a Fase 2 o tornou canalizado:
+- **Custo por tick:** enquanto voa, o servidor cobra mana a cada tick (`flightManaPerTick` x velocidade; padrão 0,25). Sem mana, o voo acaba com aviso.
+- **Planagem** (novo parâmetro `glide`, 0 a 1): sem comandos, o corpo **plana adiante na direção do olhar como numa elytra** e perde altura devagar, em vez de parar no ar; com planagem alta há mais inércia. W continua dando propulsão. A velocidade continua de 0,3 a 3.
+- **Canalização:** no Grimório, o modo **Segurar** (voa enquanto a tecla estiver apertada) ou **Alternar** (liga e desliga) mantém o voo sem limite de duração; **soltar/alternar de novo** encerra. No modo Toque, vale a duração do glifo.
+- **Segurança:** a permissão de voo só existe durante o efeito e é devolvida ao acabar; **a primeira queda depois do voo não causa dano** (vale uma vez, até 60 s). Em modo criativo/espectador nada muda.

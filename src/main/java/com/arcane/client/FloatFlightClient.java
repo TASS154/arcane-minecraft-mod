@@ -37,7 +37,7 @@ public final class FloatFlightClient {
   private FloatFlightClient() {}
 
   private static double speedOf(MobEffectInstance effect) {
-    return Math.max(0.3, effect.getAmplifier() / 10.0);
+    return com.arcane.execution.FlightService.speedOf(effect.getAmplifier());
   }
 
   @SubscribeEvent
@@ -59,9 +59,17 @@ public final class FloatFlightClient {
     float fwd = player.input.forwardImpulse;
     float side = player.input.leftImpulse;
     double up = (player.input.jumping ? 1.0 : 0.0) - (player.input.shiftKeyDown ? 1.0 : 0.0);
+    double glide = com.arcane.execution.FlightService.glideOf(effect.getAmplifier());
     Vec3 target = look.scale(fwd * speed).add(left.scale(side * speed * 0.7)).add(0, up * speed * 0.6, 0);
-    // Aceleracao suave: chega perto do alvo em ~1 s; sem comandos, freia ate pairar.
-    Vec3 velocity = player.getDeltaMovement().lerp(target, 0.09);
+    if (glide > 0 && fwd <= 0 && side == 0 && up == 0) {
+      // Planagem: sem comandos, o corpo segue planando na direcao do olhar (como uma elytra) e perde altura devagar,
+      // em vez de parar no ar. Quanto maior a planagem, mais rapido ele plana e mais devagar cai.
+      Vec3 flat = new Vec3(look.x, 0, look.z);
+      Vec3 forward = flat.lengthSqr() < 1.0e-4 ? Vec3.ZERO : flat.normalize().scale(speed * 0.55 * glide);
+      target = forward.add(0, -0.06 * (1.0 - 0.8 * glide), 0);
+    }
+    // Aceleracao suave: chega perto do alvo em ~1 s; com planagem ha mais inercia (o embalo dura mais).
+    Vec3 velocity = player.getDeltaMovement().lerp(target, 0.09 * (1.0 - 0.7 * glide));
     player.setDeltaMovement(velocity);
   }
 

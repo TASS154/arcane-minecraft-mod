@@ -224,6 +224,7 @@
   "hud.arcane.keys": "Keys 1-9",
   "hud.arcane.charging": "Charging…",
   "hud.arcane.charged": "Fully charged! Release",
+  "message.arcane.flight_exhausted": "Out of mana: the flight ended.",
   "message.arcane.requires_ritual": "This spell only works as a ritual (level %s): cast it at the Arcane Altar",
   "message.arcane.ritual.no_altar": "There is no Arcane Altar here",
   "message.arcane.ritual.no_spell": "Pick an active spell in the grimoire before the ritual",
@@ -515,7 +516,7 @@
   "glyph.arcane.chain": "Chain",
   "glyph.arcane.chain.desc": "Modifier: the previous effect spreads from creature to creature. Explosion and Destructive Blast detonate again, smaller, on nearby creatures (up to 3 hops, 8 extra); Damage arcs to the nearest creature at 60% per hop. Other effects ignore Chain (the preview warns).",
   "glyph.arcane.float": "Float",
-  "glyph.arcane.float.desc": "Effect: the target hovers and glides smoothly where it looks, as if lifted by the head (the head leads, the legs follow). W moves, Space rises, Shift sinks, Ctrl speeds up; with no input it hovers in place. Speed from 0.3 to 3 blocks per tick, plus duration in ticks.",
+  "glyph.arcane.float.desc": "Effect: the target hovers and glides smoothly where it looks, as if lifted by the head (the head leads, the legs follow). W moves, Space rises, Shift sinks, Ctrl speeds up; with no input it hovers in place. Speed from 0.3 to 3 blocks per tick, duration in ticks and glide (0 to 1: with no input the body glides forward like an elytra and sinks slowly instead of stopping). It costs mana every tick while flying (more at high speed) and ends when mana runs out; the first fall after the flight deals no damage. In the Grimoire, Hold or Toggle mode keeps the flight going while you channel.",
   "glyph.arcane.telekinesis": "Telekinesis",
   "glyph.arcane.telekinesis.desc": "Effect: holds creatures and blocks with your mind and carries them hovering in front of your aim. The block group is decided when you cast: one block; a sphere (Sphere 1-6) around the aimed block; or, with Same type, the connected blocks of the same material (up to 120), optionally limited by the sphere. When released, everything falls with its momentum. Distance 2-16, duration up to 20 s."
 }

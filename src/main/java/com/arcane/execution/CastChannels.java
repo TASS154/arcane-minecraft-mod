@@ -48,6 +48,19 @@ public final class CastChannels {
 
   public static boolean isActive(UUID player) { return ACTIVE.containsKey(player); }
 
+  private static boolean flies(Inscription inscription) {
+    return inscription.glyphs().stream().anyMatch(g -> g.glyphId().getPath().equals("float"));
+  }
+
+  /** Mantem o voo ligado enquanto a canalizacao durar (o custo e por tick, em FlightService). */
+  private static void sustainFlight(ServerPlayer player) {
+    var effect = player.getEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
+    if (effect != null && effect.getDuration() < 40) {
+      player.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get(), 80,
+          effect.getAmplifier(), false, false, true));
+    }
+  }
+
   /** Fracao carregada (0 a 1) de quem esta no modo CARREGAR, ou -1. */
   public static double chargeFraction(ServerPlayer player) {
     Active a = ACTIVE.get(player.getUUID());
@@ -113,7 +126,8 @@ public final class CastChannels {
     if (a.mode == CastMode.CHARGE) {
       fire(player, a);
     } else if (a.mode == CastMode.HOLD) {
-      ACTIVE.remove(player.getUUID());
+      var g = GrimoireAttachments.get(player).flatMap(gr -> gr.getInscription(a.spell)).orElse(null);
+      stop(player, g != null && toggleable(g)); // soltar encerra o voo e a telecinese
     }
   }
 
@@ -133,7 +147,7 @@ public final class CastChannels {
   public static void stop(ServerPlayer player, boolean endEffects) {
     Active a = ACTIVE.remove(player.getUUID());
     if (a == null) return;
-    if (endEffects && a.mode == CastMode.TOGGLE) {
+    if (endEffects && (a.mode == CastMode.TOGGLE || a.mode == CastMode.HOLD)) {
       player.removeEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
       Telekinesis.release(player.getUUID());
     }
@@ -165,7 +179,9 @@ public final class CastChannels {
           }
         }
         case HOLD -> {
-          if (now >= a.next) {
+          if (flies(inscription)) {
+            sustainFlight(player); // voar ja custa por tick: nao relanca a magia
+          } else if (now >= a.next) {
             a.next = now + HOLD_INTERVAL_TICKS;
             var r = CastingService.tryCast(player, inscription, PrecisionSnapshot.of(inscription));
             if (!r.success()) { fail(player, r.message()); it.remove(); }
@@ -173,6 +189,7 @@ public final class CastChannels {
         }
         case TOGGLE -> {
           // some sozinho quando o efeito acaba (Flutuar) para o proximo toque lancar de novo
+          if (flies(inscription)) sustainFlight(player);
           boolean floating = player.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
           boolean holding = Telekinesis.heldCount(player.getUUID()) > 0;
           if (now - a.start > 5 && !floating && !holding) it.remove();

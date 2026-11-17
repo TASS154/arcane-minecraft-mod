@@ -11,3 +11,8 @@
 - **Segurar:** repete a cada 0,5 s pagando o custo cheio; para sem mana. Sem recarga especial.
 - **Teclas 1-9** no modo Conjurador consomem as teclas da hotbar (a roda do mouse ainda troca a hotbar).
 - **"Usadas recentemente"** usa a última conjuração (por qualquer modo), guardada em tempo de jogo.
+
+## Dúvidas registradas na Fase 2
+- **Glifo novo ou Flutuar?** Reaproveitei Flutuar (já era voo, "puxado pela cabeça"). Se quiser um glifo separado "Voo", é só renomear/duplicar com a tabela; o comportamento fica igual.
+- **Custo:** 0,25 mana por tick por bloco/tick de velocidade (ex.: velocidade 1 = 5 mana/s; velocidade 3 = 15 mana/s). Provisório, em `flightManaPerTick`.
+- **Queda segura:** uma queda, até 60 s depois do voo. Se quiser dano normal ao cair de grandes alturas quando faltar mana (punição), é uma linha.

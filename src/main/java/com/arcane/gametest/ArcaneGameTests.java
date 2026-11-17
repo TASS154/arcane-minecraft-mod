@@ -56,6 +56,10 @@ public class ArcaneGameTests {
     return new GlyphInstance(new ResourceLocation("arcane", id), Map.of(key, value));
   }
 
+  private static GlyphInstance g(String id, String k1, double v1, String k2, double v2) {
+    return new GlyphInstance(new ResourceLocation("arcane", id), Map.of(k1, v1, k2, v2));
+  }
+
   private static void floor(GameTestHelper h) {
     for (int x = 0; x < 7; x++) for (int z = 0; z < 7; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
   }
@@ -253,6 +257,51 @@ public class ArcaneGameTests {
     h.assertTrue(prefs.activeLoadout() >= 0 && prefs.activeLoadout() < com.arcane.grimoire.SpellPrefs.LOADOUTS, "indice normalizado");
     com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow().removeInscription(spell.id());
     h.assertTrue(!prefs.loadout(2).contains(spell.id()), "magia apagada sai dos conjuntos");
+    h.succeed();
+  }
+
+
+  // ------------------------------------------------------------------ Fase 2: voo canalizado
+  @GameTest(template = "empty", timeoutTicks = 160)
+  public static void flightIsChanneledPaysManaEveryTickAndLandsSafely(GameTestHelper h) {
+    floor(h);
+    var player = casterWith(h);
+    h.getLevel().addNewPlayer(player);
+    h.onEachTick(player::doTick); // o servidor ticka o jogador pela conexao (doTick): efeitos e custo por tick
+    var spell = addSpell(player, com.arcane.grimoire.SpellPrefs.CastMode.TOGGLE, g("self"), g("float", "speed", 1.0, "duration", 40.0));
+    com.arcane.execution.CastChannels.press(player, spell.id());
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(player);
+    h.assertTrue(player.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get()), "o voo ligou");
+    float mana0 = mana.current();
+    h.runAfterDelay(30, () -> {
+      h.assertTrue(player.getAbilities().mayfly, "a permissao de voo existe durante o voo (tick " + player.tickCount + ", efeito " + player.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get()) + ", removido " + player.isRemoved() + ", mana " + mana.current() + ")");
+      h.assertTrue(mana0 - mana.current() >= 5.0f, "custa mana a cada tick (gastou " + (mana0 - mana.current()) + ")");
+    });
+    h.runAfterDelay(70, () -> {
+      h.assertTrue(player.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get()), "canalizando, o voo passa da duracao de 40 ticks");
+      mana.set(0.05f);
+    });
+    h.runAfterDelay(80, () -> {
+      h.assertTrue(!player.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get()), "sem mana o voo acaba");
+      h.assertTrue(!player.getAbilities().mayfly, "a permissao de voo foi devolvida");
+      float life = player.getHealth();
+      player.causeFallDamage(8.0f, 1.0f, h.getLevel().damageSources().fall());
+      h.assertTrue(player.getHealth() == life, "a primeira queda depois do voo nao machuca (vida " + player.getHealth() + ")");
+      player.causeFallDamage(8.0f, 1.0f, h.getLevel().damageSources().fall());
+      h.assertTrue(player.getHealth() < life, "a protecao vale uma vez so");
+      player.discard();
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty")
+  public static void flightSpeedAndGlideTravelInTheAmplifier(GameTestHelper h) {
+    Pig pig = pig(h, 3, 3);
+    cast(h, pig, g("self"), g("float", "speed", 1.5, "glide", 1.0));
+    var effect = pig.getEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
+    h.assertTrue(effect != null, "efeito aplicado");
+    h.assertTrue(Math.abs(com.arcane.execution.FlightService.speedOf(effect.getAmplifier()) - 1.5) < 0.06, "velocidade 1,5");
+    h.assertTrue(com.arcane.execution.FlightService.glideOf(effect.getAmplifier()) > 0.99, "planagem total");
     h.succeed();
   }
 

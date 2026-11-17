@@ -63,6 +63,7 @@ public final class ModEffects {
             if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
                 if (player.getPersistentData().getBoolean(GRANTED)) {
                     player.getPersistentData().remove(GRANTED);
+                    com.arcane.execution.FlightService.markSafe(player);
                     if (!player.isCreative() && !player.isSpectator()) {
                         player.getAbilities().mayfly = false;
                         player.getAbilities().flying = false;

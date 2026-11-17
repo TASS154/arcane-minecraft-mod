@@ -1529,7 +1529,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 1,
+          "weight": 3,
           "functions": [
             {
               "function": "minecraft:set_nbt",
@@ -1540,7 +1540,7 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 1,
+          "weight": 3,
           "functions": [
             {
               "function": "minecraft:set_nbt",

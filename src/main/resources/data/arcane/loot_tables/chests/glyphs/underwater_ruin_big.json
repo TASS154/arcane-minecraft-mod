@@ -931,28 +931,6 @@
               "tag": "{glyph:\"arcane:bind\"}"
             }
           ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "arcane:glyph_note",
-          "weight": 3,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{glyph:\"arcane:restore\"}"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "arcane:glyph_note",
-          "weight": 3,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{glyph:\"arcane:chorus\"}"
-            }
-          ]
         }
       ]
     },

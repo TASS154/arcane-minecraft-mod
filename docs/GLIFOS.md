@@ -141,7 +141,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Chamariz** | `arcane:decoy` | 2 | 2 | Vazio | `duration` 100 (20–300) | Efeito: uma ilusão no ponto mirado atrai criaturas num raio de 20 blocos e elas deixam de te escolher como alvo por até 15 s. |
 | **Maldição** | `arcane:curse` | 3 | 3 | Sangue | `duration` 300 (60–2400) | Efeito: por até 2 min o alvo leva 25% a mais de dano e não recupera vida. Dissipar em si mesmo tira. |
 | **Bolso Arcano** | `arcane:pocket` | 2 | 3 | Conhecimento | — | Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas. |
-| **Restaurar** | `arcane:restore` | 4 | 1 | Terra | `radius` 6 (2–12) | Efeito: recompõe, num raio de 2–12 blocos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta. |
+| **Restaurar** | `arcane:restore` | 4 | 3 | Terra | `radius` 6 (2–12) | Efeito: recompõe, num raio de 2–12 blocos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta. |
 
 ## Modificadores (30)
 
@@ -178,7 +178,7 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Falso Rastro** | `arcane:false_trace` | 2 | 2 | Vazio | — | Modificador: o resíduo no mundo leva uma assinatura falsa (que não é a sua) e a magia deixa um segundo resíduo isca a até 10 blocos. Quem analisa o resíduo é enganado. |
 | **Sobrecarga** | `arcane:overcharge` | 3 | 3 | Sangue | — | Modificador: dobra a força do efeito anterior (dano, cura, empurrão, raio, potência) e 50% de duração, mas você sofre 1 coração de dano mágico a cada efeito sobrecarregado (nunca fatal: só se você tiver mais de 1,5 coração). Mais forte que Potência, com preço. |
 | **Vincular** | `arcane:bind` | 2 | 2 | Vazio | — | Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular. |
-| **Coro** | `arcane:chorus` | 2 | 1 | Vida | `min` 2 (2–4) | Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga. |
+| **Coro** | `arcane:chorus` | 2 | 3 | Vida | `min` 2 (2–4) | Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga. |
 
 ## Condições (23)
 

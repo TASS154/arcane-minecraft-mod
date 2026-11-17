@@ -775,7 +775,7 @@ TIERS = {
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
         "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain", "sleep", "on_kill", "on_fall",
         "satellites", "link", "trail", "recall", "imbue", "acid", "electrify", "contagion", "dispel", "reflect", "silence", "swap",
-        "curse", "overcharge", "after_hits", "pocket"],
+        "curse", "overcharge", "after_hits", "pocket", "restore", "chorus"],
     4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis", "phase", "petrify", "reanimate"],
 }
 FAMILIES = {

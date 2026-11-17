@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **140 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **141 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -71,7 +71,7 @@ Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para
 | **Madeira** | `arcane:wood` | 1 | 1 | Terra | — | Filtro: só blocos de madeira (troncos e tábuas). |
 | **Forasteiros** | `arcane:outsiders` | 2 | 3 | Arcano | — | Filtro: afeta só quem NÃO é você nem está na sua lista de convidados (comando /arcane guest add|remove|list). Animais domesticados e invocações de você ou dos seus convidados também ficam de fora. Útil em inscrições e zonas que protegem a sua casa. |
 
-## Efeitos (63)
+## Efeitos (64)
 
 O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro principal (o dobro do dano custa o dobro).
 
@@ -140,6 +140,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Revelar** | `arcane:reveal` | 2 | 2 | Conhecimento | `radius` 12 (3–24) | Efeito: tira a invisibilidade e faz brilhar por 5 s as criaturas num raio de 3–24 blocos, e conta quantas estavam escondidas. |
 | **Chamariz** | `arcane:decoy` | 2 | 2 | Vazio | `duration` 100 (20–300) | Efeito: uma ilusão no ponto mirado atrai criaturas num raio de 20 blocos e elas deixam de te escolher como alvo por até 15 s. |
 | **Maldição** | `arcane:curse` | 3 | 3 | Sangue | `duration` 300 (60–2400) | Efeito: por até 2 min o alvo leva 25% a mais de dano e não recupera vida. Dissipar em si mesmo tira. |
+| **Bolso Arcano** | `arcane:pocket` | 2 | 3 | Conhecimento | — | Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas. |
 
 ## Modificadores (29)
 

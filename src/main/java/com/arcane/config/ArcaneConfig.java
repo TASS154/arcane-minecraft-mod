@@ -31,6 +31,18 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue SCAR_LIFETIME_TICKS;
   public static final ForgeConfigSpec.BooleanValue WORLD_ALTERING_SPELLS;
   public static final ForgeConfigSpec.BooleanValue BLOCK_BREAKING_SPELLS;
+  public static final ForgeConfigSpec.BooleanValue POCKET_ENABLED;
+  public static final ForgeConfigSpec.IntValue POCKET_SLOTS;
+  public static final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> POCKET_BLOCKED_ITEMS;
+  public static final ForgeConfigSpec.BooleanValue RESTORE_ENABLED;
+  public static final ForgeConfigSpec.IntValue RESTORE_WINDOW_SECONDS;
+  public static final ForgeConfigSpec.IntValue RESTORE_MAX_BLOCKS;
+  public static final ForgeConfigSpec.IntValue RESTORE_JOURNAL_CAP;
+  public static final ForgeConfigSpec.BooleanValue BLAST_DROPS_LOOT;
+  public static final ForgeConfigSpec.BooleanValue CHORUS_ENABLED;
+  public static final ForgeConfigSpec.DoubleValue CHORUS_RADIUS;
+  public static final ForgeConfigSpec.IntValue CHORUS_WINDOW_TICKS;
+  public static final ForgeConfigSpec.IntValue CHORUS_MAX_PARTICIPANTS;
 
   static {
     ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -71,6 +83,20 @@ public class ArcaneConfig {
         .define("worldAlteringSpells", true);
     BLOCK_BREAKING_SPELLS = builder.comment("Spells may destroy blocks (Dig, Cut, Damage on fragile blocks). Turn off to protect builds")
         .define("blockBreakingSpells", true);
+    POCKET_ENABLED = builder.comment("Arcane Pocket: a per-player ender-chest-like storage opened by the Pocket glyph").define("pocketEnabled", true);
+    POCKET_SLOTS = builder.comment("Usable slots of the Arcane Pocket (half of a small chest = 13; the menu shows 2 rows and the rest stay locked)").defineInRange("pocketSlots", 13, 1, 18);
+    POCKET_BLOCKED_ITEMS = builder.comment("Item ids that cannot go in the Pocket (shulker boxes, the grimoire and pages are always blocked)")
+        .defineList("pocketBlockedItems", java.util.List.of("minecraft:bundle"), o -> o instanceof String);
+    RESTORE_ENABLED = builder.comment("Restore glyph: recompose blocks that spells destroyed recently").define("restoreEnabled", true);
+    RESTORE_WINDOW_SECONDS = builder.comment("How long a destroyed block stays restorable (PROVISIONAL)").defineInRange("restoreWindowSeconds", 120, 5, 3600);
+    RESTORE_MAX_BLOCKS = builder.comment("Max blocks one Restore cast recomposes (PROVISIONAL)").defineInRange("restoreMaxBlocksPerCast", 256, 1, 4096);
+    RESTORE_JOURNAL_CAP = builder.comment("Max journal entries per dimension; the oldest are dropped first").defineInRange("restoreJournalCap", 4096, 64, 65536);
+    BLAST_DROPS_LOOT = builder.comment("If true, blocks destroyed by explosions and other destructive spells drop items (Dig always does). Those blocks are then NOT recorded for Restore, to avoid a loot exploit")
+        .define("blastDropsLoot", false);
+    CHORUS_ENABLED = builder.comment("Chorus modifier: spells that need several players casting together").define("chorusEnabled", true);
+    CHORUS_RADIUS = builder.comment("Radius (blocks) of the chorus circle around the first caster (PROVISIONAL)").defineInRange("chorusRadius", 8.0, 2.0, 32.0);
+    CHORUS_WINDOW_TICKS = builder.comment("Ticks the others have to cast after the first caster opens the chorus (PROVISIONAL)").defineInRange("chorusWindowTicks", 60, 10, 400);
+    CHORUS_MAX_PARTICIPANTS = builder.comment("Max players counted in one chorus").defineInRange("chorusMaxParticipants", 5, 2, 16);
     SPEC = builder.build();
   }
 }

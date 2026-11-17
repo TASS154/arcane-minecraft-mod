@@ -34,7 +34,7 @@ public final class EffectReach {
       Map.entry("reanimate", ALL), Map.entry("sense", ALL), Map.entry("arcane_sight", ALL), Map.entry("emit_signal", ALL),
       Map.entry("dispel", ENTITY), Map.entry("reflect", ENTITY), Map.entry("silence", ENTITY), Map.entry("drain_mana", ENTITY),
       Map.entry("swap", ENTITY), Map.entry("reveal", ALL), Map.entry("decoy", ALL), Map.entry("curse", ENTITY),
-      Map.entry("wet", ENTITY), Map.entry("lifesteal", ENTITY), Map.entry("life_transfer", ENTITY), Map.entry("read_item", ENTITY),
+      Map.entry("wet", ENTITY), Map.entry("lifesteal", ENTITY), Map.entry("life_transfer", ENTITY), Map.entry("read_item", ENTITY), Map.entry("pocket", ALL),
       // Nao dependem dos alvos: agem sobre o conjurador ou o mundo.
       Map.entry("blink", ALL), Map.entry("weather", ALL), Map.entry("warp", ALL));
 
@@ -56,7 +56,7 @@ public final class EffectReach {
   /** Efeitos que nao dependem dos alvos (agem sobre o conjurador ou o mundo). */
   public static boolean independent(String path) {
     return path.equals("blink") || path.equals("weather") || path.equals("warp") || path.equals("recall") || path.equals("phase")
-        || path.equals("sense") || path.equals("arcane_sight");
+        || path.equals("sense") || path.equals("arcane_sight") || path.equals("pocket") || path.equals("restore");
   }
   public static int ofForm(String path) { return FORMS.getOrDefault(path, ALL); }
   public static int ofEffect(String path) { return EFFECTS.getOrDefault(path, ALL); }

@@ -1,0 +1,13 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:pocket"
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 3,
+  "families": [
+    "knowledge"
+  ]
+}

@@ -46,6 +46,30 @@ public class ArcaneCommands {
                   ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.guest.list", set.size(), String.join(", ", names)), false);
                   return set.size();
                 })))
+        .then(Commands.literal("pocket")
+            .requires(src -> src.hasPermission(2))
+            .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+                .executes(ctx -> {
+                  ServerPlayer admin = ctx.getSource().getPlayerOrException();
+                  ServerPlayer owner = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+                  com.arcane.pocket.ArcanePocket.openFor(admin, owner);
+                  return 1;
+                })
+                .then(Commands.literal("list").executes(ctx -> {
+                  ServerPlayer owner = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+                  var c = com.arcane.pocket.ArcanePocket.container(owner);
+                  int items = 0, used = 0;
+                  for (int i = 0; i < c.getContainerSize(); i++) if (!c.getItem(i).isEmpty()) { items += c.getItem(i).getCount(); used++; }
+                  final int fi = items, fu = used;
+                  ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.pocket.listed", owner.getDisplayName(), fi, fu), false);
+                  return fi;
+                }))
+                .then(Commands.literal("clear").executes(ctx -> {
+                  ServerPlayer owner = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+                  int n = com.arcane.pocket.ArcanePocket.clear(owner);
+                  ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.pocket.cleared", owner.getDisplayName(), n), true);
+                  return n;
+                }))))
         .then(Commands.literal("chamber")
             .requires(src -> src.hasPermission(2))
             .executes(ctx -> {

@@ -745,6 +745,11 @@ _g("bind", "modifier", 2,
    ["..####..", ".#....#.", ".#....#.", "########", "########", ".#....#.", ".#....#.", "..####.."],
    scope={"target": "previous_effect", "kind": "effect", "mutate": {"bind": {"op": "put", "value": 1.0}}})
 
+# ================================================================== FASE 5: sistemas novos
+_g("pocket", "effect", 2,
+   ("Bolso Arcano", "Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas."),
+   ("Arcane Pocket", "Effect: opens your Arcane Pocket, a 13-item space only yours (like an Ender Chest) that stays with you when you die. It will not open during recent combat nor accept shulkers, the grimoire or pages."),
+   ["..####..", ".#....#.", "..####..", ".######.", "##.##.##", "##.##.##", ".######.", "..####.."])
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
@@ -759,7 +764,7 @@ TIERS = {
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
         "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain", "sleep", "on_kill", "on_fall",
         "satellites", "link", "trail", "recall", "imbue", "acid", "electrify", "contagion", "dispel", "reflect", "silence", "swap",
-        "curse", "overcharge", "after_hits"],
+        "curse", "overcharge", "after_hits", "pocket"],
     4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis", "phase", "petrify", "reanimate"],
 }
 FAMILIES = {
@@ -769,7 +774,7 @@ FAMILIES = {
     "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill", "acid", "curse", "reanimate", "contagion", "overcharge", "after_hits"],
     "life": ["heal", "shield", "speed", "allies", "players", "animals"],
     "force": ["hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
-    "knowledge": ["mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
+    "knowledge": ["pocket", "mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert", "phase", "recall", "swap", "link", "silence", "drain_mana", "decoy", "stealth", "false_trace", "bind"],
     "earth": ["summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],

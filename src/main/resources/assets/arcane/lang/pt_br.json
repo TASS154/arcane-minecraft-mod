@@ -358,6 +358,12 @@
   "message.arcane.imbue.empty": "Encantar precisa de um item na mão.",
   "message.arcane.reanimate.none": "Não há corpo recente por perto.",
   "message.arcane.reanimate.full": "Você já tem o máximo de aliados reanimados.",
+  "message.arcane.pocket.disabled": "O Bolso Arcano está desligado neste servidor",
+  "message.arcane.pocket.combat": "O Bolso não abre em combate",
+  "container.arcane.pocket": "Bolso Arcano",
+  "container.arcane.pocket.other": "Bolso Arcano de %s",
+  "message.arcane.pocket.listed": "Bolso de %s: %s item(ns) em %s espaço(s)",
+  "message.arcane.pocket.cleared": "Bolso de %s esvaziado (%s item(ns))",
   "glyph.arcane.self": "Eu",
   "glyph.arcane.self.desc": "Forma: o feitiço acontece em você.",
   "glyph.arcane.touch": "Toque",
@@ -637,5 +643,7 @@
   "glyph.arcane.overcharge": "Sobrecarga",
   "glyph.arcane.overcharge.desc": "Modificador: dobra a força do efeito anterior (dano, cura, empurrão, raio, potência) e 50% de duração, mas você sofre 1 coração de dano mágico a cada efeito sobrecarregado (nunca fatal: só se você tiver mais de 1,5 coração). Mais forte que Potência, com preço.",
   "glyph.arcane.bind": "Vincular",
-  "glyph.arcane.bind.desc": "Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular."
+  "glyph.arcane.bind.desc": "Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular.",
+  "glyph.arcane.pocket": "Bolso Arcano",
+  "glyph.arcane.pocket.desc": "Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas."
 }

@@ -38,3 +38,11 @@
 - **Ativar por Sinal:** vale em inscrições no mundo; dispara na subida do sinal e usa a criatura mais perto (6 blocos) como origem. Sem criatura por perto, nada acontece.
 - **Silêncio:** quem está silenciado não consegue nem se dissipar; só o tempo (ou outro meio futuro) resolve. Dissipar em outros não tira Silêncio.
 - **Escalada e Gancho no jogador:** dependem de velocidade/entrada aplicadas no servidor; podem precisar de ajuste fino no cliente.
+
+## Dúvidas registradas na Fase 5
+- **Bolso, 13 espaços:** "metade de um baú pequeno" virou 13 (27 / 2 arredondado para baixo). O menu mostra 2 fileiras (18) e os 5 últimos ficam travados. Se preferir 14 ou 9, é só mudar `pocketSlots`.
+- **Coro, "ao mesmo tempo":** interpretei como uma janela de 3 s (60 ticks) a partir de quem começa, com o círculo de raio 8 ao redor dele. Os outros precisam ter a mesma magia equipada. Dispara no fim da janela, para contar todo mundo. Tudo em config (`chorusRadius`, `chorusWindowTicks`, `chorusMaxParticipants`).
+- **Coro e rituais/inscrições do mundo:** não valem (só conjuração direta de jogadores). Magias carregadas e NPCs também não.
+- **Restaurar:** os mesmos blocos nunca voltam duas vezes; o autor da destruição não é guardado; sem recarga (o custo em mana limita). Se virar "pincel", reavaliar uma recarga curta.
+- **Explosões sem loot:** vale para Explosão Destrutiva e Cadeia, Cortar e Dano em blocos frágeis. Congelar e Fogo (gelo/neve) nunca soltaram item.
+- **Raridade:** Bolso, Restaurar e Coro ficaram no tier 3 (raro). Confirmar se o Bolso e o Coro devem ser mais raros ou mais comuns.

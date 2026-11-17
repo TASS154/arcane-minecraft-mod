@@ -66,7 +66,7 @@ public class Phase5GameTests {
   }
 
   // ------------------------------------------------------------------ Bolso Arcano
-  @GameTest(template = "empty", batch = "phase5_pocket")
+  @GameTest(template = "empty", batch = "phase5_pocket_1")
   public static void pocketRefusesBlockedItemsAndLockedSlots(GameTestHelper h) {
     var p = player(h, 3.5, 3.5);
     var c = ArcanePocket.container(p);
@@ -81,7 +81,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_pocket")
+  @GameTest(template = "empty", batch = "phase5_pocket_2")
   public static void pocketKeepsItemsAcrossSaveReloadAndDeath(GameTestHelper h) {
     var p = player(h, 3.5, 3.5);
     var c = ArcanePocket.container(p);
@@ -104,7 +104,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_pocket")
+  @GameTest(template = "empty", batch = "phase5_pocket_3")
   public static void pocketIsPrivatePerPlayer(GameTestHelper h) {
     var a = player(h, 2.5, 2.5);
     var b = player(h, 4.5, 4.5);
@@ -114,7 +114,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_pocket")
+  @GameTest(template = "empty", batch = "phase5_pocket_4")
   public static void pocketGlyphOpensTheMenu(GameTestHelper h) {
     floor(h);
     var p = player(h, 3.5, 3.5, "self", "pocket");
@@ -125,7 +125,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_pocket")
+  @GameTest(template = "empty", batch = "phase5_pocket_5")
   public static void pocketDoesNotOpenInCombat(GameTestHelper h) {
     floor(h);
     var p = player(h, 3.5, 3.5, "self", "pocket");
@@ -136,7 +136,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_pocket")
+  @GameTest(template = "empty", batch = "phase5_pocket_6")
   public static void pocketAdminClearEmptiesIt(GameTestHelper h) {
     var p = player(h, 3.5, 3.5);
     ArcanePocket.container(p).setItem(3, new ItemStack(Items.IRON_INGOT, 9));
@@ -153,7 +153,7 @@ public class Phase5GameTests {
     return h.getLevel().getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(h.absolutePos(BlockPos.ZERO), h.absolutePos(new BlockPos(7, 5, 7)))).size();
   }
 
-  @GameTest(template = "empty", batch = "phase5_restore")
+  @GameTest(template = "empty", batch = "phase5_restore_7")
   public static void blastLeavesNoLootAndRestoreBringsTheBlocksBack(GameTestHelper h) {
     floor(h);
     BlockJournal.clear(lvl(h));
@@ -177,7 +177,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_restore")
+  @GameTest(template = "empty", batch = "phase5_restore_8")
   public static void restoreNeverOverwritesWhatWasBuiltAfterwards(GameTestHelper h) {
     floor(h);
     BlockJournal.clear(lvl(h));
@@ -194,7 +194,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_restore")
+  @GameTest(template = "empty", batch = "phase5_restore_9")
   public static void restoreRespectsRadiusAndPerCastCap(GameTestHelper h) {
     floor(h);
     BlockJournal.clear(lvl(h));
@@ -211,7 +211,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_restore")
+  @GameTest(template = "empty", batch = "phase5_restore_10")
   public static void digIsNotJournaledAndStillDrops(GameTestHelper h) {
     floor(h);
     BlockJournal.clear(lvl(h));
@@ -224,7 +224,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_restore")
+  @GameTest(template = "empty", batch = "phase5_restore_11")
   public static void chestComesBackEmptyAndItsContentsFell(GameTestHelper h) {
     floor(h);
     BlockJournal.clear(lvl(h));
@@ -243,7 +243,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_restore")
+  @GameTest(template = "empty", batch = "phase5_restore_12")
   public static void restoreChargesManaPerBlockAndAnyPlayerCanUseIt(GameTestHelper h) {
     floor(h);
     BlockJournal.clear(lvl(h));
@@ -263,7 +263,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_restore")
+  @GameTest(template = "empty", batch = "phase5_restore_13")
   public static void withoutManaRestoreOnlyBringsBackWhatItCanPay(GameTestHelper h) {
     floor(h);
     BlockJournal.clear(lvl(h));
@@ -287,7 +287,7 @@ public class Phase5GameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "phase5_loot")
+  @GameTest(template = "empty", batch = "phase5_loot_14")
   public static void blastDropsLootConfigKeepsThoseBlocksOutOfTheJournal(GameTestHelper h) {
     floor(h);
     BlockJournal.clear(lvl(h));
@@ -303,6 +303,145 @@ public class Phase5GameTests {
     } finally {
       cfg.set(old);
     }
+    h.succeed();
+  }
+
+  // ------------------------------------------------------------------ Coro
+  private static Inscription chorusSpell(double amount) {
+    return new Inscription(List.of(g("self"), g("heal", "amount", amount), g("chorus", "min", 2.0)));
+  }
+
+  private static com.arcane.execution.ExecutionResult castSpell(GameTestHelper h, ServerPlayer p, Inscription spell) {
+    p.setYRot(0);
+    p.setXRot(0);
+    return CastingService.tryCast(p, spell, com.arcane.execution.PrecisionSnapshot.of(spell));
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 200, batch = "phase5_chorus_15")
+  public static void chorusFiresWhenTwoCastInsideTheCircleAndSplitsManaAndBoostsForce(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.ChorusService.clearAll();
+    var a = player(h, 3.5, 3.5, "self", "heal", "chorus");
+    var b = player(h, 5.5, 3.5, "self", "heal", "chorus");
+    a.setHealth(2f);
+    var ma = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(a);
+    var mb = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(b);
+    ma.set(100f);
+    mb.set(100f);
+    var r1 = castSpell(h, a, chorusSpell(2.0));
+    h.assertTrue(r1.success(), "o iniciador abriu o Coro: " + r1.message());
+    h.assertTrue(a.getHealth() == 2f && ma.current() == 100f, "nada acontece na hora (vida " + a.getHealth() + ", mana " + ma.current() + ")");
+    var r2 = castSpell(h, b, chorusSpell(2.0));
+    h.assertTrue(r2.success(), "o segundo entrou no Coro: " + r2.message());
+    h.runAfterDelay(80, () -> {
+      // heal 2 x 1,35 = 2,7: so o Coro pode ter curado mais que 2 (o dobro de vida base nao existe sem ele)
+      h.assertTrue(a.getHealth() >= 2f + 2.5f, "a magia disparou, mais forte (vida " + a.getHealth() + ")");
+      h.assertTrue(ma.current() < 100f && mb.current() < 100f, "os dois pagaram (" + ma.current() + " e " + mb.current() + ")");
+      h.assertTrue(Math.abs(ma.current() - mb.current()) < 0.01f, "a mesma cota para os dois");
+      h.assertTrue(com.arcane.execution.ChorusService.activeSessions() == 0, "a sessao fechou");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 200, batch = "phase5_chorus_16")
+  public static void chorusWithOneCasterDoesNothingAndCostsNothing(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.ChorusService.clearAll();
+    var a = player(h, 3.5, 3.5, "self", "heal", "chorus");
+    a.setHealth(2f);
+    var ma = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(a);
+    ma.set(100f);
+    castSpell(h, a, chorusSpell(2.0));
+    h.runAfterDelay(80, () -> {
+      h.assertTrue(a.getHealth() == 2f, "sem o segundo, a magia nao dispara (vida " + a.getHealth() + ")");
+      h.assertTrue(ma.current() == 100f, "e ninguem paga (mana " + ma.current() + ")");
+      h.assertTrue(com.arcane.execution.ChorusService.activeSessions() == 0, "a sessao expirou");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 200, batch = "phase5_chorus_17")
+  public static void aPlayerOutsideTheCircleDoesNotJoin(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.ChorusService.clearAll();
+    var a = player(h, 0.5, 0.5, "self", "heal", "chorus");
+    var far = player(h, 3.5, 3.5, "self", "heal", "chorus");
+    var pos = h.absoluteVec(new Vec3(0.5, 1, 0.5)).add(30, 0, 0); // bem fora do raio de 8
+    far.moveTo(pos.x, pos.y, pos.z);
+    a.setHealth(2f);
+    castSpell(h, a, chorusSpell(2.0));
+    castSpell(h, far, chorusSpell(2.0)); // fora do circulo: abre o proprio Coro, nao entra no de A
+    h.assertTrue(com.arcane.execution.ChorusService.activeSessions() == 2, "duas sessoes separadas");
+    h.runAfterDelay(80, () -> {
+      h.assertTrue(a.getHealth() == 2f, "nenhum Coro se completou (vida " + a.getHealth() + ")");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 200, batch = "phase5_chorus_18")
+  public static void aDifferentSpellDoesNotJoinTheChorus(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.ChorusService.clearAll();
+    var a = player(h, 3.5, 3.5, "self", "heal", "chorus");
+    var b = player(h, 4.5, 3.5, "self", "heal", "chorus");
+    a.setHealth(2f);
+    castSpell(h, a, chorusSpell(2.0));
+    castSpell(h, b, chorusSpell(5.0)); // outra magia equipada
+    h.assertTrue(com.arcane.execution.ChorusService.activeSessions() == 2, "cada um abriu o seu");
+    h.runAfterDelay(80, () -> {
+      h.assertTrue(a.getHealth() == 2f, "o Coro nao se formou com magias diferentes (vida " + a.getHealth() + ")");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 200, batch = "phase5_chorus_19")
+  public static void aLateCasterAfterTheWindowDoesNotJoin(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.ChorusService.clearAll();
+    var a = player(h, 3.5, 3.5, "self", "heal", "chorus");
+    var b = player(h, 4.5, 3.5, "self", "heal", "chorus");
+    a.setHealth(2f);
+    castSpell(h, a, chorusSpell(2.0));
+    h.runAfterDelay(80, () -> {
+      castSpell(h, b, chorusSpell(2.0)); // a janela de A ja acabou
+      h.assertTrue(com.arcane.execution.ChorusService.activeSessions() == 1, "B abriu o proprio Coro");
+      h.assertTrue(a.getHealth() == 2f, "A nao foi curado (vida " + a.getHealth() + ")");
+      com.arcane.execution.ChorusService.clearAll();
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 200, batch = "phase5_chorus_20")
+  public static void someoneWithoutManaLeavesAndTheChorusFailsBelowTheMinimum(GameTestHelper h) {
+    floor(h);
+    com.arcane.execution.ChorusService.clearAll();
+    var a = player(h, 3.5, 3.5, "self", "heal", "chorus");
+    var b = player(h, 4.5, 3.5, "self", "heal", "chorus");
+    a.setHealth(2f);
+    var ma = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(a);
+    var mb = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(b);
+    ma.set(100f);
+    mb.set(100f);
+    castSpell(h, a, chorusSpell(2.0));
+    castSpell(h, b, chorusSpell(2.0));
+    mb.set(0f); // B gastou a mana antes do disparo
+    h.runAfterDelay(80, () -> {
+      h.assertTrue(a.getHealth() == 2f, "com B sem mana, abaixo do minimo: nao dispara (vida " + a.getHealth() + ")");
+      h.assertTrue(ma.current() == 100f, "e A nao pagou (mana " + ma.current() + ")");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", batch = "phase5_chorus_21")
+  public static void npcsAndChargedCastsCannotFormAChorus(GameTestHelper h) {
+    floor(h);
+    var pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 3));
+    var r = CastingService.tryCast(pig, chorusSpell(2.0), h.getLevel());
+    h.assertTrue(!r.success(), "criatura/NPC nao conjura Coro");
+    var a = player(h, 3.5, 3.5, "self", "heal", "chorus");
+    var spell = chorusSpell(2.0);
+    var charged = CastingService.cast(a, spell, com.arcane.execution.PrecisionSnapshot.of(spell), 1.0, true);
+    h.assertTrue(!charged.success(), "magia carregada (mana ja paga) nao entra em Coro");
     h.succeed();
   }
 }

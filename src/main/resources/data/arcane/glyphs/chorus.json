@@ -1,0 +1,26 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:chorus"
+  },
+  "parameters": {
+    "min": {
+      "type": "int",
+      "default": 2.0,
+      "min": 2.0,
+      "max": 4.0
+    }
+  },
+  "modifier_scope": {
+    "target": "flag",
+    "kind": "effect",
+    "mutate": {}
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 1,
+  "families": [
+    "life"
+  ]
+}

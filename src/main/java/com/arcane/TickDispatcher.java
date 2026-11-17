@@ -18,6 +18,7 @@ public final class TickDispatcher {
         com.arcane.execution.Telekinesis.tick(server);
         com.arcane.execution.CastChannels.tick(server);
         com.arcane.execution.Phase4Service.tick(server);
+        com.arcane.execution.ChorusService.tick(server);
         if (server.getTickCount() % AMBIENT_INTERVAL_TICKS == 0) {
             tickAmbient(server);
         }

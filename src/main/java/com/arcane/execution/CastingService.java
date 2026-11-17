@@ -52,6 +52,12 @@ public final class CastingService {
             return ExecutionResult.fail(broken);
         }
 
+        // Coro: nao dispara sozinho. Entra numa sessao (ou abre uma) e quem paga e dispara e o ChorusService, no fim da janela.
+        if (!ChorusService.firing() && ChorusService.isChorus(inscription)) {
+            if (free) return ExecutionResult.fail("message.arcane.chorus.nocharge");
+            return ChorusService.handle(player, inscription, scale);
+        }
+
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
         int baseCost = plan.baseManaCost();
         double inkMultiplier = InkRegistry.getManaMultiplier(inscription.metadata().ink());
@@ -119,6 +125,7 @@ public final class CastingService {
             return ExecutionResult.fail("message.arcane.requires_ritual");
         }
         if (Phase4State.active(caster, Phase4State.SILENCE)) return ExecutionResult.fail("message.arcane.silenced");
+        if (ChorusService.isChorus(inscription)) return ExecutionResult.fail("message.arcane.chorus.players_only");
         String broken = Vows.violation(caster, inscription);
         if (broken != null) return ExecutionResult.fail(broken);
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);

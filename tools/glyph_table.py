@@ -755,6 +755,12 @@ _g("restore", "effect", 4,
    ("Restore", "Effect: recomposes, within 2-12 blocks, the blocks spells destroyed in the last 2 minutes (explosions, Cut, Damage, ice and fire), where nobody has built since. It returns no items: explosions drop no loot (configurable). Charges a little mana per block that comes back."),
    ["#.####.#", "#.#..#.#", "..#.##..", "###..###", "###..###", "..##.#..", "#.#..#.#", "#.####.#"],
    params={"radius": (6.0, 2.0, 12.0, "float")}, magnitude=["radius"])
+_g("chorus", "modifier", 2,
+   ("Coro", "Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga."),
+   ("Chorus", "Modifier: the spell only fires if 2-4 players cast it together, inside the circle that appears on the ground around whoever starts (radius 8, 3 s for the others). Everyone needs the same spell. Strength rises 35% per extra participant (max x2.4) and the mana is split among them. Without enough people nothing happens and nobody pays."),
+   ["..#..#..", ".#.##.#.", "#..##..#", ".#.##.#.", "..#..#..", ".#.##.#.", "#..##..#", ".#.##.#."],
+   params={"min": (2.0, 2.0, 4.0, "int")},
+   scope={"target": "flag", "kind": "effect", "mutate": {}})
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
@@ -777,7 +783,7 @@ FAMILIES = {
     "ice": ["slow", "freeze", "shield", "wet", "rain", "petrify"],
     "storm": ["thunder", "ray", "pillar", "rain", "rumble", "raining", "wet", "electrify", "on_signal", "emit_signal"],
     "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill", "acid", "curse", "reanimate", "contagion", "overcharge", "after_hits"],
-    "life": ["heal", "shield", "speed", "allies", "players", "animals"],
+    "life": ["chorus", "heal", "shield", "speed", "allies", "players", "animals"],
     "force": ["hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["pocket", "mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],

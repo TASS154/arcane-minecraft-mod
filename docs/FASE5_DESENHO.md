@@ -1,6 +1,6 @@
 # Fase 5: documento de desenho (sistemas novos)
 
-Estado: **proposta, nada implementado.** Aguarda aprovação antes de qualquer código. Os três sistemas são independentes entre si e podem ser aprovados, adiados ou cortados separadamente.
+Estado: **desenho com decisões fechadas, nada implementado.** Aguarda o "pode implementar" de Everton. Os três sistemas são independentes entre si e podem ser aprovados, adiados ou cortados separadamente.
 
 Custo em "unidades": P ≈ 0,5 dia, M ≈ 1 dia, G ≈ 2 a 3 dias de trabalho, contando código, GameTests, docs e ajustes (estimativa minha, sem margem para surpresas de cliente).
 
@@ -39,73 +39,71 @@ GameTests: registro em cada ponto de escrita (e Dig **não** registra); restaura
 
 ## 2. Coro (magia que exige dois ou mais jogadores)
 
+**Decisões fechadas com Everton:** todos os participantes ativam a magia **ao mesmo tempo**, **dentro do círculo**. Padrões que escolhi para o que ficou em aberto (registrados em `PERGUNTAS.md`): "ao mesmo tempo" = dentro de uma janela de 3 s; o círculo é uma área ao redor de quem inicia, de raio 8, desenhada no chão por partículas; todos precisam ter **a mesma magia equipada**.
+
 ### O que é
 Uma inscrição marcada como **Coro** só funciona se N jogadores (N ≥ 2) a conjurarem juntos, e ganha força por participante.
 
 ### Desenho
 - **Glifo.** Modificador `chorus` com parâmetro `min` (2 a 4). A inscrição que o contém passa a exigir um grupo.
-- **Fluxo.** O iniciador conjura normalmente; em vez de executar, o servidor abre uma **sessão de coro** (`ChorusSession`: id, iniciador, inscrição, prazo de 10 s, lista de participantes). Jogadores num raio (padrão 16) que tenham **a mesma magia equipada** no Grimório e apertem a tecla de conjurar dentro do prazo entram. Quando chega a `min`, a magia dispara **uma vez**, com o iniciador como conjurador.
-- **Custo.** Cada participante paga sua cota de mana (custo total ÷ participantes, com piso), debitada no servidor no momento do disparo; se algum não tiver mana, ele sai da sessão e o coro falha se cair abaixo de `min`.
-- **Força.** Multiplicador de magnitude `1 + 0,35 × (participantes − 1)`, com teto (x2,4 com 5 ou mais), pela mesma via de `ExecutionContext.amplify`, sem inventar outro caminho.
-- **Rede.** Um pacote S2C avisa os jogadores próximos ("Coro de X: pressione para participar", barra de 10 s) e um C2S de adesão (o pressionar normal de conjurar reaproveita `C2SCastRequestPacket` com o id da sessão). Nada vem do cliente além da intenção; distância, mana e magia equipada são conferidos no servidor.
-- **NPC.** Fora da v1 (magos NPC não participam).
-- **Config.** `chorusEnabled`, `chorusRadius`, `chorusWindowSeconds`, `chorusMaxParticipants`.
+- **Fluxo.** O primeiro a conjurar abre uma **sessão de coro** (`ChorusSession`: iniciador, centro, inscrição, prazo de 3 s, participantes) e o servidor desenha o círculo de raio 8 em volta dele. Quem estiver dentro do círculo, com a mesma magia equipada, e conjurar com a tecla normal até o prazo entra. Se, ao fim da janela, houver `min` participantes, a magia dispara **uma vez**, com o iniciador como conjurador. Se não, nada acontece e **ninguém gasta mana**.
+- **Sem rede nova.** Não há convite nem UI de adesão: a conjuração normal (`C2SCastRequestPacket`) já basta e o círculo é só partículas do servidor. Um aviso de chat curto ("Coro de X: faltam N") sai pelo canal existente.
+- **Custo.** Cada participante paga sua cota (custo total ÷ participantes, com piso), debitada no disparo; quem não tiver mana sai, e o coro falha se cair abaixo de `min`.
+- **Força.** Magnitude `1 + 0,35 × (participantes − 1)`, teto x2,4, pelo mesmo caminho de `ExecutionContext.amplify`.
+- **Posição.** Participante que saiu do círculo antes do disparo é descartado; a posição é conferida no servidor no fim da janela.
+- **NPC.** Fora da v1.
+- **Config.** `chorusEnabled`, `chorusRadius` (8), `chorusWindowTicks` (60), `chorusMaxParticipants`.
 
 ### Riscos
 | Risco | Gravidade | Mitigação |
 |---|---|---|
-| Abuso por contas múltiplas | média | é uma magia cooperativa por natureza; teto no multiplicador |
-| Spam de convites | média | uma sessão por iniciador, recarga de 10 s, raio |
-| Dessincronização de UI | média | a sessão é inteira no servidor; o cliente só mostra estado recebido |
-| Impossível de testar com um jogador só | alta para o teste manual | GameTests com jogadores simulados (já temos o padrão `EmbeddedChannel`); teste manual exige 2 clientes |
-| Quem sai/desconecta no meio | baixa | a sessão expira e devolve nada (a mana só sai no disparo) |
+| Abuso por contas múltiplas | média | magia cooperativa por natureza; teto no multiplicador |
+| Janela de 3 s apertada com latência alta | média | configurável; o tempo conta no servidor |
+| Verificar em jogo exige 2 clientes | alta para teste manual | GameTests com jogadores simulados |
+| Quem sai/desconecta no meio | baixa | a sessão expira sem cobrar mana |
 
-### Custo: **G** (UI de adesão e dois pacotes são a maior parte).
+### Custo: **M a G** (sem pacotes nem UI novos, caiu em relação ao desenho anterior).
 ### Testes planejados
-GameTests: sessão abre, sessão fecha por prazo, dispara com N, falha com N−1, cota de mana, raio, magia equipada diferente recusa, multiplicador com teto. JUnit: cálculo de cota e de multiplicador.
+GameTests: sessão abre, expira após 3 s sem disparar nem cobrar, dispara com N dentro do círculo, falha com N−1, jogador fora do círculo não conta, magia equipada diferente não conta, cota de mana, multiplicador com teto. JUnit: cálculo de cota e multiplicador.
 
 ---
 
 ## 3. Bolso Arcano (espaço de armazenamento do mago)
 
+**Decisões fechadas com Everton:** funciona como **Baú do Fim** (por jogador, ninguém abre o de outro) e **permanece na morte**; capacidade = **metade de um baú pequeno**. Baú pequeno tem 27 espaços, então **13** (arredondado para baixo, configurável).
+
 ### O que é
 Um espaço extra de itens ligado ao jogador, acessado por glifo, sem ocupar o inventário.
 
 ### Desenho
-- **Armazenamento.** Um `anexo` (attachment) por jogador, como o Grimório (`GrimoireAttachments`): contêiner de 9 a 27 espaços conforme nível, serializado no NBT do jogador. Sobrevive à morte? **Pergunta 2.**
-- **Acesso.** Glifo `pocket`: ao conjurar, abre a tela do contêiner (`MenuProvider` de baú simples, sem GUI nova). Custo de mana por abertura, recarga curta.
-- **Regras para evitar abuso.** Lista de itens proibidos (outros mods de armazenamento, shulker boxes, o próprio Grimório e itens com inscrição, para não aninhar), bloqueio para quem está em combate recente (3 s), e o conteúdo não é lido por nenhum filtro/efeito.
-- **Multiplayer.** O contêiner é por jogador; ninguém abre o de outro. Comando de admin `/arcane pocket <jogador> [limpar]` para recuperar itens.
-- **Config.** `pocketEnabled`, `pocketSlots`, `pocketBlockedItems`.
-- **Escopo fora da v1.** Bolso por inscrição/bloco, Bolso compartilhado, magias que sacam itens do bolso.
+- **Armazenamento.** `anexo` por jogador (como o Grimório), com 13 espaços, serializado no NBT do jogador. Os anexos são copiados no clone de morte, então o conteúdo permanece.
+- **Acesso.** Glifo `pocket` abre um menu de baú de 2 fileiras em que só os 13 primeiros espaços são utilizáveis (os 5 restantes ficam bloqueados). Custo de mana por abertura.
+- **Regras contra abuso.** Lista de itens proibidos (shulker boxes, o próprio Grimório, itens com inscrição) e bloqueio em combate recente (3 s).
+- **Admin.** `/arcane pocket <jogador> [limpar]` para recuperar itens.
+- **Config.** `pocketEnabled`, `pocketSlots` (13), `pocketBlockedItems`.
+- **Fora da v1.** Bolso por bloco, compartilhado, magias que sacam itens dele.
 
 ### Riscos
 | Risco | Gravidade | Mitigação |
 |---|---|---|
-| Perda de itens por bug de serialização | alta | teste de salvar/recarregar; cópia de segurança no NBT |
-| Exploit de duplicação (fechar menu em tick de morte, troca de dimensão) | alta | só abre/fecha no servidor, gravação ao fechar, bloqueio durante morte |
-| Aninhamento (bolso dentro do bolso, shulker) | média | lista de bloqueio |
-| Item perdido na morte, conforme regra escolhida | média | decisão explícita (Pergunta 2) |
-| Compatibilidade com mods de inventário | baixa | usar o caminho padrão `Container`/`MenuProvider` |
+| Perda de itens por bug de serialização | alta | teste de salvar/recarregar |
+| Duplicação (fechar na morte ou troca de dimensão) | alta | gravação no servidor ao fechar; cópia de morte testada |
+| Aninhamento | média | lista de bloqueio |
 
 ### Custo: **M**.
 ### Testes planejados
-GameTests: guardar e abrir, sobreviver a salvar/recarregar, bloqueio de itens proibidos, bloqueio em combate, privacidade entre jogadores, comando de admin. JUnit: serialização do contêiner.
+GameTests: guardar e abrir, sobreviver a salvar/recarregar e ao clone de morte, bloqueio de itens proibidos, espaços 14+ inutilizáveis, bloqueio em combate, privacidade entre jogadores, comando de admin. JUnit: serialização do contêiner.
 
 ---
 
 ## Ordem e custo total sugeridos
 
-1. **Bolso Arcano** (M): isolado e de menor risco; bom para validar o padrão de menu/anexo.
-2. **Restaurar** (M): maior risco de exploit, mas de escopo fechado nos pontos de escrita.
-3. **Coro** (G): o mais caro e o único que depende de dois clientes para a verificação em jogo.
+1. **Bolso Arcano** (M): isolado e de menor risco; valida o padrão de menu/anexo.
+2. **Restaurar** (M): escopo fechado nos pontos de escrita.
+3. **Coro** (M a G): o único que depende de dois clientes para a verificação em jogo.
 
-Total estimado: 4 a 7 dias de trabalho. Cada um fecha com commit próprio, docs regeradas e honestidade no `ESTADO_DO_MOD.md`.
+Total estimado: 3 a 5 dias de trabalho. Cada um fecha com commit próprio, docs regeradas e honestidade no `ESTADO_DO_MOD.md`.
 
-## Perguntas que precisam de resposta antes de começar
+## Perguntas
 
-1. ~~Restaurar: glifo vs ritual~~ **Fechado:** glifo raro (tier 3).
-2. **Bolso:** os itens ficam com o jogador na morte (recomendado, é um bolso mágico) ou caem como o inventário?
-3. ~~Restaurar: diário~~ **Fechado:** só em memória na v1.
-4. **Coro:** os participantes precisam ter a mesma magia equipada (recomendado, evita adesão acidental) ou basta estarem no raio?
-5. **Todos:** posso cortar algum dos três ou mudar a ordem?
+Todas respondidas. Restam só os padrões que eu escolhi no Coro (janela de 3 s, raio 8, mesma magia equipada) e no Bolso (13 espaços), que Everton pode ajustar na revisão.

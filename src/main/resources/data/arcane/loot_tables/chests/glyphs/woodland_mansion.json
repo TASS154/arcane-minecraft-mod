@@ -1408,6 +1408,17 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:focus\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
           "weight": 5,
           "functions": [
             {

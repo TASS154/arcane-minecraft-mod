@@ -14,7 +14,7 @@ public final class EffectReach {
 
   private static final Map<String, Integer> FORMS = Map.ofEntries(
       Map.entry("self", ENTITY), Map.entry("touch", ENTITY | BLOCK), Map.entry("projectile", ENTITY | BLOCK),
-      Map.entry("ray", ALL), Map.entry("aura", ENTITY), Map.entry("wave", ENTITY),
+      Map.entry("ray", ALL), Map.entry("focus", ENTITY), Map.entry("aura", ENTITY), Map.entry("wave", ENTITY),
       Map.entry("pillar", ALL), Map.entry("barrier", ENTITY | BLOCK),
       Map.entry("summon_wolves", ENTITY), Map.entry("summon_golem", ENTITY));
 

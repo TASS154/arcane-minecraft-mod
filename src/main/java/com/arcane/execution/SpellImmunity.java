@@ -50,7 +50,7 @@ public final class SpellImmunity {
     if (caster != null) event.getAffectedEntities().remove(caster);
     // Explosoes de magia que destroem blocos: por padrao nao soltam item e entram no diario do Restaurar.
     // Com blastDropsLoot ligado seguem o caminho do vanilla (com loot) e ficam fora do diario.
-    if (caster != null && Boolean.TRUE.equals(EXPLOSION_BREAKS.get()) && !com.arcane.config.ArcaneConfig.BLAST_DROPS_LOOT.get()
+    if (caster != null && Boolean.TRUE.equals(EXPLOSION_BREAKS.get()) && !com.arcane.restore.BlockJournal.dropsLoot()
         && event.getLevel() instanceof net.minecraft.server.level.ServerLevel level) {
       for (net.minecraft.core.BlockPos pos : new java.util.ArrayList<>(event.getAffectedBlocks())) {
         var before = level.getBlockState(pos);

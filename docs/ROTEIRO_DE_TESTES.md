@@ -386,5 +386,14 @@ Monte `Eu, X, Inverter` para cada par e confirme o oposto:
 
 ---
 
+## 9. Foco (novo glifo de forma)
+Montagem: `Foco, Atrair` (ou `Foco, Dano`). Precisa conhecer o glifo `focus`: `/arcane learn @s arcane:focus` (ou o comando que você usa para conhecer glifos).
+- [ ] Mirando num **zumbi ou aldeão** a até 24 blocos: a magia funciona (atrai/fere).
+- [ ] Mirando no **chão, no ar ou num bloco**: a magia **falha** com a mensagem "Nenhuma criatura viva na mira." e **a mana não cai**.
+- [ ] **Atrás de uma parede:** falha igual, sem gastar mana.
+- [ ] Um porco bem baixo pode ser difícil de acertar (a mira segue a altura dos olhos); anote se isso incomoda.
+
+---
+
 ## Como reportar uma falha
 Anote: **ID do item** (por exemplo `4.3 Medo`), a **composição exata** da magia, o que esperava, o que aconteceu e, se houver, o trecho do log. Com isso eu reproduzo, escrevo o GameTest que falha e corrijo.

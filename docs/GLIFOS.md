@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **143 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **144 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -33,7 +33,7 @@ São **143 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–
 | Muralha | Barreira | Parede de energia 3x3 que some sozinha |
 | Grupo | Raio → Grupo → Dano → Fogo → Fim do Grupo → Potência | A Potência vale para Dano **e** Fogo |
 
-## Formas (10)
+## Formas (11)
 
 Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única exceção são Condições e Ativadores). Só pode haver uma.
 
@@ -49,6 +49,7 @@ Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única
 | **Barreira** | `arcane:barrier` | 4 | 3 | Terra | `duration` 200 (40–600), `radius` 3 (2–12) | Forma: ergue uma parede de energia a sua frente (3x3 com raio 3; Area e raio ampliam). Com Domo, Esfera ou Anel vira uma casca em volta do centro. Os glifos seguintes atingem os blocos e quem estiver dentro ou encostado. |
 | **Invocar Lobos** | `arcane:summon_wolves` | 4 | 2 | Terra | `count` 3 (1–6), `size` 1 (1–3), `duration` 1200 (200–6000) | Forma de RITUAL (menor): invoca Lobos Espectrais domesticados que lutam por você por um tempo. Número (count) e tamanho (size 1–3) são escolha sua: maiores têm outro modelo (Alfa, Fenrir) e mais vida e dano. Os lobos são os alvos do que vem depois. |
 | **Invocar Golem** | `arcane:summon_golem` | 6 | 3 | Terra | `count` 1 (1–3), `size` 1 (1–3), `duration` 2400 (400–12000) | Forma de RITUAL (médio): ergue Golens Rúnicos que protegem você por um tempo. Número (count 1–3) e tamanho (size 1–3: Guardião, Colosso, Titã, cada um com modelo próprio). O golem é o alvo do que vem depois. |
+| **Foco** | `arcane:focus` | 2 | 2 | Arcano | `range` 24 (4–48) | Forma: entrega só a criatura viva sob a sua mira (até 24 blocos, não atravessa paredes). Não toca blocos nem pontos vazios e não faz efeito próprio: serve para Atrair, Marcar, Elo e outros que só fazem sentido com uma criatura. Sem criatura na mira, a magia falha e não gasta mana. |
 
 ## Filtros (14)
 

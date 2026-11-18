@@ -32,6 +32,17 @@ public final class BlockJournal {
   /** Blocos ja escolhidos por um Restaurar, esperando a vez de voltar (alguns por tick, do mais novo para o mais antigo). */
   private static final Map<ResourceKey<Level>, java.util.ArrayDeque<Entry>> PENDING = new HashMap<>();
 
+  /** So para testes: forca o valor de blastDropsLoot sem mexer no arquivo de config (que o Forge recarrega do disco, com corrida). */
+  private static volatile Boolean lootOverride;
+
+  public static void overrideLootForTests(Boolean value) { lootOverride = value; }
+
+  /** Valor efetivo de blastDropsLoot: o da config, salvo override de teste. */
+  public static boolean dropsLoot() {
+    Boolean o = lootOverride;
+    return o != null ? o : ArcaneConfig.BLAST_DROPS_LOOT.get();
+  }
+
   private BlockJournal() {}
 
   private static long window() { return ArcaneConfig.RESTORE_WINDOW_SECONDS.get() * 20L; }
@@ -55,7 +66,7 @@ public final class BlockJournal {
    * Com ela: solta item e NAO entra no diario (senao daria para pegar o loot e restaurar o bloco).
    */
   public static boolean destroy(ServerLevel level, BlockPos pos, Entity breaker) {
-    if (ArcaneConfig.BLAST_DROPS_LOOT.get()) return level.destroyBlock(pos, true, breaker);
+    if (dropsLoot()) return level.destroyBlock(pos, true, breaker);
     BlockState before = level.getBlockState(pos);
     boolean ok = level.destroyBlock(pos, false, breaker);
     if (ok) record(level, pos, before);
@@ -101,6 +112,9 @@ public final class BlockJournal {
   public static void flush(ServerLevel level) {
     while (pending(level) > 0) place(level, Integer.MAX_VALUE);
   }
+
+  /** Poe de volta ate {@code budget} blocos da fila (um tick de recolocacao; usado nos testes de desempenho). */
+  public static void flushSome(ServerLevel level, int budget) { place(level, budget); }
 
   private static void place(ServerLevel level, int budget) {
     var q = PENDING.get(level.dimension());

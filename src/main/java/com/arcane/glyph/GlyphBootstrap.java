@@ -48,6 +48,7 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerForm(ArcaneIds.TOUCH, new RayFormHandler(false));
         GlyphHandlerRegistry.registerForm(ArcaneIds.PROJECTILE, new ProjectileFormHandler());
         GlyphHandlerRegistry.registerForm(ArcaneIds.of("ray"), new RayFormHandler(true));
+        GlyphHandlerRegistry.registerForm(ArcaneIds.of("focus"), new com.arcane.execution.handlers.FocusFormHandler());
         GlyphHandlerRegistry.registerForm(ArcaneIds.of("aura"), new AuraFormHandler());
         GlyphHandlerRegistry.registerForm(ArcaneIds.of("wave"), new WaveFormHandler());
         GlyphHandlerRegistry.registerForm(ArcaneIds.of("pillar"), new PillarFormHandler());

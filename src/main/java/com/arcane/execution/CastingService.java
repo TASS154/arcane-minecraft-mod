@@ -61,6 +61,12 @@ public final class CastingService {
             return ExecutionResult.fail(broken);
         }
 
+        // Foco: precisa de uma criatura viva sob a mira; sem ela, falha antes de cobrar qualquer mana.
+        if (com.arcane.execution.handlers.FocusFormHandler.hasFocus(inscription) && com.arcane.execution.handlers.FocusFormHandler.find(
+                player, player.getEyePosition(), player.getLookAngle(), com.arcane.execution.handlers.FocusFormHandler.rangeOf(inscription)) == null) {
+            return ExecutionResult.fail("message.arcane.focus.no_target");
+        }
+
         // Coro: nao dispara sozinho. Entra numa sessao (ou abre uma) e quem paga e dispara e o ChorusService, no fim da janela.
         if (!ChorusService.firing() && ChorusService.isChorus(inscription)) {
             if (free) return ExecutionResult.fail("message.arcane.chorus.nocharge");
@@ -137,6 +143,10 @@ public final class CastingService {
         }
         if (Phase4State.active(caster, Phase4State.SILENCE)) return ExecutionResult.fail("message.arcane.silenced");
         if (ChorusService.isChorus(inscription)) return ExecutionResult.fail("message.arcane.chorus.players_only");
+        if (com.arcane.execution.handlers.FocusFormHandler.hasFocus(inscription) && com.arcane.execution.handlers.FocusFormHandler.find(
+                caster, caster.getEyePosition(), caster.getLookAngle(), com.arcane.execution.handlers.FocusFormHandler.rangeOf(inscription)) == null) {
+            return ExecutionResult.fail("message.arcane.focus.no_target");
+        }
         String broken = Vows.violation(caster, inscription);
         if (broken != null) return ExecutionResult.fail(broken);
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);

@@ -320,17 +320,15 @@ public class Phase5GameTests {
   public static void blastDropsLootConfigKeepsThoseBlocksOutOfTheJournal(GameTestHelper h) {
     floor(h);
     BlockJournal.clear(lvl(h));
-    var cfg = com.arcane.config.ArcaneConfig.BLAST_DROPS_LOOT;
-    boolean old = cfg.get();
     try {
-      cfg.set(true);
+      BlockJournal.overrideLootForTests(true);
       BlockPos rel = new BlockPos(3, 1, 3);
       h.setBlock(rel, Blocks.STONE);
       BlockJournal.destroy(lvl(h), h.absolutePos(rel), null);
       h.assertTrue(BlockJournal.size(lvl(h)) == 0, "com loot ligado, nada entra no diario");
       h.assertTrue(itemsOnGround(h) >= 1, "com loot ligado, o bloco solta item");
     } finally {
-      cfg.set(old);
+      BlockJournal.overrideLootForTests(null);
     }
     h.succeed();
   }
@@ -564,5 +562,77 @@ public class Phase5GameTests {
       p.removeEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
       h.succeed();
     });
+  }
+
+  // ------------------------------------------------------------------ Foco (forma de mira viva)
+  @GameTest(template = "empty", batch = "phase7_focus_1")
+  public static void focusDeliversOnlyTheLivingCreatureUnderAimAndFailsWithoutSpendingMana(GameTestHelper h) {
+    floor(h);
+    var p = player(h, 3.5, 1.5, "focus", "damage");
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(p);
+    mana.set(80f);
+    var pig = h.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(3, 1, 4));
+    var spell = new Inscription(List.of(g("focus", "range", 12.0), g("damage", "amount", 2.0)));
+    float hp = pig.getHealth();
+    float m0 = mana.current();
+    var ok = castSpell(h, p, spell);
+    h.assertTrue(ok.success(), "com criatura na mira a magia funciona: " + ok.message());
+    h.assertTrue(pig.getHealth() < hp, "o Foco entregou a criatura ao efeito");
+    h.assertTrue(mana.current() < m0, "gastou mana ao funcionar");
+    pig.discard();
+    float m1 = mana.current();
+    var fail = castSpell(h, p, spell);
+    h.assertTrue(!fail.success() && fail.message().equals("message.arcane.focus.no_target"), "sem criatura: falha (" + fail.message() + ")");
+    h.assertTrue(mana.current() == m1, "e nao gasta mana (" + mana.current() + " de " + m1 + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase7_focus_2")
+  public static void focusDoesNotSeeThroughWallsOrPickBlocks(GameTestHelper h) {
+    floor(h);
+    var p = player(h, 3.5, 1.5, "focus", "damage");
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(p);
+    mana.set(80f);
+    h.setBlock(new BlockPos(3, 1, 3), Blocks.STONE);
+    h.setBlock(new BlockPos(3, 2, 3), Blocks.STONE);
+    h.setBlock(new BlockPos(3, 3, 3), Blocks.STONE);
+    var pig = h.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(3, 1, 5));
+    var spell = new Inscription(List.of(g("focus", "range", 12.0), g("damage", "amount", 2.0)));
+    float hp = pig.getHealth();
+    float m0 = mana.current();
+    var r = castSpell(h, p, spell);
+    h.assertTrue(!r.success(), "criatura atras de parede nao e alvo");
+    h.assertTrue(pig.getHealth() == hp && mana.current() == m0, "nada acontece e nada e cobrado");
+    h.succeed();
+  }
+
+  // ------------------------------------------------------------------ Desempenho do Restaurar
+  @GameTest(template = "empty", timeoutTicks = 200, batch = "phase7_perf_3")
+  public static void restoreWithAFullJournalStaysCheapPerTick(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    int cap = com.arcane.config.ArcaneConfig.RESTORE_JOURNAL_CAP.get();
+    // enche o diario ate o teto com blocos distantes entre si (um andar de terra de 64x64 sobre o chao do teste)
+    var origin = h.absolutePos(new BlockPos(0, 2, 0));
+    for (int i = 0; i < cap; i++) {
+      BlockPos at = origin.offset(i % 64, i / 64 % 64, 0);
+      lvl(h).setBlock(at, Blocks.DIRT.defaultBlockState(), 2);
+      BlockJournal.destroy(lvl(h), at, null);
+    }
+    long t0 = System.nanoTime();
+    int queued = BlockJournal.restore(lvl(h), Vec3.atCenterOf(origin).add(32, 32, 0), 16, 1024);
+    double selectMs = (System.nanoTime() - t0) / 1.0e6;
+    h.assertTrue(queued > 0, "algo entrou na fila (" + queued + ")");
+    h.assertTrue(selectMs < 100.0, "escolher os blocos num diario cheio custa pouco (" + selectMs + " ms)");
+    long worst = 0;
+    int ticks = 0;
+    while (BlockJournal.pending(lvl(h)) > 0 && ticks++ < 400) {
+      long a = System.nanoTime();
+      BlockJournal.flushSome(lvl(h), com.arcane.config.ArcaneConfig.RESTORE_BLOCKS_PER_TICK.get());
+      worst = Math.max(worst, System.nanoTime() - a);
+    }
+    h.assertTrue(worst / 1.0e6 < 25.0, "cada tick de recolocacao custa pouco (pior " + worst / 1.0e6 + " ms)");
+    BlockJournal.clear(lvl(h));
+    h.succeed();
   }
 }

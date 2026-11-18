@@ -35,7 +35,6 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = ArcaneMod.MODID, value = Dist.CLIENT)
 public final class FloatFlightClient {
   private static final double PIVOT = 1.5;
-  private static final Map<UUID, Float> LEAN = new HashMap<>();
   private static final Set<UUID> PUSHED = new HashSet<>();
   private static boolean wasFloating;
   /** Jogadores em voo rapido (sprint): a onda de choque dispara quando entram nesta lista. */
@@ -152,34 +151,49 @@ public final class FloatFlightClient {
     if (fovBoost > 0.001f) event.setNewFovModifier(event.getNewFovModifier() * (1.0f + 0.35f * fovBoost));
   }
 
-  /**
-   * Inclinacao do corpo em graus (0 = em pe): o corpo se alinha ao olhar, cabeca primeiro. Olhar na horizontal deita o
-   * corpo 90 graus; olhar para cima o levanta; olhar para baixo mergulha. Parado, fica em pe.
-   */
-  private static float leanTarget(Player player) {
-    double speed = horizontalSpeed(player);
-    if (speed < 0.06) return 0.0f;
-    float align = (float) Math.min(1.0, speed / 0.2);
-    float fromVertical = Mth.clamp(90.0f + player.getXRot(), 8.0f, 150.0f);
-    return fromVertical * align;
+  /** Movimento suavizado por jogador: {inclinacao (graus), rolagem (graus), frente, lado} (frente e lado de -1 a 1). */
+  private static final Map<UUID, float[]> MOTION = new HashMap<>();
+
+  /** Estado de movimento para o modelo (nunca nulo). */
+  public static float[] motion(UUID id) {
+    float[] m = MOTION.get(id);
+    return m == null ? new float[4] : m;
   }
 
+  /**
+   * Estilo Frieren: so ir para a FRENTE deita o corpo (como quem voa olhando adiante, com a cabeca sempre em pe, ver
+   * PlayerAnimClient). Subir e descer nao deitam; ir para os lados ou para tras mantem o corpo em pe (so uma leve
+   * inclinacao) e mexe tronco, pernas e bracos. Tudo medido em relacao a para onde o corpo esta virado.
+   */
   @SubscribeEvent
   public static void onRenderPre(RenderPlayerEvent.Pre event) {
     Player player = event.getEntity();
     if (!player.hasEffect(ModEffects.FLOAT_FLIGHT.get())) {
-      LEAN.remove(player.getUUID());
+      MOTION.remove(player.getUUID());
       return;
     }
-    float current = LEAN.getOrDefault(player.getUUID(), 0.0f);
-    current += (leanTarget(player) - current) * 0.06f; // as pernas demoram: o corpo acompanha a cabeca aos poucos
-    LEAN.put(player.getUUID(), current);
+    double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
+    double yawRad = Math.toRadians(player.getYRot());
+    double fwdSpeed = dx * -Math.sin(yawRad) + dz * Math.cos(yawRad);
+    double sideSpeed = dx * -Math.cos(yawRad) + dz * -Math.sin(yawRad); // positivo = para a direita de quem voa
+    float fwd = (float) Mth.clamp(fwdSpeed / 0.2, -1.0, 1.0);
+    float side = (float) Mth.clamp(sideSpeed / 0.15, -1.0, 1.0);
+    float leanTarget;
+    if (fwd > 0.2f) leanTarget = 78.0f * Math.min(1f, (fwd - 0.2f) / 0.5f) + 10.0f * (float) Mth.clamp((fwdSpeed - 0.2) / 0.2, 0.0, 1.0);
+    else leanTarget = fwd < -0.2f ? 10.0f * fwd : 0.0f; // para tras: so um leve recuo do tronco
+    float rollTarget = 12.0f * side;
+    float[] m = MOTION.computeIfAbsent(player.getUUID(), k -> new float[4]);
+    m[0] += (leanTarget - m[0]) * 0.08f; // as pernas demoram: o corpo acompanha aos poucos
+    m[1] += (rollTarget - m[1]) * 0.08f;
+    m[2] += (fwd - m[2]) * 0.12f;
+    m[3] += (side - m[3]) * 0.12f;
     float yaw = Mth.rotLerp(event.getPartialTick(), player.yBodyRotO, player.yBodyRot);
     var pose = event.getPoseStack();
     pose.pushPose();
     pose.translate(0.0, PIVOT, 0.0);
     pose.mulPose(Axis.YP.rotationDegrees(-yaw));
-    pose.mulPose(Axis.XP.rotationDegrees(current));
+    pose.mulPose(Axis.XP.rotationDegrees(m[0]));
+    pose.mulPose(Axis.ZP.rotationDegrees(m[1]));
     pose.mulPose(Axis.YP.rotationDegrees(yaw));
     pose.translate(0.0, -PIVOT, 0.0);
     PUSHED.add(player.getUUID());

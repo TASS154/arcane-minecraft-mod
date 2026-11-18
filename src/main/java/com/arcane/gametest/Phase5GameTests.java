@@ -635,4 +635,36 @@ public class Phase5GameTests {
     BlockJournal.clear(lvl(h));
     h.succeed();
   }
+
+  // ------------------------------------------------------------------ Coluna: ate o ceu e so com chao
+  @GameTest(template = "empty", batch = "phase8_pillar_1")
+  public static void pillarReachesTheSkyAndStrikesCreaturesFarAbove(GameTestHelper h) {
+    floor(h);
+    var p = player(h, 3.5, 3.5, "pillar", "damage", "origin_self");
+    var high = h.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(3, 1, 3));
+    var at = h.absoluteVec(new Vec3(3.5, 40.0, 3.5));
+    high.setNoGravity(true);
+    high.moveTo(at.x, at.y, at.z);
+    float hp = high.getHealth();
+    var r = castSpell(h, p, new Inscription(List.of(g("pillar", "radius", 2.0), g("origin_self"), g("damage", "amount", 3.0))));
+    h.assertTrue(r.success(), "a coluna funciona com chao: " + r.message());
+    h.assertTrue(high.getHealth() < hp, "a coluna alcanca uma criatura a 40 blocos de altura (vida " + high.getHealth() + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "phase8_pillar_2")
+  public static void pillarDoesNotManifestInMidAirAndCostsNothing(GameTestHelper h) {
+    floor(h);
+    var p = player(h, 3.5, 3.5, "pillar", "damage");
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(p);
+    mana.set(80f);
+    float m0 = mana.current();
+    p.setYRot(0);
+    p.setXRot(-90); // mirando o ceu: o ponto mirado fica no ar
+    var spell = new Inscription(List.of(g("pillar", "radius", 2.0), g("damage", "amount", 3.0)));
+    var r = CastingService.tryCast(p, spell, com.arcane.execution.PrecisionSnapshot.of(spell));
+    h.assertTrue(!r.success() && r.message().equals("message.arcane.pillar.needs_ground"), "no ar a coluna falha (" + r.message() + ")");
+    h.assertTrue(mana.current() == m0, "e nao cobra mana (" + mana.current() + ")");
+    h.succeed();
+  }
 }

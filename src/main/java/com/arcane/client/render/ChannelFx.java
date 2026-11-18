@@ -69,7 +69,21 @@ public final class ChannelFx {
 
   private static float target() { return state == S2CChannelPacket.HOLDING ? 1f : 0.25f + 0.75f * Mth.clamp(progress, 0f, 1f); }
 
-  private record Anchor(Vec3 center, Vec3 u, Vec3 v, Vec3 n, float base) {}
+  private record Anchor(Vec3 center, Vec3 u, Vec3 v, Vec3 n, float base, boolean grounded) {
+    Anchor(Vec3 center, Vec3 u, Vec3 v, Vec3 n, float base) { this(center, u, v, n, base, true); }
+  }
+
+  /** Ha chao (bloco firme) ate 4 blocos abaixo do ponto? A coluna nao se manifesta no ar. */
+  private static boolean hasGround(Minecraft mc, Vec3 at) {
+    var pos = net.minecraft.core.BlockPos.containing(at.add(0, 0.5, 0));
+    for (int i = 0; i <= 5; i++) {
+      var below = pos.below();
+      var st = mc.level.getBlockState(below);
+      if (!st.isAir() && st.isFaceSturdy(mc.level, below, net.minecraft.core.Direction.UP)) return true;
+      pos = below;
+    }
+    return false;
+  }
 
   /** Onde as runas ficam: o circulo e o plano dependem da forma da magia. */
   private static Anchor anchor(Minecraft mc, float partial) {
@@ -91,8 +105,7 @@ public final class ChannelFx {
       case S2CChannelPacket.PILLAR: {
         HitResult hit = player.pick(32.0, partial, false);
         Vec3 at = hit.getType() == HitResult.Type.MISS ? eye.add(look.scale(10.0)) : hit.getLocation();
-        if (hit.getType() == HitResult.Type.MISS) at = new Vec3(at.x, feet.y, at.z);
-        return new Anchor(at.add(0, 0.07, 0), ux, vz, new Vec3(0, 1, 0), 1.5f);
+        return new Anchor(at.add(0, 0.07, 0), ux, vz, new Vec3(0, 1, 0), 1.5f, hasGround(mc, at));
       }
       default: {
         // base do feixe: circulo de runas na frente da mao, de frente para onde vai a magia
@@ -115,6 +128,7 @@ public final class ChannelFx {
     if (mc.player == null || mc.level == null) return;
     float partial = event.getPartialTick();
     Anchor a = anchor(mc, partial);
+    if (!a.grounded) return; // coluna mirando o ar: nao ha o que mostrar (e a magia falharia)
     PoseStack pose = event.getPoseStack();
     Vec3 cam = event.getCamera().getPosition();
     MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
@@ -135,8 +149,7 @@ public final class ChannelFx {
     } else if (shape == S2CChannelPacket.PILLAR) {
       // previa da coluna: um fio de luz subindo da runa, mais grosso quanto mais carregada
       float w = 0.05f + 0.22f * shown;
-      BeamRenderer.box(c, last, a.center, a.center.add(0, 6.0 + 10.0 * shown, 0), a.u, a.v, w, r, g, b, (int) (70 * pulse));
-      BeamRenderer.box(c, last, a.center, a.center.add(0, 6.0 + 10.0 * shown, 0), a.u, a.v, w * 0.3f, 255, 255, 255, (int) (200 * pulse));
+      ShapeFxRenderer.skyColumn(c, last, a.center, a.center.add(0, ShapeFxRenderer.skyHeight(a.center), 0), w, r, g, b, 0.7f * pulse);
     } else {
       RuneCircle.draw(c, last, a.center.add(0, 0.02, 0), a.u, a.v, rad * 0.55f, -s * 1.2f, 255, 255, 255, (int) (alpha * 0.8f));
     }

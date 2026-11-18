@@ -667,5 +667,6 @@
   "glyph.arcane.restore": "Restaurar",
   "glyph.arcane.restore.desc": "Efeito: recompõe, num raio de 2–16 blocos (padrão 10), aos poucos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta.",
   "glyph.arcane.chorus": "Coro",
-  "glyph.arcane.chorus.desc": "Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga."
+  "glyph.arcane.chorus.desc": "Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga.",
+  "message.arcane.pillar.needs_ground": "A coluna precisa de chão: ela não se manifesta no ar."
 }

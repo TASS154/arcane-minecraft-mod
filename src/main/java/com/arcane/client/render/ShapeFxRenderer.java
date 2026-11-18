@@ -174,15 +174,12 @@ public class ShapeFxRenderer {
       case S2CShapeFxPacket.PILLAR -> {
         // A coluna DESCE do ceu: a ponta cai do alto ate o chao (primeiros ~20%), depois fica e some. Circulo de runas na base.
         float drop = Math.min(1f, life * 5f);
-        float top = SKY * (1f - 0f);
-        float headY = SKY * (1f - ease(drop));
+        float top = skyHeight(f.pos);
+        float headY = top * (1f - ease(drop));
         float w = f.size * 0.5f * Math.min(1f, life * 8f) * fade;
         Vec3 bottom = f.pos.add(0, headY, 0), topV = f.pos.add(0, top, 0);
         Vec3 ux = new Vec3(1, 0, 0), vz = new Vec3(0, 0, 1);
-        if (w > 0.01f) {
-          BeamRenderer.box(c, pose, bottom, topV, ux, vz, w, r, g, b, 90);
-          BeamRenderer.box(c, pose, bottom, topV, ux, vz, w * 0.35f, 255, 255, 255, 255);
-        }
+        if (w > 0.01f) skyColumn(c, pose, bottom, topV, w, r, g, b, 1f);
         for (int i = 0; i < 3; i++) {
           float h = (1f - ((life * 2.2f + i / 3f) % 1f)) * 10f; // aneis descendo junto com a luz
           if (f.pos.y + h < f.pos.y + headY) continue;
@@ -264,9 +261,8 @@ public class ShapeFxRenderer {
     float w = (0.35f + 0.25f * Mth.sin(life * 18f)) * fade;
     if (colT > 0f && w > 0.01f) {
       // a coluna cai do ceu ate o altar
-      Vec3 bottom = f.pos.add(0, SKY * (1f - ease(colT)), 0), top = f.pos.add(0, SKY, 0);
-      BeamRenderer.box(c, pose, bottom, top, new Vec3(1, 0, 0), new Vec3(0, 0, 1), w, r, g, b, 90);
-      BeamRenderer.box(c, pose, bottom, top, new Vec3(1, 0, 0), new Vec3(0, 0, 1), w * 0.35f, 255, 255, 255, 255);
+      Vec3 bottom = f.pos.add(0, skyHeight(f.pos) * (1f - ease(colT)), 0), top = f.pos.add(0, skyHeight(f.pos), 0);
+      skyColumn(c, pose, bottom, f.pos.add(0, skyHeight(f.pos), 0), w, r, g, b, 1f);
     }
     RuneCircle.draw(c, pose, f.pos.add(0, 0.1, 0), new Vec3(1, 0, 0), new Vec3(0, 0, 1), Math.max(1.5f, f.size * 0.45f) * ease(Math.min(1f, life * 3f)), life * 3f, r, g, b, (int) (230 * fade));
     // aneis de runas descendo pela coluna
@@ -277,6 +273,32 @@ public class ShapeFxRenderer {
   }
 
   // ---------------------------------------------------------------- geometria
+  /** Altura da coluna acima de {@code base}: ate o limite de construcao do mundo (o ceu). */
+  static float skyHeight(Vec3 base) {
+    var level = Minecraft.getInstance().level;
+    float limit = level == null ? 320f : level.getMaxBuildHeight();
+    return Math.max(64f, limit - (float) base.y);
+  }
+
+  /**
+   * Coluna de luz que vai ate o ceu sem ponta visivel: quatro faces (casca, nucleo branco por dentro) em que a opacidade
+   * cai com a altura ate sumir no topo. {@code strength} (0 a 1) escala tudo.
+   */
+  static void skyColumn(VertexConsumer c, PoseStack.Pose pose, Vec3 bottom, Vec3 top, float w, int r, int g, int b, float strength) {
+    float span = (float) Math.max(1.0, top.y - bottom.y);
+    for (int layer = 0; layer < 2; layer++) {
+      float half = layer == 0 ? w : w * 0.35f;
+      int cr = layer == 0 ? r : 255, cg = layer == 0 ? g : 255, cb = layer == 0 ? b : 255;
+      int a0 = (int) ((layer == 0 ? 95 : 235) * strength);
+      Vec3[] bc = {bottom.add(-half, 0, -half), bottom.add(half, 0, -half), bottom.add(half, 0, half), bottom.add(-half, 0, half)};
+      Vec3[] tc = {top.add(-half, 0, -half), top.add(half, 0, -half), top.add(half, 0, half), top.add(-half, 0, half)};
+      for (int i = 0; i < 4; i++) {
+        int j = (i + 1) % 4;
+        gradQuad(c, pose, bc[i], bc[j], tc[j], tc[i], cr, cg, cb, a0, 0);
+      }
+    }
+  }
+
   private static Vec3 pt(Vec3 center, float angle, float radius, float y) {
     return new Vec3(center.x + Math.cos(angle) * radius, center.y + y, center.z + Math.sin(angle) * radius);
   }

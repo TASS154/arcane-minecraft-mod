@@ -75,10 +75,29 @@ public final class PlayerAnimClient {
       // Em voo nao ha passada: sem balanco de pernas e bracos (o corpo e o ponto de apoio, ver FloatFlightClient).
       super.setupAnim(p, flying ? 0f : limbSwing, flying ? 0f : limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
       if (flying) {
+        float[] mo = com.arcane.client.FloatFlightClient.motion(p.getUUID());
+        float lean = mo[0] * Mth.DEG_TO_RAD, fwd = mo[2], side = mo[3];
         float sway = Mth.sin(ageInTicks * 0.08f) * 0.04f;
-        leftLeg.xRot = 0.12f + sway; rightLeg.xRot = 0.05f - sway;
-        leftArm.xRot = 0.15f - sway; rightArm.xRot = 0.15f + sway;
-        leftArm.zRot = -0.12f; rightArm.zRot = 0.12f;
+        float back = Math.max(0f, -fwd), ahead = Math.max(0f, fwd), sideAbs = Math.abs(side);
+        // A cabeca fica SEMPRE em pe, olhando adiante: desfaz a inclinacao do corpo (a pose inteira esta girada em FloatFlightClient)
+        head.xRot = -lean + headPitch * Mth.DEG_TO_RAD * 0.35f;
+        head.yRot = netHeadYaw * Mth.DEG_TO_RAD * 0.5f;
+        // tronco: gira para o lado em que se vai, e recua um pouco para tras
+        body.yRot = side * 0.30f;
+        body.xRot = back * 0.12f;
+        // pernas: arrastam atras ao avancar; abrem para os lados ao deslizar; passo curto para tras
+        leftLeg.xRot = 0.10f + ahead * 0.18f - back * 0.55f + sway;
+        rightLeg.xRot = 0.05f + ahead * 0.10f - back * 0.30f - sway;
+        leftLeg.zRot = -0.05f - sideAbs * 0.30f + side * 0.10f;
+        rightLeg.zRot = 0.05f + sideAbs * 0.30f + side * 0.10f;
+        // bracos: esticados a frente ao avancar; abertos para equilibrar nos lados; para tras vao um pouco a frente
+        leftArm.xRot = 0.15f - ahead * 0.55f - back * 0.45f - sway;
+        rightArm.xRot = 0.15f - ahead * 0.55f - back * 0.45f + sway;
+        leftArm.zRot = -0.12f - sideAbs * 0.45f + side * 0.20f;
+        rightArm.zRot = 0.12f + sideAbs * 0.45f + side * 0.20f;
+        leftSleeve.copyFrom(leftArm); rightSleeve.copyFrom(rightArm);
+        leftPants.copyFrom(leftLeg); rightPants.copyFrom(rightLeg);
+        jacket.copyFrom(body); hat.copyFrom(head);
       }
       Playing playing = PLAYING.get(p.getUUID());
       if (playing == null) { channelPose(p, ageInTicks); return; }

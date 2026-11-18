@@ -20,6 +20,9 @@ public class PillarFormHandler implements FormHandler {
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
     double radius = Math.max(1.0, Math.min(context.ritualRadius() > 0 || context.areaFactor() > 1.0 ? 64.0 : 24.0, context.coverRadius(spec.parameters().getOrDefault("radius", 2.0) * context.areaFactor())));
+    if (!com.arcane.execution.Region.mayManifest(context, spec, radius)) {
+      return DeliveryResult.stop(new TargetList(List.of(), List.of())); // a coluna nao se manifesta no ar
+    }
     com.arcane.execution.Region region = com.arcane.execution.Region.of(context, spec, com.arcane.execution.ShapeGeometry.COLUMN, radius);
     List<Entity> entities = new ArrayList<>(region.entities(context.level(), context.caster(), false));
     region.playFx(context);

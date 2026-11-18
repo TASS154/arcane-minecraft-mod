@@ -79,7 +79,14 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
       BlockPos b = BlockPos.containing(center);
       center = new Vec3(b.getX() + 0.5, b.getY(), b.getZ() + 0.5);
     }
-    double height = shape == ShapeGeometry.WALL ? wallHeight(r) : shape == ShapeGeometry.COLUMN ? COLUMN_HEIGHT : r;
+    if (shape == ShapeGeometry.COLUMN && ctx.ritualCenter() == null) {
+      // A coluna nasce do chao: assenta o centro na celula de ar sobre o chao (se nao ha chao, ver mayManifest).
+      var cell = Targeting.groundCell(ctx.level(), center);
+      if (cell.isPresent()) center = new Vec3(center.x, cell.get().getY(), center.z);
+    }
+    // A coluna sobe ate o limite de construcao do mundo (o "ceu"); o restante dos formatos mantem as alturas de sempre.
+    double height = shape == ShapeGeometry.WALL ? wallHeight(r)
+        : shape == ShapeGeometry.COLUMN ? Math.max(COLUMN_HEIGHT, ctx.level().getMaxBuildHeight() - center.y) : r;
     return new Region(shape, center, r, height, ctx.look());
   }
 
@@ -108,7 +115,19 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
     }
   }
 
+  /** Verdadeiro se uma coluna pode se manifestar aqui: precisa de chao logo abaixo do centro (nunca no ar). Outros formatos: sempre. */
+  public static boolean mayManifest(ExecutionContext ctx, DeliverySpec spec, double radius) {
+    if (ctx.ritualCenter() != null) return true;
+    Region region = Region.of(ctx, spec, ShapeGeometry.COLUMN, radius);
+    if (region.shape != ShapeGeometry.COLUMN) return true;
+    return Targeting.groundCell(ctx.level(), region.center).isPresent();
+  }
+
   public AABB bounds() {
+    if (shape == ShapeGeometry.COLUMN) {
+      double h = radius + 2;
+      return new AABB(center.x - h, center.y - 4, center.z - h, center.x + h, center.y + height + 2, center.z + h);
+    }
     double h = Math.max(radius, height);
     if (shape == ShapeGeometry.WALL) h = Math.max(h, wallHalf(radius) + 2);
     return new AABB(center.x - h - 2, center.y - h - 2, center.z - h - 2, center.x + h + 2, center.y + h + 2, center.z + h + 2);
@@ -136,7 +155,7 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
       }
       case ShapeGeometry.COLUMN -> {
         int n = (int) Math.ceil(r) + 1;
-        for (int dy = 0; dy <= (int) height; dy++) {
+        for (int dy = 0; dy <= (int) Math.min(height, COLUMN_HEIGHT); dy++) { // so a casca perto do chao vira bloco
           for (int dx = -n; dx <= n; dx++) {
             for (int dz = -n; dz <= n; dz++) {
               double d = Math.sqrt(dx * (double) dx + dz * (double) dz);

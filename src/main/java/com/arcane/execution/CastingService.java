@@ -78,11 +78,6 @@ public final class CastingService {
         double inkMultiplier = InkRegistry.getManaMultiplier(inscription.metadata().ink());
         int manaCost = (int) Math.ceil(baseCost * precision.manaCostMultiplier() * inkMultiplier);
 
-        ManaState mana = GrimoireAttachments.getManaOrCreate(player);
-        if (!free && !mana.trySpend(manaCost)) {
-            return ExecutionResult.fail("message.arcane.mana.insufficient");
-        }
-
         EnvironmentalSnapshot environment = AmbientFieldResolver.resolve((ServerLevel) player.level(), player.blockPosition());
         ExecutionContext context = new ExecutionContext(
                 (ServerLevel) player.level(),
@@ -94,6 +89,18 @@ public final class CastingService {
                 ExecutionContext.TriggerEvent.cast()
         );
         context.setScaleFactor(scale);
+
+        // Coluna (Pilar): nao se manifesta no ar. Falha antes de cobrar mana.
+        if (DeliverySpec.fromPlan(plan.delivery()).handler().getPath().equals("pillar")) {
+            var spec = DeliverySpec.fromPlan(plan.delivery());
+            double radius = Math.max(1.0, spec.parameters().getOrDefault("radius", 2.0));
+            if (!Region.mayManifest(context, spec, radius)) return ExecutionResult.fail("message.arcane.pillar.needs_ground");
+        }
+
+        ManaState mana = GrimoireAttachments.getManaOrCreate(player);
+        if (!free && !mana.trySpend(manaCost)) {
+            return ExecutionResult.fail("message.arcane.mana.insufficient");
+        }
 
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {

@@ -20,6 +20,13 @@ public final class ModSounds {
   public static final RegistryObject<SoundEvent> RITUAL_ACTIVATE = register("ritual_activate");
   public static final RegistryObject<SoundEvent> MANA_POISON = register("mana_poison");
   public static final RegistryObject<SoundEvent> GRIMOIRE_SUMMON = register("grimoire_summon");
+  public static final RegistryObject<SoundEvent> CHARGE_START = register("charge_start");
+  public static final RegistryObject<SoundEvent> CHARGE_RELEASE = register("charge_release");
+  public static final RegistryObject<SoundEvent> DOMAIN_OPEN = register("domain_open");
+  public static final RegistryObject<SoundEvent> DOMAIN_BREAK = register("domain_break");
+  public static final RegistryObject<SoundEvent> FLIGHT_BOOST = register("flight_boost");
+  public static final RegistryObject<SoundEvent> GOLEM_SLAM = register("golem_slam");
+  public static final RegistryObject<SoundEvent> GOLEM_HUM = register("golem_hum");
 
   private ModSounds() {}
 

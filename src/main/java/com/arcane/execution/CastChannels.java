@@ -140,6 +140,7 @@ public final class CastChannels {
         charging.cost = Math.max(1, cost);
         ACTIVE.put(player.getUUID(), charging);
         sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.CHARGING, 0.0);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.arcane.registry.ModSounds.CHARGE_START.get(), net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 1.0f);
       }
       case HOLD -> {
         var r = CastingService.tryCast(player, inscription, precision);
@@ -179,6 +180,7 @@ public final class CastChannels {
     com.arcane.network.ModNetwork.sendChannel(player, com.arcane.network.packet.S2CChannelPacket.OFF, 0f, 0, 0);
     var r = CastingService.cast(player, inscription, PrecisionSnapshot.of(inscription), scale, true);
     if (!r.success()) fail(player, r.message());
+    else player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.arcane.registry.ModSounds.CHARGE_RELEASE.get(), net.minecraft.sounds.SoundSource.PLAYERS, (float) Math.min(1.3, 0.6 + 0.15 * scale), (float) Math.max(0.7, 1.15 - 0.06 * scale));
   }
 
   /** Cancela o canal do jogador; no modo ALTERNAR, tambem desliga o efeito continuo. */

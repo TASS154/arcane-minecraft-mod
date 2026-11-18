@@ -1,10 +1,92 @@
 {
-  "spell_cast":      { "subtitle": "subtitles.arcane.spell_cast",      "sounds": ["arcane:spell_cast"] },
-  "spell_hit":       { "subtitle": "subtitles.arcane.spell_hit",       "sounds": ["arcane:spell_hit"] },
-  "workbench_save":  { "subtitle": "subtitles.arcane.workbench_save",  "sounds": ["arcane:workbench_save"] },
-  "glyph_learned":   { "subtitle": "subtitles.arcane.glyph_learned",   "sounds": ["arcane:glyph_learned"] },
-  "pen_stroke":      { "subtitle": "subtitles.arcane.pen_stroke",      "sounds": ["arcane:pen_stroke"] },
-  "ritual_activate": { "subtitle": "subtitles.arcane.ritual_activate", "sounds": ["arcane:ritual_activate"] },
-  "mana_poison":     { "subtitle": "subtitles.arcane.mana_poison",     "sounds": ["arcane:mana_poison"] },
-  "grimoire_summon": { "subtitle": "subtitles.arcane.grimoire_summon", "sounds": ["arcane:grimoire_summon"] }
+  "spell_cast": {
+    "subtitle": "subtitles.arcane.spell_cast",
+    "sounds": [
+      "arcane:spell_cast"
+    ]
+  },
+  "spell_hit": {
+    "subtitle": "subtitles.arcane.spell_hit",
+    "sounds": [
+      "arcane:spell_hit"
+    ]
+  },
+  "workbench_save": {
+    "subtitle": "subtitles.arcane.workbench_save",
+    "sounds": [
+      "arcane:workbench_save"
+    ]
+  },
+  "glyph_learned": {
+    "subtitle": "subtitles.arcane.glyph_learned",
+    "sounds": [
+      "arcane:glyph_learned"
+    ]
+  },
+  "pen_stroke": {
+    "subtitle": "subtitles.arcane.pen_stroke",
+    "sounds": [
+      "arcane:pen_stroke"
+    ]
+  },
+  "ritual_activate": {
+    "subtitle": "subtitles.arcane.ritual_activate",
+    "sounds": [
+      "arcane:ritual_activate"
+    ]
+  },
+  "mana_poison": {
+    "subtitle": "subtitles.arcane.mana_poison",
+    "sounds": [
+      "arcane:mana_poison"
+    ]
+  },
+  "grimoire_summon": {
+    "subtitle": "subtitles.arcane.grimoire_summon",
+    "sounds": [
+      "arcane:grimoire_summon"
+    ]
+  },
+  "charge_start": {
+    "subtitle": "subtitles.arcane.charge_start",
+    "sounds": [
+      "arcane:charge_start"
+    ]
+  },
+  "charge_release": {
+    "subtitle": "subtitles.arcane.charge_release",
+    "sounds": [
+      "arcane:charge_release"
+    ]
+  },
+  "domain_open": {
+    "subtitle": "subtitles.arcane.domain_open",
+    "sounds": [
+      "arcane:domain_open"
+    ]
+  },
+  "domain_break": {
+    "subtitle": "subtitles.arcane.domain_break",
+    "sounds": [
+      "arcane:domain_break"
+    ]
+  },
+  "flight_boost": {
+    "subtitle": "subtitles.arcane.flight_boost",
+    "sounds": [
+      "arcane:flight_boost"
+    ]
+  },
+  "golem_slam": {
+    "subtitle": "subtitles.arcane.golem_slam",
+    "sounds": [
+      "arcane:golem_slam"
+    ]
+  },
+  "golem_hum": {
+    "subtitle": "subtitles.arcane.golem_hum",
+    "sounds": [
+      "arcane:golem_hum"
+    ]
+  }
 }

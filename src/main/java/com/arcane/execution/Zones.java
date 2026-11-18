@@ -140,6 +140,7 @@ public final class Zones {
     }
     evicted.forEach(Zones::finish);
     context.setZone(zone);
+    if (zone.domain) context.level().playSound(null, zone.position.x, zone.position.y, zone.position.z, com.arcane.registry.ModSounds.DOMAIN_OPEN.get(), net.minecraft.sounds.SoundSource.PLAYERS, 1.2f, 1.0f);
     if (zone.domain && context.resolvedTargets() != null) {
       var shell = new ArrayList<net.minecraft.core.BlockPos>();
       for (var b : context.resolvedTargets().blocks()) if (b.state().is(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get())) shell.add(b.pos());
@@ -214,6 +215,7 @@ public final class Zones {
     if (!zone.domain || zone.shell == null) return;
     var level = zone.context.level();
     var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get();
+    level.playSound(null, zone.position.x, zone.position.y, zone.position.z, com.arcane.registry.ModSounds.DOMAIN_BREAK.get(), net.minecraft.sounds.SoundSource.PLAYERS, 1.3f, 1.0f);
     for (var pos : zone.shell) {
       if (level.getBlockState(pos).is(barrier)) {
         level.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.02);

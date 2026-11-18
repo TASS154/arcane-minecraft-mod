@@ -128,7 +128,7 @@ public final class FloatFlightClient {
     }
     level.addParticle(ParticleTypes.FLASH, c.x, c.y, c.z, 0, 0, 0);
     level.playLocalSound(p.getX(), p.getY(), p.getZ(), SoundEvents.FIREWORK_ROCKET_LARGE_BLAST, SoundSource.PLAYERS, 1.0f, 0.7f, false);
-    level.playLocalSound(p.getX(), p.getY(), p.getZ(), SoundEvents.TRIDENT_RIPTIDE_2, SoundSource.PLAYERS, 0.8f, 1.3f, false);
+    level.playLocalSound(p.getX(), p.getY(), p.getZ(), com.arcane.registry.ModSounds.FLIGHT_BOOST.get(), SoundSource.PLAYERS, 1.0f, 1.0f, false);
   }
 
   /** Rastro de luz ciano ao longo do caminho percorrido neste tick. */

@@ -42,6 +42,9 @@ public class ClientSetup {
   @SubscribeEvent
   public static void onClientSetup(FMLClientSetupEvent event) {
     event.enqueueWork(() -> MenuScreens.register(ModMenuTypes.ARCANE_WORKBENCH.get(), ArcaneWorkbenchScreen::new));
+    // Botao "Config" da aba Mods: abre as opcoes do Arcane (preferencias e, num mundo local, as regras do mundo).
+    net.minecraftforge.fml.ModLoadingContext.get().registerExtensionPoint(net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory.class,
+        () -> new net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new com.arcane.client.screen.ArcaneOptionsScreen(parent)));
   }
 
   @SubscribeEvent
@@ -51,6 +54,23 @@ public class ClientSetup {
     event.registerEntityRenderer(ModEntities.NPC_MAGE.get(), NPCMageRenderer::new);
     event.registerEntityRenderer(ModEntities.SPECTRAL_WOLF.get(), com.arcane.client.render.SummonRenderers.Wolf::new);
     event.registerEntityRenderer(ModEntities.ARCANE_GOLEM.get(), com.arcane.client.render.SummonRenderers.Golem::new);
+  }
+
+  /** Petrificar: toda criatura e a skin do jogador ganham a camada que desenha o modelo em pedra quando petrificadas. */
+  @SubscribeEvent
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public static void addPetrifyLayers(EntityRenderersEvent.AddLayers event) {
+    for (var type : net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValues()) {
+      Object renderer = event.getRenderer((net.minecraft.world.entity.EntityType) type);
+      if (renderer instanceof net.minecraft.client.renderer.entity.LivingEntityRenderer<?, ?>) {
+        net.minecraft.client.renderer.entity.LivingEntityRenderer living = (net.minecraft.client.renderer.entity.LivingEntityRenderer) renderer;
+        living.addLayer(new com.arcane.client.render.PetrifyLayer(living));
+      }
+    }
+    for (String skin : event.getSkins()) {
+      var renderer = event.getSkin(skin);
+      if (renderer != null) renderer.addLayer(new com.arcane.client.render.PetrifyLayer(renderer));
+    }
   }
 
   @SubscribeEvent

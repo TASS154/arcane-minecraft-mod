@@ -165,7 +165,7 @@ Magia de teste: `Mira` (Raio, Dano) num porco parado.
   - [ ] **Duração além do tempo:** em modo segurar/alternar o voo se sustenta além dos 10 s do parâmetro enquanto você mantém.
   - [ ] **Mana (corrigido):** o voo agora cobra mana **também no Criativo** (antes o servidor pulava a cobrança de quem está em Criativo, o que parecia "não puxar mana"). Teste no Sobrevivência para ver o efeito real: a barra desce continuamente.
   - [ ] **Sem animação de andar:** voando, as pernas e os braços **não balançam** como numa caminhada; só um leve balanço de flutuação.
-  - [ ] **Orientação:** o corpo se alinha ao **para onde você olha** (olhar na horizontal = deitado como o Super-Homem; olhar para cima = em pé subindo; olhar para baixo = mergulho). Vista de 3ª pessoa (F5) ou com um segundo jogador.
+  - [ ] **Orientação (estilo Frieren):** a **cabeça fica sempre em pé**, olhando adiante. Só **avançar** deita o corpo (como o Super-Homem); **subir e descer** não deitam; **lados e para trás** mantêm em pé, com tronco, pernas e braços se mexendo. Confira em F5: o corpo **tomba para o lado certo** ao ir para a direita e para a esquerda (se estiver invertido, é falha: me diga) e os braços e pernas não parecem quebrados.
   - [ ] **Voo rápido (segure Sprint/Ctrl no voo):** ao começar surge uma **onda de choque** (anéis de luz que se abrem para os lados, clarão e estouro de som), o **FOV aumenta** suavemente, e fica um **rastro de luz ciano** atrás de você. A mana gasta **2,5x mais** por tick. Soltar o sprint desliga tudo e o FOV volta.
 - **Servidor dedicado (nunca testado):** suba um servidor (`gradlew runServer`) e entre com um segundo cliente. Confira que voar **não expulsa** você (sem "Flying is not enabled" ou "moved too quickly").
 - **Falha se:** você cai ao ligar o voo, o servidor expulsa, ou a mana não drena.
@@ -392,6 +392,14 @@ Montagem: `Foco, Atrair` (ou `Foco, Dano`). Precisa conhecer o glifo `focus`: `/
 - [ ] Mirando no **chão, no ar ou num bloco**: a magia **falha** com a mensagem "Nenhuma criatura viva na mira." e **a mana não cai**.
 - [ ] **Atrás de uma parede:** falha igual, sem gastar mana.
 - [ ] Um porco bem baixo pode ser difícil de acertar (a mira segue a altura dos olhos); anote se isso incomoda.
+
+---
+
+## 10. Coluna (Pilar) até o céu
+- [ ] `Pilar, Dano` mirando o **chão**: a coluna de luz **sobe até o céu e some com a altura**, sem ponta visível. Criaturas muito acima (use uma flecha ou um morcego) levam o dano.
+- [ ] Mirando o **ar/o céu**: a magia **falha** ("A coluna precisa de chão...") e a **mana não cai**. Com **Carregar**, nenhuma runa de coluna aparece enquanto você mira o ar.
+- [ ] Mirando uma parede: a coluna nasce no chão ao pé dela.
+- [ ] O Pilar de **ritual** continua funcionando (coluna cai no altar).
 
 ---
 

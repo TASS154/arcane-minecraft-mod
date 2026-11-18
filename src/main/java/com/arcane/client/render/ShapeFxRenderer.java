@@ -186,7 +186,11 @@ public class ShapeFxRenderer {
         float w = f.size * 0.5f * Math.min(1f, life * 8f) * fade;
         Vec3 bottom = f.pos.add(0, headY, 0), topV = f.pos.add(0, top, 0);
         Vec3 ux = new Vec3(1, 0, 0), vz = new Vec3(0, 0, 1);
-        if (w > 0.01f) skyColumn(c, pose, bottom, topV, w, r, g, b, 1f);
+        if (w > 0.01f) {
+          // Gravidade (elemento FORCE) + coluna: luz semitransparente, arroxeada, com glitch descendo.
+          if (f.element == SpellElement.FORCE) glitchColumn(c, pose, bottom, topV, w, f.age + partial, f.pos);
+          else skyColumn(c, pose, bottom, topV, w, r, g, b, 1f);
+        }
         for (int i = 0; i < 3; i++) {
           float h = (1f - ((life * 2.2f + i / 3f) % 1f)) * 10f; // aneis descendo junto com a luz
           if (f.pos.y + h < f.pos.y + headY) continue;
@@ -302,6 +306,50 @@ public class ShapeFxRenderer {
       for (int i = 0; i < 4; i++) {
         int j = (i + 1) % 4;
         gradQuad(c, pose, bc[i], bc[j], tc[j], tc[i], cr, cg, cb, a0, 0);
+      }
+    }
+  }
+
+  private static float hash01(int a, int b) {
+    int h = a * 73856093 ^ b * 19349663;
+    h ^= h >>> 13;
+    h *= 0x5bd1e995;
+    h ^= h >>> 15;
+    return (h & 0xFFFF) / 65535f;
+  }
+
+  /**
+   * Coluna da gravidade: casca fina semitransparente e arroxeada (uma coluna lisa bem fraca por baixo) mais fatias que
+   * tremem de lado e piscam em passos curtos. O padrao desliza para baixo e uma faixa clara de "varredura" desce pela luz.
+   * So as fatias proximas da ponta sao desenhadas (limite de geometria); acima, so a casca fraca.
+   */
+  static void glitchColumn(VertexConsumer c, PoseStack.Pose pose, Vec3 bottom, Vec3 top, float w, float time, Vec3 seed) {
+    final int pr = 150, pg = 95, pb = 235;     // roxo
+    final int cr = 225, cg = 205, cb = 255;    // miolo claro
+    skyColumn(c, pose, bottom, top, w * 0.9f, pr, pg, pb, 0.35f);
+    float sliceH = 1.1f;
+    int slices = Math.min(44, (int) Math.ceil((top.y - bottom.y) / sliceH));
+    int step = (int) (time * 1.2f);            // passo do glitch (~24 por segundo / 20 tps)
+    int shift = (int) (time * 2.4f);           // deslocamento do padrao para baixo
+    int salt = (int) (seed.x * 7 + seed.z * 13);
+    for (int i = 0; i < slices; i++) {
+      float yLo = (float) bottom.y + i * sliceH;
+      float yHi = Math.min((float) top.y, yLo + sliceH * 0.85f);
+      int pat = i + shift;                      // i cresce para cima; pat maior em cima => padrao desce
+      float n = hash01(pat + salt, step / 2);
+      if (n < 0.18f) continue;                  // buraco no sinal
+      float jx = (hash01(pat * 3 + salt, step) - 0.5f) * w * (n > 0.85f ? 1.6f : 0.5f);
+      float jz = (hash01(pat * 5 + salt, step + 7) - 0.5f) * w * (n > 0.85f ? 1.6f : 0.5f);
+      float half = w * (0.75f + 0.5f * hash01(pat, salt));
+      boolean hot = n > 0.9f;
+      int a = (int) ((hot ? 95 : 48) * (0.6f + 0.4f * hash01(pat + 11, step)));
+      int rr = hot ? cr : pr, gg = hot ? cg : pg, bb = hot ? cb : pb;
+      Vec3 b0 = new Vec3(bottom.x + jx, yLo, bottom.z + jz), t0 = new Vec3(bottom.x + jx, yHi, bottom.z + jz);
+      Vec3[] bc = {b0.add(-half, 0, -half), b0.add(half, 0, -half), b0.add(half, 0, half), b0.add(-half, 0, half)};
+      Vec3[] tc = {t0.add(-half, 0, -half), t0.add(half, 0, -half), t0.add(half, 0, half), t0.add(-half, 0, half)};
+      for (int k = 0; k < 4; k++) {
+        int j = (k + 1) % 4;
+        gradQuad(c, pose, bc[k], bc[j], tc[j], tc[k], rr, gg, bb, a, a);
       }
     }
   }

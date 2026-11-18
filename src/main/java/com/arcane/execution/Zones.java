@@ -146,6 +146,7 @@ public final class Zones {
       for (var b : context.resolvedTargets().blocks()) if (b.state().is(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get())) shell.add(b.pos());
       zone.shell = shell;
     }
+    if (zone.domain) domainFx(zone, 0);
     if (context.resolvedTargets() != null) {
       for (var e : context.resolvedTargets().entities()) zone.inside.add(e.getUUID());
     }
@@ -210,11 +211,32 @@ public final class Zones {
     return intact >= zone.shell.size() * (1.0 - DOMAIN_BREAK_FRACTION);
   }
 
+  /** Efeitos do Dominio. 0 = abrir (coluna de runas + circulo), 1 = pulso (faiscas correndo pela casca), 2 = quebrar (estilhacos). */
+  private static void domainFx(Zone zone, int kind) {
+    var level = zone.context.level();
+    var element = SpellElement.of(zone.context.plan());
+    double radius = zone.shell == null || zone.shell.isEmpty() ? 4.0 : Math.max(2.0, Math.sqrt(zone.shell.size() / 6.0));
+    if (kind == 0) {
+      com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.RITUAL, zone.position, Vec3.ZERO, (float) radius, element.color(), element.ordinal(), 40);
+      com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.CAST, zone.position, Vec3.ZERO, (float) radius, element.color(), element.ordinal(), 24);
+    } else if (zone.shell != null && !zone.shell.isEmpty()) {
+      int n = kind == 1 ? 6 : 60;
+      var rnd = level.random;
+      for (int i = 0; i < n; i++) {
+        var pos = zone.shell.get(rnd.nextInt(zone.shell.size()));
+        if (kind == 1) level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0.1, 0.1, 0.1, 0.01);
+        else level.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0.4, 0.4, 0.4, 0.3);
+      }
+      if (kind == 2) com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.IMPACT, zone.position.add(0, 1, 0), Vec3.ZERO, (float) radius, element.color(), element.ordinal(), 16);
+    }
+  }
+
   /** A casca some (com faiscas) quando o Dominio acaba, quebrado ou por tempo. */
   private static void shatter(Zone zone) {
     if (!zone.domain || zone.shell == null) return;
     var level = zone.context.level();
     var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get();
+    domainFx(zone, 2);
     level.playSound(null, zone.position.x, zone.position.y, zone.position.z, com.arcane.registry.ModSounds.DOMAIN_BREAK.get(), net.minecraft.sounds.SoundSource.PLAYERS, 1.3f, 1.0f);
     for (var pos : zone.shell) {
       if (level.getBlockState(pos).is(barrier)) {
@@ -227,6 +249,7 @@ public final class Zones {
   private static void pulse(Zone zone) {
     ExecutionContext c = fresh(zone, "zone_tick");
     if (zone.domain && !domainHolds(zone, c)) { zone.broken = true; return; }
+    if (zone.domain) domainFx(zone, 1);
     deliver(c);
     zoneEvents(zone, c);
     for (var segment : zone.plain) SpellPipeline.INSTANCE.executeSegment(c, segment);

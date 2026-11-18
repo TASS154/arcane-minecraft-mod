@@ -47,9 +47,9 @@ class InteractionRulesTest {
   void zoneCostGrowsWithPulsesAndIsCapped() {
     assertEquals(1.0, SpellLimits.zoneMultiplier(0, 1.0), 1e-9);
     assertEquals(1.0, SpellLimits.zoneMultiplier(1, 1.0), 1e-9);
-    assertEquals(2.35, SpellLimits.zoneMultiplier(10, 1.0), 1e-9);
+    assertEquals(5.5, SpellLimits.zoneMultiplier(10, 1.0), 1e-9);
     assertTrue(SpellLimits.zoneMultiplier(20, 1.0) > SpellLimits.zoneMultiplier(10, 1.0));
-    assertEquals(6.0, SpellLimits.zoneMultiplier(60, 0.5), 1e-9);
+    assertEquals(60.0, SpellLimits.zoneMultiplier(60, 0.5), 1e-9);
     assertEquals(SpellLimits.zoneMultiplier(10, 0.5), SpellLimits.zoneMultiplier(10, 0.1), 1e-9, "intervalo minimo 0,5 s");
   }
 }

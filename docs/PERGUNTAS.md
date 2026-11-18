@@ -39,6 +39,13 @@
 - **Silêncio:** quem está silenciado não consegue nem se dissipar; só o tempo (ou outro meio futuro) resolve. Dissipar em outros não tira Silêncio.
 - **Escalada e Gancho no jogador:** dependem de velocidade/entrada aplicadas no servidor; podem precisar de ajuste fino no cliente.
 
+## Revisão de 18 nov 2026 (padrões adotados)
+- **Regulador de área:** Ctrl+scroll (ou scroll simples no modo Conjurador), só em magias com área. Mude se preferir outra tecla.
+- **Constantes do custo:** zona até 60x, área ^1,25 com teto 12x, invocação por tamanho e quantidade. Ajuste em `SpellLimits` se ainda parecer barato.
+- **Regras do mundo na tela de Opções:** só editáveis em mundo local.
+- **Ritual sem forma:** vira Aura centrada no altar.
+- **Golem:** sem opção de quantidade (era ignorada no custo).
+
 ## Dúvidas registradas na Fase 5
 - **Bolso, 13 espaços:** "metade de um baú pequeno" virou 13 (27 / 2 arredondado para baixo). O menu mostra 2 fileiras (18) e os 5 últimos ficam travados. Se preferir 14 ou 9, é só mudar `pocketSlots`.
 - **Coro, "ao mesmo tempo":** interpretei como uma janela de 3 s (60 ticks) a partir de quem começa, com o círculo de raio 8 ao redor dele. Os outros precisam ter a mesma magia equipada. Dispara no fim da janela, para contar todo mundo. Tudo em config (`chorusRadius`, `chorusWindowTicks`, `chorusMaxParticipants`).

@@ -418,6 +418,16 @@ Montagem: `Foco, Atrair` (ou `Foco, Dano`). Precisa conhecer o glifo `focus`: `/
 - [ ] **Lobos (ritual):** quando o alvo está longe, o lobo some e reaparece atrás dele; quem é mordido fica lento.
 - [ ] **Tremor de câmera:** explosões/impactos fortes e disparo de carga forte sacodem a câmera; carregar causa um tremor leve crescente. Deve sumir com "reduzir clarões" ligado. Se enjoar, reporte.
 
+- [ ] **Toggle:** ligue o voo, lance outra magia: o voo continua; só desliga ao apertar de novo ou sem mana.
+- [ ] **Segurar:** Barreira+Domo segurando mantém a casca e ela some ao soltar; efeitos não ficam "repetindo".
+- [ ] **Área x dano:** Ctrl+scroll (ou scroll no modo Conjurador) muda a área e o dano em sentido oposto; carregar amplia a área também.
+- [ ] **Radial:** scroll com o radial aberto troca de conjunto.
+- [ ] **Cristal:** explosão pequena no cristal 32x mostra o anel no raio real e a mensagem.
+- [ ] **Aba Mods > Config:** abre as Opções do Arcane.
+- [ ] **Custo:** golem maior, mais lobos, domínio longo/rápido e área maior custam visivelmente mais.
+- [ ] **Altar:** clique abre a tela de ritual; ritual sem forma funciona; oferendas aparecem na prévia.
+- [ ] **Salto/Atravessar:** pequenos raios; **Petrificar:** o modelo vira pedra.
+
 ---
 
 ## Como reportar uma falha

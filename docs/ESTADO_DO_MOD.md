@@ -243,6 +243,20 @@ Mecânica de mobs coberta por GameTest (193 passam + JUnit). **Sons, visuais e t
 - **Mobs com ação própria (testado):** **Golem Rúnico** — cada golpe é um impacto em área (70% do dano em inimigos ao redor do alvo, com empurrão para cima, som e partículas), levanta uma **runa de guarda** (Resistência III por 5 s, recarga 15 s) quando abaixo de 60% de vida lutando, e zumbe parado. **Lobo Espectral** — **salta para as costas** do alvo a 6–20 blocos (recarga 5 s), a mordida **entorpece** (Lentidão II, 3 s) e não sofre dano de queda. Testes: `runicGolemStrikeSplashesNearbyEnemies`, `spectralWolfPouncesBehindADistantTarget`. Pendente: ouvir/ver o golem e o lobo em ação contra mobs reais (a IA vanilla escolhe os alvos).
 - **Feeling (cliente, não visto):** `CameraShake` — tremor de câmera por "trauma" em impactos, abertura de ritual e disparo de carga forte, mais um tremor leve e crescente enquanto você carrega; some com atenuação por distância e é desligado pela opção "reduzir clarões".
 
+## Revisão de toggle, área, custo e rituais (18 nov 2026)
+Cobertos por GameTest (198 passam): toggle sobrevive a outra magia, regulador de área x dano, modelo de custo, ritual sem forma e o pacote do altar. **Telas, scroll, camada de pedra, raios do Salto/Atravessar e anel de área: implementados, NÃO vistos em jogo.**
+- **Toggle:** só desliga ao apertar de novo ou quando a mana acaba; conjurar outra magia não o desliga (`CastChannels.TOGGLES`). Testado.
+- **Segurar (Hold):** agora *mantém* a magia: efeitos limitados ao próximo pulso e a casca de Barreira/Domo é renovada enquanto segura e desfeita ao soltar. Não testado em jogo (só o comportamento antigo de repetir tem teste).
+- **Carga amplia a área:** potência xN também multiplica a área (área e dano iguais). Testado.
+- **Regulador de área:** Ctrl+scroll (ou scroll simples no modo Conjurador) com uma magia que tenha área: sobe a área e reduz o dano na proporção inversa (passos de 1,25x, de -4 a +8). Só vale para magias com área. Testado a lógica; o scroll em si não.
+- **Rádio:** scroll com o radial aberto troca de conjunto; o botão "conjunto ativo" saiu do menu do Grimório.
+- **Cristal x áreas:** o limite do cristal (`crystalAreaCap`) já valia na conta; Explosão e Rajada agora mostram um anel no raio real e uma mensagem na barra de ação (as partículas vanilla da explosão não crescem). Nos mundos de teste o cap já é 32.
+- **Config na aba Mods:** o botão Config abre as Opções do Arcane (preferências + regras do mundo, estas só em mundo local).
+- **Custo:** zona/domínio cobram por pulso e duração (até 60x), área maior cobra ~ razão^1,25 (teto 12x), invocações cobram por tamanho e quantidade. Golem não tem mais "quantidade".
+- **Domínio além do domo:** o raio do efeito agora é limitado ao da casca.
+- **Altar:** clicar no altar abre uma tela própria (não usa a magia ativa nem o Grimório): desenhe o ritual, veja a prévia (círculo, nível, mana, oferendas) e Realizar/Guardar. Ritual dispensa forma (vira Aura no altar). Testado pelo pacote; a tela não foi vista.
+- **Efeitos novos:** Salto e Atravessar soltam raios elétricos; Petrificar dá o efeito marcador e o cliente desenha o modelo em pedra (`PetrifyLayer`). Não visto.
+
 ## Coluna da gravidade (glitch roxo)
 
 - Implementado, não testado no jogo: quando a magia tem elemento FORCE (Gravidade e afins: empurrar, atrair, levitar, flutuar, telecinese) e forma Coluna, `ShapeFxRenderer.glitchColumn` desenha a coluna semitransparente e arroxeada, com fatias que tremem de lado, piscam e têm buracos; o padrão desliza para baixo. Só efeito visual (cliente); a mecânica não mudou. Conferir no jogo: `pillar` + `gravity`.

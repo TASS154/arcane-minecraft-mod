@@ -78,6 +78,12 @@ public final class ControlEffects {
     @Override void extra(ExecutionContext context, LivingEntity living, int ticks) {
       living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, 6, false, false), context.caster());
       living.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, ticks, 3, false, false), context.caster());
+      living.addEffect(new MobEffectInstance(MobEffects.JUMP, ticks, 128, false, false), context.caster());
+      // marcador sincronizado: o cliente desenha o modelo dela em pedra (PetrifyLayer)
+      living.addEffect(new MobEffectInstance(com.arcane.registry.ModEffects.PETRIFIED.get(), ticks, 0, false, false, false), context.caster());
+      context.level().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState()),
+          living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 24, 0.4, living.getBbHeight() * 0.4, 0.4, 0.05);
+      context.level().playSound(null, living.blockPosition(), net.minecraft.sounds.SoundEvents.STONE_PLACE, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 0.7f);
       if (living instanceof Mob mob) mob.setTarget(null);
     }
   }

@@ -110,6 +110,7 @@ public final class UtilityEffects {
           caster.fallDistance = 0;
           level.sendParticles(ParticleTypes.PORTAL, from.x, from.y + 1.0, from.z, 14, 0.3, 0.5, 0.3, 0.3);
           level.sendParticles(ParticleTypes.PORTAL, dest.x, dest.y + 1.0, dest.z, 14, 0.3, 0.5, 0.3, 0.3);
+          com.arcane.execution.ElectricTrail.draw(level, from.add(0, 1.0, 0), dest.add(0, 1.0, 0)); // raios por dentro da parede
           return;
         }
       }

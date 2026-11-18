@@ -34,6 +34,7 @@ public class BlinkEffectHandler implements EffectHandler {
     if (moved) {
       context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(), from.x, from.y + 1.0, from.z, 14, 0.3, 0.5, 0.3, 0.05);
       context.level().sendParticles(com.arcane.execution.SpellElement.of(context.plan()).particle(), caster.getX(), caster.getY() + 1.0, caster.getZ(), 14, 0.3, 0.5, 0.3, 0.05);
+      com.arcane.execution.ElectricTrail.draw(context.level(), from.add(0, 1.0, 0), caster.position().add(0, 1.0, 0));
     }
   }
 }

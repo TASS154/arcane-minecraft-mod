@@ -20,6 +20,9 @@ public final class ModEffects {
     /** Flutuar: voo suave guiado pelo olhar (o movimento roda no cliente; a amplificacao guarda a velocidade x10). */
     public static final RegistryObject<MobEffect> FLOAT_FLIGHT = EFFECTS.register("float_flight", FloatFlight::new);
 
+    /** Petrificado: marcador sincronizado com o cliente (o estado real fica em Phase4State); faz o modelo virar pedra. */
+    public static final RegistryObject<MobEffect> PETRIFIED = EFFECTS.register("petrified", () -> new MobEffect(MobEffectCategory.HARMFUL, 0x8E8E93) {});
+
     private ModEffects() {}
 
     public static void register(IEventBus bus) { EFFECTS.register(bus); }

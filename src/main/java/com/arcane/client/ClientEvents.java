@@ -89,6 +89,7 @@ public class ClientEvents {
   @SubscribeEvent
   public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
     ClientArcaneData.reset();
+    com.arcane.client.screen.RitualAltarScreen.clearDrafts();
   }
 
   /** Lore dos itens (chave item.arcane.<nome>.desc, linhas separadas por \n) e glifo das notas. */

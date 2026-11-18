@@ -68,7 +68,7 @@ public final class LowCostEffects {
   public static class Rain implements EffectHandler {
     @Override
     public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-      double radius = Math.min(10.0, p(context, call, "radius", 4.0) * context.areaFactor());
+      double radius = Math.min(Math.min(48.0, Math.max(10.0, 10.0 * context.areaFactor())), p(context, call, "radius", 4.0) * context.areaFactor());
       int wet = (int) Math.min(Wetness.MAX_TICKS, p(context, call, "duration", 400.0));
       List<Vec3> centers = centers(targets);
       for (LivingEntity e : near(context, centers, radius, true)) Wetness.soak(context.level(), e, wet);
@@ -207,7 +207,7 @@ public final class LowCostEffects {
   public static class Rumble implements EffectHandler {
     @Override
     public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-      double radius = Math.min(8.0, p(context, call, "radius", 3.0) * context.areaFactor());
+      double radius = Math.min(Math.min(48.0, Math.max(8.0, 8.0 * context.areaFactor())), p(context, call, "radius", 3.0) * context.areaFactor());
       float damage = (float) Math.min(12.0, p(context, call, "damage", 2.0));
       List<Vec3> centers = centers(targets);
       var source = context.level().damageSources().indirectMagic(context.caster(), context.caster());

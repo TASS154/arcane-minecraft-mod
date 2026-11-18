@@ -43,8 +43,18 @@ public class RitualAltarScreen extends Screen {
   private int cat, page, selected = -1;
   private int dirty = 2;
   private RitualService.Report report;
-  private final List<Slot> composition = new ArrayList<>();
-  private final List<Integer> offerSlots = new ArrayList<>();
+  private final List<Slot> composition;
+  private final List<Integer> offerSlots;
+
+  /** Rascunho por altar: fechar a tela nao desfaz a magia que estava sendo montada (vale ate sair do mundo). */
+  private static final class Draft {
+    final List<Slot> composition = new ArrayList<>();
+    final List<Integer> offerSlots = new ArrayList<>();
+    boolean offeringsTab;
+    int cat, page, selected = -1;
+  }
+  private static final Map<BlockPos, Draft> DRAFTS = new HashMap<>();
+  private final Draft draft;
   private Button performButton, storeButton, ritualTabButton, offerTabButton;
 
   private static final class Slot {
@@ -55,8 +65,27 @@ public class RitualAltarScreen extends Screen {
 
   public RitualAltarScreen(BlockPos altar) {
     super(Component.translatable("gui.arcane.ritual.title"));
-    this.altar = altar;
+    this.altar = altar.immutable();
+    this.draft = DRAFTS.computeIfAbsent(this.altar, k -> new Draft());
+    this.composition = draft.composition;
+    this.offerSlots = draft.offerSlots;
+    this.offeringsTab = draft.offeringsTab;
+    this.cat = draft.cat;
+    this.page = draft.page;
+    this.selected = draft.selected;
   }
+
+  @Override
+  public void removed() {
+    draft.offeringsTab = offeringsTab;
+    draft.cat = cat;
+    draft.page = page;
+    draft.selected = selected;
+    super.removed();
+  }
+
+  /** Esquece os rascunhos (ao sair do mundo). */
+  public static void clearDrafts() { DRAFTS.clear(); lastReport = null; }
 
   /** Chamado pelo pacote de relatorio: atualiza a tela aberta. */
   public static void onReport(RitualService.Report r) {

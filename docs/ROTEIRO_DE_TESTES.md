@@ -403,5 +403,13 @@ Montagem: `Foco, Atrair` (ou `Foco, Dano`). Precisa conhecer o glifo `focus`: `/
 
 ---
 
+## 11. Grimório enxuto, Ritual e Domínio (nada visto em jogo ainda)
+- [ ] **Estrela:** na aba Magias, clique na ☆ ao lado do nome: vira ★ dourada e a magia sobe na lista. Clicar no nome seleciona **e ativa**.
+- [ ] **Sem botões demais:** não há mais Ativar/Fechar/Favorita/✔; nome e pasta salvam com **Enter**; o botão de uma letra troca o modo (passe o mouse para ver o nome); chips **1–4** põem/tiram a magia dos conjuntos; **✖** apaga (clique de novo em "?" para confirmar). Confira se nada se sobrepõe e se o texto da busca cabe.
+- [ ] **Ritual:** na aba Glifos, Invocar Lobos/Golem, Teleporte e Clima aparecem como categoria **Ritual** (rosa).
+- [ ] **Domínio:** componha `Barreira, Domo, Domínio, Dano (amount 0,5)`, entre no domo com um bicho: ele perde vida a cada segundo. Quebre uns blocos da casca: o efeito para e o resto da casca some.
+
+---
+
 ## Como reportar uma falha
 Anote: **ID do item** (por exemplo `4.3 Medo`), a **composição exata** da magia, o que esperava, o que aconteceu e, se houver, o trecho do log. Com isso eu reproduzo, escrevo o GameTest que falha e corrijo.

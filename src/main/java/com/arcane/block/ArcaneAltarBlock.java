@@ -27,8 +27,8 @@ import javax.annotation.Nullable;
 
 /**
  * Altar Arcano: o centro do ritual.
- *  - Botao direito: conjura a magia ATIVA do grimorio com o poder do circulo desenhado em volta.
- *  - Shift + botao direito: armazena a magia no altar; qualquer magia com o glifo Ativar a dispara (ate 48 blocos).
+ *  - Botao direito: abre a tela do altar (desenhar o ritual, ver o circulo e as oferendas; Realizar ou Guardar no altar
+ *    para qualquer magia com o glifo Ativar disparar, ate 48 blocos). Nao usa a magia ativa do grimorio.
  * O Compasso Arcano e o Giz Arcano tem uso proprio (o altar nao interfere).
  */
 public class ArcaneAltarBlock extends Block implements EntityBlock {
@@ -56,16 +56,8 @@ public class ArcaneAltarBlock extends Block implements EntityBlock {
     if (level.isClientSide) return InteractionResult.SUCCESS;
     if (!(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel serverLevel)) return InteractionResult.PASS;
 
-    var spell = GrimoireAttachments.get(sp).flatMap(g -> g.activeInscriptionId().flatMap(g::getInscription));
-    if (spell.isEmpty()) {
-      RitualMessages.send(sp, new RitualService.Result(RitualService.Outcome.NO_SPELL, null, 0, "", 0, null));
-      return InteractionResult.CONSUME;
-    }
-    ComponentSource source = ComponentSource.of(sp);
-    RitualService.Result result = sp.isShiftKeyDown()
-        ? RitualService.store(serverLevel, pos, sp, spell.get(), source, true)
-        : RitualService.perform(serverLevel, pos, sp, spell.get(), source, true);
-    RitualMessages.send(sp, result);
+    // O ritual nao usa a magia ativa do grimorio: abre a tela do altar, onde se desenha o ritual e se fazem as oferendas.
+    com.arcane.network.ModNetwork.sendToPlayer(sp, new com.arcane.network.packet.S2COpenRitualPacket(pos));
     return InteractionResult.CONSUME;
   }
 }

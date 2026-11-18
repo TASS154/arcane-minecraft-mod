@@ -219,6 +219,29 @@ public final class RitualService {
     return placed;
   }
 
+  // ------------------------------------------------------------------ previa (tela do altar)
+  public record Need(ResourceLocation item, int need, int have) {}
+
+  /** O que a tela do altar mostra: validade, custo, circulo, nivel exigido e as oferendas (necessario x que voce tem). */
+  public record Report(boolean valid, net.minecraft.network.chat.Component message, int cost, int mana, int circleLevel,
+                       int completenessPct, int needLevel, List<Need> needs, boolean legendary, int stars) {}
+
+  public static Report preview(ServerLevel level, BlockPos altar, ServerPlayer player, Inscription spell, boolean wantsLegendary) {
+    ComponentSource source = ComponentSource.of(player);
+    CircleReport circle = evaluate(level, altar);
+    RitualRequirements req = RitualRequirements.of(spell);
+    boolean legendary = isLegendary(circle, spell, req, source, wantsLegendary);
+    var validation = InscriptionValidator.validate(spell, GrimoireAttachments.get(player), true);
+    List<Need> needs = new ArrayList<>();
+    for (Map.Entry<Item, Integer> e : neededItems(req, legendary).entrySet()) {
+      needs.add(new Need(ForgeRegistries.ITEMS.getKey(e.getKey()), e.getValue(), Math.min(source.count(e.getKey()), 9999)));
+    }
+    int cost = spell.glyphs().isEmpty() ? 0 : CastingService.ritualCost(spell, legendary);
+    return new Report(validation.valid(), validation.message(), cost, (int) GrimoireAttachments.getManaOrCreate(player).current(),
+        circle.level().number(), (int) Math.round(circle.completeness() * 100), req.level(), needs, legendary,
+        Math.min(source.count(Items.NETHER_STAR), 99));
+  }
+
   // ------------------------------------------------------------------ conjurar
   private static Map<Item, Integer> neededItems(RitualRequirements req, boolean legendary) {
     Map<Item, Integer> need = new LinkedHashMap<>();
@@ -253,7 +276,7 @@ public final class RitualService {
       }
     }
     if (performer instanceof ServerPlayer player) {
-      var validation = InscriptionValidator.validate(spell, GrimoireAttachments.get(player));
+      var validation = InscriptionValidator.validate(spell, GrimoireAttachments.get(player), true);
       if (!validation.valid()) {
         return new Result(Outcome.INVALID, circle, effective, validation.message().getString(), 0, null);
       }

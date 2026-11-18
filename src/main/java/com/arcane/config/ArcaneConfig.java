@@ -14,6 +14,9 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.DoubleValue RITUAL_POWER_MAJOR;
   public static final ForgeConfigSpec.DoubleValue RITUAL_MIN_COMPLETENESS;
   public static final ForgeConfigSpec.IntValue RITUAL_MAX_PERCENT;
+  public static final ForgeConfigSpec.BooleanValue UNIQUE_OFFERINGS_BREAK_CAP;
+  public static final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> UNIQUE_OFFERINGS;
+  public static final ForgeConfigSpec.BooleanValue AREA_HARD_CAPS;
   public static final ForgeConfigSpec.BooleanValue ELEMENT_INTERACTIONS;
   public static final ForgeConfigSpec.DoubleValue ELEMENT_INTERACTION_STRENGTH;
   public static final ForgeConfigSpec.IntValue MAGE_CAST_INTERVAL_TICKS;
@@ -64,8 +67,14 @@ public class ArcaneConfig {
         .defineInRange("ritualPowerMedium", 3.0, 1.0, 100.0);
     RITUAL_POWER_MAJOR = builder.comment("Power multiplier of a major ritual (radius 16). PROVISIONAL")
         .defineInRange("ritualPowerMajor", 10.0, 1.0, 100.0);
-    RITUAL_MAX_PERCENT = builder.comment("Maximum total ritual value in percent (circle size + offerings, after the legendary doubling)")
-        .defineInRange("ritualMaxPercent", 1500, 100, 100000);
+    RITUAL_MAX_PERCENT = builder.comment("Maximum total ritual value in percent (circle size + offerings, after the legendary doubling). 0 = no limit")
+        .defineInRange("ritualMaxPercent", 1500, 0, 1000000);
+    UNIQUE_OFFERINGS_BREAK_CAP = builder.comment("An offering that is a unique item (see uniqueOfferings) lifts the ritualMaxPercent limit for that ritual")
+        .define("uniqueOfferingsBreakCap", true);
+    UNIQUE_OFFERINGS = builder.comment("Item ids counted as unique offerings (one per world, non-renewable)")
+        .defineList("uniqueOfferings", java.util.List.of("minecraft:dragon_head", "minecraft:dragon_egg", "minecraft:elytra"), o -> o instanceof String);
+    AREA_HARD_CAPS = builder.comment("Keep the fixed maximum radius of area spells/forms (24 to 64 blocks). false = no fixed maximum, only the crystal and charge limits apply")
+        .define("areaHardCaps", true);
     RITUAL_MIN_COMPLETENESS = builder.comment("Fraction of the circle's traces that must be drawn for a ritual to work")
         .defineInRange("ritualMinCompleteness", 0.85, 0.3, 1.0);
     ELEMENT_INTERACTIONS = builder.comment("Elements interact with the environment (storm stronger in rain, fire weaker when wet...)")
@@ -76,7 +85,7 @@ public class ArcaneConfig {
     GRIMOIRE_LOSS_DAYS = builder.comment("Days of reduced mana after losing the grimoire (PROVISIONAL)").defineInRange("grimoireLossDays", 3, 0, 30);
     SEALED_CHAMBER_CHANCE = builder.comment("Chance per newly generated Overworld chunk of an underground sealed-creature chamber (0 disables)").defineInRange("sealedChamberChance", 0.008, 0.0, 1.0);
     FLIGHT_MANA_PER_TICK = builder.comment("Mana drained every tick while the Float flight lasts, per block/tick of flight speed (0 = free flight) (PROVISIONAL)").defineInRange("flightManaPerTick", 0.25, 0.0, 10.0);
-    CRYSTAL_AREA_CAP = builder.comment("Ceiling of the crystal's multiplier on spell radius/area (the zone multiplier goes up to 32)").defineInRange("crystalAreaCap", 32.0, 1.0, 32.0);
+    CRYSTAL_AREA_CAP = builder.comment("Ceiling of the crystal's multiplier on spell radius/area (the zone multiplier goes up to 32). 0 = no ceiling").defineInRange("crystalAreaCap", 32.0, 0.0, 64.0);
     CRYSTAL_POISON_DAMAGE = builder.comment("Mana Poisoning damage multiplier near crystals (1 = base)").defineInRange("crystalPoisonDamage", 1.0, 0.0, 20.0);
     CRYSTAL_WILD_CAST_MAX = builder.comment("Max chance (percent per second, at the innermost zone) of a random grimoire spell firing near a crystal; each second a percentage up to the zone limit is drawn (0 disables)").defineInRange("crystalWildCastMaxPercent", 30.0, 0.0, 100.0);
     MANA_PER_GLYPH = builder.comment("Extra max mana per discovered glyph (partial knowledge or better) (PROVISIONAL)").defineInRange("manaPerGlyph", 1.5, 0.0, 50.0);
@@ -98,7 +107,7 @@ public class ArcaneConfig {
     RESTORE_WINDOW_SECONDS = builder.comment("How long a destroyed block stays restorable (PROVISIONAL)").defineInRange("restoreWindowSeconds", 120, 5, 3600);
     RESTORE_MAX_BLOCKS = builder.comment("Max blocks one Restore cast recomposes (PROVISIONAL)").defineInRange("restoreMaxBlocksPerCast", 1024, 1, 8192);
     RESTORE_BLOCKS_PER_TICK = builder.comment("Blocks Restore puts back per tick (they return gradually, newest first) (PROVISIONAL)").defineInRange("restoreBlocksPerTick", 6, 1, 64);
-    CHARGE_MAX_SCALE = builder.comment("Highest power multiplier a Charge cast can reach; there is no time limit, only mana (PROVISIONAL)").defineInRange("chargeMaxScale", 6.0, 1.5, 20.0);
+    CHARGE_MAX_SCALE = builder.comment("Highest power multiplier a Charge cast can reach; there is no time limit, only mana (PROVISIONAL). 0 = no ceiling").defineInRange("chargeMaxScale", 6.0, 0.0, 1000.0);
     HOLD_DRAIN_PER_SECOND = builder.comment("Hold mode: fraction of the spell mana cost drained per second while the key is held (PROVISIONAL)").defineInRange("holdDrainPerSecond", 0.6, 0.0, 10.0);
     RESTORE_JOURNAL_CAP = builder.comment("Max journal entries per dimension; the oldest are dropped first").defineInRange("restoreJournalCap", 4096, 64, 65536);
     RESTORE_MANA_PER_BLOCK = builder.comment("Extra mana per block actually recomposed by Restore, on top of the glyph cost (PROVISIONAL)").defineInRange("restoreManaPerBlock", 0.3, 0.0, 20.0);

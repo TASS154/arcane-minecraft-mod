@@ -8,7 +8,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.common.ForgeConfigSpec;
 
 /**
  * Opcoes do Arcane (tambem abre pelo botao "Config" da aba Mods). Coluna da esquerda: preferencias do jogador (modo de uso,
@@ -17,8 +16,6 @@ import net.minecraftforge.common.ForgeConfigSpec;
  * mexa em serverconfig/arcane-server.toml.
  */
 public class ArcaneOptionsScreen extends Screen {
-  private static final double[] AREA_CAPS = {1, 2, 4, 8, 16, 32};
-  private static final double[] CHARGE_CAPS = {3, 6, 10, 20};
   private final Screen parent;
 
   public ArcaneOptionsScreen(Screen parent) {
@@ -50,35 +47,11 @@ public class ArcaneOptionsScreen extends Screen {
     addRenderableWidget(Button.builder(flag("gui.arcane.options.flashes", ClientPrefs.reduceFlashes()), b -> { ClientPrefs.flip(ClientPrefs.REDUCE_FLASHES); b.setMessage(flag("gui.arcane.options.flashes", ClientPrefs.reduceFlashes())); })
         .bounds(left, y + 72, w, 20).tooltip(Tooltip.create(Component.translatable("gui.arcane.options.flashes.tip"))).build());
 
-    if (worldRulesAvailable()) {
-      rule(right, y, "gui.arcane.rule.world_altering", ArcaneConfig.WORLD_ALTERING_SPELLS);
-      rule(right, y + 24, "gui.arcane.rule.block_breaking", ArcaneConfig.BLOCK_BREAKING_SPELLS);
-      rule(right, y + 48, "gui.arcane.rule.interactions", ArcaneConfig.ELEMENT_INTERACTIONS);
-      rule(right, y + 72, "gui.arcane.rule.scars", ArcaneConfig.SCARS_ENABLED);
-      cycle(right, y + 96, "gui.arcane.rule.crystal_cap", ArcaneConfig.CRYSTAL_AREA_CAP, AREA_CAPS);
-      cycle(right, y + 120, "gui.arcane.rule.charge_cap", ArcaneConfig.CHARGE_MAX_SCALE, CHARGE_CAPS);
-    }
+    Button rules = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.options.world.open"), b -> minecraft.setScreen(new WorldRulesScreen(this)))
+        .bounds(right, y, w, 20).tooltip(Tooltip.create(Component.translatable("gui.arcane.options.world.open.tip"))).build());
+    rules.active = worldRulesAvailable();
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.close"), b -> onClose())
-        .bounds(width / 2 - 50, y + 150, 100, 20).build());
-  }
-
-  private void rule(int x, int y, String key, ForgeConfigSpec.BooleanValue value) {
-    addRenderableWidget(Button.builder(flag(key, value.get()), b -> { value.set(!value.get()); b.setMessage(flag(key, value.get())); })
-        .bounds(x, y, 180, 20).tooltip(Tooltip.create(Component.translatable(key + ".tip"))).build());
-  }
-
-  private void cycle(int x, int y, String key, ForgeConfigSpec.DoubleValue value, double[] steps) {
-    addRenderableWidget(Button.builder(number(key, value.get()), b -> {
-      double now = value.get();
-      double next = steps[0];
-      for (int i = 0; i < steps.length; i++) if (steps[i] > now + 1.0e-9) { next = steps[i]; break; }
-      value.set(next);
-      b.setMessage(number(key, value.get()));
-    }).bounds(x, y, 180, 20).tooltip(Tooltip.create(Component.translatable(key + ".tip"))).build());
-  }
-
-  private static Component number(String key, double v) {
-    return Component.translatable(key, v == Math.rint(v) ? String.valueOf((int) v) : String.valueOf(v));
+        .bounds(width / 2 - 50, y + 100, 100, 20).build());
   }
 
   private static Component modeLabel() {

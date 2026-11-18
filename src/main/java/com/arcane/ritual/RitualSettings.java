@@ -29,12 +29,38 @@ public final class RitualSettings {
   }
 
   /** Teto do valor total do ritual, em % (circulo + oferendas, ja contando o dobro do lendario). */
-  public static int maxPercent() { return maxPercent; }
+  public static int maxPercent() { return maxPercent <= 0 ? Integer.MAX_VALUE : maxPercent; }
 
-  public static void setMaxPercent(int percent) { maxPercent = Math.max(100, percent); }
+  /** 0 (ou menos) = sem teto. */
+  public static void setMaxPercent(int percent) { maxPercent = percent <= 0 ? 0 : Math.max(100, percent); }
+
+  private static volatile boolean uniqueBreaksCap = true;
+  private static volatile java.util.Set<net.minecraft.resources.ResourceLocation> uniqueItems = java.util.Set.of(
+      new net.minecraft.resources.ResourceLocation("minecraft:dragon_head"),
+      new net.minecraft.resources.ResourceLocation("minecraft:dragon_egg"),
+      new net.minecraft.resources.ResourceLocation("minecraft:elytra"));
+
+  public static boolean uniqueBreaksCap() { return uniqueBreaksCap; }
+
+  public static void setUnique(boolean breaksCap, java.util.Collection<? extends String> ids) {
+    uniqueBreaksCap = breaksCap;
+    java.util.Set<net.minecraft.resources.ResourceLocation> set = new java.util.HashSet<>();
+    for (String id : ids) {
+      var rl = net.minecraft.resources.ResourceLocation.tryParse(id);
+      if (rl != null) set.add(rl);
+    }
+    uniqueItems = java.util.Set.copyOf(set);
+  }
+
+  /** O item e unico (cabeca de dragao, ovo de dragao...)? */
+  public static boolean isUnique(net.minecraft.world.item.ItemStack stack) {
+    var key = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+    return key != null && uniqueItems.contains(key);
+  }
 
   public static void reset() {
     maxPercent = DEFAULT_MAX_PERCENT;
+    setUnique(true, java.util.List.of("minecraft:dragon_head", "minecraft:dragon_egg", "minecraft:elytra"));
     set(DEFAULT_MINOR, DEFAULT_MEDIUM, DEFAULT_MAJOR, DEFAULT_MIN_COMPLETENESS);
   }
 

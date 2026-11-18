@@ -188,7 +188,7 @@ public final class UtilityEffects {
   public static class Sense implements EffectHandler {
     @Override
     public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-      double radius = Math.min(Math.min(64.0, Math.max(32.0, 32.0 * context.areaFactor())), p(context, call, "radius", 16.0) * context.areaFactor());
+      double radius = Math.min(Math.min(ExecutionContext.cap(64.0), Math.max(32.0, 32.0 * context.areaFactor())), p(context, call, "radius", 16.0) * context.areaFactor());
       List<LivingEntity> found = scan(context, radius);
       int hostile = 0;
       for (LivingEntity e : found) {
@@ -272,7 +272,7 @@ public final class UtilityEffects {
   public static class Reveal implements EffectHandler {
     @Override
     public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-      double radius = Math.min(Math.min(64.0, Math.max(24.0, 24.0 * context.areaFactor())), p(context, call, "radius", 12.0) * context.areaFactor());
+      double radius = Math.min(Math.min(ExecutionContext.cap(64.0), Math.max(24.0, 24.0 * context.areaFactor())), p(context, call, "radius", 12.0) * context.areaFactor());
       int revealed = 0;
       for (LivingEntity e : scan(context, radius)) {
         if (e.hasEffect(MobEffects.INVISIBILITY) || e.isInvisible()) revealed++;

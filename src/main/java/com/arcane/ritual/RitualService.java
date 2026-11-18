@@ -235,6 +235,8 @@ public final class RitualService {
     public static final Offerings NONE = new Offerings(List.of(), true);
 
     public int percent() { return OfferingValue.sum(stacks); }
+    /** Alguma oferenda e item unico (e a config deixa isso quebrar o teto)? Oferenda virtual (legado) nao conta. */
+    public boolean unique() { return !virtual && OfferingValue.hasUnique(stacks); }
 
     /** Modo antigo (boolean): uma Estrela do Nether tirada do ComponentSource, se houver. */
     static Offerings legacy(ComponentSource source, boolean wantsLegendary) {
@@ -259,7 +261,7 @@ public final class RitualService {
     int cost = spell.glyphs().isEmpty() ? 0 : CastingService.ritualCost(spell, legendary);
     return new Report(validation.valid(), validation.message(), cost, (int) GrimoireAttachments.getManaOrCreate(player).current(),
         circle.level().number(), (int) Math.round(circle.completeness() * 100), req.level(), needs, legendary,
-        sizePercent(circle), offeringPct, OfferingValue.total(sizePercent(circle), offeringPct));
+        sizePercent(circle), offeringPct, OfferingValue.total(sizePercent(circle), offeringPct, offerings.unique()));
   }
 
   // ------------------------------------------------------------------ conjurar
@@ -349,7 +351,7 @@ public final class RitualService {
       GrimoireAttachments.getManaOrCreate(player).trySpend(CastingService.ritualCost(spell, legendary));
     }
     int effective = legendary ? RitualLevel.LEGENDARY.number() : circle.level().number();
-    double power = OfferingValue.total(sizePercent(circle), offeringPct) / 100.0 * circle.quality();
+    double power = OfferingValue.total(sizePercent(circle), offeringPct, offerings.unique()) / 100.0 * circle.quality();
     double area = circle.level().areaScale();
     ExecutionResult cast = CastingService.castRitual(performer, spell, level,
         new CastingService.RitualBonus(effective, power, area, legendary, circle.radius(), net.minecraft.world.phys.Vec3.atCenterOf(altar)));
@@ -381,7 +383,7 @@ public final class RitualService {
     need.forEach(source::take);
     consumeOfferings(offerings, source, performer);
     GrimoireAttachments.getManaOrCreate(performer).trySpend(CastingService.ritualCost(spell, legendary));
-    be.store(spell, performer.getUUID(), legendary, offeringPct);
+    be.store(spell, performer.getUUID(), legendary, offeringPct, offerings.unique());
     level.playSound(null, altar, ModSounds.WORKBENCH_SAVE.get(), SoundSource.BLOCKS, 1.0f, 0.7f);
     return new Result(Outcome.STORED, circle, circle.level().number(), "", 0, null);
   }
@@ -417,7 +419,7 @@ public final class RitualService {
       boolean legendary = altar.storedLegendary();
       int effective = legendary ? RitualLevel.LEGENDARY.number() : circle.level().number();
       if (RitualRequirements.of(spell).level() > effective) continue;
-      double power = OfferingValue.total(sizePercent(circle), altar.storedOffering()) / 100.0 * circle.quality();
+      double power = OfferingValue.total(sizePercent(circle), altar.storedOffering(), altar.storedUnique()) / 100.0 * circle.quality();
       // A magia guardada nao some: o altar dispara de novo a cada ativacao, pagando a mana de cada vez.
       if (activator instanceof net.minecraft.server.level.ServerPlayer sp && !sp.getAbilities().instabuild) {
         var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(sp);

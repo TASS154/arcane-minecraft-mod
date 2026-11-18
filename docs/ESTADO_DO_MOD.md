@@ -265,6 +265,14 @@ Cobertos por GameTest (202 passam): cratera esférica, valor das oferendas e tet
 - **Runas da carga = área real (não visto):** o servidor manda o raio real (carga, cristal e regulador contados) e as runas de Aura, Onda e Pilar têm esse tamanho. Onda: círculo de meio alcance, a meio caminho (aproximação do leque).
 - **Segurar (não visto):** o pilar mantido fica fixo onde nasceu (mirar em outro lugar não o move; testado). Aura, Onda e Pilar mantidos não reiniciam a animação a cada pulso: o desenho abre uma vez, fica de pé e apaga ao soltar; o som toca só na primeira. As runas do canal não pulsam mais.
 
+## Terceira revisão: tetos configuráveis, itens únicos e regras do mundo (18 nov 2026)
+Lógica coberta por GameTest (203 passam). **Telas: implementadas, NÃO vistas em jogo.**
+- **Todo teto é configurável e removível (testado o do ritual):** `ritualMaxPercent` (0 = sem limite), `crystalAreaCap` (0 = sem teto), `chargeMaxScale` (0 = sem teto) e `areaHardCaps` (desligado = sem raio máximo fixo nas formas e efeitos de área; antes eram 24 a 64 blocos fixos no código).
+- **Itens únicos (testado):** cabeça de dragão, ovo de dragão e elitro (lista `uniqueOfferings`, configurável) como oferenda quebram o teto do ritual, se `uniqueOfferingsBreakCap` estiver ligado. A magia guardada no altar lembra isso. Cabeça de dragão passou a valer 250%.
+- **Cristal e área:** os efeitos de área com teto fixo (Controle, Baixo custo, Utilidade) agora sobem o teto junto com o multiplicador do cristal. Raio e Toque medem alcance, não área, e não mudam.
+- **Altar:** fechar a tela guarda o rascunho (glifos, números, oferendas, aba) por altar até sair do mundo.
+- **Regras do mundo na tela de configurações do mod (não vista):** botão "Regras do mundo..." abre a nova tela com terreno, quebra de blocos, interações, cicatrizes, raio fixo, tetos (cristal, carga, ritual, "sem limite" é a última opção) e o interruptor dos itens únicos. Só num mundo local; em servidor dedicado, `serverconfig/arcane-server.toml`.
+
 ## Coluna da gravidade (glitch roxo)
 
 - Implementado, não testado no jogo: quando a magia tem elemento FORCE (Gravidade e afins: empurrar, atrair, levitar, flutuar, telecinese) e forma Coluna, `ShapeFxRenderer.glitchColumn` desenha a coluna semitransparente e arroxeada, com fatias que tremem de lado, piscam e têm buracos; o padrão desliza para baixo. Só efeito visual (cliente); a mecânica não mudou. Conferir no jogo: `pillar` + `gravity`.

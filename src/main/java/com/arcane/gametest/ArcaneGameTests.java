@@ -2109,6 +2109,26 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  // ================================================================== Revisao 3: tetos configuraveis e itens unicos
+  @GameTest(template = "empty", batch = "rev_caps_unique")
+  public static void ritualCapCanBeRemovedAndUniqueItemsBreakIt(GameTestHelper h) {
+    var head = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DRAGON_HEAD);
+    var egg = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DRAGON_EGG);
+    var iron = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT);
+    h.assertTrue(com.arcane.ritual.RitualSettings.isUnique(head) && com.arcane.ritual.RitualSettings.isUnique(egg) && !com.arcane.ritual.RitualSettings.isUnique(iron), "cabeca e ovo de dragao sao unicos; ferro nao");
+    h.assertTrue(com.arcane.ritual.OfferingValue.hasUnique(java.util.List.of(iron, head)) && !com.arcane.ritual.OfferingValue.hasUnique(java.util.List.of(iron)), "a lista detecta o item unico");
+    com.arcane.ritual.RitualSettings.setMaxPercent(1500);
+    h.assertTrue(com.arcane.ritual.OfferingValue.total(1000, 900, false) == 1500, "sem item unico o teto vale");
+    h.assertTrue(com.arcane.ritual.OfferingValue.total(1000, 900, true) == 3800, "com item unico o teto some: (1000+900)x2");
+    com.arcane.ritual.RitualSettings.setUnique(false, java.util.List.of("minecraft:dragon_head"));
+    h.assertTrue(com.arcane.ritual.OfferingValue.total(1000, 900, true) == 1500, "config desligada: o unico nao quebra o teto");
+    h.assertTrue(com.arcane.ritual.RitualSettings.isUnique(head) && !com.arcane.ritual.RitualSettings.isUnique(egg), "a lista de unicos e configuravel");
+    com.arcane.ritual.RitualSettings.setMaxPercent(0);
+    h.assertTrue(com.arcane.ritual.OfferingValue.total(1000, 900, false) == 3800, "teto 0 = sem limite");
+    com.arcane.ritual.RitualSettings.reset();
+    h.succeed();
+  }
+
   // ================================================================== Revisao 2: cratera redonda, oferendas, pilar mantido
   @GameTest(template = "empty", batch = "rev_crater", timeoutTicks = 60)
   public static void blastCraterIsASphereNotACube(GameTestHelper h) {

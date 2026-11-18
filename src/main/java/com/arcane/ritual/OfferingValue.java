@@ -22,6 +22,7 @@ public final class OfferingValue {
   private static final Map<Item, Integer> PRECIOUS = Map.ofEntries(
       Map.entry(Items.NETHER_STAR, 310), // sozinha ja e lendaria, como era a oferenda original
       Map.entry(Items.DRAGON_EGG, 400),
+      Map.entry(Items.DRAGON_HEAD, 250),
       Map.entry(Items.ENCHANTED_GOLDEN_APPLE, 200),
       Map.entry(Items.TOTEM_OF_UNDYING, 150),
       Map.entry(Items.HEART_OF_THE_SEA, 120),
@@ -78,9 +79,18 @@ public final class OfferingValue {
    * Valor total do ritual em %: tamanho do circulo + oferendas, dobrado se as oferendas o tornam lendario, limitado ao teto
    * da config. {@code sizePercent} e o poder do nivel do circulo (150/300/1000).
    */
-  public static int total(int sizePercent, int offeringPercent) {
+  public static int total(int sizePercent, int offeringPercent) { return total(sizePercent, offeringPercent, false); }
+
+  /** Com {@code unique} (alguma oferenda e um item unico) e a config ligada, o teto nao se aplica. */
+  public static int total(int sizePercent, int offeringPercent, boolean unique) {
     long total = (long) sizePercent + offeringPercent;
     if (legendary(offeringPercent)) total *= 2;
-    return (int) Math.min(total, RitualSettings.maxPercent());
+    long cap = unique && RitualSettings.uniqueBreaksCap() ? Integer.MAX_VALUE : RitualSettings.maxPercent();
+    return (int) Math.min(total, cap);
+  }
+
+  public static boolean hasUnique(List<ItemStack> stacks) {
+    for (ItemStack s : stacks) if (RitualSettings.isUnique(s)) return true;
+    return false;
   }
 }

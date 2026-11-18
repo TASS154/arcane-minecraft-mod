@@ -67,6 +67,7 @@ public class ArcaneMod {
             com.arcane.ritual.RitualSettings.set(ArcaneConfig.RITUAL_POWER_MINOR.get(), ArcaneConfig.RITUAL_POWER_MEDIUM.get(),
                     ArcaneConfig.RITUAL_POWER_MAJOR.get(), ArcaneConfig.RITUAL_MIN_COMPLETENESS.get());
             com.arcane.ritual.RitualSettings.setMaxPercent(ArcaneConfig.RITUAL_MAX_PERCENT.get());
+            com.arcane.ritual.RitualSettings.setUnique(ArcaneConfig.UNIQUE_OFFERINGS_BREAK_CAP.get(), ArcaneConfig.UNIQUE_OFFERINGS.get());
         }
     }
 

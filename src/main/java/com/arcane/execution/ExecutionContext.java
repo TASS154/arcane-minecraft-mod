@@ -84,9 +84,21 @@ public class ExecutionContext {
      * potencia por ate 32x; para o TAMANHO usamos a raiz (limitada a 3x), senao uma explosao viraria um buraco.
      */
     public double areaFactor() {
-        double crystal = Math.min(com.arcane.config.ArcaneConfig.CRYSTAL_AREA_CAP.get(), Math.max(1.0, environment.potencyMultiplier()));
+        double crystal = crystalFactor(environment.potencyMultiplier());
         // Carregar tambem cresce a area (potencia x5 = area x5) e o regulador do conjurador troca area por dano.
         return areaScale * crystal * Math.max(1.0, scaleFactor) * areaDial;
+    }
+
+    /** Efeito do cristal no tamanho: a potencia da zona, limitada por crystalAreaCap (0 = sem teto). */
+    public static double crystalFactor(double potency) {
+        double cap = com.arcane.config.ArcaneConfig.CRYSTAL_AREA_CAP.get();
+        double p = Math.max(1.0, potency);
+        return cap <= 0 ? p : Math.min(cap, p);
+    }
+
+    /** Raio maximo fixo de uma forma/efeito de area; com areaHardCaps desligado nao ha maximo fixo. */
+    public static double cap(double fixedMax) {
+        return com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.get() ? fixedMax : 4096.0;
     }
 
     /** Regulador de area (1 = normal): multiplica a area e divide o dano na mesma proporcao. */

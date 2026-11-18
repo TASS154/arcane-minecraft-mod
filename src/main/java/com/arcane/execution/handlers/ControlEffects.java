@@ -209,7 +209,7 @@ public final class ControlEffects {
   public static class Contagion implements EffectHandler {
     @Override
     public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-      double radius = Math.min(Math.min(48.0, Math.max(8.0, 8.0 * context.areaFactor())), p(context, call, "radius", 4.0) * context.areaFactor());
+      double radius = Math.min(Math.min(ExecutionContext.cap(48.0), Math.max(8.0, 8.0 * context.areaFactor())), p(context, call, "radius", 4.0) * context.areaFactor());
       for (Entity e : targets.entities()) {
         if (!(e instanceof LivingEntity source)) continue;
         List<MobEffectInstance> harmful = new ArrayList<>();

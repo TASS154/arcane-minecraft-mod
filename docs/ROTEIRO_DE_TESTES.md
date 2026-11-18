@@ -433,6 +433,10 @@ Montagem: `Foco, Atrair` (ou `Foco, Dano`). Precisa conhecer o glifo `focus`: `/
 - [ ] **Carga:** as runas de Aura/Pilar/Onda crescem até o tamanho real da área (confira com Ctrl+scroll e com o cristal).
 - [ ] **Segurar:** pilar fixo no lugar, sem pulsar nem recomeçar a animação; some ao soltar.
 
+- [ ] **Altar guarda o rascunho:** monte uma magia, feche a tela, reabra: tudo continua lá.
+- [ ] **Regras do mundo:** Mods > Arcane > Config > "Regras do mundo..." abre; cada botão muda e persiste; o teto do ritual tem "sem limite".
+- [ ] **Item único:** oferecer cabeça/ovo de dragão num ritual grande passa de 1500%; com a regra desligada, não.
+
 ---
 
 ## Como reportar uma falha

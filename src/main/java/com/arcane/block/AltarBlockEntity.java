@@ -17,6 +17,7 @@ public class AltarBlockEntity extends BlockEntity {
   @Nullable private UUID owner;
   private boolean storedLegendary;
   private int storedOffering;
+  private boolean storedUnique;
   private long cooldownUntil;
 
   public AltarBlockEntity(BlockPos pos, BlockState state) {
@@ -28,6 +29,8 @@ public class AltarBlockEntity extends BlockEntity {
   public boolean storedLegendary() { return storedLegendary; }
   /** Valor (%) das oferendas gastas ao guardar a magia; vale a cada disparo. */
   public int storedOffering() { return storedOffering; }
+  /** Entre as oferendas havia um item unico (o teto do valor nao se aplica). */
+  public boolean storedUnique() { return storedUnique; }
   public long cooldownUntil() { return cooldownUntil; }
   public boolean hasStored() { return stored != null; }
 
@@ -36,6 +39,11 @@ public class AltarBlockEntity extends BlockEntity {
   }
 
   public void store(Inscription spell, UUID ownerId, boolean legendary, int offeringPercent) {
+    store(spell, ownerId, legendary, offeringPercent, false);
+  }
+
+  public void store(Inscription spell, UUID ownerId, boolean legendary, int offeringPercent, boolean unique) {
+    this.storedUnique = unique;
     this.storedOffering = offeringPercent;
     this.stored = spell;
     this.owner = ownerId;
@@ -47,6 +55,7 @@ public class AltarBlockEntity extends BlockEntity {
     this.stored = null;
     this.storedLegendary = false;
     this.storedOffering = 0;
+    this.storedUnique = false;
     setChanged();
   }
 
@@ -64,6 +73,7 @@ public class AltarBlockEntity extends BlockEntity {
     if (owner != null) tag.putUUID("owner", owner);
     tag.putBoolean("legendary", storedLegendary);
     tag.putInt("offering", storedOffering);
+    tag.putBoolean("unique", storedUnique);
     tag.putLong("cooldown", cooldownUntil);
   }
 
@@ -74,6 +84,7 @@ public class AltarBlockEntity extends BlockEntity {
     owner = tag.hasUUID("owner") ? tag.getUUID("owner") : null;
     storedLegendary = tag.getBoolean("legendary");
     storedOffering = tag.getInt("offering");
+    storedUnique = tag.getBoolean("unique");
     cooldownUntil = tag.getLong("cooldown");
   }
 }

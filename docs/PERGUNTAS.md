@@ -54,6 +54,11 @@
 - **Onda (runas):** o círculo é só uma aproximação do leque.
 - **Segurar:** só Pilar fica fixo; feixe e aura seguem o conjurador.
 
+## Terceira revisão de 18 nov 2026 (padrões adotados)
+- **Itens únicos:** cabeça de dragão, ovo de dragão e elitro. Estrela do Nether NÃO é única (renovável). Quebram o teto por inteiro, não só sobem ele.
+- **"Sem limite" = 0** nos tetos de ritual, cristal e carga.
+- **Raio fixo das áreas:** um único interruptor (`areaHardCaps`) em vez de um por forma.
+
 ## Dúvidas registradas na Fase 5
 - **Bolso, 13 espaços:** "metade de um baú pequeno" virou 13 (27 / 2 arredondado para baixo). O menu mostra 2 fileiras (18) e os 5 últimos ficam travados. Se preferir 14 ou 9, é só mudar `pocketSlots`.
 - **Coro, "ao mesmo tempo":** interpretei como uma janela de 3 s (60 ticks) a partir de quem começa, com o círculo de raio 8 ao redor dele. Os outros precisam ter a mesma magia equipada. Dispara no fim da janela, para contar todo mundo. Tudo em config (`chorusRadius`, `chorusWindowTicks`, `chorusMaxParticipants`).

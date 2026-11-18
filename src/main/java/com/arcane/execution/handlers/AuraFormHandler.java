@@ -15,7 +15,7 @@ import java.util.List;
 public class AuraFormHandler implements FormHandler {
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
-    double radius = Math.max(1.0, Math.min(64.0, context.coverRadius(spec.parameters().getOrDefault("radius", 5.0) * context.areaFactor())));
+    double radius = Math.max(1.0, Math.min(ExecutionContext.cap(64.0), context.coverRadius(spec.parameters().getOrDefault("radius", 5.0) * context.areaFactor())));
     com.arcane.execution.Region region = com.arcane.execution.Region.of(context, spec, com.arcane.execution.ShapeGeometry.SPHERE, radius);
     List<Entity> found = region.entities(context.level(), context.caster(), false);
     region.playFx(context);

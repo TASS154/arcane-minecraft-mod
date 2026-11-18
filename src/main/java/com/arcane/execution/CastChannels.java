@@ -122,7 +122,7 @@ public final class CastChannels {
     };
     if (base <= 0.0) return 0f;
     var environment = com.arcane.ambient.AmbientFieldResolver.resolve((net.minecraft.server.level.ServerLevel) player.level(), player.blockPosition());
-    double crystal = Math.min(com.arcane.config.ArcaneConfig.CRYSTAL_AREA_CAP.get(), Math.max(1.0, environment.potencyMultiplier()));
+    double crystal = ExecutionContext.crystalFactor(environment.potencyMultiplier());
     double factor = crystal * Math.max(1.0, scale) * AreaDial.factorFor(player.getUUID(), plan);
     return (float) Math.min(64.0, Math.max(1.0, base * factor));
   }
@@ -175,7 +175,8 @@ public final class CastChannels {
   /** Potencia de uma carga que gastou {@code drained} de mana numa magia de custo {@code cost}. */
   public static double chargeScale(double drained, double cost) {
     double max = com.arcane.config.ArcaneConfig.CHARGE_MAX_SCALE.get();
-    return Math.min(max, 1.0 + (2.0 / 1.5) * drained / Math.max(1.0, cost));
+    double scale = 1.0 + (2.0 / 1.5) * drained / Math.max(1.0, cost);
+    return max <= 0 ? scale : Math.min(max, scale);
   }
 
   /** Fracao carregada (0 a 1) de quem esta no modo CARREGAR, ou -1. */
@@ -183,6 +184,7 @@ public final class CastChannels {
     Active a = ACTIVE.get(player.getUUID());
     if (a == null || a.mode != CastMode.CHARGE) return -1;
     double max = com.arcane.config.ArcaneConfig.CHARGE_MAX_SCALE.get();
+    if (max <= 0) max = 20.0; // sem teto: a barra usa 20x como referencia
     return (chargeScale(a.drained, a.cost) - 1.0) / Math.max(0.01, max - 1.0);
   }
 
@@ -352,7 +354,8 @@ public final class CastChannels {
           // as runas ficam la, prontas, ate o jogador soltar.
           var mana = GrimoireAttachments.getManaOrCreate(player);
           double step = a.cost * CHARGE_DRAIN_PER_TICK;
-          boolean capped = chargeScale(a.drained, a.cost) >= com.arcane.config.ArcaneConfig.CHARGE_MAX_SCALE.get() - 1.0e-9;
+          double chargeCap = com.arcane.config.ArcaneConfig.CHARGE_MAX_SCALE.get();
+          boolean capped = chargeCap > 0 && chargeScale(a.drained, a.cost) >= chargeCap - 1.0e-9;
           if (!capped && mana.current() >= step) {
             mana.set((float) (mana.current() - step));
             a.drained += step;

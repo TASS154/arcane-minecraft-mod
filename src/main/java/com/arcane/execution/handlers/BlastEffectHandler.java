@@ -38,7 +38,7 @@ public class BlastEffectHandler implements EffectHandler {
 
   @Override
   public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-    float cap = Math.min(36f, MAX_RADIUS * (float) Math.max(1.0, context.areaFactor()));
+    float cap = Math.min((float) ExecutionContext.cap(36.0), MAX_RADIUS * (float) Math.max(1.0, context.areaFactor()));
     float radius = (float) Math.max(1.0, Math.min(cap, call.parameters().getOrDefault("radius", 3.0) * context.areaFactor()));
     Level.ExplosionInteraction interaction = Targeting.mayBreakBlocks(context) ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE;
     int count = 0;

@@ -54,6 +54,7 @@ public final class ClientCasting {
     Minecraft mc = Minecraft.getInstance();
     if (mc.player == null || mc.getConnection() == null) return;
     int next = Math.floorMod(ClientArcaneData.activeLoadout() + direction, com.arcane.grimoire.SpellPrefs.LOADOUTS);
+    ClientArcaneData.setActiveLoadoutLocal(next);
     ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.LOADOUT_SWITCH, new UUID(0, 0), next, ""));
     mc.player.displayClientMessage(Component.translatable("hud.arcane.loadout", next + 1).withStyle(ChatFormatting.LIGHT_PURPLE), true);
   }

@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class RadialScreen extends Screen {
   private static final int RADIUS = 72;
-  private final List<SpellEntry> spells = ClientCasting.pickable();
+  private List<SpellEntry> spells = ClientCasting.pickable();
   private int hovered = -1;
 
   public RadialScreen() {
@@ -56,6 +56,16 @@ public class RadialScreen extends Screen {
       long window = Minecraft.getInstance().getWindow().getWindow();
       if (!InputConstants.isKeyDown(window, key.getValue())) choose();
     }
+  }
+
+  /** A roda do mouse com a roda aberta troca o conjunto de magias (e a roda se redesenha com o novo conjunto). */
+  @Override
+  public boolean mouseScrolled(double mx, double my, double delta) {
+    if (delta == 0) return false;
+    ClientCasting.switchLoadout(delta > 0 ? -1 : 1);
+    spells = ClientCasting.pickable();
+    hovered = -1;
+    return true;
   }
 
   @Override

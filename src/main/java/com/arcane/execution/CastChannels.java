@@ -40,10 +40,58 @@ public final class CastChannels {
     long next;
     double drained;
     double cost = 1;
+    /** Blocos de barreira da magia mantida: renovados enquanto segura e desfeitos ao soltar. */
+    final java.util.Set<net.minecraft.core.BlockPos> shell = new java.util.HashSet<>();
     Active(UUID spell, CastMode mode, long start, ServerPlayer owner) { this.owner = owner; this.spell = spell; this.mode = mode; this.start = start; this.next = start + HOLD_INTERVAL_TICKS; }
   }
 
+  /** Magias ALTERNAR ligadas: vivem a parte do canal (carregar/segurar), entao conjurar outra magia nao as desliga. */
+  private static final class Toggle {
+    final UUID spell;
+    final ServerPlayer owner;
+    final long start;
+    Toggle(UUID spell, ServerPlayer owner, long start) { this.spell = spell; this.owner = owner; this.start = start; }
+  }
+
   private static final Map<UUID, Active> ACTIVE = new ConcurrentHashMap<>();
+  /** A magia mantida que esta sendo conjurada agora (so durante a chamada de cast): ela le daqui o modo "manter". */
+  private static final ThreadLocal<Active> HOLDING_NOW = new ThreadLocal<>();
+
+  /**
+   * SEGURAR de verdade: enquanto a tecla esta apertada a magia nao "repete", ela se MANTEM. Efeitos com duracao so duram
+   * ate o proximo pulso (acabam logo ao soltar) e a casca de uma Barreira e renovada e desfeita ao soltar.
+   * Retorna os ticks de duracao maxima dos efeitos mantidos (0 = nao e uma magia mantida).
+   */
+  public static int holdTicks() { return HOLDING_NOW.get() == null ? 0 : HOLD_INTERVAL_TICKS + 6; }
+
+  /** A barreira da magia mantida registra aqui cada bloco da casca. */
+  public static void holdShell(net.minecraft.core.BlockPos pos) {
+    Active a = HOLDING_NOW.get();
+    if (a != null) a.shell.add(pos.immutable());
+  }
+
+  private static ExecutionResult castHeld(ServerPlayer player, Inscription inscription, Active a, boolean silent) {
+    HOLDING_NOW.set(a);
+    try {
+      return CastingService.cast(player, inscription, PrecisionSnapshot.of(inscription), 1.0, silent, silent);
+    } finally {
+      HOLDING_NOW.remove();
+    }
+  }
+
+  /** Desfaz a casca de barreira da magia mantida (com faiscas). */
+  private static void releaseShell(ServerPlayer player, Active a) {
+    if (a.shell.isEmpty() || !(player.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+    var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get();
+    for (var pos : a.shell) {
+      if (level.getBlockState(pos).is(barrier)) {
+        level.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.02);
+        level.removeBlock(pos, false);
+      }
+    }
+    a.shell.clear();
+  }
+  private static final Map<UUID, Toggle> TOGGLES = new ConcurrentHashMap<>();
 
   private CastChannels() {}
 
@@ -51,7 +99,17 @@ public final class CastChannels {
     return inscription.glyphs().stream().anyMatch(g -> TOGGLE_GLYPHS.contains(g.glyphId().getPath()));
   }
 
-  public static boolean isActive(UUID player) { return ACTIVE.containsKey(player); }
+  public static boolean isActive(UUID player) { return ACTIVE.containsKey(player) || TOGGLES.containsKey(player); }
+
+  /** O jogador tem alguma magia ALTERNAR ligada? */
+  public static boolean hasToggle(UUID player) { return TOGGLES.containsKey(player); }
+
+  /** Desliga a magia ALTERNAR do jogador (voo e telecinese terminam). */
+  public static void stopToggle(ServerPlayer player) {
+    if (TOGGLES.remove(player.getUUID()) == null) return;
+    player.removeEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
+    Telekinesis.release(player.getUUID());
+  }
 
   private static boolean flies(Inscription inscription) {
     return inscription.glyphs().stream().anyMatch(g -> g.glyphId().getPath().equals("float"));
@@ -115,15 +173,14 @@ public final class CastChannels {
     CastMode mode = grimoire.prefs().mode(spellId);
     if (mode == CastMode.TOGGLE && !toggleable(inscription)) mode = CastMode.TAP;
     long now = player.level().getGameTime();
-    Active current = ACTIVE.get(player.getUUID());
-    if (current != null) {
-      if (current.mode == CastMode.TOGGLE && current.spell.equals(spellId)) {
-        stop(player, true);
-        return;
-      }
-      if (current.mode == CastMode.CHARGE || current.mode == CastMode.HOLD) return; // ja canalizando
-      stop(player, false); // alternar de outra magia: troca
+    // Apertar de novo a magia ALTERNAR que ja esta ligada a desliga (so isso, ou a mana acabar, a desliga).
+    Toggle on = TOGGLES.get(player.getUUID());
+    if (mode == CastMode.TOGGLE && on != null && on.spell.equals(spellId)) {
+      stopToggle(player);
+      return;
     }
+    Active current = ACTIVE.get(player.getUUID());
+    if (current != null) return; // ja canalizando (carregar ou segurar)
     PrecisionSnapshot precision = PrecisionSnapshot.of(inscription);
     switch (mode) {
       case TAP -> {
@@ -143,17 +200,18 @@ public final class CastChannels {
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), com.arcane.registry.ModSounds.CHARGE_START.get(), net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 1.0f);
       }
       case HOLD -> {
-        var r = CastingService.tryCast(player, inscription, precision);
-        if (!r.success()) { fail(player, r.message()); return; }
         Active holding = new Active(spellId, mode, now, player);
         holding.cost = Math.max(1, CastingService.manaCostOf(inscription, precision));
+        var r = castHeld(player, inscription, holding, false);
+        if (!r.success()) { fail(player, r.message()); return; }
         ACTIVE.put(player.getUUID(), holding);
         sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.HOLDING, 1.0);
       }
       case TOGGLE -> {
         var r = CastingService.tryCast(player, inscription, precision);
         if (!r.success()) { fail(player, r.message()); return; }
-        ACTIVE.put(player.getUUID(), new Active(spellId, mode, now, player));
+        if (on != null) stopToggle(player); // outra magia ALTERNAR: so uma por vez (voo e telecinese brigam pelo mesmo corpo)
+        TOGGLES.put(player.getUUID(), new Toggle(spellId, player, now));
       }
     }
   }
@@ -192,16 +250,37 @@ public final class CastChannels {
   public static void stop(ServerPlayer player, boolean endEffects) {
     Active a = ACTIVE.remove(player.getUUID());
     if (a == null) return;
+    releaseShell(player, a);
     com.arcane.network.ModNetwork.sendChannel(player, com.arcane.network.packet.S2CChannelPacket.OFF, 0f, 0, 0);
-    if (endEffects && (a.mode == CastMode.TOGGLE || a.mode == CastMode.HOLD)) {
+    if (endEffects && a.mode == CastMode.HOLD) {
       player.removeEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
       Telekinesis.release(player.getUUID());
     }
   }
 
-  public static void clear() { ACTIVE.clear(); }
+  public static void clear() { ACTIVE.clear(); TOGGLES.clear(); }
+
+  /** Mantem as magias ALTERNAR ligadas; elas acabam quando o efeito acaba (mana zerada derruba o voo, ver FlightService). */
+  private static void tickToggles(MinecraftServer server) {
+    for (Iterator<Map.Entry<UUID, Toggle>> it = TOGGLES.entrySet().iterator(); it.hasNext(); ) {
+      var entry = it.next();
+      Toggle t = entry.getValue();
+      ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+      if (player == null) player = t.owner;
+      if (player == null || !player.isAlive() || player.hasDisconnected()) { it.remove(); continue; }
+      var grimoire = GrimoireAttachments.get(player).orElse(null);
+      Inscription inscription = grimoire == null ? null : grimoire.getInscription(t.spell).orElse(null);
+      if (inscription == null) { it.remove(); continue; }
+      long now = player.level().getGameTime();
+      if (flies(inscription)) sustainFlight(player);
+      boolean floating = player.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
+      boolean holding = Telekinesis.heldCount(player.getUUID()) > 0;
+      if (now - t.start > 5 && !floating && !holding) it.remove(); // acabou sozinho (sem mana, solto, etc.)
+    }
+  }
 
   public static void tick(MinecraftServer server) {
+    tickToggles(server);
     if (ACTIVE.isEmpty()) return;
     for (Iterator<Map.Entry<UUID, Active>> it = ACTIVE.entrySet().iterator(); it.hasNext(); ) {
       var entry = it.next();
@@ -241,18 +320,11 @@ public final class CastChannels {
             mana.set((float) (mana.current() - step));
             if (now >= a.next) {
               a.next = now + HOLD_INTERVAL_TICKS;
-              var r = CastingService.cast(player, inscription, PrecisionSnapshot.of(inscription), 1.0, true, true);
+              var r = castHeld(player, inscription, a, true);
               if (!r.success()) { fail(player, r.message()); stop(player, false); continue; }
             }
             if ((now - a.start) % FX_INTERVAL_TICKS == 0) sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.HOLDING, 1.0);
           }
-        }
-        case TOGGLE -> {
-          // some sozinho quando o efeito acaba (Flutuar) para o proximo toque lancar de novo
-          if (flies(inscription)) sustainFlight(player);
-          boolean floating = player.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
-          boolean holding = Telekinesis.heldCount(player.getUUID()) > 0;
-          if (now - a.start > 5 && !floating && !holding) it.remove();
         }
         default -> it.remove();
       }

@@ -164,30 +164,59 @@ public final class ClientArcaneData {
     totalGlyphs = 0;
   }
 
-  /** Custo de mana de uma composicao, igual ao calculo do servidor (efeitos escalam com o parametro principal). */
+  /**
+   * Custo de mana de uma composicao, igual ao calculo do servidor: (formas e modificadores + efeitos x pulsos da zona ou
+   * do Dominio) x sobretaxa por glifo x area. A area aqui e estimada pelo raio do glifo de forma e pelos glifos Area.
+   */
   public static double costOf(List<GlyphEntry> entries) {
-    double total = 0;
+    double other = 0, effects = 0;
+    double areaRatio = 1.0;
+    boolean regionForm = false;
     for (GlyphEntry e : entries) {
       Optional<KnownGlyph> known = glyph(e.id());
       if (known.isEmpty()) continue;
       KnownGlyph k = known.get();
       double cost = k.cost();
-      if (k.scales() && k.primary().isPresent()) {
+      if (k.scales() && k.primary().isPresent() && k.category().equals("effect")) {
         ParamDef p = k.primary().get();
         Double value = e.params().get(p.key());
         if (value != null && p.def() > 0) {
           cost *= com.arcane.inscription.SpellLimits.parameterFactor(p.clamp(value) / p.def());
         }
       }
-      total += cost;
+      if (k.category().equals("form")) {
+        ParamDef size = k.params().stream().filter(x -> x.key().equals("size")).findFirst().orElse(null);
+        if (size != null) { // invocacoes: quantidade x tamanho x duracao
+          double count = ratio(k, e, "count"), duration = ratio(k, e, "duration");
+          cost *= com.arcane.inscription.SpellLimits.summonFactor(count, size.clamp(e.params().getOrDefault("size", size.def())), duration);
+        }
+        String path = e.id().getPath();
+        if (path.equals("aura") || path.equals("barrier") || path.equals("pillar")) { regionForm = true; areaRatio *= ratio(k, e, "radius"); }
+        else if (path.equals("wave")) { regionForm = true; areaRatio *= ratio(k, e, "range"); }
+      }
+      if (k.category().equals("effect")) effects += cost; else other += cost;
     }
-    double zone = 1.0;
+    double seconds = 0, interval = 1.0;
     for (GlyphEntry e : entries) {
-      if (e.id().getPath().equals("zone")) {
-        zone = com.arcane.inscription.SpellLimits.zoneMultiplier(e.params().getOrDefault("seconds", 10.0), e.params().getOrDefault("interval", 1.0));
+      String path = e.id().getPath();
+      if (path.equals("area")) areaRatio *= 2.0;
+      if (path.equals("more_range")) areaRatio *= 1.0; // alcance nao conta como area (so a Onda, abaixo)
+      if (path.equals("zone") || path.equals("domain")) {
+        seconds = e.params().getOrDefault("seconds", 10.0);
+        interval = e.params().getOrDefault("interval", 1.0);
       }
     }
-    return Math.ceil(total * costMultiplier(entries.size()) * zone);
+    double zone = com.arcane.inscription.SpellLimits.zoneMultiplier(seconds, interval);
+    double area = regionForm ? com.arcane.inscription.SpellLimits.areaCostFactor(areaRatio) : 1.0;
+    return Math.ceil((other + effects * zone) * costMultiplier(entries.size()) * area);
+  }
+
+  /** Valor escolhido de um parametro dividido pelo padrao do glifo (1 se o glifo nao tem o parametro). */
+  private static double ratio(KnownGlyph k, GlyphEntry e, String key) {
+    for (ParamDef p : k.params()) {
+      if (p.key().equals(key) && p.def() > 0) return p.clamp(e.params().getOrDefault(key, p.def())) / p.def();
+    }
+    return 1.0;
   }
 
   public static int pages() { return pages; }
@@ -207,6 +236,8 @@ public final class ClientArcaneData {
   public static double poison() { return poison; }
   public static List<List<UUID>> loadouts() { return loadouts; }
   public static int activeLoadout() { return activeLoadout; }
+  /** Previsao local da troca de conjunto (o servidor confirma na proxima sincronizacao). */
+  public static void setActiveLoadoutLocal(int index) { activeLoadout = index; }
 
   /** Magias do conjunto ativo que ainda existem, na ordem dos slots. */
   public static List<SpellEntry> activeLoadoutSpells() {

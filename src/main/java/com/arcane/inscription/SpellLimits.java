@@ -51,12 +51,23 @@ public final class SpellLimits {
   }
 
   /**
-   * Custo de uma forma persistente: cada pulso da Zona reaplica os efeitos, entao o custo cresce com o numero de
-   * pulsos (segundos / intervalo): x(1 + 0,15 por pulso alem do primeiro), limitado a x6. Sem zona, x1.
+   * Custo de uma forma persistente (Zona, Dominio): cada pulso reaplica os efeitos, entao o custo dos EFEITOS cresce com o
+   * numero de pulsos (segundos / intervalo): x(1 + 0,5 por pulso alem do primeiro), limitado a x60. Quanto dano a magia
+   * entrega ao longo do tempo entra no preco. Sem zona, x1.
    */
   public static double zoneMultiplier(double seconds, double intervalSeconds) {
     if (seconds <= 0.0) return 1.0;
     double pulses = seconds / Math.max(0.5, intervalSeconds);
-    return Math.min(6.0, 1.0 + 0.15 * Math.max(0.0, pulses - 1.0));
+    return Math.min(60.0, 1.0 + 0.5 * Math.max(0.0, pulses - 1.0));
+  }
+
+  /** Custo da AREA: o dobro do raio padrao custa x2,4; so sobe (reduzir a area nao barateia). Limitado a x12. */
+  public static double areaCostFactor(double ratio) {
+    return ratio <= 1.0 ? 1.0 : Math.min(12.0, Math.pow(ratio, 1.25));
+  }
+
+  /** Custo de uma invocacao: quantidade x tamanho^1,5 x duracao^0,7 (cada um relativo ao padrao do glifo). */
+  public static double summonFactor(double countRatio, double size, double durationRatio) {
+    return Math.max(0.25, countRatio) * Math.pow(Math.max(1.0, size), 1.5) * Math.pow(Math.max(0.5, Math.min(6.0, durationRatio)), 0.7);
   }
 }

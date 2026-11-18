@@ -62,6 +62,14 @@ public record GlyphDefinition(
         return out;
     }
 
+    /** Formas de invocacao (com tamanho): o custo cresce com quantidade, tamanho e duracao escolhidos. 1 nas demais formas. */
+    public double formFactor(java.util.Map<String, Double> given) {
+        if (category != GlyphCategory.FORM || !parameters.containsKey("size")) return 1.0;
+        double countRatio = parameters.containsKey("count") ? resolveParam("count", given) / Math.max(1.0, parameters.get("count").defaultValue()) : 1.0;
+        double durationRatio = parameters.containsKey("duration") ? resolveParam("duration", given) / Math.max(1.0, parameters.get("duration").defaultValue()) : 1.0;
+        return com.arcane.inscription.SpellLimits.summonFactor(countRatio, resolveParam("size", given), durationRatio);
+    }
+
     /** Custo de mana desta instancia. Efeitos escalam linearmente com o parametro principal. */
     public double manaCost(java.util.Map<String, Double> given) {
         double base = cost.mana();

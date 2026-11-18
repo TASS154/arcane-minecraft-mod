@@ -8,12 +8,6 @@
     "position": "start"
   },
   "parameters": {
-    "count": {
-      "type": "int",
-      "default": 1.0,
-      "min": 1.0,
-      "max": 3.0
-    },
     "size": {
       "type": "int",
       "default": 1.0,

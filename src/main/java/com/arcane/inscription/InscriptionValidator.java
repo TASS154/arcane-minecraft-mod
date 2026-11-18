@@ -30,6 +30,14 @@ public final class InscriptionValidator {
     }
 
     public static ValidationResult validate(Inscription inscription, Optional<GrimoireState> grimoire) {
+        return validate(inscription, grimoire, false);
+    }
+
+    /**
+     * Com {@code ritual}, a magia nao precisa de forma: o altar e a forma (o circulo desenhado e a area). Todo o resto da
+     * gramatica vale igual.
+     */
+    public static ValidationResult validate(Inscription inscription, Optional<GrimoireState> grimoire, boolean ritual) {
         if (inscription.glyphs().isEmpty()) {
             return ValidationResult.fail("message.arcane.inscription.empty");
         }
@@ -68,7 +76,7 @@ public final class InscriptionValidator {
                     return ValidationResult.fail("message.arcane.inscription.form_not_first");
                 }
                 hasForm = true;
-            } else if (!hasForm && def.category() != GlyphCategory.CONDITION && def.category() != GlyphCategory.ACTIVATOR) {
+            } else if (!ritual && !hasForm && def.category() != GlyphCategory.CONDITION && def.category() != GlyphCategory.ACTIVATOR) {
                 return ValidationResult.fail("message.arcane.inscription.missing_form");
             }
 
@@ -89,7 +97,7 @@ public final class InscriptionValidator {
             previousCategory = def.category();
         }
 
-        if (!hasForm && inscription.glyphs().stream().noneMatch(g ->
+        if (!ritual && !hasForm && inscription.glyphs().stream().noneMatch(g ->
                 GlyphRegistry.get(g.glyphId()).map(d -> d.category() == GlyphCategory.ACTIVATOR).orElse(false))) {
             return ValidationResult.fail("message.arcane.inscription.missing_form");
         }

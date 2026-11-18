@@ -1,5 +1,6 @@
 package com.arcane.inscription;
 
+import com.arcane.glyph.GlyphCategory;
 import com.arcane.glyph.GlyphDefinition;
 import com.arcane.glyph.GlyphRegistry;
 import com.arcane.glyph.ModifierScope;
@@ -56,16 +57,20 @@ public final class InscriptionCompiler {
         List<Integer> groupStarts = new ArrayList<>();
         int[] lastGroup = null; // [inicio, fim) em allEffects, valido ate o proximo efeito/forma/condicao
         ModifierApplicator.DeliverySpecCompiled delivery = null;
-        double mana = 0;
+        double mana = 0;       // tudo que nao e efeito (formas, modificadores...): pago uma vez
+        double effectMana = 0; // efeitos: repetem a cada pulso de uma zona
+        GlyphDefinition formDef = null;
 
         for (GlyphInstance instance : inscription.glyphs()) {
             GlyphDefinition def = GlyphRegistry.getOrThrow(instance.glyphId());
-            mana += def.manaCost(instance.parameters());
+            double glyphCost = def.manaCost(instance.parameters()) * def.formFactor(instance.parameters());
+            if (def.category() == GlyphCategory.EFFECT) effectMana += glyphCost; else mana += glyphCost;
 
             switch (def.category()) {
                 case FORM -> {
                     lastGroup = null;
                     Map<String, Double> params = def.resolveParams(instance.parameters());
+                    formDef = def;
                     delivery = new ModifierApplicator.DeliverySpecCompiled(instance.glyphId(), def.behavior().handler(),
                             params, params.getOrDefault("range", 16.0));
                 }
@@ -110,7 +115,7 @@ public final class InscriptionCompiler {
                                 for (int i = 1; i < times; i++) {
                                     last.segment().effects.add(last.get());
                                     allEffects.add(new Slot(last.segment(), last.segment().effects.size() - 1));
-                                    if (effectDef != null) mana += effectDef.manaCost(last.get().parameters());
+                                    if (effectDef != null) effectMana += effectDef.manaCost(last.get().parameters());
                                 }
                             }
                         }
@@ -152,9 +157,22 @@ public final class InscriptionCompiler {
         }
         CompiledExecutionPlan.DeliverySpec spec = new CompiledExecutionPlan.DeliverySpec(
                 delivery.formId(), delivery.handler(), delivery.parameters(), delivery.range());
-        mana *= SpellLimits.multiplier(inscription.glyphs().size());
-        mana *= SpellLimits.zoneMultiplier(delivery.parameters().getOrDefault("zone_seconds", 0.0), delivery.parameters().getOrDefault("zone_interval", 1.0));
+        // Preco = (formas e modificadores + efeitos x pulsos da zona) x sobretaxa por glifo x area. A zona e o Dominio cobram
+        // o dano entregue ao longo do tempo; a area cobra quanto do mundo a magia alcanca.
+        double zone = SpellLimits.zoneMultiplier(delivery.parameters().getOrDefault("zone_seconds", 0.0), delivery.parameters().getOrDefault("zone_interval", 1.0));
+        mana = (mana + effectMana * zone) * SpellLimits.multiplier(inscription.glyphs().size()) * areaCostOf(formDef, delivery);
         return new CompiledExecutionPlan(spec, List.copyOf(segments), (int) Math.ceil(mana), inscription.fingerprint());
+    }
+
+    private static final java.util.Set<String> REGION_FORMS = java.util.Set.of("aura", "wave", "pillar", "barrier");
+
+    /** Fator de custo da area: raio (ou alcance, na Onda) final da forma contra o padrao do glifo, depois de Area e afins. */
+    private static double areaCostOf(GlyphDefinition formDef, ModifierApplicator.DeliverySpecCompiled delivery) {
+        if (formDef == null || !REGION_FORMS.contains(delivery.handler().getPath())) return 1.0;
+        String key = formDef.parameters().containsKey("radius") ? "radius" : "range";
+        var param = formDef.parameters().get(key);
+        if (param == null || param.defaultValue() <= 0) return 1.0;
+        return SpellLimits.areaCostFactor(delivery.parameters().getOrDefault(key, param.defaultValue()) / param.defaultValue());
     }
 
     private static void flush(List<SegmentBuilder> built, SegmentBuilder segment,

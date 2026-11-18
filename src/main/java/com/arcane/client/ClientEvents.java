@@ -46,6 +46,21 @@ public class ClientEvents {
     }
   }
 
+  /**
+   * Roda do mouse regula a area da magia (area maior = menos dano). Vale com Ctrl apertado, ou sempre no modo Conjurador
+   * (la a hotbar e das teclas 1 a 9). Nao mexe na hotbar quando age.
+   */
+  @SubscribeEvent
+  public static void onScroll(InputEvent.MouseScrollingEvent event) {
+    var mc = net.minecraft.client.Minecraft.getInstance();
+    if (mc.player == null || mc.screen != null || event.getScrollDelta() == 0) return;
+    boolean ctrl = net.minecraft.client.gui.screens.Screen.hasControlDown();
+    if (!ctrl && ClientPrefs.mode() != ClientPrefs.UseMode.CASTER) return;
+    if (ClientArcaneData.active().isEmpty()) return;
+    event.setCanceled(true);
+    com.arcane.network.ModNetwork.CHANNEL.sendToServer(new com.arcane.network.packet.C2SAreaDialPacket(event.getScrollDelta() > 0 ? 1 : -1));
+  }
+
   /** Segurando o Compasso Arcano: holograma de faiscas do circulo ao redor do bloco mirado (o altar). */
   @SubscribeEvent
   public static void onClientTick(TickEvent.ClientTickEvent event) {

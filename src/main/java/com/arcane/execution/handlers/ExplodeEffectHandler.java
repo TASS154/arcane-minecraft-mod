@@ -24,6 +24,7 @@ public class ExplodeEffectHandler implements EffectHandler {
     int limit = cover ? com.arcane.execution.AreaCover.MAX_BLASTS : MAX_EXPLOSIONS;
     for (Vec3 pos : spots) {
       if (count++ >= limit) break;
+      if (count == 1) com.arcane.execution.AreaFeedback.explosion(context, pos, radius);
       context.level().sendParticles(com.arcane.registry.ModParticles.ARCANE_SHOCK.get(), pos.x, pos.y + 0.3, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
       final float r = radius;
       com.arcane.execution.SpellImmunity.explodeAs(context.caster(), () -> context.level().explode(context.caster(), pos.x, pos.y, pos.z, r, Level.ExplosionInteraction.NONE));

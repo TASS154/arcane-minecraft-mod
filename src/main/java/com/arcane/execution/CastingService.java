@@ -89,6 +89,8 @@ public final class CastingService {
                 ExecutionContext.TriggerEvent.cast()
         );
         context.setScaleFactor(scale);
+        context.setAreaDial(AreaDial.factorFor(player.getUUID(), plan));
+        context.setHoldTicks(CastChannels.holdTicks());
 
         // Coluna (Pilar): nao se manifesta no ar. Falha antes de cobrar mana.
         if (DeliverySpec.fromPlan(plan.delivery()).handler().getPath().equals("pillar")) {
@@ -120,15 +122,31 @@ public final class CastingService {
         public RitualBonus(int level, double power, double areaScale, boolean legendary) { this(level, power, areaScale, legendary, 0.0, null); }
     }
 
+    /**
+     * Ritual sem forma: o altar e a forma. Sem glifo de forma, a magia vira uma Aura no centro do circulo (que cobre o
+     * circulo inteiro). Com forma (ex.: Invocar Lobos), nada muda.
+     */
+    public static Inscription withRitualForm(Inscription inscription) {
+        boolean hasForm = inscription.glyphs().stream().anyMatch(g -> com.arcane.glyph.GlyphRegistry.get(g.glyphId())
+                .map(d -> d.category() == com.arcane.glyph.GlyphCategory.FORM).orElse(false));
+        if (hasForm) return inscription;
+        java.util.List<com.arcane.inscription.GlyphInstance> glyphs = new java.util.ArrayList<>();
+        glyphs.add(new com.arcane.inscription.GlyphInstance(com.arcane.glyph.ArcaneIds.of("aura"), java.util.Map.of()));
+        glyphs.addAll(inscription.glyphs());
+        return new Inscription(java.util.List.copyOf(glyphs), inscription.metadata());
+    }
+
     /** Mana de um ritual: o custo normal; no lendario, sem a sobretaxa exponencial por tamanho. */
     public static int ritualCost(Inscription inscription, boolean legendary) {
-        double cost = CompiledPlanCache.getOrCompile(inscription).baseManaCost();
-        if (legendary) cost /= com.arcane.inscription.SpellLimits.multiplier(inscription.glyphs().size());
+        Inscription withForm = withRitualForm(inscription);
+        double cost = CompiledPlanCache.getOrCompile(withForm).baseManaCost();
+        if (legendary) cost /= com.arcane.inscription.SpellLimits.multiplier(withForm.glyphs().size());
         return (int) Math.ceil(cost);
     }
 
     /** Conjura dentro de um ritual (os componentes e a mana ja foram cobrados por RitualService). */
     public static ExecutionResult castRitual(LivingEntity caster, Inscription inscription, ServerLevel level, RitualBonus bonus) {
+        inscription = withRitualForm(inscription);
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
         // O cristal vale onde o ritual acontece (o altar), nao onde o conjurador esta.
         net.minecraft.core.BlockPos where = bonus.center() != null ? net.minecraft.core.BlockPos.containing(bonus.center()) : caster.blockPosition();

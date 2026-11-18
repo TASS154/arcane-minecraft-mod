@@ -9,6 +9,10 @@ import com.arcane.network.packet.C2SOpenWritePacket;
 import com.arcane.network.packet.C2SDeleteInscriptionPacket;
 import com.arcane.network.packet.C2SSaveInscriptionPacket;
 import com.arcane.network.packet.C2SSelectInscriptionPacket;
+import com.arcane.network.packet.C2SAreaDialPacket;
+import com.arcane.network.packet.C2SRitualPacket;
+import com.arcane.network.packet.S2COpenRitualPacket;
+import com.arcane.network.packet.S2CRitualReportPacket;
 import com.arcane.network.packet.S2CBeamPacket;
 import com.arcane.network.packet.S2CGrimoireSyncPacket;
 import com.arcane.network.packet.S2CShapeFxPacket;
@@ -69,6 +73,18 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(C2SSelectInscriptionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SSelectInscriptionPacket::encode).decoder(C2SSelectInscriptionPacket::decode)
         .consumerMainThread(C2SSelectInscriptionPacket::handle).add();
+    CHANNEL.messageBuilder(C2SRitualPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(C2SRitualPacket::encode).decoder(C2SRitualPacket::decode)
+        .consumerMainThread(C2SRitualPacket::handle).add();
+    CHANNEL.messageBuilder(S2COpenRitualPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(S2COpenRitualPacket::encode).decoder(S2COpenRitualPacket::decode)
+        .consumerMainThread(S2COpenRitualPacket::handle).add();
+    CHANNEL.messageBuilder(S2CRitualReportPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(S2CRitualReportPacket::encode).decoder(S2CRitualReportPacket::decode)
+        .consumerMainThread(S2CRitualReportPacket::handle).add();
+    CHANNEL.messageBuilder(C2SAreaDialPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(C2SAreaDialPacket::encode).decoder(C2SAreaDialPacket::decode)
+        .consumerMainThread(C2SAreaDialPacket::handle).add();
     CHANNEL.messageBuilder(C2SDeleteInscriptionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SDeleteInscriptionPacket::encode).decoder(C2SDeleteInscriptionPacket::decode)
         .consumerMainThread(C2SDeleteInscriptionPacket::handle).add();

@@ -28,7 +28,12 @@ public class BarrierFormHandler implements FormHandler {
   /** Regiao da casca desta barreira (a mesma na conjuracao e nos pulsos do Dominio). */
   public static Region regionOf(ExecutionContext context, DeliverySpec spec) {
     double radius = context.coverRadius(spec.parameters().getOrDefault("radius", 3.0) * context.areaFactor());
-    return Region.of(context, spec, ShapeGeometry.WALL, radius);
+    Region r = Region.of(context, spec, ShapeGeometry.WALL, radius);
+    // A casca e limitada por ShapeGeometry (blocos maximos); o efeito do Dominio tem que usar o MESMO raio da casca,
+    // senao atinge criaturas alem do domo quando o Area passa do limite.
+    if (r.shape() == ShapeGeometry.WALL) return r;
+    double clamped = ShapeGeometry.clampRadius(r.shape(), r.radius());
+    return new Region(r.shape(), r.center(), clamped, r.shape() == ShapeGeometry.COLUMN ? r.height() : clamped, r.facing());
   }
 
   public static boolean isDomain(DeliverySpec spec) { return spec.parameters().getOrDefault("domain", 0.0) > 0.0; }
@@ -40,16 +45,22 @@ public class BarrierFormHandler implements FormHandler {
       return DeliveryResult.of(new TargetList(regionOf(context, spec).entities(context.level(), context.caster(), true), List.of()));
     }
     if (!Targeting.mayAlterWorld(context)) return DeliveryResult.of(TargetList.empty());
-    double radius = context.coverRadius(spec.parameters().getOrDefault("radius", 3.0) * context.areaFactor());
     int life = (int) Math.max(1, Math.min(ArcaneBarrierBlock.MAX_LIFE, Math.round(spec.parameters().getOrDefault("duration", 200.0) / 40.0)));
     BlockState barrier = ModBlocks.ARCANE_BARRIER.get().defaultBlockState().setValue(ArcaneBarrierBlock.LIFE, life);
-    Region region = Region.of(context, spec, ShapeGeometry.WALL, radius);
+    Region region = regionOf(context, spec);
     List<TargetList.BlockTarget> placed = new ArrayList<>();
+    boolean held = context.holdTicks() > 0; // modo Segurar: a casca e mantida (renovada) e some ao soltar
     for (BlockPos pos : region.shell()) {
       BlockState existing = context.level().getBlockState(pos);
       if (existing.isAir() || existing.canBeReplaced()) {
         context.level().setBlockAndUpdate(pos, barrier);
         placed.add(new TargetList.BlockTarget(pos, barrier));
+        if (held) com.arcane.execution.CastChannels.holdShell(pos);
+      } else if (held && existing.is(ModBlocks.ARCANE_BARRIER.get())) {
+        if (existing.getValue(ArcaneBarrierBlock.LIFE) < ArcaneBarrierBlock.MAX_LIFE) {
+          context.level().setBlock(pos, existing.setValue(ArcaneBarrierBlock.LIFE, ArcaneBarrierBlock.MAX_LIFE), 2);
+        }
+        com.arcane.execution.CastChannels.holdShell(pos);
       }
     }
     // Quem esta dentro ou encostado (margem de 1 bloco) tambem e alvo dos glifos seguintes.

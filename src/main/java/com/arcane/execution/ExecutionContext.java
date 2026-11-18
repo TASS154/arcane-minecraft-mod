@@ -66,6 +66,7 @@ public class ExecutionContext {
     public void setRitualSiteId(UUID id) { this.ritualSiteId = Optional.ofNullable(id); }
     public double geometryBonus() { return geometryBonus; }
     public void setGeometryBonus(double geometryBonus) { this.geometryBonus = geometryBonus; }
+    private double areaDial = 1.0;
     public double scaleFactor() { return scaleFactor; }
     /** 0 = conjuracao comum; 1..4 = nivel do ritual em que a magia esta sendo conjurada. */
     public int ritualLevel() { return ritualLevel; }
@@ -84,8 +85,13 @@ public class ExecutionContext {
      */
     public double areaFactor() {
         double crystal = Math.min(com.arcane.config.ArcaneConfig.CRYSTAL_AREA_CAP.get(), Math.max(1.0, environment.potencyMultiplier()));
-        return areaScale * crystal;
+        // Carregar tambem cresce a area (potencia x5 = area x5) e o regulador do conjurador troca area por dano.
+        return areaScale * crystal * Math.max(1.0, scaleFactor) * areaDial;
     }
+
+    /** Regulador de area (1 = normal): multiplica a area e divide o dano na mesma proporcao. */
+    public double areaDial() { return areaDial; }
+    public void setAreaDial(double areaDial) { this.areaDial = Math.max(0.1, areaDial); }
 
     /** Num ritual, magias de area cobrem pelo menos o circulo inteiro. */
     public double coverRadius(double radius) {
@@ -94,12 +100,22 @@ public class ExecutionContext {
 
     public void setScaleFactor(double scaleFactor) { this.scaleFactor = scaleFactor; }
 
+    /** Magia MANTIDA (modo Segurar): duracao maxima, em ticks, dos efeitos de cada pulso (0 = conjuracao comum). */
+    public int holdTicks() { return holdTicks; }
+    public void setHoldTicks(int holdTicks) { this.holdTicks = holdTicks; }
+    private int holdTicks;
+
     public double amplify(double value, java.util.List<String> magnitudeKeys, String key) {
+        if (holdTicks > 0 && key.equals("duration")) {
+            // mantida: o efeito dura so ate o proximo pulso, entao acaba logo depois de soltar
+            return Math.min(holdTicks, !magnitudeKeys.isEmpty() && !magnitudeKeys.contains(key) ? value
+                    : value * environment.potencyMultiplier() * precision.powerMultiplier() * geometryBonus * scaleFactor / areaDial);
+        }
         if (!magnitudeKeys.isEmpty() && !magnitudeKeys.contains(key)) {
             return value;
         }
         return value * environment.potencyMultiplier() * precision.powerMultiplier()
-                * geometryBonus * scaleFactor;
+                * geometryBonus * scaleFactor / areaDial;
     }
 
     public record TriggerEvent(String type, Optional<net.minecraft.world.entity.Entity> entity,

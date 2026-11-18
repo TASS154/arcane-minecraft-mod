@@ -2074,6 +2074,41 @@ public class ArcaneGameTests {
     });
   }
 
+  @GameTest(template = "ritual_arena", timeoutTicks = 60)
+  public static void runicGolemStrikeSplashesNearbyEnemies(GameTestHelper h) {
+    for (int x = 0; x < 15; x++) for (int z = 0; z < 15; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+    var golem = com.arcane.registry.ModEntities.ARCANE_GOLEM.get().create(h.getLevel());
+    var at = h.absoluteVec(new net.minecraft.world.phys.Vec3(3.5, 1, 3.5));
+    golem.moveTo(at.x, at.y, at.z, 0, 0);
+    h.getLevel().addFreshEntity(golem);
+    var a = h.spawnWithNoFreeWill(EntityType.SPIDER, new BlockPos(5, 1, 3));
+    var b = h.spawnWithNoFreeWill(EntityType.SPIDER, new BlockPos(6, 1, 4));
+    var far = h.spawnWithNoFreeWill(EntityType.SPIDER, new BlockPos(12, 1, 12));
+    float ha = a.getHealth(), hb = b.getHealth(), hf = far.getHealth();
+    golem.doHurtTarget(a);
+    h.assertTrue(a.getHealth() < ha, "o alvo leva o golpe");
+    h.assertTrue(b.getHealth() < hb, "o inimigo ao lado do alvo leva o impacto em area (vida " + b.getHealth() + ")");
+    h.assertTrue(far.getHealth() == hf, "quem esta longe nao e atingido");
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 60)
+  public static void spectralWolfPouncesBehindADistantTarget(GameTestHelper h) {
+    for (int x = 0; x < 15; x++) for (int z = 0; z < 15; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+    var wolf = com.arcane.registry.ModEntities.SPECTRAL_WOLF.get().create(h.getLevel());
+    var w = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+    wolf.moveTo(w.x, w.y, w.z, 0, 0);
+    h.getLevel().addFreshEntity(wolf);
+    var prey = h.spawnWithNoFreeWill(EntityType.SPIDER, new BlockPos(11, 1, 11));
+    wolf.setTarget(prey);
+    double before = wolf.distanceTo(prey);
+    h.assertTrue(before > 6.0, "comeca longe");
+    wolf.tickCount = 20;
+    wolf.aiStep();
+    h.assertTrue(wolf.distanceTo(prey) < 3.0, "o lobo salta para perto do alvo (distancia " + wolf.distanceTo(prey) + ")");
+    h.succeed();
+  }
+
   @GameTest(template = "ritual_arena", timeoutTicks = 100)
   public static void areaModifierEnlargesTheDome(GameTestHelper h) {
     for (int x = 0; x < 15; x++) for (int z = 0; z < 15; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);

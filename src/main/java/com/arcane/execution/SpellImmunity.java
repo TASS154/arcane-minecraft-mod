@@ -33,7 +33,16 @@ public final class SpellImmunity {
     explodeAs(caster, net.minecraft.world.level.Level.ExplosionInteraction.NONE, explosion);
   }
 
+  /** Raio da cratera redonda da explosao em andamento (0 = deixa a cratera do vanilla). */
+  private static final ThreadLocal<Float> EXPLOSION_RADIUS = new ThreadLocal<>();
+
   public static void explodeAs(LivingEntity caster, net.minecraft.world.level.Level.ExplosionInteraction interaction, Runnable explosion) {
+    explodeAs(caster, interaction, 0f, explosion);
+  }
+
+  /** Como acima, e a cratera (se a explosao destroi blocos) passa a ser uma esfera de raio {@code radius}. */
+  public static void explodeAs(LivingEntity caster, net.minecraft.world.level.Level.ExplosionInteraction interaction, float radius, Runnable explosion) {
+    EXPLOSION_RADIUS.set(radius);
     EXPLOSION_CASTER.set(caster);
     EXPLOSION_BREAKS.set(interaction != net.minecraft.world.level.Level.ExplosionInteraction.NONE);
     try {
@@ -41,6 +50,7 @@ public final class SpellImmunity {
     } finally {
       EXPLOSION_CASTER.remove();
       EXPLOSION_BREAKS.remove();
+      EXPLOSION_RADIUS.remove();
     }
   }
 
@@ -48,6 +58,14 @@ public final class SpellImmunity {
   public static void onDetonate(ExplosionEvent.Detonate event) {
     LivingEntity caster = EXPLOSION_CASTER.get();
     if (caster != null) event.getAffectedEntities().remove(caster);
+    Float round = EXPLOSION_RADIUS.get();
+    if (caster != null && Boolean.TRUE.equals(EXPLOSION_BREAKS.get()) && round != null && round >= 2.5f
+        && event.getLevel() instanceof net.minecraft.server.level.ServerLevel crater) {
+      // A cratera do vanilla sai de raios em grade e fica quadrada/espinhosa em raios grandes: troca por uma esfera.
+      var blocks = event.getAffectedBlocks();
+      blocks.clear();
+      blocks.addAll(RoundCrater.blocks(crater, event.getExplosion().getPosition(), round));
+    }
     // Explosoes de magia que destroem blocos: por padrao nao soltam item e entram no diario do Restaurar.
     // Com blastDropsLoot ligado seguem o caminho do vanilla (com loot) e ficam fora do diario.
     if (caster != null && Boolean.TRUE.equals(EXPLOSION_BREAKS.get()) && !com.arcane.restore.BlockJournal.dropsLoot()

@@ -53,7 +53,7 @@ public class BlastEffectHandler implements EffectHandler {
       if (count++ >= limit) break;
       if (count == 1) com.arcane.execution.AreaFeedback.explosion(context, pos, radius);
       context.level().sendParticles(com.arcane.registry.ModParticles.ARCANE_SHOCK.get(), pos.x, pos.y + 0.3, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
-      SpellImmunity.explodeAs(context.caster(), interaction, () -> context.level().explode(context.caster(), pos.x, pos.y, pos.z, radius, interaction));
+      SpellImmunity.explodeAs(context.caster(), interaction, radius, () -> context.level().explode(context.caster(), pos.x, pos.y, pos.z, radius, interaction));
       if (Chain.enabled(call)) {
         Chain.explosions(context, pos, radius, interaction, 0, new java.util.HashSet<>(java.util.List.of(context.caster().getUUID())), Chain.explosionBudget());
       }

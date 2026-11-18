@@ -47,7 +47,7 @@ public final class Chain {
       var server = level.getServer();
       server.tell(new TickTask(server.getTickCount() + 5, () -> {
         level.sendParticles(com.arcane.registry.ModParticles.ARCANE_SHOCK.get(), at.x, at.y + 0.3, at.z, 1, 0, 0, 0, 0);
-        SpellImmunity.explodeAs(ctx.caster(), interaction, () -> level.explode(ctx.caster(), at.x, at.y, at.z, next, interaction));
+        SpellImmunity.explodeAs(ctx.caster(), interaction, next, () -> level.explode(ctx.caster(), at.x, at.y, at.z, next, interaction));
         explosions(ctx, at, next, interaction, depth + 1, seen, budget);
       }));
     }

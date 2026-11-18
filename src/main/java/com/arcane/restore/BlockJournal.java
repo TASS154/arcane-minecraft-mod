@@ -29,6 +29,8 @@ public final class BlockJournal {
   public record Entry(BlockPos pos, BlockState before, BlockState after) {}
 
   private static final Map<ResourceKey<Level>, JournalLog<Entry>> LOGS = new HashMap<>();
+  /** Blocos ja escolhidos por um Restaurar, esperando a vez de voltar (alguns por tick, do mais novo para o mais antigo). */
+  private static final Map<ResourceKey<Level>, java.util.ArrayDeque<Entry>> PENDING = new HashMap<>();
 
   private BlockJournal() {}
 
@@ -63,7 +65,7 @@ public final class BlockJournal {
   /** Estado do diario da dimensao (para testes e depuracao). */
   public static int size(ServerLevel level) { return log(level).size(); }
 
-  public static void clear(ServerLevel level) { log(level).clear(); }
+  public static void clear(ServerLevel level) { log(level).clear(); PENDING.remove(level.dimension()); }
 
   /**
    * Recompõe, da mais nova para a mais antiga (assim pilhas de mudancas na mesma posicao se desfazem na ordem certa), ate
@@ -81,13 +83,54 @@ public final class BlockJournal {
       if (Vec3.atCenterOf(e.pos()).distanceToSqr(center) > r2) continue;
       if (!level.isLoaded(e.pos())) continue;
       if (level.getBlockState(e.pos()) != e.after()) continue; // alguem construiu ali: nao mexe
-      level.setBlock(e.pos(), e.before(), 3);
       used.add(s);
     }
     log.removeAll(used);
+    var queue = PENDING.computeIfAbsent(level.dimension(), k -> new java.util.ArrayDeque<>());
+    for (JournalLog.Stamped<Entry> s : used) queue.add(s.value());
     return used.size();
   }
 
+  /** Quantos blocos ainda esperam a vez de voltar nesta dimensao. */
+  public static int pending(ServerLevel level) {
+    var q = PENDING.get(level.dimension());
+    return q == null ? 0 : q.size();
+  }
+
+  /** Poe de volta, agora, tudo o que esta na fila (testes e desligamento). */
+  public static void flush(ServerLevel level) {
+    while (pending(level) > 0) place(level, Integer.MAX_VALUE);
+  }
+
+  private static void place(ServerLevel level, int budget) {
+    var q = PENDING.get(level.dimension());
+    if (q == null) return;
+    int placed = 0;
+    while (!q.isEmpty() && budget-- > 0) {
+      Entry e = q.poll();
+      if (!level.isLoaded(e.pos()) || level.getBlockState(e.pos()) != e.after()) continue; // mudou no meio do caminho: nao mexe
+      level.setBlock(e.pos(), e.before(), 3);
+      if (placed++ % 2 == 0) level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, e.pos().getX() + 0.5, e.pos().getY() + 0.6, e.pos().getZ() + 0.5, 2, 0.25, 0.25, 0.25, 0.01);
+    }
+    if (placed > 0 && level.getGameTime() % 3 == 0) {
+      var first = q.peek();
+      net.minecraft.core.BlockPos at = first != null ? first.pos() : null;
+      if (at != null) level.playSound(null, at, net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME, net.minecraft.sounds.SoundSource.BLOCKS, 0.5f, 1.2f);
+    }
+  }
+
   @SubscribeEvent
-  public static void stopped(ServerStoppedEvent event) { LOGS.clear(); }
+  public static void onServerTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
+    if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || PENDING.isEmpty()) return;
+    int budget = ArcaneConfig.RESTORE_BLOCKS_PER_TICK.get();
+    for (var it = PENDING.entrySet().iterator(); it.hasNext(); ) {
+      var en = it.next();
+      ServerLevel lvl = event.getServer().getLevel(en.getKey());
+      if (lvl == null || en.getValue().isEmpty()) { it.remove(); continue; }
+      place(lvl, budget);
+    }
+  }
+
+  @SubscribeEvent
+  public static void stopped(ServerStoppedEvent event) { LOGS.clear(); PENDING.clear(); }
 }

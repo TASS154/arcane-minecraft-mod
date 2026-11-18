@@ -1,5 +1,6 @@
 package com.arcane.client.screen;
 
+import com.arcane.client.ArcaneTheme;
 import com.arcane.client.ClientArcaneData;
 import com.arcane.client.ClientArcaneData.SpellEntry;
 import com.arcane.client.ClientCasting;
@@ -64,11 +65,34 @@ public class RadialScreen extends Screen {
     return true;
   }
 
+  /** Anel de pontos de luz em volta do centro. */
+  private static void ring(GuiGraphics g, int cx, int cy, int radius, int segments, int color) {
+    for (int k = 0; k < segments; k++) {
+      double a = Math.PI * 2 * k / segments;
+      int px = cx + (int) Math.round(Math.cos(a) * radius), py = cy + (int) Math.round(Math.sin(a) * radius);
+      g.fill(px, py, px + 1, py + 1, color);
+    }
+  }
+
   @Override
   public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
     updateHover(mouseX, mouseY);
     int cx = width / 2, cy = height / 2;
-    g.fill(cx - 3, cy - 3, cx + 3, cy + 3, 0xAAFFFFFF);
+    // fundo escurecido e um disco de vidro com aneis; o cursor aponta para a magia escolhida
+    g.fillGradient(0, 0, width, height, 0xB0070412, 0xB0120A28);
+    long time = Minecraft.getInstance().level != null ? Minecraft.getInstance().level.getGameTime() : 0;
+    ring(g, cx, cy, RADIUS + 34, 120, ArcaneTheme.alpha(ArcaneTheme.EDGE, 0.6f));
+    ring(g, cx, cy, RADIUS - 34, 72, ArcaneTheme.alpha(ArcaneTheme.EDGE_LIT, 0.5f));
+    ring(g, cx, cy, 22, 40, ArcaneTheme.alpha(ArcaneTheme.VIOLET, 0.8f));
+    for (int k = 0; k < 12; k++) {
+      double a = Math.PI * 2 * k / 12 + time * 0.01;
+      int px = cx + (int) Math.round(Math.cos(a) * (RADIUS + 34)), py = cy + (int) Math.round(Math.sin(a) * (RADIUS + 34));
+      g.fill(px - 1, py - 1, px + 2, py + 2, ArcaneTheme.alpha(ArcaneTheme.EDGE_LIT, 0.85f));
+    }
+    if (hovered >= 0 && hovered < spells.size()) {
+      int hx = cx + (int) Math.round(Math.cos(angleOf(hovered)) * (RADIUS - 24)), hy = cy + (int) Math.round(Math.sin(angleOf(hovered)) * (RADIUS - 24));
+      for (int k = 0; k <= 8; k++) g.fill(cx + (hx - cx) * k / 8, cy + (hy - cy) * k / 8, cx + (hx - cx) * k / 8 + 1, cy + (hy - cy) * k / 8 + 1, ArcaneTheme.alpha(ArcaneTheme.EDGE_LIT, 0.9f));
+    }
     Component centre = Component.translatable("gui.arcane.radial.set", ClientArcaneData.activeLoadout() + 1);
     for (int i = 0; i < spells.size(); i++) {
       SpellEntry s = spells.get(i);
@@ -77,21 +101,20 @@ public class RadialScreen extends Screen {
       boolean on = i == hovered;
       boolean active = ClientArcaneData.active().map(a -> a.equals(s.id())).orElse(false);
       int r = on ? 24 : 20;
-      g.fill(x - r, y - r, x + r, y + r, on ? 0xE0F0E0C0 : 0xB8E8DCC0);
-      g.renderOutline(x - r, y - r, r * 2, r * 2, active ? 0xFFC08000 : (on ? 0xFF6A3F8F : 0xFF7A6A50));
+      ArcaneTheme.panel(g, x - r, y - r, r * 2, r * 2, active ? ArcaneTheme.GOLD : on ? ArcaneTheme.EDGE_LIT : ArcaneTheme.EDGE, on || active ? 1f : 0f);
       SealRenderer.draw(g, s.glyphs().stream().map(ClientArcaneData.GlyphEntry::id).toList(), x, y - 3, r - 6);
       String name = font.plainSubstrByWidth(s.name().isEmpty() ? Component.translatable("gui.arcane.unnamed").getString() : s.name(), r * 2 - 2);
-      g.drawString(font, name, x - font.width(name) / 2, y + r - 10, 0x2A1A08, false);
-      if (s.favorite()) g.drawString(font, "★", x - r + 2, y - r + 2, 0xC08000, false);
-      g.drawString(font, String.valueOf(i + 1), x + r - 8, y - r + 2, 0x5A4630, false);
+      g.drawString(font, name, x - font.width(name) / 2, y + r - 10, on ? ArcaneTheme.TEXT : ArcaneTheme.TEXT_DIM, false);
+      if (s.favorite()) g.drawString(font, "\u2605", x - r + 2, y - r + 2, ArcaneTheme.GOLD, false);
+      g.drawString(font, String.valueOf(i + 1), x + r - 8, y - r + 2, ArcaneTheme.TEXT_DIM, false);
     }
     if (hovered >= 0 && hovered < spells.size()) {
       SpellEntry s = spells.get(hovered);
       Component title = s.name().isEmpty() ? Component.translatable("gui.arcane.unnamed") : Component.literal(s.name());
-      g.drawCenteredString(font, title, cx, cy - 8, 0xFFFFFF);
-      g.drawCenteredString(font, Component.translatable("gui.arcane.mode." + s.mode()).append(" · " + Math.max(0, s.cost())), cx, cy + 4, 0xD0B0FF);
+      g.drawCenteredString(font, title, cx, cy - 8, ArcaneTheme.TEXT);
+      g.drawCenteredString(font, Component.translatable("gui.arcane.mode." + s.mode()).append(" \u00b7 " + Math.max(0, s.cost())), cx, cy + 4, ArcaneTheme.VIOLET);
     } else {
-      g.drawCenteredString(font, spells.isEmpty() ? Component.translatable("gui.arcane.radial.empty") : centre, cx, cy - 4, 0xD0B0FF);
+      g.drawCenteredString(font, spells.isEmpty() ? Component.translatable("gui.arcane.radial.empty") : centre, cx, cy - 4, ArcaneTheme.VIOLET);
     }
   }
 }

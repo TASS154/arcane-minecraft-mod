@@ -1,5 +1,6 @@
 package com.arcane.client.hud;
 
+import com.arcane.client.ArcaneTheme;
 import com.arcane.client.ClientArcaneData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -34,12 +35,13 @@ public class ManaHudOverlay implements IGuiOverlay {
     float mana = Math.min(ClientArcaneData.mana(), max);
     boolean poisoned = ClientArcaneData.poison() > 0;
 
-    g.blit(TEXTURE, x - 12, y, 104, 0, 9, 9, 128, 32);
-    g.blit(TEXTURE, x, y, 0, 0, BAR_W, 10, 128, 32);
-    int fill = Math.round(100 * (mana / max));
-    if (fill > 0) {
-      g.blit(TEXTURE, x + 1, y + 1, 0, poisoned ? 20 : 10, fill, 8, 128, 32);
-    }
+    long time = mc.level != null ? mc.level.getGameTime() : 0;
+    float fraction = max <= 0 ? 0f : mana / max;
+    boolean low = fraction < 0.2f;
+    // vidro escuro atras da barra e do rotulo, e a barra em degrade azul para ciano (veneno: indigo palido)
+    ArcaneTheme.panel(g, x - 15, y - 3, BAR_W + 17, 16, low && (time / 6) % 2 == 0 ? ArcaneTheme.DANGER : ArcaneTheme.EDGE, 0f);
+    g.drawString(font, "\u2726", x - 11, y + 1, poisoned ? 0xFF8FA0FF : ArcaneTheme.EDGE_LIT, true);
+    ArcaneTheme.bar(g, x + 1, y + 1, 100, 8, fraction, poisoned ? 0xFF2E3C99 : 0xFF3F5BFF, poisoned ? 0xFF8FA0FF : 0xFF7FE8FF, time);
     String value = (int) mana + "/" + (int) max;
     g.drawString(font, value, x + BAR_W / 2 - font.width(value) / 2, y + 1, 0xFFFFFF, true);
 

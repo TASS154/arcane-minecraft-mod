@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 /** Efeito visual 3D de uma forma (aura, onda, pilar), impacto ou ritual. So visual; o dano e do servidor. */
 public record S2CShapeFxPacket(int type, Vec3 pos, Vec3 dir, float size, int rgb, int element, int ticks) {
-  public static final int AURA = 0, WAVE = 1, PILLAR = 2, IMPACT = 3, RITUAL = 4, HOLOGRAM = 5;
+  public static final int AURA = 0, WAVE = 1, PILLAR = 2, IMPACT = 3, RITUAL = 4, HOLOGRAM = 5, CAST = 6;
 
   public static void encode(S2CShapeFxPacket p, FriendlyByteBuf buf) {
     buf.writeVarInt(p.type);

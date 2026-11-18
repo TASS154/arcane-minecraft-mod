@@ -12,8 +12,8 @@ public final class Phase5Effects {
   private Phase5Effects() {}
 
   /**
-   * Restaurar: recompoe os blocos que magias destruiram ha pouco, no raio (padrao 6, ate 12) em volta do alvo ou de voce.
-   * Cobra mana por bloco que de fato voltou; sem mana para todos, volta so o que ela paga. Sem recarga.
+   * Restaurar: recompoe os blocos que magias destruiram ha pouco, no raio (padrao 10, ate 16) em volta do alvo ou de voce.
+   * Os blocos voltam aos poucos (RESTORE_BLOCKS_PER_TICK por tick), do mais novo para o mais antigo. Cobra mana por bloco escolhido; sem mana para todos, volta so o que ela paga. Sem recarga.
    */
   public static class Restore implements EffectHandler {
     @Override
@@ -29,7 +29,7 @@ public final class Phase5Effects {
         if (!targets.points().isEmpty()) center = targets.points().get(0);
         else if (!targets.blocks().isEmpty()) center = net.minecraft.world.phys.Vec3.atCenterOf(targets.blocks().get(0).pos());
       }
-      double radius = Math.max(2.0, Math.min(12.0, context.amplify(call.parameters().getOrDefault("radius", 6.0), call.magnitudeKeys(), "radius")));
+      double radius = Math.max(2.0, Math.min(16.0, context.amplify(call.parameters().getOrDefault("radius", 10.0), call.magnitudeKeys(), "radius")));
       int cap = com.arcane.config.ArcaneConfig.RESTORE_MAX_BLOCKS.get();
       double perBlock = com.arcane.config.ArcaneConfig.RESTORE_MANA_PER_BLOCK.get();
       com.arcane.execution.ManaState mana = caster instanceof net.minecraft.world.entity.player.Player pl ? com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(pl) : null;

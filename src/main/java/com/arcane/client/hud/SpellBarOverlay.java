@@ -1,5 +1,6 @@
 package com.arcane.client.hud;
 
+import com.arcane.client.ArcaneTheme;
 import com.arcane.client.ClientArcaneData;
 import com.arcane.client.ClientArcaneData.SpellEntry;
 import com.arcane.client.ClientCasting;
@@ -37,23 +38,23 @@ public class SpellBarOverlay implements IGuiOverlay {
         SpellEntry s = shown.get(i);
         int x = x0 + i * SLOT;
         boolean active = ClientArcaneData.active().map(a -> a.equals(s.id())).orElse(false);
-        g.fill(x, y, x + SLOT - 2, y + SLOT - 2, active ? 0xC0F0E0B0 : 0x90000000);
-        g.renderOutline(x, y, SLOT - 2, SLOT - 2, active ? 0xFFC08000 : 0xFF6A5A40);
+        ArcaneTheme.panel(g, x, y, SLOT - 2, SLOT - 2, active ? ArcaneTheme.EDGE_LIT : ArcaneTheme.EDGE, active ? 1f : 0f);
         SealRenderer.draw(g, s.glyphs().stream().map(ClientArcaneData.GlyphEntry::id).toList(), x + (SLOT - 2) / 2, y + (SLOT - 2) / 2, 8);
-        g.drawString(font, String.valueOf(i + 1), x + 2, y + 1, active ? 0x2A1A08 : 0xFFFFFF, false);
+        g.drawString(font, String.valueOf(i + 1), x + 2, y + 1, active ? ArcaneTheme.GOLD : ArcaneTheme.TEXT_DIM, false);
         // letra do modo: nao depende so de cor (acessibilidade)
-        g.drawString(font, new String[]{"T", "C", "H", "A"}[Math.floorMod(s.mode(), 4)], x + SLOT - 9, y + SLOT - 11, active ? 0x2A1A08 : 0xC8C8C8, false);
+        g.drawString(font, new String[]{"T", "C", "H", "A"}[Math.floorMod(s.mode(), 4)], x + SLOT - 9, y + SLOT - 11, active ? ArcaneTheme.EDGE_LIT : ArcaneTheme.TEXT_DIM, false);
       }
       Component label = numbered ? Component.translatable("hud.arcane.keys") : Component.translatable("hud.arcane.loadout", ClientArcaneData.activeLoadout() + 1);
-      g.drawCenteredString(font, label, width / 2, y - 10, 0xD0B0FF);
+      g.drawCenteredString(font, label, width / 2, y - 10, ArcaneTheme.VIOLET);
     }
     double charge = ClientCasting.chargeProgress();
     if (charge >= 0) {
-      int w = 80, x = width / 2 - w / 2, by = height - 62 - (shown.isEmpty() ? 0 : 0);
-      g.fill(x - 1, by - 1, x + w + 1, by + 5, 0xFF000000);
-      int c = charge >= 1.0 ? 0xFFFFD040 : 0xFF5AB0F0;
-      g.fill(x, by, x + (int) (w * charge), by + 4, c);
-      g.drawCenteredString(font, Component.translatable(charge >= 1.0 ? "hud.arcane.charged" : "hud.arcane.charging"), width / 2, by - 10, 0xFFFFFF);
+      int w = 96, x = width / 2 - w / 2, by = height - 66;
+      long time = mc.level != null ? mc.level.getGameTime() : 0;
+      boolean full = charge >= 0.999;
+      ArcaneTheme.panel(g, x - 6, by - 14, w + 12, 24, full ? ArcaneTheme.GOLD : ArcaneTheme.EDGE_LIT, (float) (0.3 + 0.7 * charge));
+      ArcaneTheme.bar(g, x, by, w, 5, (float) charge, full ? 0xFFFFB347 : 0xFF6A4BFF, full ? 0xFFFFE27A : 0xFF7FE8FF, time);
+      g.drawCenteredString(font, Component.translatable(full ? "hud.arcane.charged" : "hud.arcane.charging"), width / 2, by - 11, full ? ArcaneTheme.GOLD : ArcaneTheme.TEXT);
     }
   }
 }

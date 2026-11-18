@@ -141,7 +141,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Chamariz** | `arcane:decoy` | 2 | 2 | Vazio | `duration` 100 (20–300) | Efeito: uma ilusão no ponto mirado atrai criaturas num raio de 20 blocos e elas deixam de te escolher como alvo por até 15 s. |
 | **Maldição** | `arcane:curse` | 3 | 3 | Sangue | `duration` 300 (60–2400) | Efeito: por até 2 min o alvo leva 25% a mais de dano e não recupera vida. Dissipar em si mesmo tira. |
 | **Bolso Arcano** | `arcane:pocket` | 2 | 3 | Conhecimento | — | Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas. |
-| **Restaurar** | `arcane:restore` | 4 | 3 | Terra | `radius` 6 (2–12) | Efeito: recompõe, num raio de 2–12 blocos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta. |
+| **Restaurar** | `arcane:restore` | 4 | 3 | Terra | `radius` 10 (2–16) | Efeito: recompõe, num raio de 2–16 blocos (padrão 10), aos poucos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta. |
 
 ## Modificadores (30)
 

@@ -398,13 +398,15 @@ def workbench_gui():
 
 
 def grimoire_gui():
+    """Grimorio 'arcano luminoso': capa indigo com filete dourado, paginas escuras com runas tenues e lombada luminosa."""
     img = Image.new("RGBA", (256, 256), T)
     d = ImageDraw.Draw(img)
     rnd = random.Random(77)
-    # capa de couro com costura
+    # capa: indigo profundo com gradiente e granulado
     for y in range(200):
         for x in range(256):
-            img.putpixel((x, y), shade((58, 30, 74, 255), 1 + rnd.uniform(-0.08, 0.08)))
+            f = 1.08 - 0.28 * y / 200 + rnd.uniform(-0.05, 0.05)
+            img.putpixel((x, y), shade((34, 20, 62, 255), f))
     d.rectangle((0, 0, 255, 199), outline=K)
     d.rectangle((2, 2, 253, 197), outline=GD)
     for x in range(6, 250, 4):
@@ -415,32 +417,39 @@ def grimoire_gui():
         d.point((251, y), fill=GL)
     for cx, cy in ((3, 3), (252, 3), (3, 196), (252, 196)):
         d.rectangle((cx - 2, cy - 2, cx + 2, cy + 2), fill=G, outline=GD)
-    # paginas com envelhecimento
+    PAGE = (24, 18, 46, 255)
     for x0, x1 in ((12, 124), (132, 244)):
-        d.rectangle((x0, 24, x1, 172), fill=PARCH, outline=(120, 90, 50, 255))
+        d.rectangle((x0, 24, x1, 172), fill=PAGE, outline=(90, 60, 150, 255))
         for y in range(25, 172):
             for x in range(x0 + 1, x1):
                 edge = min(x - x0, x1 - x, y - 24, 172 - y)
-                f = 0.86 + 0.14 * min(1.0, edge / 9.0)
-                img.putpixel((x, y), shade(PARCH, f * (1 + rnd.uniform(-0.035, 0.03))))
-        for _ in range(4):  # manchas
-            sx, sy = rnd.randint(x0 + 10, x1 - 10), rnd.randint(32, 160)
-            for ddx in range(-3, 4):
-                for ddy in range(-2, 3):
-                    if ddx * ddx + ddy * ddy * 2 < 9:
-                        r, g, b, _ = img.getpixel((sx + ddx, sy + ddy))
-                        img.putpixel((sx + ddx, sy + ddy), shade((r, g, b, 255), 0.93))
+                f = 0.78 + 0.22 * min(1.0, edge / 12.0)
+                img.putpixel((x, y), shade(PAGE, f * (1 + rnd.uniform(-0.04, 0.04)) + (0.0 if edge > 1 else 0.0)))
+        # brilho ciano suave na borda interna (como tinta luminosa)
+        for i, glow in enumerate(((52, 132, 182, 255), (38, 92, 142, 255), (30, 62, 112, 255))):
+            d.rectangle((x0 + 1 + i, 25 + i, x1 - 1 - i, 171 - i), outline=glow)
+        # runas tenues espalhadas
+        for _ in range(26):
+            rx, ry = rnd.randint(x0 + 6, x1 - 8), rnd.randint(30, 166)
+            glow = (110, 90, 200, 255) if rnd.random() < 0.7 else (70, 190, 225, 255)
+            for k in range(rnd.randint(2, 4)):
+                if rnd.random() < 0.5:
+                    d.line([(rx, ry + k), (rx + rnd.randint(1, 3), ry + k)], fill=glow)
+                else:
+                    d.line([(rx + k, ry), (rx + k, ry + rnd.randint(1, 3))], fill=glow)
         for y in range(39, 172, 12):
-            d.line([(x0 + 3, y), (x1 - 3, y)], fill=(214, 196, 154, 255))
+            d.line([(x0 + 3, y), (x1 - 3, y)], fill=(44, 34, 84, 255))
     for i in range(8):
-        f = 0.9 - i * 0.012
+        f = 0.9 - i * 0.04
         for y in range(25, 172):
             for x in (124 - i, 132 + i):
                 r, g, b, _ = img.getpixel((x, y))
                 img.putpixel((x, y), shade((r, g, b, 255), f))
-    d.rectangle((125, 24, 131, 172), fill=(86, 52, 40, 255))
-    d.line([(128, 24), (128, 172)], fill=(52, 30, 24, 255))
-    # fita vermelha de marcador caindo do topo, pela lombada
+    d.rectangle((125, 24, 131, 172), fill=(22, 14, 40, 255))
+    d.line([(128, 24), (128, 172)], fill=(90, 220, 240, 255))  # lombada luminosa
+    d.line([(127, 24), (127, 172)], fill=(40, 120, 160, 255))
+    d.line([(129, 24), (129, 172)], fill=(40, 120, 160, 255))
+    # fita de marcador caindo do topo, pela lombada
     d.polygon([(126, 168), (130, 168), (130, 186), (128, 182), (126, 186)], fill=(176, 36, 54, 255))
     d.line([(126, 168), (126, 185)], fill=(120, 20, 36, 255))
     return img

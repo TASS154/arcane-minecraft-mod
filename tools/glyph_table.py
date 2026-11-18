@@ -751,10 +751,10 @@ _g("pocket", "effect", 2,
    ("Arcane Pocket", "Effect: opens your Arcane Pocket, a 13-item space only yours (like an Ender Chest) that stays with you when you die. It will not open during recent combat nor accept shulkers, the grimoire or pages."),
    ["..####..", ".#....#.", "..####..", ".######.", "##.##.##", "##.##.##", ".######.", "..####.."])
 _g("restore", "effect", 4,
-   ("Restaurar", "Efeito: recompõe, num raio de 2–12 blocos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta."),
-   ("Restore", "Effect: recomposes, within 2-12 blocks, the blocks spells destroyed in the last 2 minutes (explosions, Cut, Damage, ice and fire), where nobody has built since. It returns no items: explosions drop no loot (configurable). Charges a little mana per block that comes back."),
+   ("Restaurar", "Efeito: recompõe, num raio de 2–16 blocos (padrão 10), aos poucos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta."),
+   ("Restore", "Effect: recomposes, within 2-16 blocks (default 10), gradually, the blocks spells destroyed in the last 2 minutes (explosions, Cut, Damage, ice and fire), where nobody has built since. It returns no items: explosions drop no loot (configurable). Charges a little mana per block that comes back."),
    ["#.####.#", "#.#..#.#", "..#.##..", "###..###", "###..###", "..##.#..", "#.#..#.#", "#.####.#"],
-   params={"radius": (6.0, 2.0, 12.0, "float")}, magnitude=["radius"])
+   params={"radius": (10.0, 2.0, 16.0, "float")}, magnitude=["radius"])
 _g("chorus", "modifier", 2,
    ("Coro", "Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga."),
    ("Chorus", "Modifier: the spell only fires if 2-4 players cast it together, inside the circle that appears on the ground around whoever starts (radius 8, 3 s for the others). Everyone needs the same spell. Strength rises 35% per extra participant (max x2.4) and the mana is split among them. Without enough people nothing happens and nobody pays."),

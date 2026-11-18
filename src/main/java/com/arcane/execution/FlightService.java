@@ -21,6 +21,8 @@ public final class FlightService {
   public static final String SAFE_TAG = "arcane_flight_safe_until";
   /** A protecao de queda vale por no maximo 60 s depois do voo. */
   public static final long SAFE_TICKS = 1200L;
+  /** O voo rapido (sprint) gasta isto vezes mais mana por tick. */
+  public static final double SPRINT_COST_FACTOR = 2.5;
 
   private FlightService() {}
 
@@ -45,8 +47,8 @@ public final class FlightService {
   public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
     if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
     var effect = player.getEffect(ModEffects.FLOAT_FLIGHT.get());
-    if (effect == null || player.isCreative() || player.isSpectator()) return;
-    double cost = upkeep(effect.getAmplifier());
+    if (effect == null || player.isSpectator()) return;
+    double cost = upkeep(effect.getAmplifier()) * (player.isSprinting() ? SPRINT_COST_FACTOR : 1.0);
     if (cost <= 0) return;
     var mana = GrimoireAttachments.getManaOrCreate(player);
     if (mana.current() < cost) {

@@ -50,12 +50,38 @@ public final class PlayerAnimClient {
       super(root, slim);
     }
 
+    /**
+     * Pose de canalizacao (so do proprio jogador, que e quem recebe o estado): as maos se erguem para a forma da magia e
+     * tremem mais quanto mais carregada; ao segurar uma magia ficam firmes, com o corpo levemente inclinado para tras.
+     */
+    private void channelPose(AbstractClientPlayer p, float age) {
+      if (!com.arcane.client.render.ChannelFx.active() || p != Minecraft.getInstance().player) return;
+      float charge = (float) Math.max(0.0, com.arcane.client.render.ChannelFx.chargeProgress());
+      float shake = Mth.sin(age * 1.9f) * (0.01f + 0.05f * charge);
+      float arm = -1.45f - 0.35f * charge;
+      rightArm.xRot = arm + shake; leftArm.xRot = arm - shake;
+      rightArm.zRot = 0.18f + 0.18f * charge; leftArm.zRot = -0.18f - 0.18f * charge;
+      rightArm.yRot = -0.10f; leftArm.yRot = 0.10f;
+      body.xRot = -0.10f - 0.08f * charge;
+      head.xRot += -0.12f;
+      leftSleeve.copyFrom(leftArm); rightSleeve.copyFrom(rightArm);
+      jacket.copyFrom(body); hat.copyFrom(head);
+    }
+
     @Override
     public void setupAnim(AbstractClientPlayer p, float limbSwing, float limbSwingAmount, float ageInTicks,
                           float netHeadYaw, float headPitch) {
-      super.setupAnim(p, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+      boolean flying = p.hasEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
+      // Em voo nao ha passada: sem balanco de pernas e bracos (o corpo e o ponto de apoio, ver FloatFlightClient).
+      super.setupAnim(p, flying ? 0f : limbSwing, flying ? 0f : limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+      if (flying) {
+        float sway = Mth.sin(ageInTicks * 0.08f) * 0.04f;
+        leftLeg.xRot = 0.12f + sway; rightLeg.xRot = 0.05f - sway;
+        leftArm.xRot = 0.15f - sway; rightArm.xRot = 0.15f + sway;
+        leftArm.zRot = -0.12f; rightArm.zRot = 0.12f;
+      }
       Playing playing = PLAYING.get(p.getUUID());
-      if (playing == null) return;
+      if (playing == null) { channelPose(p, ageInTicks); return; }
       float t = p.tickCount + (ageInTicks - (int) ageInTicks) - playing.startAge();
       float w = PlayerClips.sample(playing.clip(), t, pose);
       if (w <= 0f) {

@@ -38,6 +38,9 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue RESTORE_WINDOW_SECONDS;
   public static final ForgeConfigSpec.IntValue RESTORE_MAX_BLOCKS;
   public static final ForgeConfigSpec.IntValue RESTORE_JOURNAL_CAP;
+  public static final ForgeConfigSpec.IntValue RESTORE_BLOCKS_PER_TICK;
+  public static final ForgeConfigSpec.DoubleValue CHARGE_MAX_SCALE;
+  public static final ForgeConfigSpec.DoubleValue HOLD_DRAIN_PER_SECOND;
   public static final ForgeConfigSpec.BooleanValue BLAST_DROPS_LOOT;
   public static final ForgeConfigSpec.DoubleValue RESTORE_MANA_PER_BLOCK;
   public static final ForgeConfigSpec.BooleanValue CHORUS_ENABLED;
@@ -90,7 +93,10 @@ public class ArcaneConfig {
         .defineList("pocketBlockedItems", java.util.List.of("minecraft:bundle"), o -> o instanceof String);
     RESTORE_ENABLED = builder.comment("Restore glyph: recompose blocks that spells destroyed recently").define("restoreEnabled", true);
     RESTORE_WINDOW_SECONDS = builder.comment("How long a destroyed block stays restorable (PROVISIONAL)").defineInRange("restoreWindowSeconds", 120, 5, 3600);
-    RESTORE_MAX_BLOCKS = builder.comment("Max blocks one Restore cast recomposes (PROVISIONAL)").defineInRange("restoreMaxBlocksPerCast", 256, 1, 4096);
+    RESTORE_MAX_BLOCKS = builder.comment("Max blocks one Restore cast recomposes (PROVISIONAL)").defineInRange("restoreMaxBlocksPerCast", 1024, 1, 8192);
+    RESTORE_BLOCKS_PER_TICK = builder.comment("Blocks Restore puts back per tick (they return gradually, newest first) (PROVISIONAL)").defineInRange("restoreBlocksPerTick", 6, 1, 64);
+    CHARGE_MAX_SCALE = builder.comment("Highest power multiplier a Charge cast can reach; there is no time limit, only mana (PROVISIONAL)").defineInRange("chargeMaxScale", 6.0, 1.5, 20.0);
+    HOLD_DRAIN_PER_SECOND = builder.comment("Hold mode: fraction of the spell mana cost drained per second while the key is held (PROVISIONAL)").defineInRange("holdDrainPerSecond", 0.6, 0.0, 10.0);
     RESTORE_JOURNAL_CAP = builder.comment("Max journal entries per dimension; the oldest are dropped first").defineInRange("restoreJournalCap", 4096, 64, 65536);
     RESTORE_MANA_PER_BLOCK = builder.comment("Extra mana per block actually recomposed by Restore, on top of the glyph cost (PROVISIONAL)").defineInRange("restoreManaPerBlock", 0.3, 0.0, 20.0);
     BLAST_DROPS_LOOT = builder.comment("If true, blocks destroyed by explosions and other destructive spells drop items (Dig always does). Those blocks are then NOT recorded for Restore, to avoid a loot exploit")

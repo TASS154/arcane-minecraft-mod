@@ -132,8 +132,8 @@ Quase tudo abaixo passou em teste automático (JUnit e GameTests), mas **quase n
 ### 2.2 Modos de conjuração (escolha o modo na página da magia)
 Magia de teste: `Mira` (Raio, Dano) num porco parado.
 - [ ] **Toque:** V uma vez = um disparo.
-- [ ] **Carregar:** segure V; aparece uma **barra de carga**; solte para disparar. Carregar mais dá **mais dano** que carregar pouco (compare a vida que o porco perde).
-- [ ] **Segurar:** segure V e a magia repete enquanto segura; **ao soltar, para na hora**.
+- [ ] **Carregar (novo):** segure V. Surgem **as runas da base da forma** da magia (Raio: círculos de runas na frente da mão; Pilar: círculo no chão onde você mira, com um fio de luz subindo; Aura/Eu: círculo no chão), que **crescem conforme a mana é gasta**, com partículas e a **barra de carga** no HUD. **Não há limite de tempo**: segure 10 s e a carga continua subindo até o teto (`chargeMaxScale`, 6) ou a mana acabar. Sem mana, a carga **para onde estava e espera**: não dispara sozinha. Soltar dispara uma vez, com a força da carga. Compare o dano com 1 s e com 5 s de carga. Seus braços devem se erguer e tremer mais quanto mais carregada.
+- [ ] **Segurar (novo):** V conjura **uma vez** (custo normal, com a animação e o círculo de conjuração), e **mantém**: as runas ficam fixas, pulsando, e o efeito continua agindo **sem refazer a animação, o som nem o clarão**. A mana drena aos poucos (`holdDrainPerSecond`, 0,6 x custo por segundo). **Ao soltar, para na hora.** Sem mana, para sozinho com aviso.
 - [ ] **Alternar:** V liga, V desliga (ótimo para voo, ver seção 3).
 - [ ] Em modo Segurar/Carregar, a mana não vaza depois de soltar.
 
@@ -163,6 +163,10 @@ Magia de teste: `Mira` (Raio, Dano) num porco parado.
   - [ ] **Planagem:** ponha `glide` em 1 (roda do mouse na linha de Flutuar): o corpo **inclina** ao planar e a descida é lenta. Anote se a inclinação parece natural.
   - [ ] **Fim da mana:** `/arcane mana set @s 5` com o voo ligado: o voo termina sozinho, você pousa e leva dano **só na segunda** queda.
   - [ ] **Duração além do tempo:** em modo segurar/alternar o voo se sustenta além dos 10 s do parâmetro enquanto você mantém.
+  - [ ] **Mana (corrigido):** o voo agora cobra mana **também no Criativo** (antes o servidor pulava a cobrança de quem está em Criativo, o que parecia "não puxar mana"). Teste no Sobrevivência para ver o efeito real: a barra desce continuamente.
+  - [ ] **Sem animação de andar:** voando, as pernas e os braços **não balançam** como numa caminhada; só um leve balanço de flutuação.
+  - [ ] **Orientação:** o corpo se alinha ao **para onde você olha** (olhar na horizontal = deitado como o Super-Homem; olhar para cima = em pé subindo; olhar para baixo = mergulho). Vista de 3ª pessoa (F5) ou com um segundo jogador.
+  - [ ] **Voo rápido (segure Sprint/Ctrl no voo):** ao começar surge uma **onda de choque** (anéis de luz que se abrem para os lados, clarão e estouro de som), o **FOV aumenta** suavemente, e fica um **rastro de luz ciano** atrás de você. A mana gasta **2,5x mais** por tick. Soltar o sprint desliga tudo e o FOV volta.
 - **Servidor dedicado (nunca testado):** suba um servidor (`gradlew runServer`) e entre com um segundo cliente. Confira que voar **não expulsa** você (sem "Flying is not enabled" ou "moved too quickly").
 - **Falha se:** você cai ao ligar o voo, o servidor expulsa, ou a mana não drena.
 
@@ -327,20 +331,20 @@ Monte `Eu, X, Inverter` para cada par e confirme o oposto:
 - [ ] **Config:** `pocketEnabled=false` bloqueia a abertura com mensagem; `pocketSlots` muda a capacidade (1 a 18).
 
 ### 6.2 Restaurar
-**Preparar:** um terreno plano de terra e pedra, 9×9. Magias: `Explosão Destrutiva` = `Eu, Explosão Destrutiva (radius 3)` e `Restaurar` = `Eu, Restaurar (radius 8)`.
+**Preparar:** um terreno plano de terra e pedra, 9×9. Magias: `Explosão Destrutiva` = `Eu, Explosão Destrutiva (radius 3)` e `Restaurar` = `Eu, Restaurar` (raio padrão **10**; vai de 2 a **16**).
 - [ ] **Explosão sem loot:** conjure a Explosão Destrutiva. **O buraco abre e nenhum item cai** (nem terra nem pedra).
-- [ ] **Restaurar:** conjure `Restaurar` perto: todo o buraco volta, igual ao que era (terra volta terra). A mana cai pelo custo do glifo (4) **mais ~0,3 por bloco** que voltou. Partículas brancas sobem.
+- [ ] **Restaurar (gradual):** conjure `Restaurar` perto: os blocos **voltam aos poucos, uns 6 por tick (cerca de 120 por segundo), do mais novo para o mais antigo**, com partículas e um som de cristal, **não todos de uma vez**. Quando termina, o buraco inteiro voltou, igual ao que era (terra volta terra). A mana cai pelo custo do glifo (4) **mais ~0,3 por bloco** que voltou. Partículas brancas sobem.
 - [ ] **Construção nova é preservada:** abra um buraco, construa blocos de madeira dentro dele e restaure: **a madeira fica** e só as posições vazias voltam.
 - [ ] **Escavar:** `Raio, Escavar` num bloco: o bloco **solta item** e o Restaurar **não o devolve**.
 - [ ] **Corte:** `Raio, Corte` em teia/folhas: quebra **sem drop** e o Restaurar devolve.
 - [ ] **Gelo e fogo:** `Raio, Congelar` em água vira gelo; Restaurar devolve a água. `Raio, Fogo` em gelo/neve derrete; Restaurar devolve.
 - [ ] **Baú:** coloque um baú com itens e exploda: **os itens caem**, e o Restaurar devolve o baú **vazio**.
-- [ ] **Raio:** blocos além do raio escolhido **não** voltam; raio máximo 12.
+- [ ] **Raio:** blocos além do raio escolhido **não** voltam; raio padrão 10, máximo 16. Teste `radius 16` numa cratera grande: ela cabe até **1024 blocos** por conjuração (`restoreMaxBlocksPerCast`).
 - [ ] **Tempo:** espere mais de 2 min (ou `restoreWindowSeconds` baixo) e tente: **nada** volta.
 - [ ] **Reinício:** exploda, feche e abra o mundo, restaure: **nada** volta (o diário é só em memória; esperado).
 - [ ] **Qualquer jogador:** outro jogador restaura o buraco que você abriu.
 - [ ] **Sem mana:** com `/arcane mana set @s 6` e muitos blocos no diário: volta **parte** e a mana termina perto de zero.
-- [ ] **Explosão grande:** `Explosão Destrutiva (radius 8)` em terreno denso, depois Restaurar (raio 12): anote se o servidor **engasga**.
+- [ ] **Explosão grande:** `Explosão Destrutiva (radius 8)` em terreno denso, depois Restaurar (raio 16): anote se o servidor **engasga**.
 - [ ] **Config `blastDropsLoot=true`:** a explosão **dropa** itens e o Restaurar **não** recompõe esses blocos.
 
 ### 6.3 Coro (precisa de **2 clientes**; use o mundo aberto para a rede local ou um segundo launcher)
@@ -368,6 +372,19 @@ Monte `Eu, X, Inverter` para cada par e confirme o oposto:
 - [ ] **Mago NPC:** o Mago NPC ainda conjura normalmente, e os glifos novos não quebram seu comportamento.
 - [ ] **Morte do jogador:** o grimório cai, o provisório aparece e o Bolso **permanece**.
 - [ ] **Servidor dedicado:** subir `gradlew runServer`, entrar com cliente, usar uma magia de cada fase.
+
+## 8. Reforma visual ("arcano luminoso"), nada disto foi visto em jogo ainda
+- [ ] **Grimório (G):** capa e páginas agora **escuras** (índigo) com runas tenues e lombada luminosa; todos os textos devem estar **legíveis** (claros sobre escuro). Procure texto escuro que sumiu no fundo escuro (isso é falha: anote onde), botões ou campos de busca com contraste ruim.
+- [ ] **HUD de mana:** painel de vidro escuro, barra em degradê azul para ciano com um brilho que corre; abaixo de 20% a moldura **pisca em vermelho**. Com Mana Poisoning a barra fica índigo pálido.
+- [ ] **Barra de magias:** casas em vidro escuro; a magia ativa tem **moldura ciano acesa**; a letra do modo (T, C, H, A) continua visível.
+- [ ] **Roda (R):** fundo escurecido, anéis de luz, casas em vidro, a escolhida com brilho e uma linha do centro até ela.
+- [ ] **Círculo de conjuração:** ao conjurar, um **círculo de runas** na cor do elemento se abre sob os pés de quem conjura (também visível para outros jogadores), com anéis de luz subindo.
+- [ ] **Feixe:** o Raio tem agora um **halo luminoso** em volta do núcleo e pulsa levemente.
+- [ ] **Aura:** o anel tem um halo largo e fraco.
+- [ ] **Pose de canalização:** ao carregar/segurar, os braços sobem para a frente (3ª pessoa).
+- [ ] **Desempenho:** conjure várias magias seguidas e confirme que o FPS não cai de modo perceptível.
+
+---
 
 ## Como reportar uma falha
 Anote: **ID do item** (por exemplo `4.3 Medo`), a **composição exata** da magia, o que esperava, o que aconteceu e, se houver, o trecho do log. Com isso eu reproduzo, escrevo o GameTest que falha e corrijo.

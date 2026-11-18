@@ -171,6 +171,7 @@ public class Phase5GameTests {
     h.assertTrue(itemsOnGround(h) == 0, "sem loot: nenhum item no chao (" + itemsOnGround(h) + ")");
     h.assertTrue(BlockJournal.size(lvl(h)) >= gone, "o diario registrou os blocos (" + BlockJournal.size(lvl(h)) + ")");
     cast(h, pig, g("self"), g("restore", "radius", 8.0));
+    BlockJournal.flush(lvl(h));
     long still = ring.stream().filter(r -> h.getBlockState(r).isAir()).count();
     h.assertTrue(still == 0, "o Restaurar devolveu todos os blocos (faltam " + still + ")");
     h.assertTrue(ring.stream().allMatch(r -> h.getBlockState(r).is(Blocks.DIRT)), "voltaram como terra");
@@ -188,6 +189,7 @@ public class Phase5GameTests {
     BlockJournal.destroy(lvl(h), h.absolutePos(other), null);
     h.setBlock(rel, Blocks.OAK_PLANKS); // alguem construiu ali depois
     int n = BlockJournal.restore(lvl(h), h.absoluteVec(new Vec3(3.5, 1.5, 3.5)), 8, 256);
+    BlockJournal.flush(lvl(h));
     h.assertTrue(n == 1, "so um bloco volta (voltaram " + n + ")");
     h.assertTrue(h.getBlockState(rel).is(Blocks.OAK_PLANKS), "a construcao nova foi preservada");
     h.assertTrue(h.getBlockState(other).is(Blocks.DIRT), "o bloco livre voltou");
@@ -237,6 +239,7 @@ public class Phase5GameTests {
         .stream().filter(i -> i.getItem().is(Items.DIAMOND)).mapToInt(i -> i.getItem().getCount()).sum();
     h.assertTrue(dropped == 4, "o conteudo caiu no chao (" + dropped + ")");
     BlockJournal.restore(lvl(h), h.absoluteVec(new Vec3(3.5, 1.5, 3.5)), 4, 256);
+    BlockJournal.flush(lvl(h));
     h.assertTrue(h.getBlockState(rel).is(Blocks.CHEST), "o bau voltou");
     var back = (net.minecraft.world.level.block.entity.ChestBlockEntity) h.getBlockEntity(rel);
     h.assertTrue(back.isEmpty(), "o bau voltou vazio");
@@ -257,6 +260,7 @@ public class Phase5GameTests {
     mana.set(100f);
     var result = cast(h, p, g("self"), g("restore", "radius", 8.0));
     h.assertTrue(result.success(), "a conjuracao falhou: " + result.message());
+    BlockJournal.flush(lvl(h));
     for (int x = 0; x < 5; x++) h.assertTrue(h.getBlockState(new BlockPos(x, 1, 5)).is(Blocks.DIRT), "bloco " + x + " voltou");
     // custo do glifo + 5 blocos x 0,3
     h.assertTrue(mana.current() < 100f - 5 * 0.3f + 0.01f, "cobrou mana (sobrou " + mana.current() + ")");
@@ -281,10 +285,35 @@ public class Phase5GameTests {
     // so sobra mana para ~2 blocos alem do custo do glifo
     mana.set(glyphCost + 0.7f);
     cast(h, p, g("self"), g("restore", "radius", 8.0));
+    BlockJournal.flush(lvl(h));
     long back = 0;
     for (int x = 0; x < 6; x++) if (h.getBlockState(new BlockPos(x, 1, 5)).is(Blocks.DIRT)) back++;
     h.assertTrue(back >= 1 && back < 6, "voltou so parte (" + back + " de 6, custo do glifo " + glyphCost + ")");
     h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 100, batch = "phase5_restore_15")
+  public static void restoreBringsBlocksBackGraduallyNotAllAtOnce(GameTestHelper h) {
+    floor(h);
+    BlockJournal.clear(lvl(h));
+    int total = 18; // com o padrao de 6 por tick, leva 3 ticks
+    for (int x = 0; x < total; x++) {
+      BlockPos rel = new BlockPos(x % 7, 1 + x / 7, 1);
+      h.setBlock(rel, Blocks.DIRT);
+      BlockJournal.destroy(lvl(h), h.absolutePos(rel), null);
+    }
+    int queued = BlockJournal.restore(lvl(h), h.absoluteVec(new Vec3(3.5, 1.5, 1.5)), 16, 1024);
+    h.assertTrue(queued == total, "todos entraram na fila (" + queued + ")");
+    h.assertTrue(BlockJournal.pending(lvl(h)) == total, "nada voltou ainda");
+    h.runAfterDelay(2, () -> {
+      int left = BlockJournal.pending(lvl(h));
+      h.assertTrue(left > 0 && left < total, "voltando aos poucos (faltam " + left + ")");
+    });
+    h.runAfterDelay(20, () -> {
+      h.assertTrue(BlockJournal.pending(lvl(h)) == 0, "a fila esvaziou");
+      for (int x = 0; x < total; x++) h.assertTrue(h.getBlockState(new BlockPos(x % 7, 1 + x / 7, 1)).is(Blocks.DIRT), "bloco " + x + " voltou");
+      h.succeed();
+    });
   }
 
   @GameTest(template = "empty", batch = "phase5_loot_14")
@@ -443,5 +472,97 @@ public class Phase5GameTests {
     var charged = CastingService.cast(a, spell, com.arcane.execution.PrecisionSnapshot.of(spell), 1.0, true);
     h.assertTrue(!charged.success(), "magia carregada (mana ja paga) nao entra em Coro");
     h.succeed();
+  }
+
+  // ------------------------------------------------------------------ Carregar, Manter e voo (ajustes pos-Fase 5)
+  private static Inscription spellInMode(ServerPlayer p, com.arcane.grimoire.SpellPrefs.CastMode mode, GlyphInstance... glyphs) {
+    var spell = new Inscription(List.of(glyphs));
+    var gr = com.arcane.grimoire.GrimoireAttachments.get(p).orElseThrow();
+    gr.addInscription(spell);
+    gr.prefs().setMode(spell.id(), mode);
+    return spell;
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 260, batch = "phase6_charge_1")
+  public static void chargeHasNoTimeLimitAndStopsOnlyWhenManaRunsOut(GameTestHelper h) {
+    floor(h);
+    var p = player(h, 3.5, 3.5, "aura", "damage");
+    var spell = spellInMode(p, com.arcane.grimoire.SpellPrefs.CastMode.CHARGE, g("aura", "radius", 1.5), g("damage", "amount", 2.0));
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(p);
+    mana.set(500f);
+    com.arcane.execution.CastChannels.press(p, spell.id());
+    h.runAfterDelay(100, () -> {
+      double f = com.arcane.execution.CastChannels.chargeFraction(p);
+      // o teto antigo (60 ticks) parava em 0,4; sem limite de tempo, aos 100 ticks passa bem disso
+      h.assertTrue(f > 0.55, "a carga continua crescendo depois de 3 s (fracao " + f + ")");
+      h.assertTrue(com.arcane.execution.CastChannels.isActive(p.getUUID()), "continua carregando, sem disparar sozinha");
+      mana.set(0f); // acabou a mana: a carga para onde estava, mas segue valendo ate soltar
+    });
+    h.runAfterDelay(140, () -> {
+      double f = com.arcane.execution.CastChannels.chargeFraction(p);
+      h.assertTrue(com.arcane.execution.CastChannels.isActive(p.getUUID()), "sem mana a carga espera (nao dispara sozinha)");
+      h.assertTrue(f > 0.55 && f < 1.0, "a carga parou onde estava (fracao " + f + ")");
+      com.arcane.execution.CastChannels.release(p);
+      h.assertTrue(!com.arcane.execution.CastChannels.isActive(p.getUUID()), "soltar encerra o canal");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 200, batch = "phase6_hold_2")
+  public static void holdCastsOnceThenOnlyDrainsSlowly(GameTestHelper h) {
+    floor(h);
+    var p = player(h, 3.5, 3.5, "aura", "damage");
+    var pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 1, 4));
+    var spell = spellInMode(p, com.arcane.grimoire.SpellPrefs.CastMode.HOLD, g("aura", "radius", 6.0), g("damage", "amount", 0.5)); // raio grande: o empurrao do golpe nao tira o alvo do alcance
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(p);
+    mana.set(500f);
+    float before = mana.current(); // a reserva maxima pode ser menor que 500
+    int cost = CastingService.manaCostOf(spell, com.arcane.execution.PrecisionSnapshot.of(spell));
+    com.arcane.execution.CastChannels.press(p, spell.id());
+    float afterCast = mana.current();
+    h.assertTrue(Math.abs((before - afterCast) - cost) < 0.5f, "conjurou uma vez, pelo custo normal (" + (before - afterCast) + " de " + cost + ")");
+    float hp = pig.getHealth();
+    h.assertTrue(hp < 10f, "o primeiro efeito atingiu o porco (vida " + hp + ")");
+    var trace = new StringBuilder();
+    for (int t : new int[] {5, 11, 12, 21, 22, 40}) {
+      h.runAfterDelay(t, () -> trace.append(t).append(":vida=").append(pig.getHealth()).append(",inv=").append(pig.invulnerableTime)
+          .append(",dist=").append(String.format("%.2f", pig.position().distanceTo(p.position()))).append(",mana=").append(mana.current()).append(" | "));
+    }
+    h.runAfterDelay(60, () -> {
+      h.assertTrue(pig.getHealth() < hp, "TRACE " + trace);
+      float extra = afterCast - mana.current();
+      // 3 s segurando a 0,6 x custo por segundo = 1,8 x custo (menos a regeneracao); nada parecido com 6 conjuracoes de custo cheio
+      h.assertTrue(extra > 0 && extra < cost * 2.5f, "manter gasta aos poucos (" + extra + " com custo " + cost + ")");
+      h.assertTrue(pig.getHealth() < hp, "o efeito continuou agindo enquanto segurava (vida " + pig.getHealth() + " de " + hp + ", canal ativo " + com.arcane.execution.CastChannels.isActive(p.getUUID()) + ")");
+      com.arcane.execution.CastChannels.release(p);
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 120, batch = "phase6_flight_3")
+  public static void flightDrainsManaEvenInCreativeAndSprintCostsMore(GameTestHelper h) {
+    floor(h);
+    var p = player(h, 3.5, 3.5);
+    h.onEachTick(p::doTick); // o servidor ticka o jogador pela conexao: efeitos e custo por tick
+    p.gameMode.changeGameModeForPlayer(net.minecraft.world.level.GameType.CREATIVE);
+    p.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get(), 400,
+        com.arcane.execution.FlightService.encode(1.0, 0.0), false, false, true));
+    var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(p);
+    mana.set(60f);
+    float[] marks = new float[3];
+    marks[0] = mana.current();
+    h.runAfterDelay(30, () -> {
+      mana.set(mana.current());
+      marks[1] = mana.current();
+      h.assertTrue(marks[0] - marks[1] > 1.0f, "no criativo o voo tambem cobra mana (" + (marks[0] - marks[1]) + ")");
+      p.setSprinting(true);
+    });
+    h.runAfterDelay(60, () -> {
+      marks[2] = mana.current();
+      float base = marks[0] - marks[1], fast = marks[1] - marks[2];
+      h.assertTrue(fast > base * 1.8f, "o voo rapido (sprint) gasta bem mais (" + fast + " contra " + base + ")");
+      p.removeEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
+      h.succeed();
+    });
   }
 }

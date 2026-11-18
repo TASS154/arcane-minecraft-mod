@@ -388,11 +388,11 @@ public class GrimoireScreen extends Screen {
     updateButtons();
     List<SpellEntry> spells = filtered();
     if (ClientArcaneData.spells().isEmpty()) {
-      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.empty_spells"), left + 18, top + 40, 100, 0x5A4630);
+      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.empty_spells"), left + 18, top + 40, 100, 0xB6AADC);
       return;
     }
     if (spells.isEmpty()) {
-      g.drawWordWrap(font, Component.translatable("gui.arcane.search.none"), left + 18, top + 42, 100, 0x5A4630);
+      g.drawWordWrap(font, Component.translatable("gui.arcane.search.none"), left + 18, top + 42, 100, 0xB6AADC);
     }
     Optional<UUID> active = ClientArcaneData.active();
     for (int r = 0; r < SPELL_ROWS; r++) {
@@ -401,33 +401,33 @@ public class GrimoireScreen extends Screen {
       SpellEntry s = spells.get(index);
       int y = top + 38 + r * ROW;
       boolean selected = s.id().equals(selectedSpell);
-      if (selected) g.fill(left + 14, y - 1, left + 124, y + ROW - 1, 0x55A07830);
+      if (selected) g.fill(left + 14, y - 1, left + 124, y + ROW - 1, 0x663C2A94);
       boolean isActive = active.map(a -> a.equals(s.id())).orElse(false);
-      if (isActive) g.drawString(font, "▶", left + 15, y + 1, 0x6A3F8F, false);
-      if (s.favorite()) g.drawString(font, "★", left + 23, y + 1, 0xC08000, false);
+      if (isActive) g.drawString(font, "▶", left + 15, y + 1, 0xC9A6FF, false);
+      if (s.favorite()) g.drawString(font, "★", left + 23, y + 1, 0xFFD36B, false);
       String name = font.plainSubstrByWidth(spellName(s).getString(), 70);
-      g.drawString(font, name, left + 33, y + 1, selected ? 0x2A1A08 : 0x4A3820, false);
+      g.drawString(font, name, left + 33, y + 1, selected ? 0xF2EAFF : 0xD2C8F0, false);
       if (s.cost() >= 0) {
         String cost = String.valueOf(s.cost());
-        g.drawString(font, cost, left + 122 - font.width(cost), y + 1, 0x1F6F8F, false);
+        g.drawString(font, cost, left + 122 - font.width(cost), y + 1, 0x6FE0FF, false);
       }
     }
     String pageText = (spellPage + 1) + "/" + pageCount();
-    g.drawString(font, pageText, left + 69 - font.width(pageText) / 2, top + 139, 0x5A4630, false);
+    g.drawString(font, pageText, left + 69 - font.width(pageText) / 2, top + 139, 0xB6AADC, false);
 
     Optional<SpellEntry> sel = selectedSpellEntry();
     if (sel.isEmpty()) {
-      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.pick_spell"), left + 134, top + 30, 100, 0x5A4630);
+      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.pick_spell"), left + 134, top + 30, 100, 0xB6AADC);
       return;
     }
     SpellEntry spell = sel.get();
     Component stageName = Component.translatable("grimoire.arcane.stage." + ClientArcaneData.stage());
     g.drawString(font, Component.translatable("gui.arcane.grimoire.pages", spells.size(), ClientArcaneData.pages()),
-        left + 134, top + 150, spells.size() >= ClientArcaneData.pages() ? 0xB04020 : 0x5A4630, false);
+        left + 134, top + 150, spells.size() >= ClientArcaneData.pages() ? 0xFF7A66 : 0xB6AADC, false);
     g.drawString(font, font.plainSubstrByWidth(Component.translatable("gui.arcane.grimoire.stage", stageName).getString(), 106),
-        left + 134, top + 160, 0x6A3F8F, false);
+        left + 134, top + 160, 0xC9A6FF, false);
     if (spell.cost() >= 0) {
-      g.drawString(font, Component.translatable("gui.arcane.glyph_cost", spell.cost()), left + 134, top + 43, 0x1F6F8F, false);
+      g.drawString(font, Component.translatable("gui.arcane.glyph_cost", spell.cost()), left + 134, top + 43, 0x6FE0FF, false);
     }
     List<Component> tip = null;
     for (int i = 0; i < spell.glyphs().size(); i++) {
@@ -474,7 +474,7 @@ public class GrimoireScreen extends Screen {
           g.drawString(font, "?", x + 5, y + 4, 0xFFD860, false);
         }
         if (k.id().equals(selectedGlyph)) {
-          g.renderOutline(x - 1, y - 1, 18, 18, 0xFFC08000);
+          g.renderOutline(x - 1, y - 1, 18, 18, 0xFF6FE0FF);
         }
         if (mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 16) hovered = k;
       } else {
@@ -483,36 +483,36 @@ public class GrimoireScreen extends Screen {
     }
     int rows = (total + COLS - 1) / COLS;
     if (rows > GRID_ROWS) {
-      g.drawString(font, (glyphScroll + 1) + "/" + (rows - GRID_ROWS + 1), left + 118 - font.width((glyphScroll + 1) + "/" + (rows - GRID_ROWS + 1)), top + 162, 0x7A6A50, false);
+      g.drawString(font, (glyphScroll + 1) + "/" + (rows - GRID_ROWS + 1), left + 118 - font.width((glyphScroll + 1) + "/" + (rows - GRID_ROWS + 1)), top + 162, 0x9488BE, false);
     }
 
     // Pagina direita: detalhes do glifo escolhido (ou o que esta sob o mouse)
     KnownGlyph shown = hovered != null ? hovered : (selectedGlyph == null ? null : ClientArcaneData.glyph(selectedGlyph).orElse(null));
     int x = left + 138;
     if (shown == null) {
-      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.pick_glyph"), x, top + 30, 100, 0x5A4630);
+      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.pick_glyph"), x, top + 30, 100, 0xB6AADC);
     } else {
       int y = top + 28;
-      g.drawString(font, ArcaneWorkbenchScreen.glyphName(shown.id()).copy().withStyle(st -> st.withColor(ArcaneWorkbenchScreen.categoryColor(shown.category()) & 0x7F7F7F)), x, y, 0x2A1A08, false);
+      g.drawString(font, ArcaneWorkbenchScreen.glyphName(shown.id()).copy().withStyle(st -> st.withColor(ArcaneWorkbenchScreen.categoryColor(shown.category()))), x, y, 0xF2EAFF, false);
       y += 12;
-      g.drawString(font, Component.translatable("category.arcane." + shown.category()), x, y, 0x5A4630, false);
+      g.drawString(font, Component.translatable("category.arcane." + shown.category()), x, y, 0xB6AADC, false);
       y += 10;
-      g.drawString(font, Component.translatable("knowledge.arcane." + knowledgeName(shown.level())), x, y, 0x6A3F8F, false);
+      g.drawString(font, Component.translatable("knowledge.arcane." + knowledgeName(shown.level())), x, y, 0xC9A6FF, false);
       y += 10;
-      g.drawString(font, Component.translatable("gui.arcane.glyph_cost", shown.cost()), x, y, 0x1F6F8F, false);
+      g.drawString(font, Component.translatable("gui.arcane.glyph_cost", shown.cost()), x, y, 0x6FE0FF, false);
       y += 14;
       for (ClientArcaneData.ParamDef p : shown.params()) {
-        g.drawString(font, font.plainSubstrByWidth(p.key() + ": " + trim(p.def()) + " (" + trim(p.min()) + "-" + trim(p.max()) + ")", 100), x, y, 0x1F6F8F, false);
+        g.drawString(font, font.plainSubstrByWidth(p.key() + ": " + trim(p.def()) + " (" + trim(p.min()) + "-" + trim(p.max()) + ")", 100), x, y, 0x6FE0FF, false);
         y += 10;
       }
       if (!shown.params().isEmpty()) y += 4;
       String descKey = "glyph." + shown.id().getNamespace() + "." + shown.id().getPath() + ".desc";
       Component desc = shown.usable() && I18n.exists(descKey) ? Component.translatable(descKey)
           : Component.translatable("gui.arcane.glyph_unknown_hint");
-      drawLines(g, desc, x, y, 100, shown.usable() ? 0x4A3820 : 0x8A6A20, Math.max(1, (top + 158 - y) / 10));
+      drawLines(g, desc, x, y, 100, shown.usable() ? 0xD2C8F0 : 0xE8B84C, Math.max(1, (top + 158 - y) / 10));
     }
     Component discovered = Component.translatable("gui.arcane.grimoire.discovered", identified, total);
-    g.drawString(font, discovered, left + 238 - font.width(discovered), top + 162, 0x5A4630, false);
+    g.drawString(font, discovered, left + 238 - font.width(discovered), top + 162, 0xB6AADC, false);
 
     if (hovered != null && selectedGlyph != null && !hovered.id().equals(selectedGlyph)) {
       // detalhe ja mostra o que esta sob o mouse
@@ -535,7 +535,7 @@ public class GrimoireScreen extends Screen {
   private void renderJournal(GuiGraphics g) {
     List<String> log = ClientArcaneData.log();
     if (log.isEmpty()) {
-      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.empty_journal"), left + 18, top + 30, 210, 0x5A4630);
+      g.drawWordWrap(font, Component.translatable("gui.arcane.grimoire.empty_journal"), left + 18, top + 30, 210, 0xB6AADC);
       return;
     }
     // Mais recentes primeiro; uma pagina do livro por coluna, para o texto nunca cruzar a lombada.
@@ -544,10 +544,10 @@ public class GrimoireScreen extends Screen {
       if (index < 0) break;
       int x = left + (r < LIST_ROWS ? 18 : 138);
       int y = top + 28 + (r % LIST_ROWS) * ROW;
-      g.drawString(font, ellipsize(describe(log.get(index)).getString(), 102), x, y, 0x4A3820, false);
+      g.drawString(font, ellipsize(describe(log.get(index)).getString(), 102), x, y, 0xD2C8F0, false);
     }
     if (log.size() > LIST_ROWS * 2) {
-      g.drawString(font, Component.translatable("gui.arcane.grimoire.scroll_hint"), left + 18, top + 162, 0x7A6A50, false);
+      g.drawString(font, Component.translatable("gui.arcane.grimoire.scroll_hint"), left + 18, top + 162, 0x9488BE, false);
     }
   }
 

@@ -2,6 +2,7 @@ package com.arcane.execution;
 
 import com.arcane.grimoire.GrimoireAttachments;
 import com.arcane.grimoire.SpellPrefs.CastMode;
+import com.arcane.inscription.CompiledPlanCache;
 import com.arcane.inscription.Inscription;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -16,15 +17,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Modos de conjuracao (canalizar): a tecla de conjurar age conforme o modo escolhido para a magia.
- * TOQUE: lanca uma vez. CARREGAR: segurar drena mana aos poucos e ao soltar lanca uma vez, mais forte quanto mais
- * carregou. SEGURAR: repete a conjuracao enquanto a tecla estiver pressionada (cada repeticao custa a mana normal).
+ * TOQUE: lanca uma vez. CARREGAR: segurar faz surgir as runas da forma da magia e drena mana aos poucos, sem limite de
+ * tempo (so a mana e o teto chargeMaxScale limitam); ao soltar, lanca uma vez, mais forte quanto mais carregou.
+ * SEGURAR: conjura UMA vez (custo normal) e mantem: enquanto a tecla estiver pressionada a magia continua agindo, em
+ * silencio, e a mana drena aos poucos (holdDrainPerSecond); soltar encerra.
  * ALTERNAR: so para magias de efeito continuo (Flutuar, Telecinese): lanca e, no segundo toque, cancela.
  * Tudo e decidido aqui no servidor; o cliente so avisa "pressionou" e "soltou".
  */
 public final class CastChannels {
-  public static final int CHARGE_MAX_TICKS = 60;
-  public static final double CHARGE_MAX_SCALE = 3.0;
+  /** Drena 1,5x o custo por 60 ticks de carga (a mesma taxa de antes); a potencia sobe 2 a cada 1,5x o custo gasto. */
+  public static final double CHARGE_DRAIN_PER_TICK = 1.5 / 60.0;
   public static final int HOLD_INTERVAL_TICKS = 10;
+  public static final int FX_INTERVAL_TICKS = 5;
   /** Magias com algum destes efeitos aceitam o modo ALTERNAR. */
   public static final Set<String> TOGGLE_GLYPHS = Set.of("float", "telekinesis");
 
@@ -35,6 +39,7 @@ public final class CastChannels {
     final long start;
     long next;
     double drained;
+    double cost = 1;
     Active(UUID spell, CastMode mode, long start, ServerPlayer owner) { this.owner = owner; this.spell = spell; this.mode = mode; this.start = start; this.next = start + HOLD_INTERVAL_TICKS; }
   }
 
@@ -61,11 +66,38 @@ public final class CastChannels {
     }
   }
 
+  /** Potencia de uma carga que gastou {@code drained} de mana numa magia de custo {@code cost}. */
+  public static double chargeScale(double drained, double cost) {
+    double max = com.arcane.config.ArcaneConfig.CHARGE_MAX_SCALE.get();
+    return Math.min(max, 1.0 + (2.0 / 1.5) * drained / Math.max(1.0, cost));
+  }
+
   /** Fracao carregada (0 a 1) de quem esta no modo CARREGAR, ou -1. */
   public static double chargeFraction(ServerPlayer player) {
     Active a = ACTIVE.get(player.getUUID());
     if (a == null || a.mode != CastMode.CHARGE) return -1;
-    return Math.min(1.0, (player.level().getGameTime() - a.start) / (double) CHARGE_MAX_TICKS);
+    double max = com.arcane.config.ArcaneConfig.CHARGE_MAX_SCALE.get();
+    return (chargeScale(a.drained, a.cost) - 1.0) / Math.max(0.01, max - 1.0);
+  }
+
+  /** Forma da magia para as runas (ver S2CChannelPacket). */
+  private static int shapeOf(Inscription inscription) {
+    String form = DeliverySpec.fromPlan(CompiledPlanCache.getOrCompile(inscription).delivery()).handler().getPath();
+    return switch (form) {
+      case "self" -> com.arcane.network.packet.S2CChannelPacket.SELF;
+      case "aura" -> com.arcane.network.packet.S2CChannelPacket.AURA;
+      case "wave" -> com.arcane.network.packet.S2CChannelPacket.WAVE;
+      case "pillar" -> com.arcane.network.packet.S2CChannelPacket.PILLAR;
+      default -> com.arcane.network.packet.S2CChannelPacket.BEAM;
+    };
+  }
+
+  private static int colorOf(Inscription inscription) {
+    return SpellElement.of(CompiledPlanCache.getOrCompile(inscription)).color();
+  }
+
+  private static void sendFx(ServerPlayer player, Inscription inscription, int state, double progress) {
+    com.arcane.network.ModNetwork.sendChannel(player, state, (float) progress, shapeOf(inscription), colorOf(inscription));
   }
 
   private static void fail(ServerPlayer player, String message) {
@@ -104,12 +136,18 @@ public final class CastChannels {
           fail(player, "message.arcane.mana.insufficient");
           return;
         }
-        ACTIVE.put(player.getUUID(), new Active(spellId, mode, now, player));
+        Active charging = new Active(spellId, mode, now, player);
+        charging.cost = Math.max(1, cost);
+        ACTIVE.put(player.getUUID(), charging);
+        sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.CHARGING, 0.0);
       }
       case HOLD -> {
         var r = CastingService.tryCast(player, inscription, precision);
         if (!r.success()) { fail(player, r.message()); return; }
-        ACTIVE.put(player.getUUID(), new Active(spellId, mode, now, player));
+        Active holding = new Active(spellId, mode, now, player);
+        holding.cost = Math.max(1, CastingService.manaCostOf(inscription, precision));
+        ACTIVE.put(player.getUUID(), holding);
+        sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.HOLDING, 1.0);
       }
       case TOGGLE -> {
         var r = CastingService.tryCast(player, inscription, precision);
@@ -137,8 +175,8 @@ public final class CastChannels {
     if (grimoire == null) return;
     Inscription inscription = grimoire.getInscription(a.spell).orElse(null);
     if (inscription == null) return;
-    double fraction = Math.min(1.0, (player.level().getGameTime() - a.start) / (double) CHARGE_MAX_TICKS);
-    double scale = 1.0 + (CHARGE_MAX_SCALE - 1.0) * fraction;
+    double scale = chargeScale(a.drained, a.cost);
+    com.arcane.network.ModNetwork.sendChannel(player, com.arcane.network.packet.S2CChannelPacket.OFF, 0f, 0, 0);
     var r = CastingService.cast(player, inscription, PrecisionSnapshot.of(inscription), scale, true);
     if (!r.success()) fail(player, r.message());
   }
@@ -147,6 +185,7 @@ public final class CastChannels {
   public static void stop(ServerPlayer player, boolean endEffects) {
     Active a = ACTIVE.remove(player.getUUID());
     if (a == null) return;
+    com.arcane.network.ModNetwork.sendChannel(player, com.arcane.network.packet.S2CChannelPacket.OFF, 0f, 0, 0);
     if (endEffects && (a.mode == CastMode.TOGGLE || a.mode == CastMode.HOLD)) {
       player.removeEffect(com.arcane.registry.ModEffects.FLOAT_FLIGHT.get());
       Telekinesis.release(player.getUUID());
@@ -169,22 +208,36 @@ public final class CastChannels {
       long now = player.level().getGameTime();
       switch (a.mode) {
         case CHARGE -> {
-          long ticks = now - a.start;
-          if (ticks < CHARGE_MAX_TICKS) {
-            // Drena 1,5x o custo ao longo da carga cheia; sem mana, lanca com o que carregou.
-            double step = CastingService.manaCostOf(inscription, PrecisionSnapshot.of(inscription)) * 1.5 / CHARGE_MAX_TICKS;
-            var mana = GrimoireAttachments.getManaOrCreate(player);
-            if (mana.current() < step) { fire(player, a); }
-            else mana.set((float) (mana.current() - step));
+          // Sem limite de tempo: a carga so para quando a mana acaba ou a potencia chega ao teto. Nao dispara sozinha:
+          // as runas ficam la, prontas, ate o jogador soltar.
+          var mana = GrimoireAttachments.getManaOrCreate(player);
+          double step = a.cost * CHARGE_DRAIN_PER_TICK;
+          boolean capped = chargeScale(a.drained, a.cost) >= com.arcane.config.ArcaneConfig.CHARGE_MAX_SCALE.get() - 1.0e-9;
+          if (!capped && mana.current() >= step) {
+            mana.set((float) (mana.current() - step));
+            a.drained += step;
           }
+          if ((now - a.start) % FX_INTERVAL_TICKS == 0) sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.CHARGING, chargeFraction(player));
         }
         case HOLD -> {
           if (flies(inscription)) {
             sustainFlight(player); // voar ja custa por tick: nao relanca a magia
-          } else if (now >= a.next) {
-            a.next = now + HOLD_INTERVAL_TICKS;
-            var r = CastingService.tryCast(player, inscription, PrecisionSnapshot.of(inscription));
-            if (!r.success()) { fail(player, r.message()); it.remove(); }
+          } else {
+            // Conjurou uma vez; agora so mantem: drena aos poucos e reaplica o efeito em silencio.
+            var mana = GrimoireAttachments.getManaOrCreate(player);
+            double step = a.cost * com.arcane.config.ArcaneConfig.HOLD_DRAIN_PER_SECOND.get() / 20.0;
+            if (mana.current() < step) {
+              fail(player, "message.arcane.mana.insufficient");
+              stop(player, false);
+              continue;
+            }
+            mana.set((float) (mana.current() - step));
+            if (now >= a.next) {
+              a.next = now + HOLD_INTERVAL_TICKS;
+              var r = CastingService.cast(player, inscription, PrecisionSnapshot.of(inscription), 1.0, true, true);
+              if (!r.success()) { fail(player, r.message()); stop(player, false); continue; }
+            }
+            if ((now - a.start) % FX_INTERVAL_TICKS == 0) sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.HOLDING, 1.0);
           }
         }
         case TOGGLE -> {

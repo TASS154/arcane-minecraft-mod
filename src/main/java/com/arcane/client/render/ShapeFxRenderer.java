@@ -100,6 +100,14 @@ public class ShapeFxRenderer {
           level.addParticle(particle, f.pos.x + Math.cos(a) * r, f.pos.y + rnd.nextDouble() * 9, f.pos.z + Math.sin(a) * r, 0, -0.12, 0);
         }
       }
+      case S2CShapeFxPacket.CAST -> {
+        // motes de luz sobem em espiral em volta do conjurador
+        for (int i = 0; i < 2; i++) {
+          double a = life * 18.0 + i * Math.PI + rnd.nextDouble() * 0.4;
+          double r = f.size * (0.9 - 0.5 * life);
+          level.addParticle(particle, f.pos.x + Math.cos(a) * r, f.pos.y + 0.1 + life * 1.8, f.pos.z + Math.sin(a) * r, 0, 0.05, 0);
+        }
+      }
       case S2CShapeFxPacket.IMPACT -> {
         if (f.age == 0) {
           for (int i = 0; i < 18; i++) {
@@ -150,6 +158,7 @@ public class ShapeFxRenderer {
       case S2CShapeFxPacket.AURA -> {
         float rad = f.size * ease(life);
         wall(c, pose, f.pos, rad, 0.9f, 0f, TAU, 36, r, g, b, (int) (170 * fade), 0);
+        ring(c, pose, f.pos.add(0, 0.06, 0), rad, 0.34f, 0f, TAU, 40, r, g, b, (int) (40 * fade));   // halo
         ring(c, pose, f.pos.add(0, 0.06, 0), rad, 0.10f, 0f, TAU, 40, r, g, b, (int) (230 * fade));
         ring(c, pose, f.pos.add(0, 0.06, 0), rad * 0.7f, 0.05f, 0f, TAU, 32, 255, 255, 255, (int) (200 * fade));
       }
@@ -182,6 +191,16 @@ public class ShapeFxRenderer {
         float circle = Math.max(1.2f, f.size * 1.4f) * ease(Math.min(1f, life * 4f));
         RuneCircle.draw(c, pose, f.pos.add(0, 0.07, 0), ux, vz, circle, life * 4f, r, g, b, (int) (235 * Math.min(1f, fade * 1.4f)));
         if (drop >= 1f && life < 0.35f) ring(c, pose, f.pos.add(0, 0.05, 0), f.size * (0.5f + 2f * (life - 0.2f)), 0.1f, 0f, TAU, 32, 255, 255, 255, (int) (200 * (0.35f - life) * 6f));
+      }
+      case S2CShapeFxPacket.CAST -> {
+        // circulo de runas no chao: abre rapido, gira, some; um segundo menor gira ao contrario e um anel de luz sobe
+        float open = ease(Math.min(1f, life * 4f));
+        float rad = Math.max(0.8f, f.size) * open;
+        Vec3 ux = new Vec3(1, 0, 0), vz = new Vec3(0, 0, 1);
+        RuneCircle.draw(c, pose, f.pos.add(0, 0.05, 0), ux, vz, rad, life * 5f, r, g, b, (int) (235 * fade));
+        RuneCircle.draw(c, pose, f.pos.add(0, 0.06, 0), ux, vz, rad * 0.55f, -life * 7f, 255, 255, 255, (int) (200 * fade));
+        ring(c, pose, f.pos.add(0, 0.05 + 1.8 * life, 0), rad * (0.9f - 0.3f * life), 0.04f, 0f, TAU, 28, r, g, b, (int) (170 * fade));
+        ring(c, pose, f.pos.add(0, 0.05 + 1.8 * life, 0), rad * (0.9f - 0.3f * life) * 0.8f, 0.02f, 0f, TAU, 24, 255, 255, 255, (int) (140 * fade));
       }
       case S2CShapeFxPacket.IMPACT -> {
         float rr = (0.25f + 0.9f * ease(life)) * f.size;

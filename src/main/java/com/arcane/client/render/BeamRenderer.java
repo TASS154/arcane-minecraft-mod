@@ -130,6 +130,9 @@ public class BeamRenderer {
     // barra: nasce no circulo, so cresce depois que ele abriu (2 ticks)
     float open = Math.min(1f, (b.age + partial) / 1.5f);
     Vec3 end = b.from.add(b.dir.scale(b.length * open));
+    float pulse = 1f + 0.12f * (float) Math.sin((b.age + partial) * 1.7);
+    box(c, pose, b.from, end, b.u, b.v, 0.38f * shrink * pulse, r, g, bl, 26);   // halo largo e fraco: da a sensacao de brilho
+    box(c, pose, b.from, end, b.u, b.v, 0.26f * shrink * pulse, r, g, bl, 52);
     box(c, pose, b.from, end, b.u, b.v, 0.16f * shrink, r, g, bl, 90);
     box(c, pose, b.from, end, b.u, b.v, 0.06f * shrink, 255, 255, 255, 255);
 

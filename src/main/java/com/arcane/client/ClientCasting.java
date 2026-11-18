@@ -27,13 +27,9 @@ public final class ClientCasting {
 
   private ClientCasting() {}
 
-  /** Progresso de carga (0 a 1) para o HUD, ou -1 se nao esta carregando. */
+  /** Progresso de carga (0 a 1) para o HUD, ou -1 se nao esta carregando (sem limite de tempo: so a mana limita). */
   public static double chargeProgress() {
-    if (!castDown && !latched) return -1;
-    Minecraft mc = Minecraft.getInstance();
-    var active = ClientArcaneData.activeSpell();
-    if (active.isEmpty() || active.get().mode() != 1 || mc.level == null) return -1;
-    return Math.min(1.0, (mc.level.getGameTime() - castStart) / 60.0);
+    return com.arcane.client.render.ChannelFx.chargeProgress(); // vem do servidor: depende da mana gasta, nao do tempo
   }
 
   /** Magias que a roda e as teclas numericas oferecem: conjunto ativo, senao favoritas, senao todas. */

@@ -9,6 +9,7 @@ import com.arcane.inscription.Inscription;
 import com.arcane.inscription.InscriptionValidator;
 import com.arcane.inscription.CompiledExecutionPlan;
 import com.arcane.network.ModNetwork;
+import com.arcane.network.packet.S2CShapeFxPacket;
 import com.arcane.network.packet.S2CSpellFxPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,6 +35,14 @@ public final class CastingService {
      * paga (carga gradual) e nada e cobrado agora.
      */
     public static ExecutionResult cast(ServerPlayer player, Inscription inscription, PrecisionSnapshot precision, double scale, boolean free) {
+        return cast(player, inscription, precision, scale, free, false);
+    }
+
+    /**
+     * Como a conjuracao normal; com {@code silent} (magia mantida) o efeito e aplicado de novo sem a animacao, o clarao,
+     * o som e as particulas de conjuracao: a magia ja foi conjurada.
+     */
+    public static ExecutionResult cast(ServerPlayer player, Inscription inscription, PrecisionSnapshot precision, double scale, boolean free, boolean silent) {
         Optional<GrimoireState> grimoire = GrimoireAttachments.get(player);
         InscriptionValidator.ValidationResult validation = InscriptionValidator.validate(inscription, grimoire);
         if (!validation.valid()) {
@@ -84,9 +93,11 @@ public final class CastingService {
         if (result.success()) {
             GrimoireAttachments.get(player).ifPresent(g -> g.prefs().touch(inscription.id(), player.level().getGameTime()));
             Vows.pay(player, inscription);
-            PlayerAnims.onCast(player, plan);
-            ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint(), SpellElement.of(plan).ordinal()));
-            if (!Traces.stealthy(inscription)) castFx((ServerLevel) player.level(), player, SpellElement.of(plan));
+            if (!silent) {
+                PlayerAnims.onCast(player, plan);
+                ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint(), SpellElement.of(plan).ordinal()));
+                if (!Traces.stealthy(inscription)) castFx((ServerLevel) player.level(), player, SpellElement.of(plan));
+            }
         }
         return new ExecutionResult(result.success(), result.message(), manaCost);
     }
@@ -153,6 +164,7 @@ public final class CastingService {
                 com.arcane.registry.ModSounds.SPELL_CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS,
                 0.8f, 0.9f + caster.getRandom().nextFloat() * 0.2f);
         ElementSounds.playCast(level, caster.position(), element);
+        ModNetwork.sendShape(level, S2CShapeFxPacket.CAST, caster.position(), net.minecraft.world.phys.Vec3.ZERO, 1.5f, element.color(), element.ordinal(), 16);
         level.sendParticles(element.particle(),
                 caster.getX(), caster.getY() + caster.getBbHeight() * 0.6, caster.getZ(),
                 12, 0.4, 0.4, 0.4, 0.02);

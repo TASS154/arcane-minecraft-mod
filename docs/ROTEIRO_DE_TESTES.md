@@ -411,5 +411,14 @@ Montagem: `Foco, Atrair` (ou `Foco, Dano`). Precisa conhecer o glifo `focus`: `/
 
 ---
 
+## 12. Sons, visuais, mobs e feeling (nada visto/ouvido em jogo ainda)
+- [ ] **Sons:** carregar (V) toca um arpejo curto ao começar e um estouro ao soltar (mais grave e forte com carga alta); voo rápido tem um "uush" novo; Domínio abre com batida grave e quebra com vidro estilhaçando. Anote se algum ficou alto, agudo ou repetitivo demais.
+- [ ] **Domínio:** ao abrir, coluna de runas e círculo; faíscas correm pela casca; ao quebrar, faíscas elétricas e impacto.
+- [ ] **Golem (ritual):** bate em área (inimigos colados ao alvo também levam dano), levanta brilho de guarda quando ferido, zumbe parado.
+- [ ] **Lobos (ritual):** quando o alvo está longe, o lobo some e reaparece atrás dele; quem é mordido fica lento.
+- [ ] **Tremor de câmera:** explosões/impactos fortes e disparo de carga forte sacodem a câmera; carregar causa um tremor leve crescente. Deve sumir com "reduzir clarões" ligado. Se enjoar, reporte.
+
+---
+
 ## Como reportar uma falha
 Anote: **ID do item** (por exemplo `4.3 Medo`), a **composição exata** da magia, o que esperava, o que aconteceu e, se houver, o trecho do log. Com isso eu reproduzo, escrevo o GameTest que falha e corrijo.

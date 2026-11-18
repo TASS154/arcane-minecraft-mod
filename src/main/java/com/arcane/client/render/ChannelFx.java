@@ -56,6 +56,7 @@ public final class ChannelFx {
     Minecraft mc = Minecraft.getInstance();
     if (state != S2CChannelPacket.OFF && (mc.player == null || ++sinceUpdate > 25)) state = S2CChannelPacket.OFF; // o servidor parou de avisar
     if (state == S2CChannelPacket.OFF) { shown = 0f; return; }
+    if (state == S2CChannelPacket.CHARGING) com.arcane.client.CameraShake.sustain(0.04f + 0.3f * Mth.clamp(progress, 0f, 1f));
     spin += 0.05f + 0.07f * shown;
     shown += (target() - shown) * 0.12f;
     if (mc.level != null && mc.player != null && state == S2CChannelPacket.CHARGING && mc.level.random.nextInt(2) == 0) {

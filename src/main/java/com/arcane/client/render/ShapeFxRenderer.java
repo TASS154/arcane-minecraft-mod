@@ -54,6 +54,13 @@ public class ShapeFxRenderer {
   }
 
   public static void add(int type, Vec3 pos, Vec3 dir, float size, int rgb, int element, int ticks) {
+    var mc = Minecraft.getInstance();
+    if (mc.player != null) {
+      double d = mc.player.position().distanceTo(pos);
+      if (type == S2CShapeFxPacket.IMPACT) com.arcane.client.CameraShake.add(Math.min(0.7f, 0.15f + size * 0.1f), d);
+      else if (type == S2CShapeFxPacket.RITUAL) com.arcane.client.CameraShake.add(0.5f, d);
+      else if (type == S2CShapeFxPacket.AURA && size > 2.5f) com.arcane.client.CameraShake.add(Math.min(0.4f, size * 0.05f), d);
+    }
     synchronized (FX) {
       if (FX.size() < 48) FX.add(new Fx(type, pos, dir, size, rgb, SpellElement.byOrdinal(element), Math.max(4, ticks)));
     }

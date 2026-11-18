@@ -16,6 +16,7 @@ public class AltarBlockEntity extends BlockEntity {
   @Nullable private Inscription stored;
   @Nullable private UUID owner;
   private boolean storedLegendary;
+  private int storedOffering;
   private long cooldownUntil;
 
   public AltarBlockEntity(BlockPos pos, BlockState state) {
@@ -25,10 +26,17 @@ public class AltarBlockEntity extends BlockEntity {
   @Nullable public Inscription stored() { return stored; }
   @Nullable public UUID owner() { return owner; }
   public boolean storedLegendary() { return storedLegendary; }
+  /** Valor (%) das oferendas gastas ao guardar a magia; vale a cada disparo. */
+  public int storedOffering() { return storedOffering; }
   public long cooldownUntil() { return cooldownUntil; }
   public boolean hasStored() { return stored != null; }
 
   public void store(Inscription spell, UUID ownerId, boolean legendary) {
+    store(spell, ownerId, legendary, legendary ? com.arcane.ritual.OfferingValue.of(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHER_STAR)) : 0);
+  }
+
+  public void store(Inscription spell, UUID ownerId, boolean legendary, int offeringPercent) {
+    this.storedOffering = offeringPercent;
     this.stored = spell;
     this.owner = ownerId;
     this.storedLegendary = legendary;
@@ -38,6 +46,7 @@ public class AltarBlockEntity extends BlockEntity {
   public void clearStored() {
     this.stored = null;
     this.storedLegendary = false;
+    this.storedOffering = 0;
     setChanged();
   }
 
@@ -54,6 +63,7 @@ public class AltarBlockEntity extends BlockEntity {
     }
     if (owner != null) tag.putUUID("owner", owner);
     tag.putBoolean("legendary", storedLegendary);
+    tag.putInt("offering", storedOffering);
     tag.putLong("cooldown", cooldownUntil);
   }
 
@@ -63,6 +73,7 @@ public class AltarBlockEntity extends BlockEntity {
     stored = tag.contains("stored") ? Inscription.CODEC.parse(NbtOps.INSTANCE, tag.get("stored")).result().orElse(null) : null;
     owner = tag.hasUUID("owner") ? tag.getUUID("owner") : null;
     storedLegendary = tag.getBoolean("legendary");
+    storedOffering = tag.getInt("offering");
     cooldownUntil = tag.getLong("cooldown");
   }
 }

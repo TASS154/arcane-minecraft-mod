@@ -13,6 +13,7 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.DoubleValue RITUAL_POWER_MEDIUM;
   public static final ForgeConfigSpec.DoubleValue RITUAL_POWER_MAJOR;
   public static final ForgeConfigSpec.DoubleValue RITUAL_MIN_COMPLETENESS;
+  public static final ForgeConfigSpec.IntValue RITUAL_MAX_PERCENT;
   public static final ForgeConfigSpec.BooleanValue ELEMENT_INTERACTIONS;
   public static final ForgeConfigSpec.DoubleValue ELEMENT_INTERACTION_STRENGTH;
   public static final ForgeConfigSpec.IntValue MAGE_CAST_INTERVAL_TICKS;
@@ -63,6 +64,8 @@ public class ArcaneConfig {
         .defineInRange("ritualPowerMedium", 3.0, 1.0, 100.0);
     RITUAL_POWER_MAJOR = builder.comment("Power multiplier of a major ritual (radius 16). PROVISIONAL")
         .defineInRange("ritualPowerMajor", 10.0, 1.0, 100.0);
+    RITUAL_MAX_PERCENT = builder.comment("Maximum total ritual value in percent (circle size + offerings, after the legendary doubling)")
+        .defineInRange("ritualMaxPercent", 1500, 100, 100000);
     RITUAL_MIN_COMPLETENESS = builder.comment("Fraction of the circle's traces that must be drawn for a ritual to work")
         .defineInRange("ritualMinCompleteness", 0.85, 0.3, 1.0);
     ELEMENT_INTERACTIONS = builder.comment("Elements interact with the environment (storm stronger in rain, fire weaker when wet...)")

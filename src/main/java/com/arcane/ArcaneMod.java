@@ -66,6 +66,7 @@ public class ArcaneMod {
                     ArcaneConfig.COST_FREE_GLYPHS.get());
             com.arcane.ritual.RitualSettings.set(ArcaneConfig.RITUAL_POWER_MINOR.get(), ArcaneConfig.RITUAL_POWER_MEDIUM.get(),
                     ArcaneConfig.RITUAL_POWER_MAJOR.get(), ArcaneConfig.RITUAL_MIN_COMPLETENESS.get());
+            com.arcane.ritual.RitualSettings.setMaxPercent(ArcaneConfig.RITUAL_MAX_PERCENT.get());
         }
     }
 

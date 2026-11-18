@@ -16,6 +16,8 @@ public final class RitualSettings {
   private static volatile double medium = DEFAULT_MEDIUM;
   private static volatile double major = DEFAULT_MAJOR;
   private static volatile double minCompleteness = DEFAULT_MIN_COMPLETENESS;
+  public static final int DEFAULT_MAX_PERCENT = 1500;
+  private static volatile int maxPercent = DEFAULT_MAX_PERCENT;
 
   private RitualSettings() {}
 
@@ -26,7 +28,13 @@ public final class RitualSettings {
     minCompleteness = Math.max(0.3, Math.min(1.0, completeness));
   }
 
+  /** Teto do valor total do ritual, em % (circulo + oferendas, ja contando o dobro do lendario). */
+  public static int maxPercent() { return maxPercent; }
+
+  public static void setMaxPercent(int percent) { maxPercent = Math.max(100, percent); }
+
   public static void reset() {
+    maxPercent = DEFAULT_MAX_PERCENT;
     set(DEFAULT_MINOR, DEFAULT_MEDIUM, DEFAULT_MAJOR, DEFAULT_MIN_COMPLETENESS);
   }
 

@@ -419,9 +419,9 @@
   "gui.arcane.ritual.circle_none": "No circle (%s%%)",
   "gui.arcane.ritual.needs_level": "Needs a %s circle",
   "gui.arcane.ritual.mana": "Mana: %s (you have %s)",
-  "gui.arcane.ritual.offerings": "Offerings",
+  "gui.arcane.ritual.offerings": "Components",
   "gui.arcane.ritual.no_offerings": "None",
-  "gui.arcane.ritual.legendary_on": "Star offered (legendary)",
+  "gui.arcane.ritual.legendary_on": "Legendary! Value doubled",
   "gui.arcane.ritual.legendary_off": "Offer a Nether Star",
   "glyph.arcane.self": "Self",
   "glyph.arcane.self.desc": "Form: the spell happens on you.",
@@ -714,5 +714,14 @@
   "glyph.arcane.chorus": "Chorus",
   "glyph.arcane.chorus.desc": "Modifier: the spell only fires if 2-4 players cast it together, inside the circle that appears on the ground around whoever starts (radius 8, 3 s for the others). Everyone needs the same spell. Strength rises 35% per extra participant (max x2.4) and the mana is split among them. Without enough people nothing happens and nobody pays.",
   "effect.arcane.petrified": "Petrified",
-  "hud.arcane.area_effect": "Area ×%s · radius %s"
+  "hud.arcane.area_effect": "Area ×%s · radius %s",
+  "gui.arcane.ritual.tab.ritual": "Ritual",
+  "gui.arcane.ritual.tab.offerings": "Offerings",
+  "gui.arcane.ritual.offer_hint": "Up to 3 items, any kind. Click to add or remove.",
+  "gui.arcane.ritual.inventory": "Your inventory",
+  "gui.arcane.ritual.item_value": "Worth +%s%% to the ritual",
+  "gui.arcane.ritual.value": "Ritual value",
+  "gui.arcane.ritual.value_size": "Circle: %s%%",
+  "gui.arcane.ritual.value_offer": "Offerings: %s%% (legendary > %s%%)",
+  "gui.arcane.ritual.value_total": "Total: %s%%"
 }

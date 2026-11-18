@@ -419,9 +419,9 @@
   "gui.arcane.ritual.circle_none": "Sem círculo (%s%%)",
   "gui.arcane.ritual.needs_level": "Exige círculo %s",
   "gui.arcane.ritual.mana": "Mana: %s (você tem %s)",
-  "gui.arcane.ritual.offerings": "Oferendas",
+  "gui.arcane.ritual.offerings": "Componentes",
   "gui.arcane.ritual.no_offerings": "Nenhuma",
-  "gui.arcane.ritual.legendary_on": "Estrela oferecida (lendário)",
+  "gui.arcane.ritual.legendary_on": "Lendário! Valor dobrado",
   "gui.arcane.ritual.legendary_off": "Oferecer Estrela do Nether",
   "glyph.arcane.self": "Eu",
   "glyph.arcane.self.desc": "Forma: o feitiço acontece em você.",
@@ -714,5 +714,14 @@
   "glyph.arcane.chorus": "Coro",
   "glyph.arcane.chorus.desc": "Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga.",
   "effect.arcane.petrified": "Petrificado",
-  "hud.arcane.area_effect": "Área ×%s · raio %s"
+  "hud.arcane.area_effect": "Área ×%s · raio %s",
+  "gui.arcane.ritual.tab.ritual": "Ritual",
+  "gui.arcane.ritual.tab.offerings": "Oferendas",
+  "gui.arcane.ritual.offer_hint": "Até 3 itens, qualquer um. Clique para pôr ou tirar.",
+  "gui.arcane.ritual.inventory": "Seu inventário",
+  "gui.arcane.ritual.item_value": "Vale +%s%% no ritual",
+  "gui.arcane.ritual.value": "Valor do ritual",
+  "gui.arcane.ritual.value_size": "Círculo: %s%%",
+  "gui.arcane.ritual.value_offer": "Oferendas: %s%% (lendário > %s%%)",
+  "gui.arcane.ritual.value_total": "Total: %s%%"
 }

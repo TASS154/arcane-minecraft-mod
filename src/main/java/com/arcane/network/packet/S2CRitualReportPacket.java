@@ -30,7 +30,9 @@ public record S2CRitualReportPacket(RitualService.Report report) {
       buf.writeVarInt(n.have());
     }
     buf.writeBoolean(r.legendary());
-    buf.writeVarInt(r.stars());
+    buf.writeVarInt(r.sizePct());
+    buf.writeVarInt(r.offeringPct());
+    buf.writeVarInt(r.totalPct());
   }
 
   public static S2CRitualReportPacket decode(FriendlyByteBuf buf) {
@@ -44,8 +46,8 @@ public record S2CRitualReportPacket(RitualService.Report report) {
       needs.add(new RitualService.Need(item, buf.readVarInt(), buf.readVarInt()));
     }
     boolean legendary = buf.readBoolean();
-    int stars = buf.readVarInt();
-    return new S2CRitualReportPacket(new RitualService.Report(valid, message, cost, mana, circle, pct, level, needs, legendary, stars));
+    int sizePct = buf.readVarInt(), offeringPct = buf.readVarInt(), totalPct = buf.readVarInt();
+    return new S2CRitualReportPacket(new RitualService.Report(valid, message, cost, mana, circle, pct, level, needs, legendary, sizePct, offeringPct, totalPct));
   }
 
   public static void handle(S2CRitualReportPacket p, Supplier<NetworkEvent.Context> ctx) {

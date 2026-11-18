@@ -26,14 +26,15 @@ import java.util.function.Supplier;
  * PREVIEW (relatorio), PERFORM (realizar) ou STORE (guardar no altar para o glifo Ativar). O servidor revalida tudo
  * (distancia ao altar, glifos, parametros, circulo, oferendas e mana).
  */
-public record C2SRitualPacket(BlockPos altar, int action, boolean legendary, List<C2SSaveInscriptionPacket.Entry> glyphs) {
+public record C2SRitualPacket(BlockPos altar, int action, List<Integer> offerSlots, List<C2SSaveInscriptionPacket.Entry> glyphs) {
   public static final int PREVIEW = 0, PERFORM = 1, STORE = 2;
   private static final int MAX_GLYPHS = 24, MAX_PARAMS = 8;
 
   public static void encode(C2SRitualPacket p, FriendlyByteBuf buf) {
     buf.writeBlockPos(p.altar);
     buf.writeVarInt(p.action);
-    buf.writeBoolean(p.legendary);
+    buf.writeVarInt(p.offerSlots.size());
+    for (int slot : p.offerSlots) buf.writeVarInt(slot);
     buf.writeVarInt(p.glyphs.size());
     for (var e : p.glyphs) {
       buf.writeUtf(e.id(), 128);
@@ -45,7 +46,9 @@ public record C2SRitualPacket(BlockPos altar, int action, boolean legendary, Lis
   public static C2SRitualPacket decode(FriendlyByteBuf buf) {
     BlockPos altar = buf.readBlockPos();
     int action = buf.readVarInt();
-    boolean legendary = buf.readBoolean();
+    int offers = Math.min(buf.readVarInt(), com.arcane.ritual.OfferingValue.MAX_ITEMS);
+    List<Integer> offerSlots = new ArrayList<>();
+    for (int i = 0; i < offers; i++) offerSlots.add(buf.readVarInt());
     int count = Math.min(buf.readVarInt(), MAX_GLYPHS + 1);
     List<C2SSaveInscriptionPacket.Entry> glyphs = new ArrayList<>();
     for (int i = 0; i < count; i++) {
@@ -55,7 +58,7 @@ public record C2SRitualPacket(BlockPos altar, int action, boolean legendary, Lis
       for (int k = 0; k < n; k++) params.put(buf.readUtf(32), buf.readDouble());
       glyphs.add(new C2SSaveInscriptionPacket.Entry(id, params));
     }
-    return new C2SRitualPacket(altar, action, legendary, glyphs);
+    return new C2SRitualPacket(altar, action, offerSlots, glyphs);
   }
 
   public static void handle(C2SRitualPacket packet, Supplier<NetworkEvent.Context> ctx) {
@@ -79,8 +82,9 @@ public record C2SRitualPacket(BlockPos altar, int action, boolean legendary, Lis
       instances.add(new GlyphInstance(id, C2SSaveInscriptionPacket.sanitize(id, entry.params())));
     }
     Inscription draft = new Inscription(List.copyOf(instances));
+    RitualService.Offerings offerings = offeringsOf(player, packet.offerSlots);
     if (packet.action == PREVIEW) {
-      ModNetwork.sendToPlayer(player, new S2CRitualReportPacket(RitualService.preview(level, pos, player, draft, packet.legendary)));
+      ModNetwork.sendToPlayer(player, new S2CRitualReportPacket(RitualService.preview(level, pos, player, draft, offerings)));
       return;
     }
     if (instances.isEmpty()) {
@@ -89,9 +93,22 @@ public record C2SRitualPacket(BlockPos altar, int action, boolean legendary, Lis
     }
     ComponentSource source = ComponentSource.of(player);
     RitualService.Result result = packet.action == STORE
-        ? RitualService.store(level, pos, player, draft, source, packet.legendary)
-        : RitualService.perform(level, pos, player, draft, source, packet.legendary);
+        ? RitualService.store(level, pos, player, draft, source, offerings)
+        : RitualService.perform(level, pos, player, draft, source, offerings);
     RitualMessages.send(player, result);
-    ModNetwork.sendToPlayer(player, new S2CRitualReportPacket(RitualService.preview(level, pos, player, draft, packet.legendary)));
+    ModNetwork.sendToPlayer(player, new S2CRitualReportPacket(RitualService.preview(level, pos, player, draft, offeringsOf(player, packet.offerSlots))));
+  }
+
+  /** As oferendas escolhidas na tela: ate 3 slots DISTINTOS do inventario (0-35), uma unidade de cada pilha nao vazia. */
+  public static RitualService.Offerings offeringsOf(ServerPlayer player, List<Integer> slots) {
+    List<net.minecraft.world.item.ItemStack> live = new ArrayList<>();
+    java.util.Set<Integer> seen = new java.util.HashSet<>();
+    for (int slot : slots) {
+      if (live.size() >= com.arcane.ritual.OfferingValue.MAX_ITEMS) break;
+      if (slot < 0 || slot >= 36 || !seen.add(slot)) continue;
+      var stack = player.getInventory().getItem(slot);
+      if (!stack.isEmpty()) live.add(stack);
+    }
+    return new RitualService.Offerings(live, false);
   }
 }

@@ -224,13 +224,33 @@ public final class RitualService {
 
   /** O que a tela do altar mostra: validade, custo, circulo, nivel exigido e as oferendas (necessario x que voce tem). */
   public record Report(boolean valid, net.minecraft.network.chat.Component message, int cost, int mana, int circleLevel,
-                       int completenessPct, int needLevel, List<Need> needs, boolean legendary, int stars) {}
+                       int completenessPct, int needLevel, List<Need> needs, boolean legendary, int sizePct, int offeringPct, int totalPct) {}
 
-  public static Report preview(ServerLevel level, BlockPos altar, ServerPlayer player, Inscription spell, boolean wantsLegendary) {
+  /**
+   * Oferendas livres do altar (ate {@link OfferingValue#MAX_ITEMS} itens, qualquer um). Cada uma vale uma porcentagem
+   * ({@link OfferingValue}); {@code virtual} = itens que o ComponentSource entrega (testes e o modo antigo da Estrela),
+   * senao sao as pilhas vivas do jogador, que perdem 1 unidade cada ao realizar.
+   */
+  public record Offerings(List<net.minecraft.world.item.ItemStack> stacks, boolean virtual) {
+    public static final Offerings NONE = new Offerings(List.of(), true);
+
+    public int percent() { return OfferingValue.sum(stacks); }
+
+    /** Modo antigo (boolean): uma Estrela do Nether tirada do ComponentSource, se houver. */
+    static Offerings legacy(ComponentSource source, boolean wantsLegendary) {
+      return wantsLegendary && source.count(Items.NETHER_STAR) >= 1
+          ? new Offerings(List.of(new net.minecraft.world.item.ItemStack(Items.NETHER_STAR)), true) : NONE;
+    }
+  }
+
+  private static int sizePercent(CircleReport circle) { return (int) Math.round(circle.level().power() * 100.0); }
+
+  public static Report preview(ServerLevel level, BlockPos altar, ServerPlayer player, Inscription spell, Offerings offerings) {
     ComponentSource source = ComponentSource.of(player);
     CircleReport circle = evaluate(level, altar);
     RitualRequirements req = RitualRequirements.of(spell);
-    boolean legendary = isLegendary(circle, spell, req, source, wantsLegendary);
+    int offeringPct = offerings.percent();
+    boolean legendary = isLegendary(circle, offeringPct);
     var validation = InscriptionValidator.validate(spell, GrimoireAttachments.get(player), true);
     List<Need> needs = new ArrayList<>();
     for (Map.Entry<Item, Integer> e : neededItems(req, legendary).entrySet()) {
@@ -239,7 +259,7 @@ public final class RitualService {
     int cost = spell.glyphs().isEmpty() ? 0 : CastingService.ritualCost(spell, legendary);
     return new Report(validation.valid(), validation.message(), cost, (int) GrimoireAttachments.getManaOrCreate(player).current(),
         circle.level().number(), (int) Math.round(circle.completeness() * 100), req.level(), needs, legendary,
-        Math.min(source.count(Items.NETHER_STAR), 99));
+        sizePercent(circle), offeringPct, OfferingValue.total(sizePercent(circle), offeringPct));
   }
 
   // ------------------------------------------------------------------ conjurar
@@ -249,15 +269,28 @@ public final class RitualService {
       Item item = ForgeRegistries.ITEMS.getValue(e.getKey());
       if (item != null && item != Items.AIR) need.merge(item, e.getValue(), Integer::sum);
     }
-    if (legendary) need.merge(Items.NETHER_STAR, 1, Integer::sum);
     return need;
   }
 
-  /** Lendario: circulo maior + oferenda, e a magia precisa disso (glifo de nivel 4 ou passa da sobretaxa gratis). */
-  private static boolean isLegendary(CircleReport circle, Inscription spell, RitualRequirements req, ComponentSource source,
-                                     boolean wantsLegendary) {
-    return wantsLegendary && circle.level() == RitualLevel.MAJOR && source.count(Items.NETHER_STAR) >= 1
-        && (req.level() >= RitualLevel.LEGENDARY.number() || spell.glyphs().size() > SpellLimits.freeGlyphs());
+  /** Lendario: as oferendas, sozinhas, passam de 300% (e ha um circulo valido). */
+  private static boolean isLegendary(CircleReport circle, int offeringPercent) {
+    return circle.level() != RitualLevel.NONE && OfferingValue.legendary(offeringPercent);
+  }
+
+  /** Falta alguma oferenda virtual no ComponentSource? (As vivas ja saem do inventario do jogador.) */
+  private static boolean offeringsMissing(Offerings offerings, ComponentSource source) {
+    if (!offerings.virtual()) return false;
+    Map<Item, Integer> count = new LinkedHashMap<>();
+    for (var s : offerings.stacks()) count.merge(s.getItem(), 1, Integer::sum);
+    for (var e : count.entrySet()) if (source.count(e.getKey()) < e.getValue()) return true;
+    return false;
+  }
+
+  private static void consumeOfferings(Offerings offerings, ComponentSource source, LivingEntity performer) {
+    for (var s : offerings.stacks()) {
+      if (offerings.virtual()) source.take(s.getItem(), 1);
+      else if (!(performer instanceof ServerPlayer p && p.getAbilities().instabuild)) s.shrink(1);
+    }
   }
 
   /** Confere tudo antes de consumir qualquer coisa. Retorna a falha, ou null se esta tudo certo. */
@@ -290,6 +323,11 @@ public final class RitualService {
 
   public static Result perform(ServerLevel level, BlockPos altar, LivingEntity performer, Inscription spell,
                                ComponentSource source, boolean wantsLegendary) {
+    return perform(level, altar, performer, spell, source, Offerings.legacy(source, wantsLegendary));
+  }
+
+  public static Result perform(ServerLevel level, BlockPos altar, LivingEntity performer, Inscription spell,
+                               ComponentSource source, Offerings offerings) {
     if (!(level.getBlockState(altar).getBlock() instanceof ArcaneAltarBlock)) {
       return new Result(Outcome.NO_ALTAR, null, 0, "", 0, null);
     }
@@ -298,17 +336,20 @@ public final class RitualService {
 
     CircleReport circle = evaluate(level, altar);
     RitualRequirements req = RitualRequirements.of(spell);
-    boolean legendary = isLegendary(circle, spell, req, source, wantsLegendary);
+    int offeringPct = offerings.percent();
+    boolean legendary = isLegendary(circle, offeringPct);
     Map<Item, Integer> need = neededItems(req, legendary);
+    if (offeringsMissing(offerings, source)) return new Result(Outcome.MISSING_COMPONENT, circle, 0, "offering", 1, null);
     Result failure = check(performer, spell, source, circle, legendary, req, need);
     if (failure != null) return failure;
 
     need.forEach(source::take);
+    consumeOfferings(offerings, source, performer);
     if (performer instanceof ServerPlayer player) {
       GrimoireAttachments.getManaOrCreate(player).trySpend(CastingService.ritualCost(spell, legendary));
     }
     int effective = legendary ? RitualLevel.LEGENDARY.number() : circle.level().number();
-    double power = circle.level().power() * circle.quality();
+    double power = OfferingValue.total(sizePercent(circle), offeringPct) / 100.0 * circle.quality();
     double area = circle.level().areaScale();
     ExecutionResult cast = CastingService.castRitual(performer, spell, level,
         new CastingService.RitualBonus(effective, power, area, legendary, circle.radius(), net.minecraft.world.phys.Vec3.atCenterOf(altar)));
@@ -321,18 +362,26 @@ public final class RitualService {
   /** Guarda a magia no altar (consumindo componentes e mana agora); o glifo Ativar a dispara depois. */
   public static Result store(ServerLevel level, BlockPos altar, ServerPlayer performer, Inscription spell,
                              ComponentSource source, boolean wantsLegendary) {
+    return store(level, altar, performer, spell, source, Offerings.legacy(source, wantsLegendary));
+  }
+
+  public static Result store(ServerLevel level, BlockPos altar, ServerPlayer performer, Inscription spell,
+                             ComponentSource source, Offerings offerings) {
     if (!(level.getBlockState(altar).getBlock() instanceof ArcaneAltarBlock) || !(level.getBlockEntity(altar) instanceof AltarBlockEntity be)) {
       return new Result(Outcome.NO_ALTAR, null, 0, "", 0, null);
     }
     CircleReport circle = evaluate(level, altar);
     RitualRequirements req = RitualRequirements.of(spell);
-    boolean legendary = isLegendary(circle, spell, req, source, wantsLegendary);
+    int offeringPct = offerings.percent();
+    boolean legendary = isLegendary(circle, offeringPct);
     Map<Item, Integer> need = neededItems(req, legendary);
+    if (offeringsMissing(offerings, source)) return new Result(Outcome.MISSING_COMPONENT, circle, 0, "offering", 1, null);
     Result failure = check(performer, spell, source, circle, legendary, req, need);
     if (failure != null) return failure;
     need.forEach(source::take);
+    consumeOfferings(offerings, source, performer);
     GrimoireAttachments.getManaOrCreate(performer).trySpend(CastingService.ritualCost(spell, legendary));
-    be.store(spell, performer.getUUID(), legendary);
+    be.store(spell, performer.getUUID(), legendary, offeringPct);
     level.playSound(null, altar, ModSounds.WORKBENCH_SAVE.get(), SoundSource.BLOCKS, 1.0f, 0.7f);
     return new Result(Outcome.STORED, circle, circle.level().number(), "", 0, null);
   }
@@ -368,7 +417,7 @@ public final class RitualService {
       boolean legendary = altar.storedLegendary();
       int effective = legendary ? RitualLevel.LEGENDARY.number() : circle.level().number();
       if (RitualRequirements.of(spell).level() > effective) continue;
-      double power = circle.level().power() * circle.quality();
+      double power = OfferingValue.total(sizePercent(circle), altar.storedOffering()) / 100.0 * circle.quality();
       // A magia guardada nao some: o altar dispara de novo a cada ativacao, pagando a mana de cada vez.
       if (activator instanceof net.minecraft.server.level.ServerPlayer sp && !sp.getAbilities().instabuild) {
         var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(sp);

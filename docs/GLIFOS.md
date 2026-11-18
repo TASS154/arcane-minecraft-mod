@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **144 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **145 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -144,7 +144,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Bolso Arcano** | `arcane:pocket` | 2 | 3 | Conhecimento | — | Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas. |
 | **Restaurar** | `arcane:restore` | 4 | 3 | Terra | `radius` 10 (2–16) | Efeito: recompõe, num raio de 2–16 blocos (padrão 10), aos poucos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta. |
 
-## Modificadores (30)
+## Modificadores (31)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -173,6 +173,7 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Eu (origem)** | `arcane:origin_self` | 1 | 1 | Terra | — | Origem: o centro da forma passa a ser voce, mesmo em formas que normalmente miram (Pilar) ou ficam a frente (parede). |
 | **Mira** | `arcane:origin_aim` | 1 | 1 | Terra | — | Origem: o centro da forma passa a ser o ponto para onde voce olha (ate 32 blocos), em vez de voce. |
 | **Zona** | `arcane:zone` | 3 | 3 | Conhecimento | `seconds` 10 (2–60), `interval` 1 (0.5–5) | Torna a forma persistente: ela se repete do mesmo lugar a cada intervalo, durante o tempo escolhido, reaplicando os efeitos em quem está dentro (Aura + Fogo vira um campo em chamas; Barreira vira parede contínua; Projétil vira torre). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). No máximo 2 zonas suas ao mesmo tempo. Invocações ignoram a Zona. |
+| **Domínio** | `arcane:domain` | 4 | 3 | Arcano | `seconds` 30 (5–60), `interval` 1 (0.5–5) | Modificador de Barreira: fecha um domo e o mantém. Tudo que está dentro recebe os efeitos da magia continuamente (a cada intervalo) até o domo quebrar: ele acaba quando perde cerca de 10% dos blocos da casca, ou quando passa o tempo. A casca não se refaz e não some sozinha enquanto o Domínio dura; quebrar um pedaço dela o encerra (e dispara "Quando a zona acabar"). Use com Barreira + Domo (ou Esfera) + um efeito (Cura, Dano, Lentidão...). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). Conta como Zona (mesmo limite de 2 por conjurador). |
 | **Cadeia** | `arcane:chain` | 3 | 3 | Força | — | Modificador: o efeito anterior se propaga de criatura em criatura. Explosão e Explosão Destrutiva detonam de novo, menores, em quem estava perto (até 3 saltos, 8 extras); Dano salta em arco para a mais próxima, com 60% do dano a cada salto. Outros efeitos ignoram a Cadeia (a prévia avisa). |
 | **Inverter** | `arcane:invert` | 1 | 2 | Vazio | — | Modificador: troca o efeito anterior pelo seu oposto, com a mesma magnitude. Pares: Dano e Cura, Empurrão e Atrair, Lentidão e Velocidade, Fogo e Congelar, Levitação e Gravidade, Roubo e Transferir Vida, Cegar e Invisibilidade, Medo e Provocar. Efeito sem par ignora o Inverter. |
 | **Furtivo** | `arcane:stealth` | 2 | 2 | Vazio | — | Modificador: a magia deixa menos rastro: o resíduo no mundo dura 1/4 do tempo e a conjuração não faz som nem partículas. Não esconde o efeito em si. |

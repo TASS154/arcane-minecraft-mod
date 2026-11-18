@@ -14,7 +14,7 @@ public final class SealRenderer {
       // Paleta Okabe-Ito (distinguivel em deuteranopia/protanopia/tritanopia), escurecida para ler no pergaminho
       return switch (category) {
         case "form" -> 0xFF0072B2;
-        case "effect" -> 0xFFD55E00;
+        case "effect", "ritual" -> 0xFFD55E00;
         case "filter" -> 0xFF009E73;
         case "modifier" -> 0xFF997F00;
         case "condition" -> 0xFFCC79A7;
@@ -24,7 +24,7 @@ public final class SealRenderer {
     }
     return switch (category) {
       case "form" -> 0xFF1E82AA;
-      case "effect" -> 0xFFBE4628;
+      case "effect", "ritual" -> 0xFFBE4628;
       case "filter" -> 0xFF468C3C;
       case "modifier" -> 0xFFAA7814;
       case "condition" -> 0xFF6E3CAA;

@@ -25,8 +25,20 @@ import java.util.List;
  * (Barreira + Cura cura quem esta no domo; Barreira + Dano fere quem encosta; Filtros restringem).
  */
 public class BarrierFormHandler implements FormHandler {
+  /** Regiao da casca desta barreira (a mesma na conjuracao e nos pulsos do Dominio). */
+  public static Region regionOf(ExecutionContext context, DeliverySpec spec) {
+    double radius = context.coverRadius(spec.parameters().getOrDefault("radius", 3.0) * context.areaFactor());
+    return Region.of(context, spec, ShapeGeometry.WALL, radius);
+  }
+
+  public static boolean isDomain(DeliverySpec spec) { return spec.parameters().getOrDefault("domain", 0.0) > 0.0; }
+
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
+    if (isDomain(spec) && context.trigger().type().equals("zone_tick")) {
+      // Pulso do Dominio: nao constroi nada; so entrega quem esta dentro da casca (a casca e cuidada por Zones).
+      return DeliveryResult.of(new TargetList(regionOf(context, spec).entities(context.level(), context.caster(), true), List.of()));
+    }
     if (!Targeting.mayAlterWorld(context)) return DeliveryResult.of(TargetList.empty());
     double radius = context.coverRadius(spec.parameters().getOrDefault("radius", 3.0) * context.areaFactor());
     int life = (int) Math.max(1, Math.min(ArcaneBarrierBlock.MAX_LIFE, Math.round(spec.parameters().getOrDefault("duration", 200.0) / 40.0)));

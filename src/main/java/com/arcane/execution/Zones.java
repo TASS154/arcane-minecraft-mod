@@ -25,6 +25,8 @@ import java.util.UUID;
 public final class Zones {
   public static final int MAX_PER_CASTER = 2, MAX_TOTAL = 64;
   public static final double MAX_SECONDS = 60.0, MIN_INTERVAL = 0.5;
+  /** Fracao da casca que pode faltar antes de o Dominio quebrar. */
+  public static final double DOMAIN_BREAK_FRACTION = 0.10;
   public static final String END_CONDITION = "on_zone_end";
   public static final String ENTER_CONDITION = "on_zone_enter", EXIT_CONDITION = "on_zone_exit";
 
@@ -36,6 +38,10 @@ public final class Zones {
     final Vec3 origin, look, position;
     final long endsAt, interval;
     long nextAt;
+    /** Dominio: a zona acaba quando a casca de barreira quebra. {@code shell} = posicoes que eram barreira. */
+    final boolean domain;
+    java.util.List<net.minecraft.core.BlockPos> shell;
+    boolean broken;
     final List<CompiledExecutionPlan.ExecutionSegment> plain = new ArrayList<>();
     final List<CompiledExecutionPlan.ExecutionSegment> enter = new ArrayList<>(), exit = new ArrayList<>();
 
@@ -52,6 +58,8 @@ public final class Zones {
       this.endsAt = endsAt;
       this.interval = interval;
       this.nextAt = nextAt;
+      this.domain = context.plan().delivery().parameters().getOrDefault("domain", 0.0) > 0.0
+          && context.plan().delivery().formId().getPath().equals("barrier");
     }
 
     public String endKey() { return "zone_end:" + id; }
@@ -132,6 +140,11 @@ public final class Zones {
     }
     evicted.forEach(Zones::finish);
     context.setZone(zone);
+    if (zone.domain && context.resolvedTargets() != null) {
+      var shell = new ArrayList<net.minecraft.core.BlockPos>();
+      for (var b : context.resolvedTargets().blocks()) if (b.state().is(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get())) shell.add(b.pos());
+      zone.shell = shell;
+    }
     if (context.resolvedTargets() != null) {
       for (var e : context.resolvedTargets().entities()) zone.inside.add(e.getUUID());
     }
@@ -173,8 +186,45 @@ public final class Zones {
     context.setResolvedTargets(form.deliver(context, spec).targets());
   }
 
+  /** Mantem a casca do Dominio (renova a vida dos blocos) e diz se ela ainda esta inteira (perdeu menos de DOMAIN_BREAK_FRACTION). */
+  private static boolean domainHolds(Zone zone, ExecutionContext c) {
+    var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get();
+    if (zone.shell == null) { // zona restaurada de um save: recalcula a casca com o que ainda e barreira
+      zone.shell = new ArrayList<>();
+      DeliverySpec spec = DeliverySpec.fromPlan(c.plan().delivery());
+      for (var pos : com.arcane.execution.handlers.BarrierFormHandler.regionOf(c, spec).shell()) {
+        if (c.level().getBlockState(pos).is(barrier)) zone.shell.add(pos);
+      }
+    }
+    if (zone.shell.isEmpty()) return false;
+    int intact = 0;
+    for (var pos : zone.shell) {
+      var st = c.level().getBlockState(pos);
+      if (!st.is(barrier)) continue;
+      intact++;
+      if (st.getValue(com.arcane.block.ArcaneBarrierBlock.LIFE) < com.arcane.block.ArcaneBarrierBlock.MAX_LIFE) {
+        c.level().setBlock(pos, st.setValue(com.arcane.block.ArcaneBarrierBlock.LIFE, com.arcane.block.ArcaneBarrierBlock.MAX_LIFE), 2);
+      }
+    }
+    return intact >= zone.shell.size() * (1.0 - DOMAIN_BREAK_FRACTION);
+  }
+
+  /** A casca some (com faiscas) quando o Dominio acaba, quebrado ou por tempo. */
+  private static void shatter(Zone zone) {
+    if (!zone.domain || zone.shell == null) return;
+    var level = zone.context.level();
+    var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get();
+    for (var pos : zone.shell) {
+      if (level.getBlockState(pos).is(barrier)) {
+        level.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.02);
+        level.removeBlock(pos, false);
+      }
+    }
+  }
+
   private static void pulse(Zone zone) {
     ExecutionContext c = fresh(zone, "zone_tick");
+    if (zone.domain && !domainHolds(zone, c)) { zone.broken = true; return; }
     deliver(c);
     zoneEvents(zone, c);
     for (var segment : zone.plain) SpellPipeline.INSTANCE.executeSegment(c, segment);
@@ -212,6 +262,7 @@ public final class Zones {
 
   private static void finish(Zone zone) {
     forget(zone);
+    shatter(zone);
     SpellEvents.emit(new SpellEvents.Event(zone.endKey(), zone.context.level(), zone.position));
   }
 
@@ -241,6 +292,10 @@ public final class Zones {
     for (Zone z : due) {
       try {
         pulse(z);
+        if (z.broken) {
+          synchronized (ZONES) { ZONES.remove(z); }
+          ended.add(z);
+        }
       } catch (RuntimeException e) {
         LOG.warn("Zona falhou e foi removida", e);
         synchronized (ZONES) { ZONES.remove(z); }

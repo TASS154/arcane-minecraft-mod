@@ -147,7 +147,8 @@ public final class ClientArcaneData {
       case "modifier" -> 3;
       case "condition" -> 4;
       case "activator" -> 5;
-      default -> 6;
+      case "ritual" -> 6;
+      default -> 7;
     };
   }
 

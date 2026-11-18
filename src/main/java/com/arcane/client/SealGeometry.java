@@ -18,7 +18,7 @@ public final class SealGeometry {
   public static int sidesFor(String category) {
     return switch (category) {
       case "form" -> 3;
-      case "effect" -> CIRCLE_SIDES;
+      case "effect", "ritual" -> CIRCLE_SIDES;
       case "filter" -> 4;
       case "modifier" -> 4;
       case "condition" -> 5;

@@ -50,14 +50,13 @@ public class GrimoireScreen extends Screen {
   private int spellPage;
   private int filterMode;
   private net.minecraft.client.gui.components.EditBox searchBox, folderBox;
-  private Button prevPage, nextPage, filterButton, favButton, modeButton, folderOk, gearButton;
+  private Button prevPage, nextPage, filterButton, modeButton, gearButton;
   private final Button[] loadoutButtons = new Button[com.arcane.grimoire.SpellPrefs.LOADOUTS];
   private int logScroll;
   private int glyphScroll;
   private UUID selectedSpell;
   private ResourceLocation selectedGlyph;
   private boolean confirmDelete;
-  private Button activateButton;
   private Button deleteButton;
   private Button copyButton;
 
@@ -75,22 +74,17 @@ public class GrimoireScreen extends Screen {
         .bounds(left + 86, top + 2, 70, 18).build());
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.tab.journal"), b -> setTab(Tab.JOURNAL))
         .bounds(left + 158, top + 2, 70, 18).build());
-    activateButton = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.activate"), b -> activate())
-        .bounds(left + 134, top + 176, 52, 20).build());
-    deleteButton = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.delete"), b -> delete())
-        .bounds(left + 190, top + 176, 52, 20).build());
-    addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.close"), b -> onClose())
-        .bounds(left + 14, top + 176, 52, 20).build());
+    deleteButton = addRenderableWidget(Button.builder(Component.literal("✖"), b -> delete())
+        .bounds(left + 222, top + 176, 20, 20).tooltip(net.minecraft.client.gui.components.Tooltip.create(
+            Component.translatable("gui.arcane.grimoire.delete"))).build());
     copyButton = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.write"), b -> openWrite())
-        .bounds(left + 70, top + 176, 60, 20).tooltip(net.minecraft.client.gui.components.Tooltip.create(
+        .bounds(left + 14, top + 176, 60, 20).tooltip(net.minecraft.client.gui.components.Tooltip.create(
             Component.translatable("gui.arcane.grimoire.write.tooltip"))).build());
-    renameBox = new net.minecraft.client.gui.components.EditBox(font, left + 134, top + 25, 82, 14, Component.translatable("gui.arcane.name"));
+    renameBox = new net.minecraft.client.gui.components.EditBox(font, left + 134, top + 25, 106, 14, Component.translatable("gui.arcane.name"));
     renameBox.setMaxLength(32);
     renameBox.setHint(Component.translatable("gui.arcane.name"));
     addRenderableWidget(renameBox);
-    renameButton = addRenderableWidget(Button.builder(Component.literal("✔"), b -> rename())
-        .bounds(left + 218, top + 24, 22, 16).tooltip(net.minecraft.client.gui.components.Tooltip.create(
-            Component.translatable("gui.arcane.grimoire.rename.tooltip"))).build());
+    renameBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.grimoire.rename.tooltip")));
     noteBox = new net.minecraft.client.gui.components.EditBox(font, left + 18, top + 176, 150, 18, Component.translatable("gui.arcane.grimoire.note"));
     noteBox.setMaxLength(C2SJournalNotePacket.MAX);
     noteBox.setHint(Component.translatable("gui.arcane.grimoire.note.hint"));
@@ -107,24 +101,19 @@ public class GrimoireScreen extends Screen {
     nextPage = addRenderableWidget(Button.builder(Component.literal("▶"), b -> turnPage(1)).bounds(left + 106, top + 136, 18, 14).build());
     filterButton = addRenderableWidget(Button.builder(filterLabel(), b -> { filterMode = (filterMode + 1) % (4 + folders().size()); spellPage = 0; updateButtons(); })
         .bounds(left + 14, top + 152, 110, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.filter.tip"))).build());
-    favButton = addRenderableWidget(Button.builder(Component.literal("☆"), b -> selectedSpellEntry().ifPresent(sp ->
-        ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.FAVORITE, sp.id(), sp.favorite() ? 0 : 1, ""))))
-        .bounds(left + 134, top + 94, 52, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.favorite.tip"))).build());
     modeButton = addRenderableWidget(Button.builder(Component.literal("-"), b -> selectedSpellEntry().ifPresent(sp ->
         ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.MODE, sp.id(), nextMode(sp), ""))))
-        .bounds(left + 190, top + 94, 52, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.mode.tip"))).build());
-    folderBox = new net.minecraft.client.gui.components.EditBox(font, left + 134, top + 110, 82, 12, Component.translatable("gui.arcane.folder"));
+        .bounds(left + 134, top + 94, 22, 14).build());
+    folderBox = new net.minecraft.client.gui.components.EditBox(font, left + 134, top + 112, 106, 12, Component.translatable("gui.arcane.folder"));
     folderBox.setMaxLength(com.arcane.grimoire.SpellPrefs.MAX_FOLDER);
     folderBox.setHint(Component.translatable("gui.arcane.folder"));
+    folderBox.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.folder.tip")));
     addRenderableWidget(folderBox);
-    folderOk = addRenderableWidget(Button.builder(Component.literal("✔"), b -> selectedSpellEntry().ifPresent(sp ->
-        ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.FOLDER, sp.id(), 0, folderBox.getValue()))))
-        .bounds(left + 218, top + 109, 22, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.folder.tip"))).build());
     for (int i = 0; i < loadoutButtons.length; i++) {
       final int set = i;
-      loadoutButtons[i] = addRenderableWidget(Button.builder(Component.literal("C" + (i + 1)), b -> selectedSpellEntry().ifPresent(sp ->
+      loadoutButtons[i] = addRenderableWidget(Button.builder(Component.literal("" + (i + 1)), b -> selectedSpellEntry().ifPresent(sp ->
           ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.LOADOUT_TOGGLE, sp.id(), set, ""))))
-          .bounds(left + 134 + i * 27, top + 126, 25, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.loadout.tip"))).build());
+          .bounds(left + 160 + i * 20, top + 94, 18, 14).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.loadout.tip"))).build());
     }
     gearButton = addRenderableWidget(Button.builder(Component.literal("⚙"), b -> minecraft.setScreen(new ArcaneOptionsScreen(this)))
         .bounds(left + 232, top + 2, 18, 18).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.arcane.options"))).build());
@@ -209,8 +198,8 @@ public class GrimoireScreen extends Screen {
   }
 
   private net.minecraft.client.gui.components.EditBox renameBox;
-  private Button renameButton;
   private UUID renameShownFor;
+  private int shownMode = -1;
   private UUID folderShownFor;
   private net.minecraft.client.gui.components.EditBox noteBox;
   private Button noteButton;
@@ -231,7 +220,6 @@ public class GrimoireScreen extends Screen {
     boolean renaming = tab == Tab.SPELLS && selectedSpellEntry().isPresent();
     if (renameBox != null) {
       renameBox.visible = renaming;
-      renameButton.visible = renaming;
       UUID now = renaming ? selectedSpell : null;
       if (!java.util.Objects.equals(now, renameShownFor)) {
         renameShownFor = now;
@@ -252,26 +240,27 @@ public class GrimoireScreen extends Screen {
       filterButton.setMessage(filterLabel());
       var sel = selectedSpellEntry();
       boolean has = onSpells && sel.isPresent();
-      favButton.visible = has; modeButton.visible = has; folderBox.visible = has; folderOk.visible = has;
+      modeButton.visible = has; folderBox.visible = has;
       for (Button lb : loadoutButtons) lb.visible = has;
       if (has) {
         SpellEntry sp = sel.get();
-        favButton.setMessage(Component.literal(sp.favorite() ? "★ " : "☆ ").append(Component.translatable("gui.arcane.favorite")));
-        modeButton.setMessage(Component.translatable("gui.arcane.mode." + sp.mode()));
+        Component modeName = Component.translatable("gui.arcane.mode." + sp.mode());
+        modeButton.setMessage(Component.literal(modeName.getString().substring(0, 1).toUpperCase(java.util.Locale.ROOT)));
+        if (sp.mode() != shownMode) {
+          shownMode = sp.mode();
+          modeButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(modeName.copy().append("\n").append(Component.translatable("gui.arcane.mode.tip"))));
+        }
         if (!java.util.Objects.equals(sp.id(), folderShownFor)) { folderShownFor = sp.id(); folderBox.setValue(sp.folder()); }
         for (int i = 0; i < loadoutButtons.length; i++) {
           boolean in = i < ClientArcaneData.loadouts().size() && ClientArcaneData.loadouts().get(i).contains(sp.id());
-          loadoutButtons[i].setMessage(Component.literal((in ? "§a" : "§7") + "C" + (i + 1)));
+          loadoutButtons[i].setMessage(Component.literal((in ? "§a" : "§8") + (i + 1)));
         }
       }
     }
     boolean spells = tab == Tab.SPELLS && selectedSpellEntry().isPresent();
-    activateButton.visible = spells;
     deleteButton.visible = spells;
     copyButton.visible = tab == Tab.SPELLS;
-    deleteButton.setMessage(Component.translatable(confirmDelete ? "gui.arcane.grimoire.confirm" : "gui.arcane.grimoire.delete")
-        .withStyle(confirmDelete ? ChatFormatting.RED : ChatFormatting.WHITE));
-    activateButton.active = selectedSpellEntry().map(s -> !ClientArcaneData.active().map(a -> a.equals(s.id())).orElse(false)).orElse(false);
+    deleteButton.setMessage(Component.literal(confirmDelete ? "?" : "✖").withStyle(confirmDelete ? ChatFormatting.RED : ChatFormatting.WHITE));
   }
 
   private Optional<SpellEntry> selectedSpellEntry() {
@@ -305,6 +294,20 @@ public class GrimoireScreen extends Screen {
   }
 
   @Override
+  public boolean keyPressed(int key, int scan, int mods) {
+    if (key == 257 || key == 335) { // Enter
+      if (renameBox != null && renameBox.isFocused() && renameBox.visible) { rename(); return true; }
+      if (folderBox != null && folderBox.isFocused() && folderBox.visible) {
+        selectedSpellEntry().ifPresent(sp -> ModNetwork.CHANNEL.sendToServer(
+            new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.FOLDER, sp.id(), 0, folderBox.getValue())));
+        return true;
+      }
+      if (noteBox != null && noteBox.isFocused() && noteBox.visible) { addNote(); return true; }
+    }
+    return super.keyPressed(key, scan, mods);
+  }
+
+  @Override
   public boolean isPauseScreen() {
     return false;
   }
@@ -319,7 +322,13 @@ public class GrimoireScreen extends Screen {
           List<SpellEntry> spells = filtered();
           int index = spellPage * SPELL_ROWS + row;
           if (index < spells.size()) {
-            selectedSpell = spells.get(index).id();
+            SpellEntry hit = spells.get(index);
+            if (mx >= left + 20 && mx < left + 32) {
+              ModNetwork.CHANNEL.sendToServer(new C2SGrimoireOrgPacket(C2SGrimoireOrgPacket.FAVORITE, hit.id(), hit.favorite() ? 0 : 1, ""));
+              return true;
+            }
+            selectedSpell = hit.id();
+            if (!ClientArcaneData.active().map(a -> a.equals(hit.id())).orElse(false)) activate();
             confirmDelete = false;
             updateButtons();
             return true;
@@ -404,7 +413,7 @@ public class GrimoireScreen extends Screen {
       if (selected) g.fill(left + 14, y - 1, left + 124, y + ROW - 1, 0x663C2A94);
       boolean isActive = active.map(a -> a.equals(s.id())).orElse(false);
       if (isActive) g.drawString(font, "▶", left + 15, y + 1, 0xC9A6FF, false);
-      if (s.favorite()) g.drawString(font, "★", left + 23, y + 1, 0xFFD36B, false);
+      g.drawString(font, s.favorite() ? "★" : "☆", left + 23, y + 1, s.favorite() ? 0xFFD36B : 0x6A5F96, false);
       String name = font.plainSubstrByWidth(spellName(s).getString(), 70);
       g.drawString(font, name, left + 33, y + 1, selected ? 0xF2EAFF : 0xD2C8F0, false);
       if (s.cost() >= 0) {

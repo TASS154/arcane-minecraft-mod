@@ -75,7 +75,8 @@ public final class ArcaneSync {
       g.putString("id", id.toString());
       g.putInt("level", level.ordinal());
       GlyphRegistry.get(id).ifPresent((GlyphDefinition def) -> {
-        g.putString("category", def.category().getSerializedName());
+        // Rituais (circulo + componentes) ganham a categoria de EXIBICAO "ritual"; a gramatica segue usando a categoria real (efeito).
+        g.putString("category", def.ritual() > 0 || !def.components().isEmpty() ? "ritual" : def.category().getSerializedName());
         g.putInt("cost", def.cost().mana());
         g.putBoolean("scales", def.category() == com.arcane.glyph.GlyphCategory.EFFECT);
         g.putInt("ritual", def.ritual());

@@ -535,6 +535,7 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
       case "modifier" -> 0xF0C850;
       case "condition" -> 0xCDA5F5;
       case "activator" -> 0xF0F5FF;
+      case "ritual" -> 0xFF6FA8;
       default -> 0xFFFFFF;
     };
   }

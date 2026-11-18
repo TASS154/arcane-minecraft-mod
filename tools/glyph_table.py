@@ -449,6 +449,12 @@ glyph("zone", "modifier", 3,
       ["..####..", ".#....#.", "#.####.#", "#.#..#.#", "#.#..#.#", "#.####.#", ".#....#.", "..####.."],
       params={"seconds": (10.0, 2.0, 60.0, "float"), "interval": (1.0, 0.5, 5.0, "float")},
       scope={"target": "delivery", "kind": "form", "mutate": {"zone_seconds": {"op": "put", "value": 10.0, "param": "seconds"}, "zone_interval": {"op": "put", "value": 1.0, "param": "interval"}}})
+glyph("domain", "modifier", 4,
+      ("Domínio", "Modificador de Barreira: fecha um domo e o mantém. Tudo que está dentro recebe os efeitos da magia continuamente (a cada intervalo) até o domo quebrar: ele acaba quando perde cerca de 10% dos blocos da casca, ou quando passa o tempo. A casca não se refaz e não some sozinha enquanto o Domínio dura; quebrar um pedaço dela o encerra (e dispara \"Quando a zona acabar\"). Use com Barreira + Domo (ou Esfera) + um efeito (Cura, Dano, Lentidão...). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). Conta como Zona (mesmo limite de 2 por conjurador)."),
+      ("Domain", "Barrier modifier: closes a dome and keeps it. Everything inside receives the spell's effects continuously (every interval) until the dome breaks: it ends when about 10% of the shell blocks are gone, or when time runs out. The shell does not heal and does not fade on its own while the Domain lasts; breaking a piece of it ends it (and fires \"When the zone ends\"). Use with Barrier + Dome (or Sphere) + an effect (Heal, Damage, Slow...). Parameters: seconds (up to 60) and interval (min 0.5 s). Counts as a Zone (same limit of 2 per caster)."),
+      ["..####..", ".#.##.#.", "#.#..#.#", "##.##.##", "##.##.##", "#.#..#.#", "########", "........"],
+      params={"seconds": (30.0, 5.0, 60.0, "float"), "interval": (1.0, 0.5, 5.0, "float")},
+      scope={"target": "delivery", "kind": "form", "mutate": {"zone_seconds": {"op": "put", "value": 30.0, "param": "seconds"}, "zone_interval": {"op": "put", "value": 1.0, "param": "interval"}, "domain": {"op": "put", "value": 1.0}}})
 glyph("on_zone_end", "condition", 0,
       ("Quando a Zona Acabar", "Condição: o que vem depois só acontece quando a zona desta magia terminar (uma vez). Sem o glifo Zona, nunca acontece."),
       ("When the Zone Ends", "Condition: what follows only happens when this spell's zone ends (once). Without the Zone glyph, it never happens."),
@@ -780,7 +786,7 @@ TIERS = {
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
         "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain", "sleep", "on_kill", "on_fall",
         "satellites", "link", "trail", "recall", "imbue", "acid", "electrify", "contagion", "dispel", "reflect", "silence", "swap",
-        "curse", "overcharge", "after_hits", "pocket", "restore", "chorus"],
+        "curse", "overcharge", "after_hits", "pocket", "restore", "chorus", "domain"],
     4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis", "phase", "petrify", "reanimate"],
 }
 FAMILIES = {

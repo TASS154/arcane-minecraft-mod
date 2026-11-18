@@ -2040,6 +2040,40 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "ritual_arena", timeoutTicks = 140, batch = "domain_dome")
+  public static void domainKeepsEffectsInsideUntilTheShellBreaks(GameTestHelper h) {
+    for (int x = 0; x < 15; x++) for (int z = 0; z < 15; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+    Pig caster = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(7, 1, 7));
+    var inside = h.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(8, 1, 7));
+    com.arcane.execution.Zones.clearFor(caster.getUUID());
+    caster.setYRot(0);
+    caster.setXRot(0);
+    var res = CastingService.tryCast(caster, new Inscription(List.of(g("barrier"), g("shape_dome"), g("domain", "seconds", 30.0, "interval", 0.5), g("damage", "amount", 0.5))), h.getLevel());
+    h.assertTrue(res.success(), "falhou: " + res.message());
+    int shell = countBarrier(h, 6);
+    h.assertTrue(shell > 20, "o domo deveria ter casca, tem " + shell);
+    h.assertTrue(com.arcane.execution.Zones.activeFor(caster.getUUID()) == 1, "o Dominio conta como zona");
+    float[] mark = new float[1];
+    h.runAfterDelay(45, () -> {
+      h.assertTrue(inside.getHealth() < inside.getMaxHealth() - 1.0f, "quem esta dentro leva o efeito continuamente (vida " + inside.getHealth() + ")");
+      h.assertTrue(countBarrier(h, 6) == shell, "a casca nao se refaz nem some enquanto dura (" + countBarrier(h, 6) + " de " + shell + ")");
+      int i = 0;
+      for (int x = -6; x <= 6; x++) for (int y = -1; y <= 7; y++) for (int z = -6; z <= 6; z++) {
+        BlockPos pos = h.absolutePos(new BlockPos(7 + x, 1 + y, 7 + z));
+        if (h.getLevel().getBlockState(pos).is(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get()) && i++ % 4 == 0) h.getLevel().removeBlock(pos, false);
+      }
+    });
+    h.runAfterDelay(70, () -> {
+      h.assertTrue(com.arcane.execution.Zones.activeFor(caster.getUUID()) == 0, "o Dominio acaba quando a casca quebra");
+      h.assertTrue(countBarrier(h, 6) == 0, "o resto da casca se desfaz (" + countBarrier(h, 6) + ")");
+      mark[0] = inside.getHealth();
+    });
+    h.runAfterDelay(110, () -> {
+      h.assertTrue(inside.getHealth() == mark[0], "depois de quebrar, o efeito para (vida " + inside.getHealth() + " vs " + mark[0] + ")");
+      h.succeed();
+    });
+  }
+
   @GameTest(template = "ritual_arena", timeoutTicks = 100)
   public static void areaModifierEnlargesTheDome(GameTestHelper h) {
     for (int x = 0; x < 15; x++) for (int z = 0; z < 15; z++) h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);

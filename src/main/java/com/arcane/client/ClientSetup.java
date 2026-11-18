@@ -61,10 +61,12 @@ public class ClientSetup {
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static void addPetrifyLayers(EntityRenderersEvent.AddLayers event) {
     for (var type : net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValues()) {
-      Object renderer = event.getRenderer((net.minecraft.world.entity.EntityType) type);
-      if (renderer instanceof net.minecraft.client.renderer.entity.LivingEntityRenderer<?, ?>) {
-        net.minecraft.client.renderer.entity.LivingEntityRenderer living = (net.minecraft.client.renderer.entity.LivingEntityRenderer) renderer;
-        living.addLayer(new com.arcane.client.render.PetrifyLayer(living));
+      try {
+        // getRenderer devolve R extends LivingEntityRenderer: tipos sem renderer vivo (Noop) estouram o cast, entao pulamos.
+        net.minecraft.client.renderer.entity.LivingEntityRenderer living = event.getRenderer((net.minecraft.world.entity.EntityType) type);
+        if (living != null) living.addLayer(new com.arcane.client.render.PetrifyLayer(living));
+      } catch (ClassCastException ignored) {
+        // nao e uma criatura viva
       }
     }
     for (String skin : event.getSkins()) {

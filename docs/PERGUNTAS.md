@@ -46,6 +46,14 @@
 - **Ritual sem forma:** vira Aura centrada no altar.
 - **Golem:** sem opção de quantidade (era ignorada no custo).
 
+## Segunda revisão de 18 nov 2026 (padrões adotados)
+- **Valor das oferendas:** tabela em `OfferingValue` (provisória). Cada oferenda consome 1 unidade; slot repetido conta uma vez. Cada item é uma unidade, não a pilha inteira.
+- **Lendário:** vem só do valor das oferendas (> 300%), sem exigir círculo maior nem glifo de nível 4; basta um círculo válido. Se achar forte demais, volte a exigir círculo maior.
+- **Teto 1500%:** `ritualMaxPercent` (100 a 100000).
+- **Cratera:** esfera de até raio 24 (mais que isso a cratera para em 24); vanilla continua para raios menores que 2,5.
+- **Onda (runas):** o círculo é só uma aproximação do leque.
+- **Segurar:** só Pilar fica fixo; feixe e aura seguem o conjurador.
+
 ## Dúvidas registradas na Fase 5
 - **Bolso, 13 espaços:** "metade de um baú pequeno" virou 13 (27 / 2 arredondado para baixo). O menu mostra 2 fileiras (18) e os 5 últimos ficam travados. Se preferir 14 ou 9, é só mudar `pocketSlots`.
 - **Coro, "ao mesmo tempo":** interpretei como uma janela de 3 s (60 ticks) a partir de quem começa, com o círculo de raio 8 ao redor dele. Os outros precisam ter a mesma magia equipada. Dispara no fim da janela, para contar todo mundo. Tudo em config (`chorusRadius`, `chorusWindowTicks`, `chorusMaxParticipants`).

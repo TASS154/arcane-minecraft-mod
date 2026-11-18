@@ -39,6 +39,9 @@ public class ShapeFxRenderer {
     final SpellElement element;
     final int total;
     int age;
+    /** Efeito de magia mantida: abre uma vez, fica de pe e so some quando para de ser renovado. */
+    boolean sustained;
+    int born;
 
     Fx(int type, Vec3 pos, Vec3 dir, float size, int rgb, SpellElement element, int total) {
       this.type = type;
@@ -50,7 +53,20 @@ public class ShapeFxRenderer {
       this.total = total;
     }
 
-    float life(float partial) { return Math.min(1f, (age + partial) / total); }
+    float life(float partial) {
+      if (sustained) {
+        float open = Math.min(1f, (born + partial) / 10f);
+        return type == S2CShapeFxPacket.PILLAR ? 0.3f * open : open;
+      }
+      return Math.min(1f, (age + partial) / total);
+    }
+
+    /** Transparencia: constante enquanto renovado; apaga nos ultimos ticks depois que o conjurador solta. */
+    float fade(float partial) {
+      if (!sustained) { float l = life(partial); return 1f - l * l; }
+      float remaining = total - age - partial;
+      return 0.85f * Math.min(1f, Math.max(0f, remaining / 3f));
+    }
   }
 
   public static void add(int type, Vec3 pos, Vec3 dir, float size, int rgb, int element, int ticks) {
@@ -61,8 +77,19 @@ public class ShapeFxRenderer {
       else if (type == S2CShapeFxPacket.RITUAL) com.arcane.client.CameraShake.add(0.5f, d);
       else if (type == S2CShapeFxPacket.AURA && size > 2.5f) com.arcane.client.CameraShake.add(Math.min(0.4f, size * 0.05f), d);
     }
+    boolean sustain = ticks >= S2CShapeFxPacket.SUSTAIN;
+    if (sustain) ticks -= S2CShapeFxPacket.SUSTAIN;
     synchronized (FX) {
-      if (FX.size() < 48) FX.add(new Fx(type, pos, dir, size, rgb, SpellElement.byOrdinal(element), Math.max(4, ticks)));
+      if (sustain) {
+        for (Fx f : FX) {
+          if (f.sustained && f.type == type && f.pos.distanceToSqr(pos) < 0.01) { f.age = 0; return; } // renova o que ja esta de pe
+        }
+      }
+      if (FX.size() < 48) {
+        Fx fx = new Fx(type, pos, dir, size, rgb, SpellElement.byOrdinal(element), Math.max(4, ticks));
+        fx.sustained = sustain;
+        FX.add(fx);
+      }
     }
   }
 
@@ -75,6 +102,7 @@ public class ShapeFxRenderer {
     Minecraft mc = Minecraft.getInstance();
     synchronized (FX) {
       if (mc.level != null) for (Fx f : FX) emit(mc, f);
+      for (Fx f : FX) f.born++;
       FX.removeIf(f -> ++f.age >= f.total);
     }
   }
@@ -159,7 +187,7 @@ public class ShapeFxRenderer {
 
   private static void draw(VertexConsumer c, PoseStack.Pose pose, Fx f, float partial) {
     float life = f.life(partial);
-    float fade = 1f - life * life;
+    float fade = f.fade(partial);
     int r = (f.rgb >> 16) & 255, g = (f.rgb >> 8) & 255, b = f.rgb & 255;
     switch (f.type) {
       case S2CShapeFxPacket.AURA -> {

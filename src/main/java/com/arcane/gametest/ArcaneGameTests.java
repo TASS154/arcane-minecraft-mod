@@ -2109,6 +2109,103 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  // ================================================================== Revisao 2: cratera redonda, oferendas, pilar mantido
+  @GameTest(template = "empty", batch = "rev_crater", timeoutTicks = 60)
+  public static void blastCraterIsASphereNotACube(GameTestHelper h) {
+    BlockPos c = h.absolutePos(new BlockPos(3, 10, 3));
+    var level = h.getLevel();
+    for (int x = -7; x <= 7; x++) for (int y = -7; y <= 7; y++) for (int z = -7; z <= 7; z++) level.setBlock(c.offset(x, y, z), Blocks.DIRT.defaultBlockState(), 2);
+    var crater = com.arcane.execution.RoundCrater.blocks(level, net.minecraft.world.phys.Vec3.atCenterOf(c), 6.0f);
+    var set = new java.util.HashSet<>(crater);
+    h.assertTrue(set.contains(c) && set.contains(c.offset(3, 0, 0)) && set.contains(c.offset(0, -3, 0)), "o miolo e os eixos saem");
+    h.assertTrue(!set.contains(c.offset(5, 5, 5)) && !set.contains(c.offset(6, 6, 0)) && !set.contains(c.offset(0, 6, 6)), "os cantos do cubo nao saem");
+    int outside = 0;
+    for (BlockPos b : crater) if (b.distSqr(c) > 6.6 * 6.6) outside++;
+    h.assertTrue(outside == 0, "nada alem do raio (" + outside + ")");
+    double ideal = 4.0 / 3.0 * Math.PI * 6 * 6 * 6;
+    h.assertTrue(crater.size() > ideal * 0.5 && crater.size() < ideal * 1.05, "volume de esfera: " + crater.size() + " de ~" + (int) ideal);
+    for (int x = -7; x <= 7; x++) for (int y = -7; y <= 7; y++) for (int z = -7; z <= 7; z++) level.setBlock(c.offset(x, y, z), Blocks.AIR.defaultBlockState(), 2);
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "rev_offer_value")
+  public static void offeringValuesAddToTheRitualAndLegendaryDoublesWithACap(GameTestHelper h) {
+    var star = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHER_STAR);
+    var iron = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT);
+    var stick = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK);
+    h.assertTrue(com.arcane.ritual.OfferingValue.of(iron) > com.arcane.ritual.OfferingValue.of(stick) && com.arcane.ritual.OfferingValue.of(stick) > 0, "qualquer item vale algo; o precioso vale mais");
+    h.assertTrue(com.arcane.ritual.OfferingValue.legendary(com.arcane.ritual.OfferingValue.of(star)), "a Estrela sozinha ja passa de 300%");
+    h.assertTrue(!com.arcane.ritual.OfferingValue.legendary(300), "300% exatos ainda nao e lendario");
+    com.arcane.ritual.RitualSettings.setMaxPercent(1500);
+    h.assertTrue(com.arcane.ritual.OfferingValue.total(300, 120) == 420, "sem lendario so soma: " + com.arcane.ritual.OfferingValue.total(300, 120));
+    h.assertTrue(com.arcane.ritual.OfferingValue.total(150, 350) == 1000, "lendario dobra: (150+350)x2 = 1000");
+    h.assertTrue(com.arcane.ritual.OfferingValue.total(300, 400) == 1400, "700% vira 1400%");
+    h.assertTrue(com.arcane.ritual.OfferingValue.total(1000, 500) == 1500, "limite de 1500%");
+    com.arcane.ritual.RitualSettings.setMaxPercent(2000);
+    h.assertTrue(com.arcane.ritual.OfferingValue.total(1000, 500) == 2000, "o limite e configuravel");
+    com.arcane.ritual.RitualSettings.setMaxPercent(com.arcane.ritual.RitualSettings.DEFAULT_MAX_PERCENT);
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", batch = "rev_offer_ritual", timeoutTicks = 100)
+  public static void offeringsPowerTheRitualAndAreConsumedOnePerItem(GameTestHelper h) {
+    arena(h);
+    var player = learn(casterWith(h), "self", "heal");
+    player.moveTo(h.absoluteVec(new net.minecraft.world.phys.Vec3(ALTAR.getX() + 2.5, 1, ALTAR.getZ() + 0.5)));
+    h.getLevel().addNewPlayer(player);
+    com.arcane.ritual.RitualService.drawPerfectCircle(h.getLevel(), altarAbs(h), 4);
+    player.getInventory().setItem(0, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 3));
+    player.getInventory().setItem(1, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_BLOCK, 2));
+    player.getInventory().setItem(2, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_BLOCK, 2));
+    var entry = new com.arcane.network.packet.C2SSaveInscriptionPacket.Entry("arcane:self", Map.of());
+    var heal = new com.arcane.network.packet.C2SSaveInscriptionPacket.Entry("arcane:heal", Map.of());
+    // pouca oferenda: soma, sem lendario, consome 1 ferro
+    var small = com.arcane.network.packet.C2SRitualPacket.offeringsOf(player, List.of(0));
+    var preview = com.arcane.ritual.RitualService.preview(h.getLevel(), altarAbs(h), player, new Inscription(List.of(g("self"), g("heal"))), small);
+    h.assertTrue(!preview.legendary() && preview.offeringPct() == 4 && preview.totalPct() == preview.sizePct() + 4, "previa: " + preview.offeringPct() + "% / total " + preview.totalPct());
+    var tried = com.arcane.ritual.RitualService.perform(h.getLevel(), altarAbs(h), player, new Inscription(List.of(g("self"), g("heal"))),
+        com.arcane.ritual.ComponentSource.of(player), small);
+    h.assertTrue(tried.success(), "ritual com oferenda: " + tried.outcome() + " " + tried.detail());
+    h.assertTrue(player.getInventory().getItem(0).getCount() == 2, "uma unidade do ferro foi para o altar");
+    // oferenda grande (2 blocos de diamante = 320%): lendario; reduz a mesma pilha em 1 cada, e slot repetido conta uma vez
+    var big = com.arcane.network.packet.C2SRitualPacket.offeringsOf(player, List.of(1, 2, 2, 1, 0));
+    h.assertTrue(big.stacks().size() == 3, "ate 3 slots distintos");
+    var bigPreview = com.arcane.ritual.RitualService.preview(h.getLevel(), altarAbs(h), player, new Inscription(List.of(g("self"), g("heal"))), big);
+    h.assertTrue(bigPreview.legendary() && bigPreview.totalPct() == (bigPreview.sizePct() + bigPreview.offeringPct()) * 2, "passou de 300%: lendario e dobra (" + bigPreview.totalPct() + "%)");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "rev_hold_pillar", timeoutTicks = 80)
+  public static void heldPillarStaysWhereItWasCastAndRunesShowTheRealRadius(GameTestHelper h) {
+    floor(h);
+    var player = learn(casterWith(h), "pillar", "damage");
+    player.setXRot(70f);
+    player.setYRot(0f);
+    var spell = addSpell(player, com.arcane.grimoire.SpellPrefs.CastMode.HOLD, g("pillar", "radius", 2.0), g("damage", "amount", 0.5));
+    com.arcane.execution.CastChannels.press(player, spell.id());
+    var anchor = com.arcane.execution.CastChannels.heldAnchor(player.getUUID());
+    var tryIt = com.arcane.execution.CastingService.tryCast(player, spell, com.arcane.execution.PrecisionSnapshot.of(spell));
+    h.assertTrue(anchor != null, "o pilar mantido registra onde nasceu (ativo=" + com.arcane.execution.CastChannels.isActive(player.getUUID())
+        + ", tentativa=" + tryIt.success() + " " + tryIt.message() + ", mana=" + com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(player).current() + ")");
+    float r1 = com.arcane.execution.CastChannels.areaRadius(player, spell, 1.0);
+    float r5 = com.arcane.execution.CastChannels.areaRadius(player, spell, 5.0);
+    h.assertTrue(r1 > 0 && Math.abs(r5 - r1 * 5f) < 0.01f, "a carga x5 aumenta o raio x5 (" + r1 + " -> " + r5 + ")");
+    com.arcane.execution.AreaDial.add(player.getUUID(), 4);
+    float dialed = com.arcane.execution.CastChannels.areaRadius(player, spell, 1.0);
+    com.arcane.execution.AreaDial.reset(player.getUUID());
+    h.assertTrue(dialed > r1 * 2.0f, "o regulador tambem entra no raio mostrado (" + dialed + ")");
+    // vira a mira: o pilar nao acompanha
+    player.setYRot(90f);
+    player.setXRot(35f);
+    h.runAfterDelay(30, () -> {
+      var later = com.arcane.execution.CastChannels.heldAnchor(player.getUUID());
+      h.assertTrue(later != null && later.distanceToSqr(anchor) < 1.0e-6, "mirar em outro lugar nao move a coluna mantida");
+      com.arcane.execution.CastChannels.release(player);
+      h.assertTrue(com.arcane.execution.CastChannels.heldAnchor(player.getUUID()) == null, "soltar libera o ponto");
+      h.succeed();
+    });
+  }
+
   // ================================================================== Revisao: toggle, area, custo, ritual sem forma
   private static net.minecraft.server.level.ServerPlayer learn(net.minecraft.server.level.ServerPlayer player, String... ids) {
     var grimoire = com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow();
@@ -2205,13 +2302,13 @@ public class ArcaneGameTests {
     com.arcane.ritual.RitualService.drawPerfectCircle(h.getLevel(), altarAbs(h), 4);
     var entry = new com.arcane.network.packet.C2SSaveInscriptionPacket.Entry("arcane:summon_wolves", Map.of("count", 2.0));
     // sem ossos: a oferenda falta e o ritual nao acontece
-    com.arcane.network.packet.C2SRitualPacket.apply(player, new com.arcane.network.packet.C2SRitualPacket(altarAbs(h), com.arcane.network.packet.C2SRitualPacket.PERFORM, false, List.of(entry)));
+    com.arcane.network.packet.C2SRitualPacket.apply(player, new com.arcane.network.packet.C2SRitualPacket(altarAbs(h), com.arcane.network.packet.C2SRitualPacket.PERFORM, List.of(), List.of(entry)));
     h.assertTrue(h.getLevel().getEntitiesOfClass(com.arcane.entity.SpectralWolfEntity.class, new net.minecraft.world.phys.AABB(altarAbs(h)).inflate(12)).isEmpty(), "sem a oferenda nao invoca");
     // com 6 ossos: invoca; os ossos saem do inventario
     player.getInventory().add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE, 6));
-    var preview = com.arcane.ritual.RitualService.preview(h.getLevel(), altarAbs(h), player, new Inscription(List.of(new GlyphInstance(new ResourceLocation("arcane", "summon_wolves"), Map.of("count", 2.0)))), false);
+    var preview = com.arcane.ritual.RitualService.preview(h.getLevel(), altarAbs(h), player, new Inscription(List.of(new GlyphInstance(new ResourceLocation("arcane", "summon_wolves"), Map.of("count", 2.0)))), com.arcane.ritual.RitualService.Offerings.NONE);
     h.assertTrue(preview.valid() && preview.needs().size() == 1 && preview.needs().get(0).need() == 6 && preview.needs().get(0).have() >= 6, "a previa lista a oferenda (6 ossos)");
-    com.arcane.network.packet.C2SRitualPacket.apply(player, new com.arcane.network.packet.C2SRitualPacket(altarAbs(h), com.arcane.network.packet.C2SRitualPacket.PERFORM, false, List.of(entry)));
+    com.arcane.network.packet.C2SRitualPacket.apply(player, new com.arcane.network.packet.C2SRitualPacket(altarAbs(h), com.arcane.network.packet.C2SRitualPacket.PERFORM, List.of(), List.of(entry)));
     var wolves = h.getLevel().getEntitiesOfClass(com.arcane.entity.SpectralWolfEntity.class, new net.minecraft.world.phys.AABB(altarAbs(h)).inflate(12));
     h.assertTrue(wolves.size() == 2, "o ritual desenhado na tela invocou 2 lobos (" + wolves.size() + ")");
     h.succeed();

@@ -106,6 +106,10 @@ public final class ModNetwork {
   }
 
   /** Estado de canalizacao (runas de carga/manter) so para o proprio jogador. */
+  public static void sendChannel(ServerPlayer player, int state, float progress, int shape, int rgb, float radius, net.minecraft.world.phys.Vec3 anchor) {
+    CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new com.arcane.network.packet.S2CChannelPacket(state, progress, shape, rgb, radius, anchor));
+  }
+
   public static void sendChannel(ServerPlayer player, int state, float progress, int shape, int rgb) {
     CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new com.arcane.network.packet.S2CChannelPacket(state, progress, shape, rgb));
   }

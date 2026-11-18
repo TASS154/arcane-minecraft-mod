@@ -38,6 +38,9 @@ public final class CastChannels {
     final CastMode mode;
     final long start;
     long next;
+    int pulses;
+    /** Pilar mantido: o ponto onde ele nasceu; fica ali (a mira nao o arrasta). */
+    net.minecraft.world.phys.Vec3 anchor;
     double drained;
     double cost = 1;
     /** Blocos de barreira da magia mantida: renovados enquanto segura e desfeitos ao soltar. */
@@ -76,7 +79,52 @@ public final class CastChannels {
       return CastingService.cast(player, inscription, PrecisionSnapshot.of(inscription), 1.0, silent, silent);
     } finally {
       HOLDING_NOW.remove();
+      a.pulses++;
     }
+  }
+
+  /** Esta conjuracao e a repeticao silenciosa de uma magia mantida (nao a primeira)? Fx e som nao se repetem. */
+  public static boolean holdPulse() {
+    Active a = HOLDING_NOW.get();
+    return a != null && a.pulses > 0;
+  }
+
+  /** Ponto onde o pilar mantido deste jogador esta fixo, ou null. */
+  public static net.minecraft.world.phys.Vec3 heldAnchor(UUID player) {
+    Active a = ACTIVE.get(player);
+    return a == null ? null : a.anchor;
+  }
+
+  /** Magia mantida em andamento (primeira conjuracao ou repeticao)? */
+  public static boolean holding() { return HOLDING_NOW.get() != null; }
+
+  /**
+   * Pilar mantido: a primeira conjuracao registra onde a coluna nasceu e as repeticoes devolvem sempre esse ponto, entao
+   * mirar em outro lugar nao a move. Fora do modo Segurar devolve {@code fresh} como veio.
+   */
+  public static net.minecraft.world.phys.Vec3 lockAnchor(net.minecraft.world.phys.Vec3 fresh) {
+    Active a = HOLDING_NOW.get();
+    if (a == null) return fresh;
+    if (a.anchor == null) a.anchor = fresh;
+    return a.anchor;
+  }
+
+  /** Raio REAL (em blocos) que a area da magia teria agora; 0 se a magia nao tem uma forma de area. */
+  public static float areaRadius(ServerPlayer player, Inscription inscription, double scale) {
+    var plan = CompiledPlanCache.getOrCompile(inscription);
+    DeliverySpec spec = DeliverySpec.fromPlan(plan.delivery());
+    double base = switch (spec.handler().getPath()) {
+      case "aura" -> spec.parameters().getOrDefault("radius", 5.0);
+      case "pillar" -> spec.parameters().getOrDefault("radius", 2.0);
+      case "barrier" -> spec.parameters().getOrDefault("radius", 3.0);
+      case "wave" -> spec.range();
+      default -> 0.0;
+    };
+    if (base <= 0.0) return 0f;
+    var environment = com.arcane.ambient.AmbientFieldResolver.resolve((net.minecraft.server.level.ServerLevel) player.level(), player.blockPosition());
+    double crystal = Math.min(com.arcane.config.ArcaneConfig.CRYSTAL_AREA_CAP.get(), Math.max(1.0, environment.potencyMultiplier()));
+    double factor = crystal * Math.max(1.0, scale) * AreaDial.factorFor(player.getUUID(), plan);
+    return (float) Math.min(64.0, Math.max(1.0, base * factor));
   }
 
   /** Desfaz a casca de barreira da magia mantida (com faiscas). */
@@ -155,7 +203,13 @@ public final class CastChannels {
   }
 
   private static void sendFx(ServerPlayer player, Inscription inscription, int state, double progress) {
-    com.arcane.network.ModNetwork.sendChannel(player, state, (float) progress, shapeOf(inscription), colorOf(inscription));
+    sendFx(player, inscription, state, progress, 1.0, null);
+  }
+
+  /** As runas mostram a area real: o servidor manda o raio que a magia teria agora (carga e regulador incluidos). */
+  private static void sendFx(ServerPlayer player, Inscription inscription, int state, double progress, double scale, net.minecraft.world.phys.Vec3 anchor) {
+    com.arcane.network.ModNetwork.sendChannel(player, state, (float) progress, shapeOf(inscription), colorOf(inscription),
+        areaRadius(player, inscription, scale), anchor);
   }
 
   private static void fail(ServerPlayer player, String message) {
@@ -205,7 +259,7 @@ public final class CastChannels {
         var r = castHeld(player, inscription, holding, false);
         if (!r.success()) { fail(player, r.message()); return; }
         ACTIVE.put(player.getUUID(), holding);
-        sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.HOLDING, 1.0);
+        sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.HOLDING, 1.0, 1.0, holding.anchor);
       }
       case TOGGLE -> {
         var r = CastingService.tryCast(player, inscription, precision);
@@ -303,7 +357,7 @@ public final class CastChannels {
             mana.set((float) (mana.current() - step));
             a.drained += step;
           }
-          if ((now - a.start) % FX_INTERVAL_TICKS == 0) sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.CHARGING, chargeFraction(player));
+          if ((now - a.start) % FX_INTERVAL_TICKS == 0) sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.CHARGING, chargeFraction(player), chargeScale(a.drained, a.cost), null);
         }
         case HOLD -> {
           if (flies(inscription)) {
@@ -323,7 +377,7 @@ public final class CastChannels {
               var r = castHeld(player, inscription, a, true);
               if (!r.success()) { fail(player, r.message()); stop(player, false); continue; }
             }
-            if ((now - a.start) % FX_INTERVAL_TICKS == 0) sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.HOLDING, 1.0);
+            if ((now - a.start) % FX_INTERVAL_TICKS == 0) sendFx(player, inscription, com.arcane.network.packet.S2CChannelPacket.HOLDING, 1.0, 1.0, a.anchor);
           }
         }
         default -> it.remove();

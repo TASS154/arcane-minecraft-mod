@@ -31,11 +31,17 @@ public final class ChannelFx {
   private static float shown;
   private static int sinceUpdate;
   private static float spin;
+  /** Raio real da area (servidor) e o que as runas ja mostram; o ponto onde um pilar mantido fica fixo. */
+  private static float areaRadius;
+  private static float shownRadius;
+  private static Vec3 lockedAnchor;
 
   private ChannelFx() {}
 
-  public static void set(int newState, float newProgress, int newShape, int newRgb) {
-    if (state == S2CChannelPacket.OFF && newState != S2CChannelPacket.OFF) shown = 0f;
+  public static void set(int newState, float newProgress, int newShape, int newRgb, float newRadius, Vec3 newAnchor) {
+    if (state == S2CChannelPacket.OFF && newState != S2CChannelPacket.OFF) { shown = 0f; shownRadius = 0f; }
+    areaRadius = newRadius;
+    lockedAnchor = newAnchor;
     state = newState;
     progress = newProgress;
     shape = newShape;
@@ -55,7 +61,8 @@ public final class ChannelFx {
     if (e.phase != TickEvent.Phase.END) return;
     Minecraft mc = Minecraft.getInstance();
     if (state != S2CChannelPacket.OFF && (mc.player == null || ++sinceUpdate > 25)) state = S2CChannelPacket.OFF; // o servidor parou de avisar
-    if (state == S2CChannelPacket.OFF) { shown = 0f; return; }
+    if (state == S2CChannelPacket.OFF) { shown = 0f; shownRadius = 0f; return; }
+    shownRadius += (areaRadius - shownRadius) * 0.25f;
     if (state == S2CChannelPacket.CHARGING) com.arcane.client.CameraShake.sustain(0.04f + 0.3f * Mth.clamp(progress, 0f, 1f));
     spin += 0.05f + 0.07f * shown;
     shown += (target() - shown) * 0.12f;
@@ -101,9 +108,14 @@ public final class ChannelFx {
       case S2CChannelPacket.WAVE: {
         Vec3 flat = new Vec3(look.x, 0, look.z);
         flat = flat.lengthSqr() < 1.0e-4 ? new Vec3(0, 0, 1) : flat.normalize();
-        return new Anchor(feet.add(flat.scale(1.8)).add(0, 0.06, 0), ux, vz, new Vec3(0, 1, 0), 1.4f);
+        // a onda cobre um leque a frente: o circulo mostra o tamanho do alcance, com o centro a meio caminho
+        double ahead = hasRealRadius() ? Math.max(1.2, shownRadius * 0.5) : 1.8;
+        return new Anchor(feet.add(flat.scale(ahead)).add(0, 0.06, 0), ux, vz, new Vec3(0, 1, 0), 1.4f);
       }
       case S2CChannelPacket.PILLAR: {
+        if (state == S2CChannelPacket.HOLDING && lockedAnchor != null) {
+          return new Anchor(lockedAnchor.add(0, 0.07, 0), ux, vz, new Vec3(0, 1, 0), 1.5f, true); // mantido: fixo onde nasceu
+        }
         HitResult hit = player.pick(32.0, partial, false);
         Vec3 at = hit.getType() == HitResult.Type.MISS ? eye.add(look.scale(10.0)) : hit.getLocation();
         return new Anchor(at.add(0, 0.07, 0), ux, vz, new Vec3(0, 1, 0), 1.5f, hasGround(mc, at));
@@ -118,7 +130,13 @@ public final class ChannelFx {
     }
   }
 
+  private static boolean hasRealRadius() {
+    return areaRadius > 0f && (shape == S2CChannelPacket.AURA || shape == S2CChannelPacket.WAVE || shape == S2CChannelPacket.PILLAR);
+  }
+
+  /** Com forma de area, as runas tem o tamanho REAL da area (carga, cristal e regulador ja contados pelo servidor). */
   private static float radius(Anchor a) {
+    if (hasRealRadius()) return Math.max(0.5f, shape == S2CChannelPacket.WAVE ? shownRadius * 0.5f : shownRadius);
     return a.base * (0.55f + 0.9f * shown);
   }
 
@@ -138,7 +156,7 @@ public final class ChannelFx {
     VertexConsumer c = buffers.getBuffer(RenderType.lightning());
     PoseStack.Pose last = pose.last();
     int r = (rgb >> 16) & 255, g = (rgb >> 8) & 255, b = rgb & 255;
-    float pulse = state == S2CChannelPacket.HOLDING ? 0.82f + 0.18f * Mth.sin((mc.player.tickCount + partial) * 0.4f) : 1f;
+    float pulse = 1f; // segurar mantem as runas firmes (sem pulsar)
     int alpha = (int) (230 * pulse * Math.min(1f, 0.35f + shown));
     float rad = radius(a);
     float s = spin + partial * 0.06f;

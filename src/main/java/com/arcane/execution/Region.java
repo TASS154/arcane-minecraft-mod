@@ -83,6 +83,7 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
       // A coluna nasce do chao: assenta o centro na celula de ar sobre o chao (se nao ha chao, ver mayManifest).
       var cell = Targeting.groundCell(ctx.level(), center);
       if (cell.isPresent()) center = new Vec3(center.x, cell.get().getY(), center.z);
+      center = com.arcane.execution.CastChannels.lockAnchor(center); // mantido: nao acompanha a mira
     }
     // A coluna sobe ate o limite de construcao do mundo (o "ceu"); o restante dos formatos mantem as alturas de sempre.
     double height = shape == ShapeGeometry.WALL ? wallHeight(r)
@@ -242,6 +243,13 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
         return;
       }
       default -> type = S2CShapeFxPacket.AURA;
+    }
+    if (CastChannels.holding()) {
+      // Magia mantida: o desenho fica de pe (o cliente reaproveita o mesmo efeito em vez de recomecar a animacao).
+      com.arcane.network.ModNetwork.sendShape(ctx.level(), type, center, dir, (float) radius, element.color(), element.ordinal(),
+          S2CShapeFxPacket.SUSTAIN + CastChannels.HOLD_INTERVAL_TICKS + 6);
+      if (!CastChannels.holdPulse()) ElementSounds.playImpact(ctx.level(), center, element);
+      return;
     }
     com.arcane.network.ModNetwork.sendShape(ctx.level(), type, center, dir, (float) radius, element.color(), element.ordinal(),
         type == S2CShapeFxPacket.WAVE ? 14 : type == S2CShapeFxPacket.PILLAR ? 18 : 16);

@@ -428,6 +428,11 @@ Montagem: `Foco, Atrair` (ou `Foco, Dano`). Precisa conhecer o glifo `focus`: `/
 - [ ] **Altar:** clique abre a tela de ritual; ritual sem forma funciona; oferendas aparecem na prévia.
 - [ ] **Salto/Atravessar:** pequenos raios; **Petrificar:** o modelo vira pedra.
 
+- [ ] **Explosão redonda:** Explosão Destrutiva grande em terreno plano deixa cratera de esfera, sem cantos quadrados.
+- [ ] **Altar:** a tela abre sem nada sobreposto; aba Oferendas mostra o inventário, 3 espaços e o valor de cada item; passar de 300% mostra "Lendário! Valor dobrado"; o total respeita o limite.
+- [ ] **Carga:** as runas de Aura/Pilar/Onda crescem até o tamanho real da área (confira com Ctrl+scroll e com o cristal).
+- [ ] **Segurar:** pilar fixo no lugar, sem pulsar nem recomeçar a animação; some ao soltar.
+
 ---
 
 ## Como reportar uma falha

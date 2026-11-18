@@ -1,7 +1,6 @@
 package com.arcane.client.screen;
 
 import com.arcane.client.ClientPrefs;
-import com.arcane.config.ArcaneConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -23,21 +22,9 @@ public class ArcaneOptionsScreen extends Screen {
     this.parent = parent;
   }
 
-  /** A config do servidor so existe (e so pode ser editada daqui) dentro de um mundo local. */
-  private static boolean worldRulesAvailable() {
-    Minecraft mc = Minecraft.getInstance();
-    if (mc.level == null || !mc.hasSingleplayerServer()) return false;
-    try {
-      ArcaneConfig.WORLD_ALTERING_SPELLS.get();
-      return true;
-    } catch (IllegalStateException notLoaded) {
-      return false;
-    }
-  }
-
   @Override
   protected void init() {
-    int left = width / 2 - 190, right = width / 2 + 10, w = 180, y = height / 2 - 70;
+    int left = width / 2 - 100, w = 200, y = height / 2 - 70;
     addRenderableWidget(Button.builder(modeLabel(), b -> { ClientPrefs.cycleMode(); b.setMessage(modeLabel()); })
         .bounds(left, y, w, 20).tooltip(Tooltip.create(Component.translatable("gui.arcane.options.mode.tip"))).build());
     addRenderableWidget(Button.builder(flag("gui.arcane.options.latch", ClientPrefs.latch()), b -> { ClientPrefs.flip(ClientPrefs.LATCH_KEYS); b.setMessage(flag("gui.arcane.options.latch", ClientPrefs.latch())); })
@@ -47,11 +34,8 @@ public class ArcaneOptionsScreen extends Screen {
     addRenderableWidget(Button.builder(flag("gui.arcane.options.flashes", ClientPrefs.reduceFlashes()), b -> { ClientPrefs.flip(ClientPrefs.REDUCE_FLASHES); b.setMessage(flag("gui.arcane.options.flashes", ClientPrefs.reduceFlashes())); })
         .bounds(left, y + 72, w, 20).tooltip(Tooltip.create(Component.translatable("gui.arcane.options.flashes.tip"))).build());
 
-    Button rules = addRenderableWidget(Button.builder(Component.translatable("gui.arcane.options.world.open"), b -> minecraft.setScreen(new WorldRulesScreen(this)))
-        .bounds(right, y, w, 20).tooltip(Tooltip.create(Component.translatable("gui.arcane.options.world.open.tip"))).build());
-    rules.active = worldRulesAvailable();
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.close"), b -> onClose())
-        .bounds(width / 2 - 50, y + 100, 100, 20).build());
+        .bounds(width / 2 - 50, y + 104, 100, 20).build());
   }
 
   private static Component modeLabel() {
@@ -71,10 +55,9 @@ public class ArcaneOptionsScreen extends Screen {
   public void render(GuiGraphics g, int mx, int my, float pt) {
     renderBackground(g);
     g.drawCenteredString(font, title, width / 2, height / 2 - 98, 0xFFFFFF);
-    g.drawString(font, Component.translatable("gui.arcane.options.player"), width / 2 - 190, height / 2 - 84, 0xB79CFF, false);
-    g.drawString(font, Component.translatable(worldRulesAvailable() ? "gui.arcane.options.world" : "gui.arcane.options.world.none"),
-        width / 2 + 10, height / 2 - 84, 0xB79CFF, false);
+    g.drawString(font, Component.translatable("gui.arcane.options.player"), width / 2 - 100, height / 2 - 84, 0xB79CFF, false);
     super.render(g, mx, my, pt);
-    g.drawCenteredString(font, Component.translatable("gui.arcane.options.keys"), width / 2, height / 2 + 108, 0xA0A0A0);
+    g.drawCenteredString(font, Component.translatable("gui.arcane.options.world.hint"), width / 2, height / 2 + 96, 0xA0A0A0);
+    g.drawCenteredString(font, Component.translatable("gui.arcane.options.keys"), width / 2, height / 2 + 112, 0xA0A0A0);
   }
 }

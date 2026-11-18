@@ -2129,6 +2129,28 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "empty", batch = "rev_world_rules")
+  public static void worldRulesCycleThroughTheStepsAndOnlyAdminsEdit(GameTestHelper h) {
+    var steps = new double[] {500, 1000, 1500, 0};
+    h.assertTrue(com.arcane.config.WorldRules.next(500, steps) == 1000 && com.arcane.config.WorldRules.next(1500, steps) == 0, "avanca nos passos; o ultimo e sem limite");
+    h.assertTrue(com.arcane.config.WorldRules.next(0, steps) == 500, "depois do sem limite volta ao primeiro");
+    var snap = com.arcane.config.WorldRules.snapshot();
+    h.assertTrue(snap.containsKey("ritual_cap") && snap.containsKey("hard_caps") && snap.containsKey("unique_break"), "o estado traz todas as regras");
+    var player = casterWith(h);
+    h.assertTrue(!com.arcane.config.WorldRules.canEdit(player), "jogador comum nao edita as regras do mundo");
+    int before = com.arcane.config.ArcaneConfig.RITUAL_MAX_PERCENT.get();
+    boolean hard = com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.get();
+    h.assertTrue(com.arcane.config.WorldRules.advance("hard_caps") && com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.get() == !hard, "regra booleana inverte");
+    com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.set(hard);
+    com.arcane.config.ArcaneConfig.RITUAL_MAX_PERCENT.set(10000);
+    com.arcane.config.WorldRules.advance("ritual_cap");
+    h.assertTrue(com.arcane.config.ArcaneConfig.RITUAL_MAX_PERCENT.get() == 0 && com.arcane.ritual.RitualSettings.maxPercent() == Integer.MAX_VALUE, "o ultimo passo remove o teto e vale na hora");
+    h.assertTrue(!com.arcane.config.WorldRules.advance("nao_existe"), "chave desconhecida e ignorada");
+    com.arcane.config.ArcaneConfig.RITUAL_MAX_PERCENT.set(before);
+    com.arcane.ritual.RitualSettings.reset();
+    h.succeed();
+  }
+
   // ================================================================== Revisao 2: cratera redonda, oferendas, pilar mantido
   @GameTest(template = "empty", batch = "rev_crater", timeoutTicks = 60)
   public static void blastCraterIsASphereNotACube(GameTestHelper h) {

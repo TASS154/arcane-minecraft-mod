@@ -1,96 +1,83 @@
 package com.arcane.client.screen;
 
-import com.arcane.config.ArcaneConfig;
-import com.arcane.ritual.RitualSettings;
+import com.arcane.network.ModNetwork;
+import com.arcane.network.packet.C2SWorldRulePacket;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.common.ForgeConfigSpec;
+
+import java.util.Map;
 
 /**
- * Regras do mundo (config do servidor), abertas pela tela de configuracoes do mod. Editaveis num mundo local;
- * em servidor dedicado mexa em serverconfig/arcane-server.toml. Todo teto aqui tem a opcao "sem limite".
- * Os numeros do ritual e dos unicos valem na hora (alem de salvar no arquivo).
+ * Regras do mundo (config do servidor). Abre com /arcane rules, so para administradores: o servidor revalida a cada
+ * clique, aplica e salva na hora em serverconfig/arcane-server.toml (nao ha botao "Salvar"). Todo teto tem "sem limite".
  */
 public class WorldRulesScreen extends Screen {
-  /** 0 = sem limite (sempre por ultimo). */
-  private static final double[] AREA_CAPS = {1, 2, 4, 8, 16, 32, 0};
-  private static final double[] CHARGE_CAPS = {3, 6, 10, 20, 50, 0};
-  private static final double[] RITUAL_CAPS = {500, 1000, 1500, 3000, 10000, 0};
-  private final Screen parent;
+  private static final String[] FLAGS = {"world_altering", "block_breaking", "interactions", "scars", "hard_caps"};
+  private static final String[] NUMBERS = {"crystal_cap", "charge_cap", "ritual_cap"};
+  private static final String UNIQUE = "unique_break";
 
-  public WorldRulesScreen(Screen parent) {
+  private Map<String, Double> values;
+  private boolean canEdit;
+  private final java.util.Map<String, Button> buttons = new java.util.HashMap<>();
+
+  private WorldRulesScreen(Map<String, Double> values, boolean canEdit) {
     super(Component.translatable("gui.arcane.options.world"));
-    this.parent = parent;
+    this.values = values;
+    this.canEdit = canEdit;
+  }
+
+  /** Chamado pelo pacote do servidor: abre a tela ou atualiza a que ja esta aberta. */
+  public static void show(Map<String, Double> values, boolean canEdit) {
+    Minecraft mc = Minecraft.getInstance();
+    if (mc.screen instanceof WorldRulesScreen s) s.update(values, canEdit);
+    else mc.setScreen(new WorldRulesScreen(values, canEdit));
+  }
+
+  private void update(Map<String, Double> values, boolean canEdit) {
+    this.values = values;
+    this.canEdit = canEdit;
+    buttons.forEach((k, b) -> { b.setMessage(label(k)); b.active = canEdit; });
   }
 
   @Override
   protected void init() {
-    int left = width / 2 - 190, right = width / 2 + 10, w = 180, y = height / 2 - 70;
-    flag(left, y, "gui.arcane.rule.world_altering", ArcaneConfig.WORLD_ALTERING_SPELLS, () -> {});
-    flag(left, y + 24, "gui.arcane.rule.block_breaking", ArcaneConfig.BLOCK_BREAKING_SPELLS, () -> {});
-    flag(left, y + 48, "gui.arcane.rule.interactions", ArcaneConfig.ELEMENT_INTERACTIONS, () -> {});
-    flag(left, y + 72, "gui.arcane.rule.scars", ArcaneConfig.SCARS_ENABLED, () -> {});
-    flag(left, y + 96, "gui.arcane.rule.hard_caps", ArcaneConfig.AREA_HARD_CAPS, () -> {});
-    cycle(right, y, "gui.arcane.rule.crystal_cap", "x", ArcaneConfig.CRYSTAL_AREA_CAP, AREA_CAPS, () -> {});
-    cycle(right, y + 24, "gui.arcane.rule.charge_cap", "x", ArcaneConfig.CHARGE_MAX_SCALE, CHARGE_CAPS, () -> {});
-    cycle(right, y + 48, "gui.arcane.rule.ritual_cap", "", RITUAL_CAPS, () -> {});
-    flag(right, y + 72, "gui.arcane.rule.unique_break", ArcaneConfig.UNIQUE_OFFERINGS_BREAK_CAP, WorldRulesScreen::applyRitual);
+    buttons.clear();
+    int left = width / 2 - 190, right = width / 2 + 10, y = height / 2 - 70;
+    for (int i = 0; i < FLAGS.length; i++) add(left, y + i * 24, FLAGS[i]);
+    for (int i = 0; i < NUMBERS.length; i++) add(right, y + i * 24, NUMBERS[i]);
+    add(right, y + NUMBERS.length * 24, UNIQUE);
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.close"), b -> onClose())
         .bounds(width / 2 - 50, y + 130, 100, 20).build());
   }
 
-  private static void applyRitual() {
-    RitualSettings.setMaxPercent(ArcaneConfig.RITUAL_MAX_PERCENT.get());
-    RitualSettings.setUnique(ArcaneConfig.UNIQUE_OFFERINGS_BREAK_CAP.get(), ArcaneConfig.UNIQUE_OFFERINGS.get());
+  private void add(int x, int y, String key) {
+    Button b = addRenderableWidget(Button.builder(label(key), btn -> ModNetwork.CHANNEL.sendToServer(new C2SWorldRulePacket(key)))
+        .bounds(x, y, 180, 20).tooltip(Tooltip.create(Component.translatable("gui.arcane.rule." + key + ".tip"))).build());
+    b.active = canEdit;
+    buttons.put(key, b);
   }
 
-  private void flag(int x, int y, String key, ForgeConfigSpec.BooleanValue value, Runnable after) {
-    addRenderableWidget(Button.builder(flagLabel(key, value.get()), b -> { value.set(!value.get()); after.run(); b.setMessage(flagLabel(key, value.get())); })
-        .bounds(x, y, 180, 20).tooltip(Tooltip.create(Component.translatable(key + ".tip"))).build());
-  }
-
-  private void cycle(int x, int y, String key, String prefix, ForgeConfigSpec.DoubleValue value, double[] steps, Runnable after) {
-    addRenderableWidget(Button.builder(numberLabel(key, prefix, value.get()), b -> {
-      value.set(next(value.get(), steps));
-      after.run();
-      b.setMessage(numberLabel(key, prefix, value.get()));
-    }).bounds(x, y, 180, 20).tooltip(Tooltip.create(Component.translatable(key + ".tip"))).build());
-  }
-
-  /** O teto do ritual e inteiro: mesmo botao, outro tipo de valor. */
-  private void cycle(int x, int y, String key, String prefix, double[] steps, Runnable after) {
-    var value = ArcaneConfig.RITUAL_MAX_PERCENT;
-    addRenderableWidget(Button.builder(numberLabel(key, prefix, value.get()), b -> {
-      value.set((int) next(value.get(), steps));
-      applyRitual();
-      after.run();
-      b.setMessage(numberLabel(key, prefix, value.get()));
-    }).bounds(x, y, 180, 20).tooltip(Tooltip.create(Component.translatable(key + ".tip"))).build());
-  }
-
-  /** Proximo valor da lista; 0 (sem limite) e o ultimo e depois dele volta ao primeiro. */
-  static double next(double now, double[] steps) {
-    if (now <= 0) return steps[0];
-    for (double s : steps) if (s > now + 1.0e-9) return s;
-    return steps[steps.length - 1] == 0 ? 0 : steps[0];
-  }
-
-  private static Component numberLabel(String key, String prefix, double v) {
-    if (v <= 0) return Component.translatable(key, Component.translatable("gui.arcane.rule.unlimited"));
-    return Component.translatable(key, prefix + (v == Math.rint(v) ? String.valueOf((long) v) : String.valueOf(v)));
-  }
-
-  private static Component flagLabel(String key, boolean on) {
-    return Component.translatable(key, Component.translatable(on ? "gui.arcane.on" : "gui.arcane.off"));
+  private Component label(String key) {
+    double v = values.getOrDefault(key, 0.0);
+    String name = "gui.arcane.rule." + key;
+    for (String f : FLAGS) if (f.equals(key)) return Component.translatable(name, Component.translatable(v > 0.5 ? "gui.arcane.on" : "gui.arcane.off"));
+    if (key.equals(UNIQUE)) return Component.translatable(name, Component.translatable(v > 0.5 ? "gui.arcane.on" : "gui.arcane.off"));
+    if (v <= 0) return Component.translatable(name, Component.translatable("gui.arcane.rule.unlimited"));
+    String num = v == Math.rint(v) ? String.valueOf((long) v) : String.valueOf(v);
+    return Component.translatable(name, key.equals("ritual_cap") ? num : "x" + num);
   }
 
   @Override
   public void onClose() {
-    minecraft.setScreen(parent);
+    minecraft.setScreen(null);
   }
+
+  @Override
+  public boolean isPauseScreen() { return false; }
 
   @Override
   public void render(GuiGraphics g, int mx, int my, float pt) {
@@ -99,5 +86,7 @@ public class WorldRulesScreen extends Screen {
     g.drawString(font, Component.translatable("gui.arcane.options.world.general"), width / 2 - 190, height / 2 - 84, 0xB79CFF, false);
     g.drawString(font, Component.translatable("gui.arcane.options.world.limits"), width / 2 + 10, height / 2 - 84, 0xB79CFF, false);
     super.render(g, mx, my, pt);
+    g.drawCenteredString(font, Component.translatable(canEdit ? "gui.arcane.options.world.autosave" : "gui.arcane.options.world.readonly"),
+        width / 2, height / 2 + 84, canEdit ? 0xA0A0A0 : 0xFF8080);
   }
 }

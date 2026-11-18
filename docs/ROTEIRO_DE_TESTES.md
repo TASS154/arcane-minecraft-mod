@@ -434,7 +434,7 @@ Montagem: `Foco, Atrair` (ou `Foco, Dano`). Precisa conhecer o glifo `focus`: `/
 - [ ] **Segurar:** pilar fixo no lugar, sem pulsar nem recomeçar a animação; some ao soltar.
 
 - [ ] **Altar guarda o rascunho:** monte uma magia, feche a tela, reabra: tudo continua lá.
-- [ ] **Regras do mundo:** Mods > Arcane > Config > "Regras do mundo..." abre; cada botão muda e persiste; o teto do ritual tem "sem limite".
+- [ ] **Regras do mundo:** `/arcane rules` abre a tela; cada botão muda e persiste (confira o .toml); o teto do ritual tem "sem limite"; um jogador sem permissão vê tudo desativado.
 - [ ] **Item único:** oferecer cabeça/ovo de dragão num ritual grande passa de 1500%; com a regra desligada, não.
 
 ---

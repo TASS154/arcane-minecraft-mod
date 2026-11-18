@@ -271,7 +271,7 @@ Lógica coberta por GameTest (203 passam). **Telas: implementadas, NÃO vistas e
 - **Itens únicos (testado):** cabeça de dragão, ovo de dragão e elitro (lista `uniqueOfferings`, configurável) como oferenda quebram o teto do ritual, se `uniqueOfferingsBreakCap` estiver ligado. A magia guardada no altar lembra isso. Cabeça de dragão passou a valer 250%.
 - **Cristal e área:** os efeitos de área com teto fixo (Controle, Baixo custo, Utilidade) agora sobem o teto junto com o multiplicador do cristal. Raio e Toque medem alcance, não área, e não mudam.
 - **Altar:** fechar a tela guarda o rascunho (glifos, números, oferendas, aba) por altar até sair do mundo.
-- **Regras do mundo na tela de configurações do mod (não vista):** botão "Regras do mundo..." abre a nova tela com terreno, quebra de blocos, interações, cicatrizes, raio fixo, tetos (cristal, carga, ritual, "sem limite" é a última opção) e o interruptor dos itens únicos. Só num mundo local; em servidor dedicado, `serverconfig/arcane-server.toml`.
+- **Regras do mundo (testada a lógica; tela não vista):** saíram do grimório e da tela de configurações do mod (o menu Mods só existe fora do mundo, onde a config do mundo não está carregada). Agora são abertas dentro do mundo por **`/arcane rules`**, só para administradores (operador nível 2 ou dono do mundo local). O servidor revalida cada clique, aplica na hora e **salva sozinho** em `serverconfig/arcane-server.toml` (não há botão Salvar). Terreno, quebra de blocos, interações, cicatrizes, raio fixo, tetos (cristal, carga, ritual; "sem limite" é o último passo) e itens únicos.
 
 ## Coluna da gravidade (glitch roxo)
 

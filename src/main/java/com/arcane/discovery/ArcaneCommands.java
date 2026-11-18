@@ -15,6 +15,14 @@ public class ArcaneCommands {
   @SubscribeEvent
   public static void register(RegisterCommandsEvent event) {
     event.getDispatcher().register(Commands.literal("arcane")
+        .then(Commands.literal("rules")
+            .requires(src -> src.hasPermission(2) || (src.getEntity() instanceof ServerPlayer sp && com.arcane.config.WorldRules.canEdit(sp)))
+            .executes(ctx -> {
+              ServerPlayer me = ctx.getSource().getPlayerOrException();
+              com.arcane.network.ModNetwork.sendToPlayer(me, new com.arcane.network.packet.S2CWorldRulesPacket(
+                  com.arcane.config.WorldRules.snapshot(), com.arcane.config.WorldRules.canEdit(me)));
+              return 1;
+            }))
         .then(Commands.literal("guest")
             .then(Commands.literal("add")
                 .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())

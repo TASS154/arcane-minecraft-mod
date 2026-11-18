@@ -82,6 +82,12 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(S2CRitualReportPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CRitualReportPacket::encode).decoder(S2CRitualReportPacket::decode)
         .consumerMainThread(S2CRitualReportPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.S2CWorldRulesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(com.arcane.network.packet.S2CWorldRulesPacket::encode).decoder(com.arcane.network.packet.S2CWorldRulesPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.S2CWorldRulesPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.C2SWorldRulePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(com.arcane.network.packet.C2SWorldRulePacket::encode).decoder(com.arcane.network.packet.C2SWorldRulePacket::decode)
+        .consumerMainThread(com.arcane.network.packet.C2SWorldRulePacket::handle).add();
     CHANNEL.messageBuilder(C2SAreaDialPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SAreaDialPacket::encode).decoder(C2SAreaDialPacket::decode)
         .consumerMainThread(C2SAreaDialPacket::handle).add();

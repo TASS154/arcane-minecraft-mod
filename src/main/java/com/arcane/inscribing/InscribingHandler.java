@@ -49,9 +49,12 @@ public class InscribingHandler {
   @SubscribeEvent(priority = EventPriority.HIGH)
   public void onPenUse(PlayerInteractEvent.RightClickBlock event) {
     Player player = event.getEntity();
-    if (event.getHand() != InteractionHand.MAIN_HAND || !player.getMainHandItem().is(ModItems.ARCANE_PEN.get())) return;
+    if (event.getHand() != InteractionHand.MAIN_HAND) return;
+    ItemStack mainItem = player.getMainHandItem();
+    boolean blockPen = mainItem.getItem() instanceof com.arcane.item.BlockPenItem;
+    if (!blockPen && !mainItem.is(ModItems.ARCANE_PEN.get())) return;
     // Caneta num Altar Arcano (sem agachar): desenha o circulo do ritual a mao, sem Compasso.
-    if (!player.isShiftKeyDown() && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof com.arcane.block.ArcaneAltarBlock) {
+    if (!blockPen && !player.isShiftKeyDown() && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof com.arcane.block.ArcaneAltarBlock) {
       event.setCanceled(true);
       event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
       if (!event.getLevel().isClientSide && player instanceof ServerPlayer sp) drawByHand(sp, (ServerLevel) event.getLevel(), event.getPos());
@@ -59,13 +62,25 @@ public class InscribingHandler {
     }
     ItemStack held = player.getOffhandItem();
     boolean erasing = player.isShiftKeyDown();
-    boolean itemMode = !erasing && !held.isEmpty() && !(held.getItem() instanceof InkItem);
+    boolean itemMode = !blockPen && !erasing && !held.isEmpty() && !(held.getItem() instanceof InkItem);
     event.setCanceled(true);
     event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
     if (event.getLevel().isClientSide || !(player instanceof ServerPlayer serverPlayer)) return;
 
     ServerLevel level = (ServerLevel) event.getLevel();
     BlockPos pos = event.getPos();
+    if (!erasing && !itemMode) {
+      // Escrever em bloco: so com a caneta do material dele.
+      if (!blockPen) {
+        player.displayClientMessage(Component.translatable("message.arcane.pen.need_block_pen").withStyle(ChatFormatting.RED), true);
+        return;
+      }
+      if (!PenRegistry.canWriteOnBlock(player, pos, level)) {
+        player.displayClientMessage(Component.translatable("message.arcane.pen.wrong_material",
+            Component.translatable("item.arcane." + ((com.arcane.item.BlockPenItem) mainItem.getItem()).group() + "_pen")).withStyle(ChatFormatting.RED), true);
+        return;
+      }
+    }
     if (erasing) {
       // Apagar so com po solvente: a pena nao apaga mais.
       player.displayClientMessage(Component.translatable("message.arcane.pen.use_solvent").withStyle(ChatFormatting.GRAY), true);
@@ -132,6 +147,7 @@ public class InscribingHandler {
         && event.getLevel().getBlockEntity(pos) instanceof ChestBlockEntity
         && player instanceof ServerPlayer serverPlayer) {
       CastingService.tryCast(serverPlayer, inscription, PrecisionSnapshot.of(inscription));
+      if (!com.arcane.execution.Traces.has(inscription, "persistence")) index.remove(pos, anchor.get().face());
     }
   }
 

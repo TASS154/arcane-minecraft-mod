@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **145 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **147 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -144,7 +144,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Bolso Arcano** | `arcane:pocket` | 2 | 3 | Conhecimento | — | Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas. |
 | **Restaurar** | `arcane:restore` | 4 | 3 | Terra | `radius` 10 (2–16) | Efeito: recompõe, num raio de 2–16 blocos (padrão 10), aos poucos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta. |
 
-## Modificadores (31)
+## Modificadores (32)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -176,13 +176,14 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Domínio** | `arcane:domain` | 4 | 3 | Arcano | `seconds` 30 (5–60), `interval` 1 (0.5–5) | Modificador de Barreira: fecha um domo e o mantém. Tudo que está dentro recebe os efeitos da magia continuamente (a cada intervalo) até o domo quebrar: ele acaba quando perde cerca de 10% dos blocos da casca, ou quando passa o tempo. A casca não se refaz e não some sozinha enquanto o Domínio dura; quebrar um pedaço dela o encerra (e dispara "Quando a zona acabar"). Use com Barreira + Domo (ou Esfera) + um efeito (Cura, Dano, Lentidão...). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). Conta como Zona (mesmo limite de 2 por conjurador). |
 | **Cadeia** | `arcane:chain` | 3 | 3 | Força | — | Modificador: o efeito anterior se propaga de criatura em criatura. Explosão e Explosão Destrutiva detonam de novo, menores, em quem estava perto (até 3 saltos, 8 extras); Dano salta em arco para a mais próxima, com 60% do dano a cada salto. Outros efeitos ignoram a Cadeia (a prévia avisa). |
 | **Inverter** | `arcane:invert` | 1 | 2 | Vazio | — | Modificador: troca o efeito anterior pelo seu oposto, com a mesma magnitude. Pares: Dano e Cura, Empurrão e Atrair, Lentidão e Velocidade, Fogo e Congelar, Levitação e Gravidade, Roubo e Transferir Vida, Cegar e Invisibilidade, Medo e Provocar. Efeito sem par ignora o Inverter. |
+| **Persistência** | `arcane:persistence` | 3 | 3 | Conhecimento | — | Modificador: o desenho não se desfaz ao disparar. Sem ele, uma inscrição no mundo (armadilha, runa) some depois de disparar uma vez. |
 | **Furtivo** | `arcane:stealth` | 2 | 2 | Vazio | — | Modificador: a magia deixa menos rastro: o resíduo no mundo dura 1/4 do tempo e a conjuração não faz som nem partículas. Não esconde o efeito em si. |
 | **Falso Rastro** | `arcane:false_trace` | 2 | 2 | Vazio | — | Modificador: o resíduo no mundo leva uma assinatura falsa (que não é a sua) e a magia deixa um segundo resíduo isca a até 10 blocos. Quem analisa o resíduo é enganado. |
 | **Sobrecarga** | `arcane:overcharge` | 3 | 3 | Sangue | — | Modificador: dobra a força do efeito anterior (dano, cura, empurrão, raio, potência) e 50% de duração, mas você sofre 1 coração de dano mágico a cada efeito sobrecarregado (nunca fatal: só se você tiver mais de 1,5 coração). Mais forte que Potência, com preço. |
 | **Vincular** | `arcane:bind` | 2 | 2 | Vazio | — | Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular. |
 | **Coro** | `arcane:chorus` | 2 | 3 | Vida | `min` 2 (2–4) | Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga. |
 
-## Condições (23)
+## Condições (24)
 
 Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira.
 
@@ -211,6 +212,7 @@ Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira
 | **Chuva ou Tempestade** | `arcane:raining` | 0 | 2 | Tempestade | `storm` 0 (0–1) | Condição: só acontece com chuva ou tempestade no mundo (storm 1: só tempestade). |
 | **Após N Acertos** | `arcane:after_hits` | 0 | 3 | Sangue | `n` 3 (2–10) | Condição: arma a magia em você: o que vem depois só acontece depois de você acertar N golpes em outras criaturas (N 2–10, padrão 3; por até 60 s). |
 | **Ativar por Sinal** | `arcane:on_signal` | 0 | 2 | Tempestade | — | Condição: em uma inscrição no mundo, troca o gatilho: ela dispara quando o bloco recebe sinal de redstone (na subida do sinal), tendo como origem a criatura mais perto (6 blocos). Fora de inscrições, não faz nada. |
+| **Ativar por Proximidade** | `arcane:on_near` | 0 | 2 | Conhecimento | — | Condição: em uma inscrição no mundo, troca o gatilho: ela dispara quando uma criatura chega a 2,5 blocos do bloco (a criatura mais perto é a origem). Fora de inscrições, não faz nada. |
 
 ## Ativadores (1)
 

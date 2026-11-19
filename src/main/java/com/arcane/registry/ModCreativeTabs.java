@@ -23,6 +23,11 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.PERFECT_COMPASS.get());
                 output.accept(ModItems.ARCANE_CHALK.get());
                 output.accept(ModItems.ARCANE_PEN.get());
+                output.accept(ModItems.EARTH_PEN.get());
+                output.accept(ModItems.STONE_PEN.get());
+                output.accept(ModItems.METAL_PEN.get());
+                output.accept(ModItems.SNOW_PEN.get());
+                output.accept(ModItems.WOOD_PEN.get());
                 output.accept(ModItems.COMMON_INK.get());
                 output.accept(ModItems.MANA_SURGE_POTION.get());
                 output.accept(ModItems.MANA_VESSEL_POTION.get());

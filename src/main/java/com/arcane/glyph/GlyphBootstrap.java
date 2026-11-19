@@ -189,6 +189,7 @@ public final class GlyphBootstrap {
 
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("after_hits"), new PredicateCondition(c -> "hits".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_signal"), new PredicateCondition(c -> true));
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_near"), new PredicateCondition(c -> true));
 
         // Ativador
         GlyphHandlerRegistry.registerActivator(ArcaneIds.ACTIVATE, new ActivateHandler());

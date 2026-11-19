@@ -727,6 +727,16 @@ _g("on_signal", "condition", 0,
    ("Activate on Signal", "Condition: in a world inscription, changes the trigger: it fires when the block receives a redstone signal (on the rising edge), using the nearest creature (6 blocks) as origin. Outside inscriptions it does nothing."),
    ["...##...", "...##...", "..####..", "...##...", "...##...", "...##...", "..####..", "...##..."])
 
+_g("on_near", "condition", 0,
+   ("Ativar por Proximidade", "Condição: em uma inscrição no mundo, troca o gatilho: ela dispara quando uma criatura chega a 2,5 blocos do bloco (a criatura mais perto é a origem). Fora de inscrições, não faz nada."),
+   ("Activate on Proximity", "Condition: in a world inscription, changes the trigger: it fires when a creature comes within 2.5 blocks of the block (the nearest creature is the origin). Outside inscriptions it does nothing."),
+   ["#......#", ".#....#.", "..#..#..", "...##...", "...##...", "..#..#..", ".#....#.", "#......#"][::-1])
+_g("persistence", "modifier", 3,
+   ("Persistência", "Modificador: o desenho não se desfaz ao disparar. Sem ele, uma inscrição no mundo (armadilha, runa) some depois de disparar uma vez."),
+   ("Persistence", "Modifier: the drawing does not fade when it fires. Without it, a world inscription (trap, rune) disappears after firing once."),
+   ["..####..", ".#....#.", "#..##..#", "#.#..#.#", "#.#..#.#", "#..##..#", ".#....#.", "..####.."][::-1],
+   scope={"target": "flag", "kind": "effect", "mutate": {}})
+
 _g("stealth", "modifier", 2,
    ("Furtivo", "Modificador: a magia deixa menos rastro: o resíduo no mundo dura 1/4 do tempo e a conjuração não faz som nem partículas. Não esconde o efeito em si."),
    ("Stealth", "Modifier: the spell leaves less trace: the world residue lasts 1/4 as long and casting makes no sound or particles. It does not hide the effect itself."),
@@ -782,11 +792,11 @@ TIERS = {
         "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave",
         "rain", "charge", "glide", "fear", "rumble", "darkness", "lifesteal", "life_transfer", "invert", "on_jump",
         "target_health", "region", "holding", "raining",
-        "hook", "climb", "arcane_sight", "reveal", "decoy", "drain_mana", "stealth", "false_trace", "bind", "on_signal"],
+        "hook", "climb", "arcane_sight", "reveal", "decoy", "drain_mana", "stealth", "false_trace", "bind", "on_signal", "on_near"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
         "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain", "sleep", "on_kill", "on_fall",
         "satellites", "link", "trail", "recall", "imbue", "acid", "electrify", "contagion", "dispel", "reflect", "silence", "swap",
-        "curse", "overcharge", "after_hits", "pocket", "restore", "chorus", "domain"],
+        "curse", "overcharge", "after_hits", "pocket", "restore", "chorus", "domain", "persistence"],
     4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis", "phase", "petrify", "reanimate"],
 }
 FAMILIES = {
@@ -797,7 +807,7 @@ FAMILIES = {
     "life": ["chorus", "heal", "shield", "speed", "allies", "players", "animals"],
     "force": ["hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["pocket", "mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
-                  "group", "end_group", "lengthen", "weaken", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
+                  "group", "end_group", "lengthen", "weaken", "persistence", "on_near", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert", "phase", "recall", "swap", "link", "silence", "drain_mana", "decoy", "stealth", "false_trace", "bind"],
     "earth": ["restore", "summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
 }

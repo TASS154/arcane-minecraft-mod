@@ -134,6 +134,12 @@ def main():
     shapeless("mixed_common_ink", ["arcane:common_ink", "arcane:permanent_ink"])
     shapeless("mixed_blood_ink", ["arcane:blood_ink", "arcane:permanent_ink"])
     shapeless("mixed_invisible_ink", ["arcane:invisible_ink", "arcane:permanent_ink"])
+    # Canetas de bloco: a Pena Arcana + o material (nada de loot obrigatorio; sao craftaveis).
+    shapeless("earth_pen", ["arcane:arcane_pen", "minecraft:dirt", "minecraft:clay_ball", "minecraft:gravel"])
+    shapeless("stone_pen", ["arcane:arcane_pen", "minecraft:cobblestone", "minecraft:flint", "minecraft:coal"])
+    shapeless("metal_pen", ["arcane:arcane_pen", "minecraft:iron_ingot", "minecraft:obsidian", "minecraft:gold_nugget"])
+    shapeless("snow_pen", ["arcane:arcane_pen", "minecraft:snowball", "minecraft:packed_ice", "minecraft:quartz"])
+    shapeless("wood_pen", ["arcane:arcane_pen", "minecraft:oak_planks", "minecraft:stick", "minecraft:string"])
     shapeless("solvent_powder", ["minecraft:sugar", "minecraft:ink_sac"], 2)
 
     # ---------------------------------------------------------- loot de blocos

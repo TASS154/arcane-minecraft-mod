@@ -2289,6 +2289,82 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "empty", batch = "block_pens")
+  public static void eachBlockPenWritesOnlyOnItsOwnMaterial(GameTestHelper h) {
+    var level = h.getLevel();
+    var player = casterWith(h);
+    BlockPos at = h.absolutePos(new BlockPos(3, 1, 3));
+    java.util.Map<String, net.minecraft.world.level.block.Block[]> own = java.util.Map.of(
+        "earth", new net.minecraft.world.level.block.Block[] {Blocks.DIRT, Blocks.SAND, Blocks.GRAVEL, Blocks.GRASS_BLOCK},
+        "stone", new net.minecraft.world.level.block.Block[] {Blocks.STONE, Blocks.COBBLESTONE, Blocks.IRON_ORE, Blocks.STONE_BRICKS, Blocks.DEEPSLATE},
+        "metal", new net.minecraft.world.level.block.Block[] {Blocks.IRON_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.ANVIL, Blocks.OBSIDIAN},
+        "snow", new net.minecraft.world.level.block.Block[] {Blocks.SNOW_BLOCK, Blocks.ICE, Blocks.PACKED_ICE},
+        "wood", new net.minecraft.world.level.block.Block[] {Blocks.OAK_PLANKS, Blocks.OAK_LOG, Blocks.SPRUCE_PLANKS});
+    java.util.Map<String, net.minecraft.world.item.Item> pens = java.util.Map.of(
+        "earth", com.arcane.registry.ModItems.EARTH_PEN.get(), "stone", com.arcane.registry.ModItems.STONE_PEN.get(),
+        "metal", com.arcane.registry.ModItems.METAL_PEN.get(), "snow", com.arcane.registry.ModItems.SNOW_PEN.get(),
+        "wood", com.arcane.registry.ModItems.WOOD_PEN.get());
+    for (var pen : pens.entrySet()) {
+      player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(pen.getValue()));
+      for (var group : own.entrySet()) {
+        for (var block : group.getValue()) {
+          level.setBlock(at, block.defaultBlockState(), 3);
+          boolean can = com.arcane.inscribing.PenRegistry.canWriteOnBlock(player, at, level);
+          h.assertTrue(can == group.getKey().equals(pen.getKey()), "caneta de " + pen.getKey() + " em " + block + (can ? ": nao devia escrever" : ": devia escrever"));
+        }
+      }
+    }
+    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(com.arcane.registry.ModItems.ARCANE_PEN.get()));
+    level.setBlock(at, Blocks.STONE.defaultBlockState(), 3);
+    h.assertTrue(!com.arcane.inscribing.PenRegistry.canWriteOnBlock(player, at, level), "a Pena Arcana comum nao escreve em blocos");
+    level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "consume_trap", timeoutTicks = 120)
+  public static void aWorldDrawingFadesAfterFiringUnlessItHasPersistence(GameTestHelper h) {
+    floor(h);
+    var level = h.getLevel();
+    BlockPos plain = new BlockPos(2, 1, 2), kept = new BlockPos(5, 1, 5);
+    h.setBlock(plain, Blocks.STONE);
+    h.setBlock(kept, Blocks.STONE);
+    BlockPos plainAbs = h.absolutePos(plain), keptAbs = h.absolutePos(kept);
+    var index = WorldInscriptionIndex.get(level);
+    var common = new ResourceLocation("arcane", "common");
+    index.put(new InscriptionAnchor(plainAbs, new Inscription(List.of(g("self"), g("damage", "amount", 1.0))), InscribingService.TRIGGER_ON_TOUCH, common));
+    index.put(new InscriptionAnchor(keptAbs, new Inscription(List.of(g("self"), g("persistence"), g("damage", "amount", 1.0))), InscribingService.TRIGGER_ON_TOUCH, common));
+    Pig a = h.spawnWithNoFreeWill(EntityType.PIG, plain.above());
+    Pig b = h.spawnWithNoFreeWill(EntityType.PIG, kept.above());
+    h.runAfterDelay(60, () -> {
+      h.assertTrue(a.getHealth() < a.getMaxHealth(), "o primeiro porco foi ferido");
+      h.assertTrue(b.getHealth() < b.getMaxHealth(), "o segundo porco foi ferido");
+      h.assertTrue(index.at(plainAbs).isEmpty(), "sem Persistencia o desenho some depois de disparar");
+      h.assertTrue(!index.at(keptAbs).isEmpty(), "com Persistencia o desenho continua");
+      index.remove(keptAbs);
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", batch = "near_trigger", timeoutTicks = 120)
+  public static void proximityDrawingFiresWhenACreatureComesNear(GameTestHelper h) {
+    floor(h);
+    var level = h.getLevel();
+    BlockPos stone = new BlockPos(1, 1, 1);
+    h.setBlock(stone, Blocks.STONE);
+    BlockPos abs = h.absolutePos(stone);
+    var index = WorldInscriptionIndex.get(level);
+    index.put(new InscriptionAnchor(abs, new Inscription(List.of(g("self"), g("on_near"), g("damage", "amount", 1.0))),
+        InscribingService.TRIGGER_ON_NEAR, new ResourceLocation("arcane", "common"), net.minecraft.core.Direction.NORTH));
+    Pig far = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(6, 1, 6));
+    Pig near = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(1, 1, 3));
+    h.runAfterDelay(60, () -> {
+      h.assertTrue(near.getHealth() < near.getMaxHealth(), "quem chegou perto foi atingido");
+      h.assertTrue(far.getHealth() == far.getMaxHealth(), "quem esta longe nao foi");
+      h.assertTrue(index.at(abs).isEmpty(), "disparou uma vez e o desenho se desfez");
+      h.succeed();
+    });
+  }
+
   // ================================================================== Revisao 2: cratera redonda, oferendas, pilar mantido
   @GameTest(template = "empty", batch = "rev_crater", timeoutTicks = 60)
   public static void blastCraterIsASphereNotACube(GameTestHelper h) {

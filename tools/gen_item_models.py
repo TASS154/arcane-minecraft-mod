@@ -30,14 +30,25 @@ COLORS = [
     ("glass", (60, 75, 120, 255)),
     ("ink_dark", (14, 18, 44, 255)),
     ("cork_l", (196, 152, 96, 255)),
+    ("brown", (110, 75, 45, 255)),
+    ("brown_d", (72, 48, 28, 255)),
+    ("green", (80, 170, 70, 255)),
+    ("grey", (140, 140, 150, 255)),
+    ("grey_d", (88, 88, 100, 255)),
+    ("silver", (205, 210, 222, 255)),
+    ("ice", (170, 225, 255, 255)),
+    ("ice_d", (110, 180, 235, 255)),
+    ("oak", (190, 150, 90, 255)),
+    ("oak_d", (125, 90, 50, 255)),
+    ("blue_gem", (60, 140, 255, 255)),
 ]
 INDEX = {name: i for i, (name, _) in enumerate(COLORS)}
 
 
 def palette() -> None:
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
     for i, (_, c) in enumerate(COLORS):
-        x, y = (i % 4) * 4, (i // 4) * 4
+        x, y = (i % 8) * 4, (i // 8) * 4
         for dx in range(4):
             for dy in range(4):
                 img.putpixel((x + dx, y + dy), c)
@@ -48,8 +59,8 @@ def palette() -> None:
 
 def box(frm, to, color, rot=None):
     i = INDEX[color]
-    u, v = (i % 4) * 4 + 1, (i // 4) * 4 + 1
-    face = {"uv": [u, v, u + 2, v + 2], "texture": "#0"}
+    u, v = (i % 8) * 2 + 0.5, (i // 8) * 2 + 0.5  # paleta 32x32 em coordenadas 0-16: cada cor ocupa 2x2
+    face = {"uv": [u, v, u + 1, v + 1], "texture": "#0"}
     el = {"from": list(frm), "to": list(to), "faces": {f: dict(face) for f in ("north", "south", "east", "west", "up", "down")}}
     if rot is not None:
         el["rotation"] = {"angle": rot, "axis": "z", "origin": [8, 8, 8]}
@@ -84,6 +95,32 @@ def pen():
         box((7.2, 12.0, 7.2), (8.8, 12.8, 8.8), "gold", r),   # faixa
         box((7.5, 12.8, 7.5), (8.5, 13.8, 8.5), "lilac", r),  # gema
     ], [25, -40, 0], 1.0)
+
+
+def block_pen(kind):
+    """Canetas de bloco: mesma familia da Pena Arcana, cada uma com forma propria. Inclinadas -45 graus."""
+    r = -45
+    if kind == "earth":    # corpo grosso de terra, empunhadura verde, gema redonda (cubo grande)
+        els = [box((7.6, 0, 7.6), (8.4, 1.6, 8.4), "dark", r), box((7.0, 1.6, 7.0), (9.0, 4.6, 9.0), "green", r),
+               box((6.8, 4.6, 6.8), (9.2, 11.0, 9.2), "brown", r), box((6.6, 11.0, 6.6), (9.4, 11.8, 9.4), "brown_d", r),
+               box((7.0, 11.8, 7.0), (9.0, 13.8, 9.0), "green", r)]
+    elif kind == "stone":  # corpo cinza facetado, pomo quadrado largo
+        els = [box((7.6, 0, 7.6), (8.4, 2.0, 8.4), "dark", r), box((7.2, 2.0, 7.2), (8.8, 3.0, 8.8), "grey_d", r),
+               box((7.3, 3.0, 7.3), (8.7, 11.0, 8.7), "grey", r), box((6.4, 11.0, 6.4), (9.6, 13.4, 9.6), "grey_d", r),
+               box((6.9, 13.4, 6.9), (9.1, 13.9, 9.1), "grey", r)]
+    elif kind == "metal":  # fina e longa, ponta comprida, dois aneis e gema azul
+        els = [box((7.7, 0, 7.7), (8.3, 3.4, 8.3), "dark", r), box((7.2, 3.4, 7.2), (8.8, 4.0, 8.8), "silver", r),
+               box((7.35, 4.0, 7.35), (8.65, 12.0, 8.65), "silver", r), box((7.2, 12.0, 7.2), (8.8, 12.6, 8.8), "gold", r),
+               box((7.2, 7.6, 7.2), (8.8, 8.2, 8.8), "gold", r), box((7.4, 12.6, 7.4), (8.6, 14.0, 8.6), "blue_gem", r)]
+    elif kind == "snow":   # corpo de gelo e um cristal comprido no topo
+        els = [box((7.6, 0, 7.6), (8.4, 2.0, 8.4), "ice_d", r), box((7.2, 2.0, 7.2), (8.8, 3.0, 8.8), "white", r),
+               box((7.3, 3.0, 7.3), (8.7, 10.5, 8.7), "ice", r), box((7.1, 10.5, 7.1), (8.9, 11.2, 8.9), "white", r),
+               box((7.5, 11.2, 7.5), (8.5, 12.8, 8.5), "ice_d", r), box((7.75, 12.8, 7.75), (8.25, 15.0, 8.25), "white", r)]
+    else:                  # madeira: corpo de carvalho, empunhadura escura e uma folha
+        els = [box((7.6, 0, 7.6), (8.4, 1.8, 8.4), "dark", r), box((7.2, 1.8, 7.2), (8.8, 5.0, 8.8), "oak_d", r),
+               box((7.3, 5.0, 7.3), (8.7, 12.0, 8.7), "oak", r), box((7.2, 12.0, 7.2), (8.8, 12.7, 8.8), "oak_d", r),
+               box((7.6, 12.7, 7.6), (8.4, 13.3, 8.4), "green", r), box((8.4, 12.7, 7.7), (10.2, 13.1, 8.3), "green", r)]
+    return model(els, [25, -40, 0], 1.0)
 
 
 def bottle(light, dark):
@@ -122,6 +159,11 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     models = {
         "arcane_pen": pen(),
+        "earth_pen": block_pen("earth"),
+        "stone_pen": block_pen("stone"),
+        "metal_pen": block_pen("metal"),
+        "snow_pen": block_pen("snow"),
+        "wood_pen": block_pen("wood"),
         "common_ink": bottle("blue", "ink_dark"),
         "blood_ink": bottle("blood", "blood_d"),
         "invisible_ink": bottle("ghost", "ghost_d"),

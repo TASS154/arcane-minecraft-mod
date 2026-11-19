@@ -31,6 +31,10 @@ public final class InscribingService {
   public static final String TRIGGER_ON_TOUCH = "on_touch";
   /** Dispara quando o bloco recebe sinal de redstone (glifo Ativar por Sinal). */
   public static final String TRIGGER_ON_SIGNAL = "on_signal";
+  /** Dispara quando uma criatura chega perto do bloco (glifo Ativar por Proximidade). */
+  public static final String TRIGGER_ON_NEAR = "on_near";
+  /** Distancia, em blocos, do gatilho de proximidade. */
+  public static final double NEAR_RANGE = 2.5;
   private static final Map<ServerLevel, java.util.Set<BlockPos>> POWERED = new WeakHashMap<>();
   /** Intervalo minimo entre dois disparos do mesmo bloco por toque (provisorio). */
   public static final int TOUCH_COOLDOWN_TICKS = 40;
@@ -161,7 +165,21 @@ public final class InscribingService {
         // A criatura mais perto (ate 6 blocos) e a origem, como no gatilho de toque.
         LivingEntity near = level.getEntitiesOfClass(LivingEntity.class, new AABB(pos).inflate(6.0), e -> e.isAlive() && !e.isSpectator())
             .stream().min(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5))).orElse(null);
-        if (near != null) CastingService.tryCast(near, anchor.inscription(), level);
+        if (near != null) {
+          CastingService.tryCast(near, anchor.inscription(), level);
+          consumeUnlessPersistent(index, anchor);
+        }
+        continue;
+      }
+      if (TRIGGER_ON_NEAR.equals(anchor.triggerType())) {
+        Long lastNear = cooldowns.get(pos);
+        if (lastNear != null && now - lastNear < TOUCH_COOLDOWN_TICKS) continue;
+        List<LivingEntity> close = level.getEntitiesOfClass(LivingEntity.class, new AABB(pos).inflate(NEAR_RANGE),
+            e -> e.isAlive() && !e.isSpectator());
+        if (close.isEmpty()) continue;
+        cooldowns.put(pos, now);
+        CastingService.tryCast(close.get(0), anchor.inscription(), level);
+        consumeUnlessPersistent(index, anchor);
         continue;
       }
       if (!TRIGGER_ON_TOUCH.equals(anchor.triggerType())) continue;
@@ -174,6 +192,12 @@ public final class InscribingService {
       cooldowns.put(pos, now);
       // A criatura que pisa e o alvo/origem: Eu + Dano numa pedra vira armadilha.
       CastingService.tryCast(touching.get(0), anchor.inscription(), level);
+      consumeUnlessPersistent(index, anchor);
     }
+  }
+
+  /** O desenho se desfaz ao disparar, a menos que leve o glifo Persistencia. */
+  private static void consumeUnlessPersistent(WorldInscriptionIndex index, InscriptionAnchor anchor) {
+    if (!com.arcane.execution.Traces.has(anchor.inscription(), "persistence")) index.remove(anchor.pos(), anchor.face());
   }
 }

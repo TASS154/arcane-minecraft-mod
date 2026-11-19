@@ -143,6 +143,8 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String i
         ? com.arcane.inscribing.InscribingService.TRIGGER_ON_OPEN : com.arcane.inscribing.InscribingService.TRIGGER_ON_TOUCH;
     if (menu.building().stream().anyMatch(g -> g.glyphId().getPath().equals("on_signal"))) {
       trigger = com.arcane.inscribing.InscribingService.TRIGGER_ON_SIGNAL; // Ativar por Sinal troca o gatilho
+    } else if (menu.building().stream().anyMatch(g -> g.glyphId().getPath().equals("on_near"))) {
+      trigger = com.arcane.inscribing.InscribingService.TRIGGER_ON_NEAR; // Ativar por Proximidade
     }
     if (com.arcane.inscribing.InscribingService.inscribe(level, player, pos, menu.building(), inkId, trigger, menu.spellName(), menu.face())) {
       if (!player.getAbilities().instabuild) ink.shrink(1);

@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "#forge:stone",
+    "#forge:cobblestone",
+    "#forge:ores",
+    "#minecraft:stone_bricks",
+    "#minecraft:base_stone_overworld",
+    "#minecraft:base_stone_nether",
+    "minecraft:deepslate",
+    "minecraft:cobbled_deepslate",
+    "minecraft:polished_deepslate",
+    "minecraft:deepslate_bricks",
+    "minecraft:deepslate_tiles",
+    "minecraft:bricks",
+    "minecraft:nether_bricks",
+    "minecraft:red_nether_bricks",
+    "minecraft:sandstone",
+    "minecraft:red_sandstone",
+    "minecraft:smooth_stone",
+    "minecraft:blackstone",
+    "minecraft:basalt",
+    "minecraft:calcite",
+    "minecraft:tuff",
+    "minecraft:dripstone_block",
+    "minecraft:end_stone",
+    "minecraft:terracotta",
+    "minecraft:prismarine"
+  ]
+}

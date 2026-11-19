@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:logs",
+    "#minecraft:planks",
+    "#minecraft:wooden_slabs",
+    "#minecraft:wooden_stairs",
+    "#minecraft:wooden_fences",
+    "minecraft:bookshelf",
+    "minecraft:crafting_table",
+    "minecraft:barrel",
+    "minecraft:composter",
+    "minecraft:chest"
+  ]
+}

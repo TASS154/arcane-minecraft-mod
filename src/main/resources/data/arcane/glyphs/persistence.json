@@ -1,0 +1,18 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:persistence"
+  },
+  "modifier_scope": {
+    "target": "flag",
+    "kind": "effect",
+    "mutate": {}
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "knowledge"
+  ]
+}

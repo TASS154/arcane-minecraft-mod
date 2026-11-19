@@ -243,6 +243,7 @@
   "message.arcane.compass.drawn": "Circle drawn: %s traces, %s ink",
   "message.arcane.pen.size": "Pen: hand-drawn circle of radius %s (%sx%s, ritual %s)",
   "message.arcane.compass.need_ink": "Needs %s common ink to draw this circle",
+  "message.arcane.compass.busy": "The compass is already drawing a circle",
   "message.arcane.compass.need_altar": "Use the compass on an Arcane Altar",
   "block.arcane.arcane_altar": "Arcane Altar",
   "block.arcane.arcane_altar.desc": "The heart of the ritual. Right-click: casts the active spell with the circle's power.\nShift + right-click: stores the spell (the Activate glyph triggers it).",

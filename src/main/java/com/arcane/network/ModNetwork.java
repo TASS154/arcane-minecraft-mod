@@ -85,6 +85,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(com.arcane.network.packet.S2CWorldRulesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(com.arcane.network.packet.S2CWorldRulesPacket::encode).decoder(com.arcane.network.packet.S2CWorldRulesPacket::decode)
         .consumerMainThread(com.arcane.network.packet.S2CWorldRulesPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.S2CCompassDrawPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(com.arcane.network.packet.S2CCompassDrawPacket::encode).decoder(com.arcane.network.packet.S2CCompassDrawPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.S2CCompassDrawPacket::handle).add();
     CHANNEL.messageBuilder(com.arcane.network.packet.C2SWorldRulePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(com.arcane.network.packet.C2SWorldRulePacket::encode).decoder(com.arcane.network.packet.C2SWorldRulePacket::decode)
         .consumerMainThread(com.arcane.network.packet.C2SWorldRulePacket::handle).add();

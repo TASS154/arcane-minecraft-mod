@@ -243,6 +243,7 @@
   "message.arcane.compass.drawn": "Círculo desenhado: %s traços, %s tinta(s)",
   "message.arcane.pen.size": "Pena: círculo à mão de raio %s (%sx%s, ritual %s)",
   "message.arcane.compass.need_ink": "Precisa de %s tinta(s) comum(ns) para desenhar este círculo",
+  "message.arcane.compass.busy": "O compasso já está desenhando um círculo",
   "message.arcane.compass.need_altar": "Use o compasso em cima de um Altar Arcano",
   "block.arcane.arcane_altar": "Altar Arcano",
   "block.arcane.arcane_altar.desc": "Centro do ritual. Botão direito: conjura a magia ativa com o poder do círculo.\nShift + botão direito: armazena a magia (o glifo Ativar a dispara).",

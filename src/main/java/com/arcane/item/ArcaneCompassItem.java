@@ -1,7 +1,6 @@
 package com.arcane.item;
 
 import com.arcane.block.ArcaneAltarBlock;
-import com.arcane.registry.ModItems;
 import com.arcane.ritual.RitualLevel;
 import com.arcane.ritual.RitualService;
 import com.arcane.ritual.RitualTemplate;
@@ -10,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -82,33 +80,13 @@ public class ArcaneCompassItem extends Item {
     int radius = radius(stack);
     int ink = RitualService.inkCost(radius);
     boolean creative = sp.getAbilities().instabuild;
-    if (!creative && countInk(sp) < ink) {
+    if (!creative && com.arcane.ritual.CompassDrawing.countInk(sp) < ink) {
       sp.displayClientMessage(Component.translatable("message.arcane.compass.need_ink", ink).withStyle(ChatFormatting.RED), true);
       return InteractionResult.CONSUME;
     }
-    int placed = RitualService.drawCircle(serverLevel, pos, radius);
-    if (!creative && placed > 0) takeInk(sp, Math.max(1, (int) Math.ceil(placed / 16.0)));
-    serverLevel.playSound(null, pos, com.arcane.registry.ModSounds.PEN_STROKE.get(), SoundSource.BLOCKS, 1.0f, 0.8f);
-    sp.displayClientMessage(Component.translatable("message.arcane.compass.drawn", placed,
-        creative ? 0 : Math.max(1, (int) Math.ceil(placed / 16.0))).withStyle(ChatFormatting.LIGHT_PURPLE), true);
-    return InteractionResult.CONSUME;
-  }
-
-  private static int countInk(ServerPlayer player) {
-    int total = 0;
-    for (ItemStack s : player.getInventory().items) if (s.is(ModItems.COMMON_INK.get())) total += s.getCount();
-    return total;
-  }
-
-  private static void takeInk(ServerPlayer player, int amount) {
-    int left = amount;
-    for (ItemStack s : player.getInventory().items) {
-      if (left <= 0) break;
-      if (s.is(ModItems.COMMON_INK.get())) {
-        int n = Math.min(left, s.getCount());
-        s.shrink(n);
-        left -= n;
-      }
+    if (!com.arcane.ritual.CompassDrawing.start(sp, serverLevel, pos, radius)) {
+      sp.displayClientMessage(Component.translatable("message.arcane.compass.busy").withStyle(ChatFormatting.GRAY), true);
     }
+    return InteractionResult.CONSUME;
   }
 }

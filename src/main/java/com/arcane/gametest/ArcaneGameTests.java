@@ -2184,6 +2184,39 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  private static int traceCount(GameTestHelper h, int radius) {
+    int n = 0;
+    for (var cell : com.arcane.ritual.RitualTemplate.cells(radius)) {
+      if (com.arcane.ritual.RitualService.traceAt(h.getLevel(), altarAbs(h), cell) != null) n++;
+    }
+    return n;
+  }
+
+  @GameTest(template = "ritual_arena", batch = "compass_slow", timeoutTicks = 160)
+  public static void compassDrawsTheCircleOverTimeAndChargesInkAtTheEnd(GameTestHelper h) {
+    arena(h);
+    var player = casterWith(h);
+    player.getInventory().add(new net.minecraft.world.item.ItemStack(com.arcane.registry.ModItems.COMMON_INK.get(), 5));
+    int duration = com.arcane.ritual.CompassDrawing.durationTicks(4);
+    h.assertTrue(duration > 20, "o desenho nao e instantaneo (" + duration + " ticks)");
+    h.assertTrue(com.arcane.ritual.CompassDrawing.start(player, h.getLevel(), altarAbs(h), 4), "comecou");
+    h.assertTrue(!com.arcane.ritual.CompassDrawing.start(player, h.getLevel(), altarAbs(h), 4), "nao comeca outro enquanto desenha");
+    h.assertTrue(traceCount(h, 4) == 0, "logo no inicio ainda nao ha tracos");
+    h.runAfterDelay(duration / 2, () -> {
+      int half = traceCount(h, 4);
+      int all = com.arcane.ritual.RitualTemplate.cells(4).size();
+      h.assertTrue(half > 0 && half < all, "no meio do tempo o circulo esta pela metade (" + half + " de " + all + ")");
+      h.assertTrue(com.arcane.ritual.CompassDrawing.countInk(player) == 5, "a tinta so e gasta no fim");
+    });
+    h.runAfterDelay(duration + 10, () -> {
+      var eval = com.arcane.ritual.RitualService.evaluate(h.getLevel(), altarAbs(h));
+      h.assertTrue(eval.level() == com.arcane.ritual.RitualLevel.MINOR && eval.completeness() > 0.99, "no fim o circulo esta completo: " + eval);
+      h.assertTrue(com.arcane.ritual.CompassDrawing.countInk(player) < 5, "gastou tinta ao terminar");
+      h.assertTrue(!com.arcane.ritual.CompassDrawing.isDrawing(player.getUUID()), "a sessao terminou");
+      h.succeed();
+    });
+  }
+
   // ================================================================== Revisao 2: cratera redonda, oferendas, pilar mantido
   @GameTest(template = "empty", batch = "rev_crater", timeoutTicks = 60)
   public static void blastCraterIsASphereNotACube(GameTestHelper h) {

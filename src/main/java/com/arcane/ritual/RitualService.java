@@ -115,7 +115,7 @@ public final class RitualService {
   }
 
   /** Posicao do traco na celula (aceita ate 2 blocos abaixo e 2 acima do altar), ou null. */
-  private static BlockPos traceAt(ServerLevel level, BlockPos altar, RitualTemplate.Cell cell) {
+  public static BlockPos traceAt(ServerLevel level, BlockPos altar, RitualTemplate.Cell cell) {
     for (int dy = -2; dy <= 2; dy++) {
       BlockPos pos = altar.offset(cell.dx(), dy, cell.dz());
       if (!level.hasChunkAt(pos)) return null;
@@ -140,22 +140,33 @@ public final class RitualService {
    */
   public static int drawCircle(ServerLevel level, BlockPos altar, int radius) {
     int placed = 0;
+    for (RitualTemplate.Cell cell : RitualTemplate.cells(radius)) if (drawCell(level, altar, cell)) placed++;
+    return placed;
+  }
+
+  /** Poe o traco de UMA celula (so onde ha chao firme e espaco livre). Devolve se colocou. */
+  public static boolean drawCell(ServerLevel level, BlockPos altar, RitualTemplate.Cell cell) {
+    if (traceAt(level, altar, cell) != null) return false;
     BlockState trace = ModBlocks.ARCANE_TRACE.get().defaultBlockState();
-    for (RitualTemplate.Cell cell : RitualTemplate.cells(radius)) {
-      if (traceAt(level, altar, cell) != null) continue;
-      for (int dy = 1; dy >= -2; dy--) {
-        BlockPos pos = altar.offset(cell.dx(), dy, cell.dz());
-        if (!level.hasChunkAt(pos)) break;
-        BlockState here = level.getBlockState(pos);
-        boolean free = here.isAir() || (here.canBeReplaced() && here.getFluidState().isEmpty());
-        if (free && trace.canSurvive(level, pos)) {
-          level.setBlock(pos, trace, 3);
-          placed++;
-          break;
-        }
+    for (int dy = 1; dy >= -2; dy--) {
+      BlockPos pos = altar.offset(cell.dx(), dy, cell.dz());
+      if (!level.hasChunkAt(pos)) break;
+      BlockState here = level.getBlockState(pos);
+      boolean free = here.isAir() || (here.canBeReplaced() && here.getFluidState().isEmpty());
+      if (free && trace.canSurvive(level, pos)) {
+        level.setBlock(pos, trace, 3);
+        return true;
       }
     }
-    return placed;
+    return false;
+  }
+
+  /** Ordem em que o compasso desenha: uma varredura em volta do altar (mesma no servidor e no efeito do cliente). */
+  public static java.util.List<RitualTemplate.Cell> sweepOrder(int radius) {
+    java.util.List<RitualTemplate.Cell> list = new java.util.ArrayList<>(RitualTemplate.cells(radius));
+    list.sort(java.util.Comparator.comparingDouble((RitualTemplate.Cell c) -> Math.atan2(c.dz(), c.dx()))
+        .thenComparingInt(c -> c.dx() * c.dx() + c.dz() * c.dz()).thenComparingInt(RitualTemplate.Cell::dx));
+    return list;
   }
 
   /**

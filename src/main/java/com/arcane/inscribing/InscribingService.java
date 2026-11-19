@@ -78,10 +78,11 @@ public final class InscribingService {
       for (int dz = -4; dz <= 4; dz++) {
         for (BlockPos pos : index.getInChunk(cx + dx, cz + dz)) {
           index.get(pos).ifPresent(a -> {
-            if ("invisible".equals(a.ink().getPath()) || list.size() >= 400) return;
+            if (InkRegistry.isInvisible(a.ink()) || list.size() >= 400) return;
             List<ResourceLocation> glyphs = new ArrayList<>();
             for (GlyphInstance g : a.inscription().glyphs()) glyphs.add(g.glyphId());
-            int color = switch (a.ink().getPath()) {
+            int color = switch (InkRegistry.base(a.ink())) {
+              case "permanent" -> 0xE8C060;
               case "blood" -> 0xC02020;
               case "prismatic" -> 0xE080FF;
               case "core" -> 0xFFE070;
@@ -100,6 +101,31 @@ public final class InscribingService {
   }
 
   public static void forgetDecals(java.util.UUID player) { SENT.remove(player); }
+
+  public enum Dissolve { NOTHING, ERASED, PERMANENT_REMAINS }
+
+  /**
+   * Po solvente: apaga TODOS os desenhos do bloco de uma vez, menos os feitos so com tinta permanente (esses ficam).
+   */
+  public static Dissolve dissolve(ServerLevel level, BlockPos pos) {
+    WorldInscriptionIndex index = WorldInscriptionIndex.get(level);
+    List<InscriptionAnchor> here = index.at(pos);
+    if (here.isEmpty()) return Dissolve.NOTHING;
+    boolean left = false, removed = false;
+    for (InscriptionAnchor a : here) {
+      if (InkRegistry.isErasable(a.ink())) {
+        index.remove(pos, a.face());
+        removed = true;
+      } else {
+        left = true;
+      }
+    }
+    if (removed) {
+      level.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE,
+          pos.getX() + 0.5, pos.getY() + 1.02, pos.getZ() + 0.5, 12, 0.3, 0.1, 0.3, 0.0);
+    }
+    return left ? Dissolve.PERMANENT_REMAINS : (removed ? Dissolve.ERASED : Dissolve.NOTHING);
+  }
 
   public static boolean erase(ServerLevel level, BlockPos pos) {
     boolean removed = WorldInscriptionIndex.get(level).remove(pos).isPresent();
@@ -122,6 +148,10 @@ public final class InscribingService {
     for (InscriptionAnchor anchor : List.copyOf(index.all())) {
       BlockPos pos = anchor.pos();
       if (!level.isLoaded(pos)) continue;
+      if (InkRegistry.expired(anchor.ink(), anchor.inscription().metadata().created(), now)) {
+        index.remove(pos, anchor.face());
+        continue;
+      }
 
       if (TRIGGER_ON_SIGNAL.equals(anchor.triggerType())) {
         java.util.Set<BlockPos> powered = POWERED.computeIfAbsent(level, l -> new java.util.HashSet<>());

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "arcane:blood_ink"
+    },
+    {
+      "item": "arcane:permanent_ink"
+    }
+  ],
+  "result": {
+    "item": "arcane:mixed_blood_ink",
+    "count": 1
+  }
+}

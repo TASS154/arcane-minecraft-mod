@@ -19,6 +19,9 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.BooleanValue AREA_HARD_CAPS;
   public static final ForgeConfigSpec.IntValue RAY_RANGE;
   public static final ForgeConfigSpec.IntValue COMPASS_TICKS_PER_BLOCK;
+  public static final ForgeConfigSpec.IntValue INK_DAYS_COMMON;
+  public static final ForgeConfigSpec.IntValue INK_DAYS_BLOOD;
+  public static final ForgeConfigSpec.IntValue INK_DAYS_INVISIBLE;
   public static final ForgeConfigSpec.BooleanValue ELEMENT_INTERACTIONS;
   public static final ForgeConfigSpec.DoubleValue ELEMENT_INTERACTION_STRENGTH;
   public static final ForgeConfigSpec.IntValue MAGE_CAST_INTERVAL_TICKS;
@@ -79,6 +82,12 @@ public class ArcaneConfig {
         .defineInRange("rayRange", 512, 8, 4096);
     COMPASS_TICKS_PER_BLOCK = builder.comment("Ticks the Arcane Compass takes per block of circle radius to draw it (20 = one second). 0 = instant")
         .defineInRange("compassTicksPerBlock", 12, 0, 200);
+    INK_DAYS_COMMON = builder.comment("In-game days a drawing in common ink lasts before it fades. 0 = never")
+        .defineInRange("inkDaysCommon", 10, 0, 100000);
+    INK_DAYS_BLOOD = builder.comment("In-game days a drawing in blood ink lasts before it fades. 0 = never")
+        .defineInRange("inkDaysBlood", 20, 0, 100000);
+    INK_DAYS_INVISIBLE = builder.comment("In-game days a drawing in invisible ink lasts before it fades. 0 = never")
+        .defineInRange("inkDaysInvisible", 7, 0, 100000);
     AREA_HARD_CAPS = builder.comment("Keep the fixed maximum radius of area spells/forms (24 to 64 blocks). false = no fixed maximum, only the crystal and charge limits apply")
         .define("areaHardCaps", true);
     RITUAL_MIN_COMPLETENESS = builder.comment("Fraction of the circle's traces that must be drawn for a ritual to work")

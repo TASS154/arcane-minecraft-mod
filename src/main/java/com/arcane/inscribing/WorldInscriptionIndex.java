@@ -20,7 +20,8 @@ import java.util.Set;
 
 public class WorldInscriptionIndex extends SavedData {
   private static final String DATA_NAME = "arcane_inscriptions";
-  private final Map<BlockPos, InscriptionAnchor> anchors = new HashMap<>();
+  /** Um desenho por face do bloco. */
+  private final Map<BlockPos, java.util.EnumMap<net.minecraft.core.Direction, InscriptionAnchor>> anchors = new HashMap<>();
   private final Map<Long, Set<BlockPos>> byChunk = new HashMap<>();
 
   public static WorldInscriptionIndex get(ServerLevel level) {
@@ -40,8 +41,8 @@ public class WorldInscriptionIndex extends SavedData {
             .result().ifPresent(inscription -> {
               net.minecraft.core.Direction face = anchorTag.contains("face")
                   ? net.minecraft.core.Direction.from3DDataValue(anchorTag.getInt("face")) : net.minecraft.core.Direction.UP;
-              index.anchors.put(pos, new InscriptionAnchor(pos, inscription, anchorTag.getString("trigger"),
-                  new ResourceLocation(anchorTag.getString("ink")), face));
+              index.anchors.computeIfAbsent(pos, k -> new java.util.EnumMap<>(net.minecraft.core.Direction.class)).put(face,
+                  new InscriptionAnchor(pos, inscription, anchorTag.getString("trigger"), new ResourceLocation(anchorTag.getString("ink")), face));
               index.indexChunk(pos);
             });
       }
@@ -52,43 +53,73 @@ public class WorldInscriptionIndex extends SavedData {
   @Override
   public CompoundTag save(CompoundTag tag) {
     ListTag list = new ListTag();
-    anchors.forEach((pos, anchor) -> {
+    anchors.forEach((pos, faces) -> faces.forEach((face, anchor) -> {
       CompoundTag anchorTag = new CompoundTag();
       anchorTag.putLong("pos", pos.asLong());
       anchorTag.putString("trigger", anchor.triggerType());
       anchorTag.putString("ink", anchor.ink().toString());
-      anchorTag.putInt("face", anchor.face().get3DDataValue());
+      anchorTag.putInt("face", face.get3DDataValue());
       Inscription.CODEC.encodeStart(NbtOps.INSTANCE, anchor.inscription())
           .result().ifPresent(encoded -> anchorTag.put("inscription", encoded));
       list.add(anchorTag);
-    });
+    }));
     tag.put("anchors", list);
     return tag;
   }
 
+  /** Qualquer desenho do bloco (o primeiro, em ordem de face). */
   public Optional<InscriptionAnchor> get(BlockPos pos) {
-    return Optional.ofNullable(anchors.get(pos));
+    return at(pos).stream().findFirst();
   }
 
+  public Optional<InscriptionAnchor> get(BlockPos pos, net.minecraft.core.Direction face) {
+    var faces = anchors.get(pos);
+    return faces == null ? Optional.empty() : Optional.ofNullable(faces.get(face));
+  }
+
+  /** Todos os desenhos do bloco (ate um por face). */
+  public java.util.List<InscriptionAnchor> at(BlockPos pos) {
+    var faces = anchors.get(pos);
+    return faces == null ? java.util.List.of() : new java.util.ArrayList<>(faces.values());
+  }
+
+  /** Poe o desenho; substitui o que ja houver na mesma face. */
   public void put(InscriptionAnchor anchor) {
     BlockPos pos = anchor.pos();
-    anchors.put(pos, anchor);
+    anchors.computeIfAbsent(pos, k -> new java.util.EnumMap<>(net.minecraft.core.Direction.class)).put(anchor.face(), anchor);
     indexChunk(pos);
     setDirty();
   }
 
-  public Optional<InscriptionAnchor> remove(BlockPos pos) {
-    InscriptionAnchor removed = anchors.remove(pos);
+  public Optional<InscriptionAnchor> remove(BlockPos pos, net.minecraft.core.Direction face) {
+    var faces = anchors.get(pos);
+    InscriptionAnchor removed = faces == null ? null : faces.remove(face);
     if (removed != null) {
-      Set<BlockPos> chunk = byChunk.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
-      if (chunk != null) chunk.remove(pos);
+      if (faces.isEmpty()) forget(pos);
       setDirty();
     }
     return Optional.ofNullable(removed);
   }
 
+  /** Remove todos os desenhos do bloco. Devolve o primeiro removido (se houve algum). */
+  public Optional<InscriptionAnchor> remove(BlockPos pos) {
+    var faces = anchors.remove(pos);
+    if (faces == null || faces.isEmpty()) return Optional.empty();
+    forget(pos);
+    setDirty();
+    return Optional.of(faces.values().iterator().next());
+  }
+
+  private void forget(BlockPos pos) {
+    anchors.remove(pos);
+    Set<BlockPos> chunk = byChunk.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
+    if (chunk != null) chunk.remove(pos);
+  }
+
   public java.util.Collection<InscriptionAnchor> all() {
-    return Collections.unmodifiableCollection(anchors.values());
+    java.util.List<InscriptionAnchor> list = new java.util.ArrayList<>();
+    for (var faces : anchors.values()) list.addAll(faces.values());
+    return list;
   }
 
   public boolean isEmpty() {

@@ -98,15 +98,37 @@ def bottle(light, dark):
     ], [25, -40, 0], 1.0)
 
 
+def solvent_texture():
+    """Po solvente: um monte de po claro num fundo transparente (sprite plano)."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = [(7, 5), (8, 5), (6, 6), (7, 6), (8, 6), (9, 6), (5, 7), (6, 7), (7, 7), (8, 7), (9, 7), (10, 7),
+          (4, 8), (5, 8), (6, 8), (7, 8), (8, 8), (9, 8), (10, 8), (11, 8), (3, 9), (4, 9), (5, 9), (6, 9),
+          (7, 9), (8, 9), (9, 9), (10, 9), (11, 9), (12, 9), (4, 10), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10), (10, 10), (11, 10)]
+    for i, (x, y) in enumerate(px):
+        shade = 225 - (y - 5) * 9 - (i * 7) % 18
+        img.putpixel((x, y), (shade, shade, min(255, shade + 20), 255))
+    for x, y in ((6, 9), (9, 8), (7, 7)):
+        img.putpixel((x, y), (255, 255, 255, 255))
+    path = ASSETS / "textures/item/solvent_powder.png"
+    img.save(path)
+
+
 def main():
     palette()
-    out = ASSETS / "models/item"
+    solvent_texture()
+    (ASSETS / "models/item").mkdir(parents=True, exist_ok=True)
+    (ASSETS / "models/item/solvent_powder.json").write_text(json.dumps({"parent": "minecraft:item/generated", "textures": {"layer0": "arcane:item/solvent_powder"}}, indent=2) + "\n", encoding="utf-8")
+    out =ASSETS / "models/item"
     out.mkdir(parents=True, exist_ok=True)
     models = {
         "arcane_pen": pen(),
         "common_ink": bottle("blue", "ink_dark"),
         "blood_ink": bottle("blood", "blood_d"),
         "invisible_ink": bottle("ghost", "ghost_d"),
+        "permanent_ink": bottle("gold", "gold_d"),
+        "mixed_common_ink": bottle("gold", "ink_dark"),
+        "mixed_blood_ink": bottle("gold", "blood_d"),
+        "mixed_invisible_ink": bottle("gold", "ghost_d"),
     }
     for name, m in models.items():
         (out / f"{name}.json").write_text(json.dumps(m, indent=2) + "\n", encoding="utf-8")

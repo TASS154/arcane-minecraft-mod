@@ -129,6 +129,12 @@ def main():
     shapeless("grimoire", ["minecraft:book", "minecraft:amethyst_shard", "arcane:common_ink"])
     shapeless("blood_ink", ["arcane:common_ink", "minecraft:redstone", "minecraft:rotten_flesh"])
     shapeless("invisible_ink", ["arcane:common_ink", "minecraft:glowstone_dust", "minecraft:phantom_membrane"])
+    # Tinta permanente (cara), misturas na mesa comum (nunca se desgastam, mas saem com po solvente) e o po solvente (barato).
+    shapeless("permanent_ink", ["arcane:common_ink", "minecraft:amethyst_shard", "minecraft:gold_ingot"])
+    shapeless("mixed_common_ink", ["arcane:common_ink", "arcane:permanent_ink"])
+    shapeless("mixed_blood_ink", ["arcane:blood_ink", "arcane:permanent_ink"])
+    shapeless("mixed_invisible_ink", ["arcane:invisible_ink", "arcane:permanent_ink"])
+    shapeless("solvent_powder", ["minecraft:sugar", "minecraft:ink_sac"], 2)
 
     # ---------------------------------------------------------- loot de blocos
     write("arcane/loot_tables/blocks/arcane_workbench.json", {

@@ -27,6 +27,24 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.Optional;
 
 public class InscribingHandler {
+  /** Po solvente na mao principal: apaga todos os desenhos do bloco (a tinta permanente pura nao sai). */
+  @SubscribeEvent(priority = EventPriority.HIGH)
+  public void onSolventUse(PlayerInteractEvent.RightClickBlock event) {
+    Player player = event.getEntity();
+    if (event.getHand() != InteractionHand.MAIN_HAND || !player.getMainHandItem().is(ModItems.SOLVENT_POWDER.get())) return;
+    event.setCanceled(true);
+    event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+    if (event.getLevel().isClientSide || !(event.getLevel() instanceof ServerLevel level)) return;
+    var result = InscribingService.dissolve(level, event.getPos());
+    String key = switch (result) {
+      case NOTHING -> "message.arcane.solvent.nothing";
+      case ERASED -> "message.arcane.solvent.erased";
+      case PERMANENT_REMAINS -> "message.arcane.solvent.permanent";
+    };
+    player.displayClientMessage(Component.translatable(key).withStyle(result == InscribingService.Dissolve.ERASED ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.GRAY), true);
+    if (result == InscribingService.Dissolve.ERASED && !player.getAbilities().instabuild) player.getMainHandItem().shrink(1);
+  }
+
   /** Pena na mao principal + tinta na secundaria: escreve (ou apaga, agachado) em vez de usar o bloco. */
   @SubscribeEvent(priority = EventPriority.HIGH)
   public void onPenUse(PlayerInteractEvent.RightClickBlock event) {
@@ -49,9 +67,8 @@ public class InscribingHandler {
     ServerLevel level = (ServerLevel) event.getLevel();
     BlockPos pos = event.getPos();
     if (erasing) {
-      boolean removed = InscribingService.erase(level, pos);
-      player.displayClientMessage(Component.translatable(removed ? "message.arcane.pen.erased" : "message.arcane.pen.nothing")
-          .withStyle(ChatFormatting.GRAY), true);
+      // Apagar so com po solvente: a pena nao apaga mais.
+      player.displayClientMessage(Component.translatable("message.arcane.pen.use_solvent").withStyle(ChatFormatting.GRAY), true);
       return;
     }
     // Item na mao secundaria: escreve nele. Senao, escreve no bloco. A tinta e escolhida na propria interface.

@@ -2217,6 +2217,78 @@ public class ArcaneGameTests {
     });
   }
 
+  private static InscriptionAnchor drawing(BlockPos abs, String ink, long created, net.minecraft.core.Direction face) {
+    ResourceLocation inkId = new ResourceLocation("arcane", ink);
+    Inscription spell = new Inscription(List.of(g("self"), g("damage", "amount", 1.0)), new com.arcane.inscription.InscriptionMetadata(
+        "", inkId, new ResourceLocation("arcane", "arcane_pen"), 1.0, java.util.Optional.empty(), created,
+        com.arcane.inscription.InscriptionSourceKind.WORLD));
+    return new InscriptionAnchor(abs, spell, InscribingService.TRIGGER_ON_SIGNAL, inkId, face);
+  }
+
+  @GameTest(template = "empty", batch = "ink_expiry")
+  public static void inksFadeWithTheDaysButPermanentOnesDoNot(GameTestHelper h) {
+    var level = h.getLevel();
+    long now = level.getGameTime();
+    long day = com.arcane.inscribing.InkRegistry.DAY_TICKS;
+    // Datas de criacao negativas simulam desenhos antigos (o relogio do teste parte de perto de zero).
+    BlockPos[] at = {h.absolutePos(new BlockPos(1, 1, 1)), h.absolutePos(new BlockPos(3, 1, 1)), h.absolutePos(new BlockPos(5, 1, 1)),
+        h.absolutePos(new BlockPos(1, 1, 3)), h.absolutePos(new BlockPos(3, 1, 3)), h.absolutePos(new BlockPos(5, 1, 3))};
+    var up = net.minecraft.core.Direction.UP;
+    var index = WorldInscriptionIndex.get(level);
+    index.put(drawing(at[0], "common", now - 11 * day, up));      // passou de 10 dias
+    index.put(drawing(at[1], "common", now - 9 * day, up));       // ainda vale
+    index.put(drawing(at[2], "invisible", now - 8 * day, up));    // passou de 7 dias
+    index.put(drawing(at[3], "blood", now - 19 * day, up));       // sangue dura 20
+    index.put(drawing(at[4], "permanent", now - 5000 * day, up)); // nunca
+    index.put(drawing(at[5], "common_perm", now - 5000 * day, up)); // misturada: nunca
+    InscribingService.tickWorld(level, false);
+    h.assertTrue(index.at(at[0]).isEmpty(), "tinta comum com 11 dias se desgastou");
+    h.assertTrue(!index.at(at[1]).isEmpty(), "tinta comum com 9 dias ainda vale");
+    h.assertTrue(index.at(at[2]).isEmpty(), "tinta invisivel com 8 dias se desgastou (dura 7)");
+    h.assertTrue(!index.at(at[3]).isEmpty(), "tinta de sangue com 19 dias ainda vale (dura 20)");
+    h.assertTrue(!index.at(at[4]).isEmpty(), "tinta permanente nunca se desgasta");
+    h.assertTrue(!index.at(at[5]).isEmpty(), "tinta comum misturada com permanente nunca se desgasta");
+    for (BlockPos pos : at) index.remove(pos);
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "solvent")
+  public static void solventErasesEveryFaceAtOnceExceptPurePermanentInk(GameTestHelper h) {
+    var level = h.getLevel();
+    BlockPos abs = h.absolutePos(new BlockPos(3, 1, 3));
+    var index = WorldInscriptionIndex.get(level);
+    index.put(drawing(abs, "common", level.getGameTime(), net.minecraft.core.Direction.UP));
+    index.put(drawing(abs, "common_perm", level.getGameTime(), net.minecraft.core.Direction.NORTH));
+    index.put(drawing(abs, "blood", level.getGameTime(), net.minecraft.core.Direction.EAST));
+    h.assertTrue(index.at(abs).size() == 3, "um desenho por face: tres faces, tres desenhos");
+    h.assertTrue(InscribingService.dissolve(level, abs) == InscribingService.Dissolve.ERASED, "tudo se dissolve");
+    h.assertTrue(index.at(abs).isEmpty(), "o po apagou todas as faces de uma vez, tambem a mistura com permanente");
+
+    index.put(drawing(abs, "common", level.getGameTime(), net.minecraft.core.Direction.UP));
+    index.put(drawing(abs, "permanent", level.getGameTime(), net.minecraft.core.Direction.SOUTH));
+    h.assertTrue(InscribingService.dissolve(level, abs) == InscribingService.Dissolve.PERMANENT_REMAINS, "a permanente pura fica");
+    h.assertTrue(index.at(abs).size() == 1 && index.at(abs).get(0).face() == net.minecraft.core.Direction.SOUTH, "so a permanente pura restou");
+    h.assertTrue(InscribingService.dissolve(level, abs.above(5)) == InscribingService.Dissolve.NOTHING, "bloco sem desenho: nada");
+    index.remove(abs);
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "faces")
+  public static void aBlockHoldsOneDrawingPerFaceAndRewritingAFaceReplacesIt(GameTestHelper h) {
+    var level = h.getLevel();
+    BlockPos abs = h.absolutePos(new BlockPos(3, 1, 3));
+    var index = WorldInscriptionIndex.get(level);
+    for (var face : net.minecraft.core.Direction.values()) index.put(drawing(abs, "common", level.getGameTime(), face));
+    h.assertTrue(index.at(abs).size() == 6, "seis faces, seis desenhos");
+    index.put(drawing(abs, "blood", level.getGameTime(), net.minecraft.core.Direction.UP));
+    h.assertTrue(index.at(abs).size() == 6, "reescrever a mesma face troca o desenho, nao soma");
+    var reloaded = WorldInscriptionIndex.load(index.save(new CompoundTag()));
+    h.assertTrue(reloaded.at(abs).size() == 6, "os seis sobrevivem ao salvar e carregar");
+    h.assertTrue(reloaded.get(abs, net.minecraft.core.Direction.UP).orElseThrow().ink().getPath().equals("blood"), "a face reescrita guarda a tinta nova");
+    index.remove(abs);
+    h.succeed();
+  }
+
   // ================================================================== Revisao 2: cratera redonda, oferendas, pilar mantido
   @GameTest(template = "empty", batch = "rev_crater", timeoutTicks = 60)
   public static void blastCraterIsASphereNotACube(GameTestHelper h) {

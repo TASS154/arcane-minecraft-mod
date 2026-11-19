@@ -2321,6 +2321,20 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "empty", batch = "pen_menu_valid")
+  public static void penMenuStaysOpenWithABlockPenInHand(GameTestHelper h) {
+    var player = casterWith(h);
+    BlockPos at = h.absolutePos(new BlockPos(3, 1, 3));
+    for (var pen : List.of(com.arcane.registry.ModItems.ARCANE_PEN.get(), com.arcane.registry.ModItems.STONE_PEN.get(), com.arcane.registry.ModItems.WOOD_PEN.get())) {
+      player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(pen));
+      var menu = new com.arcane.menu.ArcaneWorkbenchMenu(1, player.getInventory(), at, com.arcane.menu.ArcaneWorkbenchMenu.BLOCK);
+      h.assertTrue(menu.stillValid(player), "o menu de escrever em bloco nao pode fechar com " + pen);
+    }
+    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+    h.assertTrue(!new com.arcane.menu.ArcaneWorkbenchMenu(2, player.getInventory(), at, com.arcane.menu.ArcaneWorkbenchMenu.BLOCK).stillValid(player), "sem caneta o menu fecha");
+    h.succeed();
+  }
+
   @GameTest(template = "empty", batch = "consume_trap", timeoutTicks = 120)
   public static void aWorldDrawingFadesAfterFiringUnlessItHasPersistence(GameTestHelper h) {
     floor(h);

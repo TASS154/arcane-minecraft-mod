@@ -107,7 +107,8 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
   public boolean stillValid(Player player) {
     if (mode == FIELD) return true;
     if (penMode()) {
-      return player.getMainHandItem().is(com.arcane.registry.ModItems.ARCANE_PEN.get())
+      var pen = player.getMainHandItem();
+      return (pen.is(com.arcane.registry.ModItems.ARCANE_PEN.get()) || pen.getItem() instanceof com.arcane.item.BlockPenItem)
           && (mode == ITEM ? !player.getOffhandItem().isEmpty() : true)
           && player.distanceToSqr(workbenchPos.getX() + 0.5, workbenchPos.getY() + 0.5, workbenchPos.getZ() + 0.5) < 100.0;
     }

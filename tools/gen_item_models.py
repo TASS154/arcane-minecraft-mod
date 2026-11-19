@@ -23,13 +23,13 @@ COLORS = [
     ("white", (240, 235, 255, 255)),
     ("cork", (150, 105, 60, 255)),
     ("blue", (40, 60, 150, 255)),
-    ("blue_d", (20, 30, 80, 255)),
     ("blood", (190, 30, 40, 255)),
     ("blood_d", (110, 10, 20, 255)),
     ("ghost", (235, 250, 255, 150)),
     ("ghost_d", (200, 230, 255, 110)),
-    ("glass", (215, 235, 255, 255)),
-    ("sheen", (255, 255, 255, 255)),
+    ("glass", (60, 75, 120, 255)),
+    ("ink_dark", (14, 18, 44, 255)),
+    ("cork_l", (196, 152, 96, 255)),
 ]
 INDEX = {name: i for i, (name, _) in enumerate(COLORS)}
 
@@ -61,10 +61,10 @@ def model(elements, gui_rot, gui_scale):
         "textures": {"0": "arcane:item/draw_palette", "particle": "arcane:item/draw_palette"},
         "gui_light": "side",
         "display": {
-            "thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 4, 0.5], "scale": [0.85, 0.85, 0.85]},
-            "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 4, 0.5], "scale": [0.85, 0.85, 0.85]},
-            "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
-            "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
+            "thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 4, 0.5], "scale": [0.55, 0.55, 0.55]},
+            "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 4, 0.5], "scale": [0.55, 0.55, 0.55]},
+            "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.13, 3.2, 1.13], "scale": [0.5, 0.5, 0.5]},
+            "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.13, 3.2, 1.13], "scale": [0.5, 0.5, 0.5]},
             "gui": {"rotation": gui_rot, "translation": [0, 0, 0], "scale": [gui_scale] * 3},
             "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
             "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.6, 0.6, 0.6]},
@@ -74,30 +74,27 @@ def model(elements, gui_rot, gui_scale):
 
 
 def pen():
-    """Caneta de pena: ponta, anel de ouro, empunhadura, corpo, gema e pluma; inclinada 45 graus."""
-    r = 45
+    """Caneta fina: ponta, anel de ouro, empunhadura, corpo, faixa e gema. Inclinada -45 graus (ponta embaixo a esquerda)."""
+    r = -45
     return model([
-        box((7.4, 0, 7.4), (8.6, 2.2, 8.6), "dark", r),      # ponta
-        box((6.8, 2.2, 6.8), (9.2, 3.4, 9.2), "gold", r),    # anel
-        box((6.6, 3.4, 6.6), (9.4, 6.4, 9.4), "lilac", r),   # empunhadura
-        box((6.2, 6.4, 6.2), (9.8, 12.0, 9.8), "violet", r),  # corpo
-        box((6.0, 6.4, 6.0), (10.0, 7.0, 10.0), "violet_d", r),
-        box((6.6, 12.0, 6.6), (9.4, 13.4, 9.4), "gold", r),  # tampa
-        box((7.2, 13.4, 7.2), (8.8, 14.4, 8.8), "lilac", r),  # gema
-        box((7.85, 11.0, 5.4), (8.15, 18.0, 10.6), "white", r),  # pluma
-        box((7.85, 14.0, 4.6), (8.15, 17.0, 5.4), "lilac", r),
-    ], [25, -40, 0], 0.85)
+        box((7.7, 0, 7.7), (8.3, 2.0, 8.3), "dark", r),       # ponta
+        box((7.3, 2.0, 7.3), (8.7, 2.8, 8.7), "gold", r),     # anel
+        box((7.4, 2.8, 7.4), (8.6, 5.5, 8.6), "lilac", r),    # empunhadura
+        box((7.3, 5.5, 7.3), (8.7, 12.0, 8.7), "violet", r),  # corpo
+        box((7.2, 12.0, 7.2), (8.8, 12.8, 8.8), "gold", r),   # faixa
+        box((7.5, 12.8, 7.5), (8.5, 13.8, 8.5), "lilac", r),  # gema
+    ], [25, -40, 0], 1.0)
 
 
 def bottle(light, dark):
+    """Frasco quadrado e baixo, gargalo de vidro e rolha larga. Caixas empilhadas, sem faces coplanares sobrepostas."""
     return model([
-        box((4.5, 0.0, 4.5), (11.5, 7.5, 11.5), dark),        # corpo
-        box((4.5, 5.0, 4.5), (11.5, 7.5, 11.5), light),       # nivel claro
-        box((4.0, 0.0, 4.0), (12.0, 0.8, 12.0), "dark"),      # base
-        box((6.0, 7.5, 6.0), (10.0, 9.5, 10.0), "glass"),     # gargalo
-        box((5.6, 9.0, 5.6), (10.4, 9.9, 10.4), "gold"),      # aro
-        box((6.4, 9.9, 6.4), (9.6, 11.6, 9.6), "cork"),       # rolha
-        box((5.0, 1.5, 4.4), (6.2, 6.5, 4.6), "sheen"),       # brilho
+        box((4.0, 0.0, 4.0), (12.0, 5.0, 12.0), dark),         # corpo
+        box((4.8, 5.0, 4.8), (11.2, 6.2, 11.2), light),        # ombro
+        box((5.8, 6.2, 5.8), (10.2, 7.8, 10.2), "glass"),      # gargalo
+        box((5.4, 7.8, 5.4), (10.6, 8.4, 10.6), light),        # aro
+        box((6.0, 8.4, 6.0), (10.0, 9.6, 10.0), "cork"),       # rolha (base)
+        box((5.2, 9.6, 5.2), (10.8, 10.8, 10.8), "cork_l"),    # rolha (topo)
     ], [25, -40, 0], 1.0)
 
 
@@ -107,7 +104,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     models = {
         "arcane_pen": pen(),
-        "common_ink": bottle("blue", "blue_d"),
+        "common_ink": bottle("blue", "ink_dark"),
         "blood_ink": bottle("blood", "blood_d"),
         "invisible_ink": bottle("ghost", "ghost_d"),
     }

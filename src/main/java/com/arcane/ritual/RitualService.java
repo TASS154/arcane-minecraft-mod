@@ -161,14 +161,6 @@ public final class RitualService {
     return false;
   }
 
-  /** Ordem em que o compasso desenha: uma varredura em volta do altar (mesma no servidor e no efeito do cliente). */
-  public static java.util.List<RitualTemplate.Cell> sweepOrder(int radius) {
-    java.util.List<RitualTemplate.Cell> list = new java.util.ArrayList<>(RitualTemplate.cells(radius));
-    list.sort(java.util.Comparator.comparingDouble((RitualTemplate.Cell c) -> Math.atan2(c.dz(), c.dx()))
-        .thenComparingInt(c -> c.dx() * c.dx() + c.dz() * c.dz()).thenComparingInt(RitualTemplate.Cell::dx));
-    return list;
-  }
-
   /**
    * Circulo PERFEITO (item do criativo): todas as celulas recebem traco, mesmo sem chao firme (um apoio de pedra e
    * posto onde faltar). Simetria 1,0 garantida.

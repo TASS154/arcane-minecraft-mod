@@ -40,7 +40,7 @@ public final class CompassDrawing {
     final BlockPos altar;
     final long start;
     final int duration;
-    final List<RitualTemplate.Cell> order;
+    final CompassPath path;
     int next = 0;
     int placed = 0;
 
@@ -50,9 +50,12 @@ public final class CompassDrawing {
       this.altar = altar;
       this.start = level.getGameTime();
       this.duration = duration;
-      this.order = RitualService.sweepOrder(radius);
+      this.path = CompassPath.of(radius);
     }
   }
+
+  /** Fracao do tempo gasta antes do traco: subir ate o altar e mergulhar a caneta (o cliente usa o mesmo valor). */
+  public static final double LEAD = 0.26;
 
   private static final Map<UUID, Session> SESSIONS = new ConcurrentHashMap<>();
 
@@ -115,12 +118,21 @@ public final class CompassDrawing {
   /** Poe as celulas devidas ate o instante atual. Devolve true quando terminou. */
   private static boolean advance(Session s, boolean force) {
     long elapsed = s.level.getGameTime() - s.start;
-    int target = force || elapsed >= s.duration ? s.order.size() : (int) (s.order.size() * (elapsed / (double) s.duration));
+    int size = s.path.cells.size();
+    int target;
+    if (force || elapsed >= s.duration) {
+      target = size;
+    } else {
+      // So comeca a por tracos depois da caneta subir, mergulhar na tinta e chegar ao primeiro traco; fica poucos ticks atras da caneta.
+      double lead = LEAD * s.duration + 3;
+      double f = (elapsed - lead) / (s.duration - lead);
+      target = f <= 0 ? 0 : s.path.reached(f * s.path.total);
+    }
     while (s.next < target) {
-      if (RitualService.drawCell(s.level, s.altar, s.order.get(s.next))) s.placed++;
+      if (RitualService.drawCell(s.level, s.altar, s.path.cells.get(s.next))) s.placed++;
       s.next++;
     }
-    return s.next >= s.order.size();
+    return s.next >= size;
   }
 
   @SubscribeEvent

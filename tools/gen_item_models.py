@@ -58,10 +58,13 @@ def box(frm, to, color, rot=None):
 
 def model(elements, gui_rot, gui_scale):
     return {
-        "parent": "minecraft:item/handheld",
         "textures": {"0": "arcane:item/draw_palette", "particle": "arcane:item/draw_palette"},
         "gui_light": "side",
         "display": {
+            "thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 4, 0.5], "scale": [0.85, 0.85, 0.85]},
+            "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 4, 0.5], "scale": [0.85, 0.85, 0.85]},
+            "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
+            "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
             "gui": {"rotation": gui_rot, "translation": [0, 0, 0], "scale": [gui_scale] * 3},
             "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
             "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.6, 0.6, 0.6]},

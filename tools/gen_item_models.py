@@ -41,6 +41,12 @@ COLORS = [
     ("oak", (190, 150, 90, 255)),
     ("oak_d", (125, 90, 50, 255)),
     ("blue_gem", (60, 140, 255, 255)),
+    ("red", (200, 50, 45, 255)),
+    ("red_d", (130, 25, 25, 255)),
+    ("orange", (235, 150, 60, 255)),
+    ("steel", (170, 180, 190, 255)),
+    ("teal", (60, 200, 190, 255)),
+    ("teal_d", (30, 120, 130, 255)),
 ]
 INDEX = {name: i for i, (name, _) in enumerate(COLORS)}
 
@@ -116,6 +122,22 @@ def block_pen(kind):
         els = [box((7.6, 0, 7.6), (8.4, 2.0, 8.4), "ice_d", r), box((7.2, 2.0, 7.2), (8.8, 3.0, 8.8), "white", r),
                box((7.3, 3.0, 7.3), (8.7, 10.5, 8.7), "ice", r), box((7.1, 10.5, 7.1), (8.9, 11.2, 8.9), "white", r),
                box((7.5, 11.2, 7.5), (8.5, 12.8, 8.5), "ice_d", r), box((7.75, 12.8, 7.75), (8.25, 15.0, 8.25), "white", r)]
+    elif kind == "redstone":  # corpo vermelho, pino de redstone no topo e contatos dourados
+        els = [box((7.6, 0, 7.6), (8.4, 2.0, 8.4), "dark", r), box((7.0, 2.0, 7.0), (9.0, 3.2, 9.0), "gold", r),
+               box((7.2, 3.2, 7.2), (8.8, 11.5, 8.8), "red", r), box((7.0, 6.0, 7.0), (9.0, 6.8, 9.0), "red_d", r),
+               box((7.0, 11.5, 7.0), (9.0, 12.3, 9.0), "gold", r), box((7.4, 12.3, 7.4), (8.6, 14.3, 8.6), "red_d", r)]
+    elif kind == "food":      # corpo laranja, empunhadura de pao e uma baga no topo
+        els = [box((7.6, 0, 7.6), (8.4, 1.8, 8.4), "dark", r), box((7.0, 1.8, 7.0), (9.0, 5.0, 9.0), "cork_l", r),
+               box((7.2, 5.0, 7.2), (8.8, 11.5, 8.8), "orange", r), box((7.0, 11.5, 7.0), (9.0, 12.2, 9.0), "gold", r),
+               box((7.0, 12.2, 7.0), (9.0, 14.0, 9.0), "red", r), box((7.6, 14.0, 7.6), (8.4, 14.8, 8.4), "green", r)]
+    elif kind == "weapon":    # corpo de aco, guarda larga e pomo de ouro
+        els = [box((7.7, 0, 7.7), (8.3, 2.6, 8.3), "dark", r), box((7.3, 2.6, 7.3), (8.7, 10.5, 8.7), "steel", r),
+               box((5.8, 10.5, 7.0), (10.2, 11.3, 9.0), "gold", r), box((7.2, 11.3, 7.2), (8.8, 13.0, 8.8), "grey_d", r),
+               box((7.0, 13.0, 7.0), (9.0, 14.0, 9.0), "gold", r)]
+    elif kind == "potion":    # corpo verde-azulado, bulbo de vidro no topo
+        els = [box((7.6, 0, 7.6), (8.4, 2.0, 8.4), "dark", r), box((7.2, 2.0, 7.2), (8.8, 4.5, 8.8), "teal_d", r),
+               box((7.3, 4.5, 7.3), (8.7, 10.0, 8.7), "teal", r), box((7.0, 10.0, 7.0), (9.0, 10.8, 9.0), "silver", r),
+               box((6.4, 10.8, 6.4), (9.6, 13.6, 9.6), "glass", r), box((6.8, 11.2, 6.8), (9.2, 12.8, 9.2), "teal", r)]
     else:                  # madeira: corpo de carvalho, empunhadura escura e uma folha
         els = [box((7.6, 0, 7.6), (8.4, 1.8, 8.4), "dark", r), box((7.2, 1.8, 7.2), (8.8, 5.0, 8.8), "oak_d", r),
                box((7.3, 5.0, 7.3), (8.7, 12.0, 8.7), "oak", r), box((7.2, 12.0, 7.2), (8.8, 12.7, 8.8), "oak_d", r),
@@ -159,6 +181,10 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     models = {
         "arcane_pen": pen(),
+        "redstone_pen": block_pen("redstone"),
+        "food_pen": block_pen("food"),
+        "weapon_pen": block_pen("weapon"),
+        "potion_pen": block_pen("potion"),
         "earth_pen": block_pen("earth"),
         "stone_pen": block_pen("stone"),
         "metal_pen": block_pen("metal"),

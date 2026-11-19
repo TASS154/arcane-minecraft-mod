@@ -767,5 +767,20 @@
   "glyph.arcane.restore": "Restore",
   "glyph.arcane.restore.desc": "Effect: recomposes, within 2-16 blocks (default 10), gradually, the blocks spells destroyed in the last 2 minutes (explosions, Cut, Damage, ice and fire), where nobody has built since. It returns no items: explosions drop no loot (configurable). Charges a little mana per block that comes back.",
   "glyph.arcane.chorus": "Chorus",
-  "glyph.arcane.chorus.desc": "Modifier: the spell only fires if 2-4 players cast it together, inside the circle that appears on the ground around whoever starts (radius 8, 3 s for the others). Everyone needs the same spell. Strength rises 35% per extra participant (max x2.4) and the mana is split among them. Without enough people nothing happens and nobody pays."
+  "glyph.arcane.chorus.desc": "Modifier: the spell only fires if 2-4 players cast it together, inside the circle that appears on the ground around whoever starts (radius 8, 3 s for the others). Everyone needs the same spell. Strength rises 35% per extra participant (max x2.4) and the mana is split among them. Without enough people nothing happens and nobody pays.",
+  "item.arcane.food_pen": "Food Pen",
+  "item.arcane.food_pen.desc": "Writes on food (hold the food in the other hand). The drawing fires when eaten.",
+  "item.arcane.weapon_pen": "Weapon Pen",
+  "item.arcane.weapon_pen.desc": "Writes on weapons and tools (hold the item in the other hand). The drawing fires on every hit.",
+  "item.arcane.potion_pen": "Potion Pen",
+  "item.arcane.potion_pen.desc": "Writes on potions (hold the potion in the other hand). The drawing fires when drunk.",
+  "item.arcane.redstone_pen": "Redstone Pen",
+  "item.arcane.redstone_pen.desc": "Writes on redstone blocks, lamps, pistons, levers and the like.",
+  "message.arcane.pen.wrong_item": "This pen does not write on this kind of object",
+  "message.arcane.pen.need_object_pen": "Food, weapons and potions need their own pen (Food, Weapon or Potion)",
+  "message.arcane.drawing.full": "The object cannot hold more drawings (maximum %s)",
+  "message.arcane.drawing.unstable": "Drawing written, but the object is now unstable: power varies and it may break",
+  "message.arcane.drawing.broke": "The unstable object broke",
+  "tooltip.arcane.drawings": "Drawings: %s/%s",
+  "tooltip.arcane.drawings.unstable": "Unstable: unpredictable power, may break"
 }

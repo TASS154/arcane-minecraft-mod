@@ -2379,6 +2379,85 @@ public class ArcaneGameTests {
     });
   }
 
+  private static Inscription objectSpell(String ink, long created, boolean persistent) {
+    ResourceLocation inkId = new ResourceLocation("arcane", ink);
+    List<GlyphInstance> glyphs = persistent ? List.of(g("self"), g("persistence"), g("shield")) : List.of(g("self"), g("shield"));
+    return new Inscription(glyphs, new com.arcane.inscription.InscriptionMetadata("", inkId, new ResourceLocation("arcane", "arcane_pen"),
+        1.0, java.util.Optional.empty(), created, com.arcane.inscription.InscriptionSourceKind.ITEM));
+  }
+
+  @GameTest(template = "empty", batch = "item_kinds")
+  public static void objectsAreClassifiedAndSmallOnesHoldOneDrawingWhileLargeOnesHoldTwo(GameTestHelper h) {
+    var kinds = com.arcane.inscribing.ItemDrawings.class;
+    var apple = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.APPLE);
+    var sword = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD);
+    var potion = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.POTION);
+    var diamond = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND);
+    var armor = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_CHESTPLATE);
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.kindOf(apple) == com.arcane.inscribing.ItemDrawings.Kind.FOOD, "maca e comida");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.kindOf(sword) == com.arcane.inscribing.ItemDrawings.Kind.WEAPON, "espada e arma");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.kindOf(potion) == com.arcane.inscribing.ItemDrawings.Kind.POTION, "pocao e pocao");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.kindOf(diamond) == com.arcane.inscribing.ItemDrawings.Kind.OTHER, "diamante e item comum");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.capacity(apple) == 1 && com.arcane.inscribing.ItemDrawings.capacity(diamond) == 1, "itens pequenos: 1");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.capacity(sword) == 2 && com.arcane.inscribing.ItemDrawings.capacity(armor) == 2, "itens grandes: 2");
+    // Passar do limite e permitido (instavel) ate a folga da config; depois recusa.
+    for (int i = 0; i < com.arcane.inscribing.ItemDrawings.maxCount(apple); i++) {
+      h.assertTrue(com.arcane.inscribing.ItemDrawings.canAdd(apple), "ainda cabe o desenho " + (i + 1));
+      com.arcane.inscribing.ItemDrawings.add(apple, objectSpell("common", 0, false));
+    }
+    h.assertTrue(!com.arcane.inscribing.ItemDrawings.canAdd(apple), "cheio");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.excess(apple) == com.arcane.config.ArcaneConfig.ITEM_EXTRA_DRAWINGS.get(), "o excedente e o que passou da capacidade");
+    // Cada tipo de caneta de objeto so escreve na sua classe.
+    var foodPen = (com.arcane.item.ObjectPenItem) com.arcane.registry.ModItems.FOOD_PEN.get();
+    var weaponPen = (com.arcane.item.ObjectPenItem) com.arcane.registry.ModItems.WEAPON_PEN.get();
+    var potionPen = (com.arcane.item.ObjectPenItem) com.arcane.registry.ModItems.POTION_PEN.get();
+    h.assertTrue(foodPen.canWriteOn(apple) && !foodPen.canWriteOn(sword) && !foodPen.canWriteOn(potion), "caneta de comida");
+    h.assertTrue(weaponPen.canWriteOn(sword) && !weaponPen.canWriteOn(apple), "caneta de arma");
+    h.assertTrue(potionPen.canWriteOn(potion) && !potionPen.canWriteOn(diamond), "caneta de pocao");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "item_fire")
+  public static void foodHealsOnEatingAndWeaponBlastsOnHitAndTheDrawingFadesUnlessPersistent(GameTestHelper h) {
+    var player = learn(casterWith(h), "self", "shield", "persistence");
+    var apple = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.APPLE);
+    com.arcane.inscribing.ItemDrawings.add(apple, objectSpell("common", h.getLevel().getGameTime(), false));
+    h.assertTrue(!player.hasEffect(MobEffects.ABSORPTION), "sem desenho disparado, sem efeito");
+    net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingEntityUseItemEvent.Finish(player, apple, 0, apple));
+    h.assertTrue(player.hasEffect(MobEffects.ABSORPTION), "comer a maca com o desenho de Escudo protege quem comeu");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.count(apple) == 0, "o desenho se desfaz depois de disparar");
+
+    player.removeAllEffects();
+    var sword = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD);
+    com.arcane.inscribing.ItemDrawings.add(sword, objectSpell("common_perm", h.getLevel().getGameTime(), true));
+    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, sword);
+    Pig victim = pig(h, 3, 3);
+    net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingHurtEvent(victim, player.damageSources().playerAttack(player), 4f));
+    h.assertTrue(player.hasEffect(MobEffects.ABSORPTION), "ferir com a espada desenhada dispara o desenho");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.count(sword) == 1, "com Persistencia o desenho continua na espada");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "item_ink")
+  public static void itemDrawingsFadeWithInkAndSolventSparesOnlyPurePermanentInk(GameTestHelper h) {
+    var player = learn(casterWith(h), "self", "shield");
+    long now = h.getLevel().getGameTime();
+    long day = com.arcane.inscribing.InkRegistry.DAY_TICKS;
+    var old = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BREAD);
+    com.arcane.inscribing.ItemDrawings.add(old, objectSpell("common", now - 11 * day, false));
+    net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingEntityUseItemEvent.Finish(player, old, 0, old));
+    h.assertTrue(!player.hasEffect(MobEffects.ABSORPTION), "tinta de 11 dias ja se desgastou: nada dispara");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.count(old) == 0, "o desenho vencido foi apagado");
+
+    var sword = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD);
+    com.arcane.inscribing.ItemDrawings.add(sword, objectSpell("common", now, false));
+    com.arcane.inscribing.ItemDrawings.add(sword, objectSpell("permanent", now, false));
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.dissolve(sword) == 1, "o po apaga o de tinta comum");
+    var left = com.arcane.inscribing.ItemDrawings.list(sword);
+    h.assertTrue(left.size() == 1 && left.get(0).metadata().ink().getPath().equals("permanent"), "so a permanente pura ficou");
+    h.succeed();
+  }
+
   // ================================================================== Revisao 2: cratera redonda, oferendas, pilar mantido
   @GameTest(template = "empty", batch = "rev_crater", timeoutTicks = 60)
   public static void blastCraterIsASphereNotACube(GameTestHelper h) {

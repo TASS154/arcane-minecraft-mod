@@ -19,6 +19,7 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.BooleanValue AREA_HARD_CAPS;
   public static final ForgeConfigSpec.IntValue RAY_RANGE;
   public static final ForgeConfigSpec.IntValue COMPASS_TICKS_PER_BLOCK;
+  public static final ForgeConfigSpec.IntValue ITEM_EXTRA_DRAWINGS;
   public static final ForgeConfigSpec.IntValue INK_DAYS_COMMON;
   public static final ForgeConfigSpec.IntValue INK_DAYS_BLOOD;
   public static final ForgeConfigSpec.IntValue INK_DAYS_INVISIBLE;
@@ -82,6 +83,8 @@ public class ArcaneConfig {
         .defineInRange("rayRange", 512, 8, 4096);
     COMPASS_TICKS_PER_BLOCK = builder.comment("Ticks the Arcane Compass takes per block of circle radius to draw it (20 = one second). 0 = instant")
         .defineInRange("compassTicksPerBlock", 12, 0, 200);
+    ITEM_EXTRA_DRAWINGS = builder.comment("Drawings an object accepts ABOVE its capacity (small = 1, large = 2). Each extra drawing makes it unstable: unpredictable power and a chance to break on use. 0 = never exceed the capacity")
+        .defineInRange("itemExtraDrawings", 2, 0, 20);
     INK_DAYS_COMMON = builder.comment("In-game days a drawing in common ink lasts before it fades. 0 = never")
         .defineInRange("inkDaysCommon", 10, 0, 100000);
     INK_DAYS_BLOOD = builder.comment("In-game days a drawing in blood ink lasts before it fades. 0 = never")

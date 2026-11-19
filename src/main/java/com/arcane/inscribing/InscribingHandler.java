@@ -52,9 +52,10 @@ public class InscribingHandler {
     if (event.getHand() != InteractionHand.MAIN_HAND) return;
     ItemStack mainItem = player.getMainHandItem();
     boolean blockPen = mainItem.getItem() instanceof com.arcane.item.BlockPenItem;
-    if (!blockPen && !mainItem.is(ModItems.ARCANE_PEN.get())) return;
+    boolean objectPen = mainItem.getItem() instanceof com.arcane.item.ObjectPenItem;
+    if (!blockPen && !objectPen && !mainItem.is(ModItems.ARCANE_PEN.get())) return;
     // Caneta num Altar Arcano (sem agachar): desenha o circulo do ritual a mao, sem Compasso.
-    if (!blockPen && !player.isShiftKeyDown() && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof com.arcane.block.ArcaneAltarBlock) {
+    if (!blockPen && !objectPen && !player.isShiftKeyDown() && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof com.arcane.block.ArcaneAltarBlock) {
       event.setCanceled(true);
       event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
       if (!event.getLevel().isClientSide && player instanceof ServerPlayer sp) drawByHand(sp, (ServerLevel) event.getLevel(), event.getPos());
@@ -71,6 +72,10 @@ public class InscribingHandler {
     BlockPos pos = event.getPos();
     if (!erasing && !itemMode) {
       // Escrever em bloco: so com a caneta do material dele.
+      if (objectPen) {
+        player.displayClientMessage(Component.translatable("message.arcane.pen.need_item").withStyle(ChatFormatting.RED), true);
+        return;
+      }
       if (!blockPen) {
         player.displayClientMessage(Component.translatable("message.arcane.pen.need_block_pen").withStyle(ChatFormatting.RED), true);
         return;
@@ -94,7 +99,8 @@ public class InscribingHandler {
   @SubscribeEvent
   public void onPenUseInAir(PlayerInteractEvent.RightClickItem event) {
     Player player = event.getEntity();
-    if (event.getHand() != InteractionHand.MAIN_HAND || !player.getMainHandItem().is(ModItems.ARCANE_PEN.get())) return;
+    ItemStack mainPen = player.getMainHandItem();
+    if (event.getHand() != InteractionHand.MAIN_HAND || !(mainPen.is(ModItems.ARCANE_PEN.get()) || mainPen.getItem() instanceof com.arcane.item.ObjectPenItem)) return;
     ItemStack held = player.getOffhandItem();
     if (held.isEmpty() || held.getItem() instanceof InkItem || player.isShiftKeyDown()) return;
     event.setCanceled(true);

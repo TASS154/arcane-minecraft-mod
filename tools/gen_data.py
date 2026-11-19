@@ -140,6 +140,10 @@ def main():
     shapeless("metal_pen", ["arcane:arcane_pen", "minecraft:iron_ingot", "minecraft:obsidian", "minecraft:gold_nugget"])
     shapeless("snow_pen", ["arcane:arcane_pen", "minecraft:snowball", "minecraft:packed_ice", "minecraft:quartz"])
     shapeless("wood_pen", ["arcane:arcane_pen", "minecraft:oak_planks", "minecraft:stick", "minecraft:string"])
+    shapeless("food_pen", ["arcane:arcane_pen", "minecraft:bread", "minecraft:sweet_berries", "minecraft:sugar"])
+    shapeless("weapon_pen", ["arcane:arcane_pen", "minecraft:iron_sword", "minecraft:flint", "minecraft:blaze_powder"])
+    shapeless("potion_pen", ["arcane:arcane_pen", "minecraft:glass_bottle", "minecraft:nether_wart", "minecraft:glowstone_dust"])
+    shapeless("redstone_pen", ["arcane:arcane_pen", "minecraft:redstone", "minecraft:redstone", "minecraft:quartz"])
     shapeless("solvent_powder", ["minecraft:sugar", "minecraft:ink_sac"], 2)
 
     # ---------------------------------------------------------- loot de blocos

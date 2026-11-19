@@ -92,6 +92,17 @@ public class ClientEvents {
     com.arcane.client.screen.RitualAltarScreen.clearDrafts();
   }
 
+  /** Desenhos em objetos: quantos tem, a capacidade e se esta instavel. */
+  @SubscribeEvent
+  public static void onDrawingTooltip(ItemTooltipEvent event) {
+    ItemStack stack = event.getItemStack();
+    int n = com.arcane.inscribing.ItemDrawings.count(stack);
+    if (n == 0) return;
+    int cap = com.arcane.inscribing.ItemDrawings.capacity(stack);
+    event.getToolTip().add(Component.translatable("tooltip.arcane.drawings", n, cap).withStyle(n > cap ? ChatFormatting.GOLD : ChatFormatting.LIGHT_PURPLE));
+    if (n > cap) event.getToolTip().add(Component.translatable("tooltip.arcane.drawings.unstable").withStyle(ChatFormatting.RED));
+  }
+
   /** Lore dos itens (chave item.arcane.<nome>.desc, linhas separadas por \n) e glifo das notas. */
   @SubscribeEvent
   public static void onTooltip(ItemTooltipEvent event) {

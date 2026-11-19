@@ -122,18 +122,39 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String i
         player.displayClientMessage(Component.translatable("message.arcane.pen.need_item").withStyle(ChatFormatting.RED), true);
         return;
       }
-      var written = held.copyWithCount(1);
+      var mainPen = player.getMainHandItem().getItem();
+      boolean scroll = held.is(net.minecraft.world.item.Items.PAPER);
+      if (mainPen instanceof com.arcane.item.ObjectPenItem objPen) {
+        if (!objPen.canWriteOn(held)) {
+          player.displayClientMessage(Component.translatable("message.arcane.pen.wrong_item").withStyle(ChatFormatting.RED), true);
+          return;
+        }
+      } else if (!scroll && com.arcane.inscribing.ItemDrawings.kindOf(held) != com.arcane.inscribing.ItemDrawings.Kind.OTHER) {
+        // Comida, arma e pocao pedem a caneta propria; a Pena Arcana escreve em papel e nos demais objetos.
+        player.displayClientMessage(Component.translatable("message.arcane.pen.need_object_pen").withStyle(ChatFormatting.RED), true);
+        return;
+      }
       var inscription = new com.arcane.inscription.Inscription(List.copyOf(menu.building()), new com.arcane.inscription.InscriptionMetadata(
           menu.spellName(), inkId, new ResourceLocation("arcane", "arcane_pen"), com.arcane.execution.PrecisionSnapshot.FIELD_POWER,
           java.util.Optional.of(player.getUUID()), player.level().getGameTime(), com.arcane.inscription.InscriptionSourceKind.ITEM));
-      com.arcane.inscribing.ItemInscriptionHelper.write(written, inscription);
-      written.setHoverName(menu.spellName().isEmpty() ? Component.translatable("gui.arcane.unnamed")
-          : Component.literal(menu.spellName()).withStyle(ChatFormatting.LIGHT_PURPLE));
+      var written = held.copyWithCount(1);
+      if (scroll) {
+        com.arcane.inscribing.ItemInscriptionHelper.write(written, inscription);
+        written.setHoverName(menu.spellName().isEmpty() ? Component.translatable("gui.arcane.unnamed")
+            : Component.literal(menu.spellName()).withStyle(ChatFormatting.LIGHT_PURPLE));
+      } else {
+        if (!com.arcane.inscribing.ItemDrawings.canAdd(written)) {
+          player.displayClientMessage(Component.translatable("message.arcane.drawing.full", com.arcane.inscribing.ItemDrawings.maxCount(written)).withStyle(ChatFormatting.RED), true);
+          return;
+        }
+        com.arcane.inscribing.ItemDrawings.add(written, inscription);
+      }
       if (!player.getAbilities().instabuild) ink.shrink(1);
       held.shrink(1);
       if (held.isEmpty()) player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, written);
       else if (!player.getInventory().add(written)) player.drop(written, false);
-      player.displayClientMessage(Component.translatable("message.arcane.pen.written.item").withStyle(ChatFormatting.LIGHT_PURPLE), true);
+      int excess = scroll ? 0 : com.arcane.inscribing.ItemDrawings.excess(written);
+      player.displayClientMessage(Component.translatable(excess > 0 ? "message.arcane.drawing.unstable" : "message.arcane.pen.written.item").withStyle(excess > 0 ? ChatFormatting.GOLD : ChatFormatting.LIGHT_PURPLE), true);
       player.closeContainer();
       return;
     }

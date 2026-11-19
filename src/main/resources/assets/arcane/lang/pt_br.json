@@ -767,5 +767,20 @@
   "glyph.arcane.restore": "Restaurar",
   "glyph.arcane.restore.desc": "Efeito: recompõe, num raio de 2–16 blocos (padrão 10), aos poucos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta.",
   "glyph.arcane.chorus": "Coro",
-  "glyph.arcane.chorus.desc": "Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga."
+  "glyph.arcane.chorus.desc": "Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga.",
+  "item.arcane.food_pen": "Caneta de Comida",
+  "item.arcane.food_pen.desc": "Escreve em comidas (segure a comida na outra mão). O desenho dispara ao comer.",
+  "item.arcane.weapon_pen": "Caneta de Arma",
+  "item.arcane.weapon_pen.desc": "Escreve em armas e ferramentas (segure o item na outra mão). O desenho dispara a cada golpe.",
+  "item.arcane.potion_pen": "Caneta de Poção",
+  "item.arcane.potion_pen.desc": "Escreve em poções (segure a poção na outra mão). O desenho dispara ao beber.",
+  "item.arcane.redstone_pen": "Caneta de Redstone",
+  "item.arcane.redstone_pen.desc": "Escreve em blocos de redstone, lâmpadas, pistões, alavancas e afins.",
+  "message.arcane.pen.wrong_item": "Esta caneta não escreve neste tipo de objeto",
+  "message.arcane.pen.need_object_pen": "Comidas, armas e poções pedem a caneta própria (Comida, Arma ou Poção)",
+  "message.arcane.drawing.full": "O objeto não comporta mais desenhos (máximo %s)",
+  "message.arcane.drawing.unstable": "Desenho escrito, mas o objeto ficou instável: a potência varia e ele pode quebrar",
+  "message.arcane.drawing.broke": "O objeto instável se quebrou",
+  "tooltip.arcane.drawings": "Desenhos: %s/%s",
+  "tooltip.arcane.drawings.unstable": "Instável: potência imprevisível, pode quebrar"
 }

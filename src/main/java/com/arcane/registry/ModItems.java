@@ -37,6 +37,10 @@ public final class ModItems {
     public static final RegistryObject<Item> METAL_PEN = ITEMS.register("metal_pen", () -> new com.arcane.item.BlockPenItem(new Item.Properties(), "metal"));
     public static final RegistryObject<Item> SNOW_PEN = ITEMS.register("snow_pen", () -> new com.arcane.item.BlockPenItem(new Item.Properties(), "snow"));
     public static final RegistryObject<Item> WOOD_PEN = ITEMS.register("wood_pen", () -> new com.arcane.item.BlockPenItem(new Item.Properties(), "wood"));
+    public static final RegistryObject<Item> FOOD_PEN = ITEMS.register("food_pen", () -> new com.arcane.item.ObjectPenItem(new Item.Properties(), com.arcane.inscribing.ItemDrawings.Kind.FOOD));
+    public static final RegistryObject<Item> WEAPON_PEN = ITEMS.register("weapon_pen", () -> new com.arcane.item.ObjectPenItem(new Item.Properties(), com.arcane.inscribing.ItemDrawings.Kind.WEAPON));
+    public static final RegistryObject<Item> POTION_PEN = ITEMS.register("potion_pen", () -> new com.arcane.item.ObjectPenItem(new Item.Properties(), com.arcane.inscribing.ItemDrawings.Kind.POTION));
+    public static final RegistryObject<Item> REDSTONE_PEN = ITEMS.register("redstone_pen", () -> new com.arcane.item.BlockPenItem(new Item.Properties(), "redstone"));
     public static final RegistryObject<Item> PERMANENT_INK = ITEMS.register("permanent_ink", () -> new InkItem(new Item.Properties(), "permanent"));
     public static final RegistryObject<Item> MIXED_COMMON_INK = ITEMS.register("mixed_common_ink", () -> new InkItem(new Item.Properties(), "common_perm"));
     public static final RegistryObject<Item> MIXED_BLOOD_INK = ITEMS.register("mixed_blood_ink", () -> new InkItem(new Item.Properties(), "blood_perm"));

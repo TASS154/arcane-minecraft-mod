@@ -26,7 +26,7 @@ public class PillarFormHandler implements FormHandler {
     com.arcane.execution.Region region = com.arcane.execution.Region.of(context, spec, com.arcane.execution.ShapeGeometry.COLUMN, radius);
     List<Entity> entities = new ArrayList<>(region.entities(context.level(), context.caster(), false));
     region.playFx(context);
-    double range = Math.max(4.0, Math.min(64.0, spec.range()));
+    double range = com.arcane.config.ArcaneConfig.RAY_RANGE.get();
     List<TargetList.BlockTarget> blocks = Targeting.ray(context, range, false).targets().blocks();
     // O centro da coluna e sempre um ponto de impacto (efeitos de ponto agem ali, mesmo sem bloco na mira).
     List<net.minecraft.world.phys.Vec3> points = List.of(region.center());

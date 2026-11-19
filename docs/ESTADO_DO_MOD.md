@@ -273,6 +273,17 @@ Lógica coberta por GameTest (203 passam). **Telas: implementadas, NÃO vistas e
 - **Altar:** fechar a tela guarda o rascunho (glifos, números, oferendas, aba) por altar até sair do mundo.
 - **Regras do mundo (testada a lógica; tela não vista):** saíram do grimório e da tela de configurações do mod (o menu Mods só existe fora do mundo, onde a config do mundo não está carregada). Agora são abertas dentro do mundo por **`/arcane rules`**, só para administradores (operador nível 2 ou dono do mundo local). O servidor revalida cada clique, aplica na hora e **salva sozinho** em `serverconfig/arcane-server.toml` (não há botão Salvar). Terreno, quebra de blocos, interações, cicatrizes, raio fixo, tetos (cristal, carga, ritual; "sem limite" é o último passo) e itens únicos.
 
+## Quarta revisão: Raio sem alcance e Pilar no alto (18 nov 2026)
+Cobertos por GameTest (206 passam). Não visto em jogo.
+- **Raio quase infinito:** o alcance máximo do glifo (48) passou a valer "sem limite" e usa `rayRange` da config (padrão 512, até 4096). Abaixo de 48 o alcance escolhido continua valendo. O Toque segue curto.
+- **Pilar no alto:** olhar para baixo de uma torre alta acha o chão (o alcance do Pilar também usa `rayRange`), e mirar numa criatura no céu faz a coluna descer ao chão logo abaixo dela e acertá-la. Olhar para o céu vazio continua sem coluna.
+- **Teste:** o mundo de teste tem terreno natural acima da estrutura, então o teste de altura abre uma coluna de ar antes.
+
+## Próxima fase (pedido de 18 nov 2026, ainda NÃO iniciada): desenhos em objetos
+- Desenhar em comidas, armas, itens e outros objetos, com **canetas específicas por tipo** (comida, arma, item...) e **canetas específicas por bloco** (terra, pedra, obsidiana...). Modelos 3D das canetas.
+- **Animação do compasso:** ao usar o compasso, a tinta e a caneta flutuam do inventário/mão; a caneta molha na tinta e só então começa a desenhar (não é instantâneo).
+- A definir antes de codar: quais tipos de caneta existem, o que cada desenho faz em cada tipo de objeto, custo/receita, e como os modelos 3D serão feitos (sem editor externo: geração por código, como as outras peças).
+
 ## Coluna da gravidade (glitch roxo)
 
 - Implementado, não testado no jogo: quando a magia tem elemento FORCE (Gravidade e afins: empurrar, atrair, levitar, flutuar, telecinese) e forma Coluna, `ShapeFxRenderer.glitchColumn` desenha a coluna semitransparente e arroxeada, com fatias que tremem de lado, piscam e têm buracos; o padrão desliza para baixo. Só efeito visual (cliente); a mecânica não mudou. Conferir no jogo: `pillar` + `gravity`.

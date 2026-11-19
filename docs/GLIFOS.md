@@ -42,7 +42,7 @@ Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única
 | **Eu** | `arcane:self` | 1 | 1 | Terra | — | Forma: o feitiço acontece em você. |
 | **Toque** | `arcane:touch` | 2 | 1 | Terra | `range` 3 (1–6) | Forma: afeta o que estiver na sua mira, bem perto (3 blocos). |
 | **Projétil** | `arcane:projectile` | 3 | 1 | Terra | `speed` 1.5 (0.5–3) | Forma: dispara um orbe que aplica o feitiço onde acertar (criatura ou bloco). |
-| **Raio** | `arcane:ray` | 3 | 2 | Tempestade | `range` 24 (4–48) | Forma: um feixe instantâneo que acerta a primeira criatura ou bloco na mira. |
+| **Raio** | `arcane:ray` | 3 | 2 | Tempestade | `range` 48 (4–48) | Forma: um feixe instantâneo que acerta a primeira criatura ou bloco na mira, a qualquer distância (reduza o alcance para limitar). |
 | **Aura** | `arcane:aura` | 4 | 3 | Força | `radius` 5 (2–12) | Forma: afeta todas as criaturas ao seu redor (menos você). |
 | **Onda** | `arcane:wave` | 3 | 2 | Força | `range` 8 (2–16) | Forma: uma onda em cone a sua frente, afetando todas as criaturas que ela alcança. |
 | **Pilar** | `arcane:pillar` | 4 | 3 | Tempestade | `range` 24 (4–48), `radius` 2 (1–6) | Forma: uma coluna vertical no ponto que você mira (criaturas e o bloco atingido). |

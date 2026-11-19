@@ -17,6 +17,7 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.BooleanValue UNIQUE_OFFERINGS_BREAK_CAP;
   public static final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> UNIQUE_OFFERINGS;
   public static final ForgeConfigSpec.BooleanValue AREA_HARD_CAPS;
+  public static final ForgeConfigSpec.IntValue RAY_RANGE;
   public static final ForgeConfigSpec.BooleanValue ELEMENT_INTERACTIONS;
   public static final ForgeConfigSpec.DoubleValue ELEMENT_INTERACTION_STRENGTH;
   public static final ForgeConfigSpec.IntValue MAGE_CAST_INTERVAL_TICKS;
@@ -73,6 +74,8 @@ public class ArcaneConfig {
         .define("uniqueOfferingsBreakCap", true);
     UNIQUE_OFFERINGS = builder.comment("Item ids counted as unique offerings (one per world, non-renewable)")
         .defineList("uniqueOfferings", java.util.List.of("minecraft:dragon_head", "minecraft:dragon_egg", "minecraft:elytra"), o -> o instanceof String);
+    RAY_RANGE = builder.comment("Range in blocks of the Ray glyph (pseudo-infinite by default; the aim stops at the first block or creature, or at the loaded world edge)")
+        .defineInRange("rayRange", 512, 8, 4096);
     AREA_HARD_CAPS = builder.comment("Keep the fixed maximum radius of area spells/forms (24 to 64 blocks). false = no fixed maximum, only the crystal and charge limits apply")
         .define("areaHardCaps", true);
     RITUAL_MIN_COMPLETENESS = builder.comment("Fraction of the circle's traces that must be drawn for a ritual to work")

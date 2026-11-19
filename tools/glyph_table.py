@@ -40,10 +40,10 @@ glyph("projectile", "form", 3,
       ["........", "....#...", "....##..", "########", "########", "....##..", "....#...", "........"],
       params={"speed": (1.5, 0.5, 3.0, "float")}, magnitude=["speed"], comp=FORM_COMP)
 glyph("ray", "form", 3,
-      ("Raio", "Forma: um feixe instantâneo que acerta a primeira criatura ou bloco na mira."),
-      ("Ray", "Form: an instant beam that hits the first creature or block you aim at."),
+      ("Raio", "Forma: um feixe instantâneo que acerta a primeira criatura ou bloco na mira, a qualquer distância (reduza o alcance para limitar)."),
+      ("Ray", "Form: an instant beam that hits the first creature or block you aim at, at any distance (lower the range to limit it)."),
       ["......##", "....###.", "...###..", "..###...", ".###....", "###.....", "##......", "#......."],
-      params={"range": (24.0, 4.0, 48.0, "float")}, comp=FORM_COMP)
+      params={"range": (48.0, 4.0, 48.0, "float")}, comp=FORM_COMP)
 glyph("aura", "form", 4,
       ("Aura", "Forma: afeta todas as criaturas ao seu redor (menos você)."),
       ("Aura", "Form: affects every creature around you (except you)."),

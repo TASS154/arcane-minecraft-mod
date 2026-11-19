@@ -26,9 +26,9 @@ class CompilerSemanticsTest {
 
   @Test
   void rangeModifierChangesDeliveryRange() {
-    assertEquals(24.0, plan(g("ray")).delivery().range(), 1e-9);
-    assertEquals(36.0, plan(g("ray"), g("damage"), g("more_range")).delivery().range(), 1e-9);
-    assertEquals(36.0, plan(g("ray"), g("more_range"), g("damage")).delivery().range(), 1e-9, "a ordem nao importa");
+    assertEquals(48.0, plan(g("ray")).delivery().range(), 1e-9);
+    assertEquals(72.0, plan(g("ray"), g("damage"), g("more_range")).delivery().range(), 1e-9);
+    assertEquals(72.0, plan(g("ray"), g("more_range"), g("damage")).delivery().range(), 1e-9, "a ordem nao importa");
   }
 
   @Test

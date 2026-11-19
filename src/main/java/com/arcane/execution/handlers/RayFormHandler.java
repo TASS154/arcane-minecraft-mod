@@ -16,7 +16,9 @@ public class RayFormHandler implements FormHandler {
 
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
-    double range = Math.max(1.0, Math.min(64.0, spec.range()));
+    // O alcance maximo do glifo Raio (48) vale "sem limite": usa rayRange da config. Abaixo disso, o alcance escolhido. O Toque e curto.
+    double chosen = Math.max(1.0, Math.min(64.0, spec.range()));
+    double range = trail && spec.range() >= 48.0 ? com.arcane.config.ArcaneConfig.RAY_RANGE.get() : chosen;
     var targets = Targeting.ray(context, range, trail).targets();
     // O Toque so alcanca o que esta ao seu alcance: nao entrega ponto vazio.
     if (!trail) targets = new com.arcane.execution.TargetList(targets.entities(), targets.blocks());

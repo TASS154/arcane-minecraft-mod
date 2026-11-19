@@ -2151,6 +2151,39 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "empty", batch = "rev_pillar_sky")
+  public static void pillarAimedAtACreatureInTheSkyLandsOnTheGroundBelowIt(GameTestHelper h) {
+    floor(h);
+    Pig caster = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 14, 1));
+    caster.setNoGravity(true);
+    Pig flyer = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 14, 5));
+    flyer.setNoGravity(true);
+    float before = flyer.getHealth();
+    cast(h, caster, g("pillar", "radius", 2.0), g("damage", "amount", 3.0));
+    assertHurt(h, flyer, before, "a criatura no ceu, no meio da mira");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "rev_pillar_down")
+  public static void pillarLookedDownFromAFarHeightFindsTheGround(GameTestHelper h) {
+    floor(h);
+    // o terreno natural do mundo de teste fica acima da estrutura: abre uma coluna de ar ate o alto
+    for (int y = 1; y <= 92; y++) for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+      h.getLevel().setBlock(h.absolutePos(new BlockPos(3 + dx, y, 3 + dz)), Blocks.AIR.defaultBlockState(), 2);
+    }
+    Pig caster = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 90, 3));
+    caster.setNoGravity(true);
+    Pig below = pig(h, 3, 3);
+    float before = below.getHealth();
+    caster.setYRot(0);
+    caster.setXRot(90);
+    var result = CastingService.tryCast(caster, new Inscription(List.of(g("pillar", "radius", 2.0), g("damage", "amount", 3.0))), h.getLevel());
+    h.assertTrue(result.success(), "a conjuracao falhou: " + result.message());
+    assertHurt(h, below, before, "quem esta no chao la embaixo (mais de 64 blocos)");
+    h.assertTrue(com.arcane.config.ArcaneConfig.RAY_RANGE.get() >= 512, "o raio e pseudo-infinito por padrao");
+    h.succeed();
+  }
+
   // ================================================================== Revisao 2: cratera redonda, oferendas, pilar mantido
   @GameTest(template = "empty", batch = "rev_crater", timeoutTicks = 60)
   public static void blastCraterIsASphereNotACube(GameTestHelper h) {

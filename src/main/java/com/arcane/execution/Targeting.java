@@ -106,6 +106,17 @@ public final class Targeting {
     return java.util.Optional.empty();
   }
 
+  /**
+   * Desce de um ponto ate o chao logo abaixo (ate o fundo do mundo): a celula de ar sobre o primeiro bloco solido.
+   * Serve ao Pilar mirado no ceu (uma criatura voando, ou olhar para baixo de uma torre alta). Vazio se so ha vazio.
+   */
+  public static java.util.Optional<Vec3> dropToGround(net.minecraft.world.level.Level level, Entity who, Vec3 point) {
+    Vec3 end = new Vec3(point.x, level.getMinBuildHeight(), point.z);
+    BlockHitResult hit = level.clip(new ClipContext(point, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, who));
+    if (hit.getType() == HitResult.Type.MISS) return java.util.Optional.empty();
+    return java.util.Optional.of(new Vec3(point.x, hit.getBlockPos().getY() + 1.0, point.z));
+  }
+
   /** Efeitos que alteram o mundo: ligado na config; jogadores sempre, criaturas so com mobGriefing ligado. */
   public static boolean mayAlterWorld(ExecutionContext ctx) {
     if (!com.arcane.config.ArcaneConfig.WORLD_ALTERING_SPELLS.get()) return false;

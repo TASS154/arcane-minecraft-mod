@@ -59,7 +59,7 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
         return new Vec3(b.getX() + 0.5, b.getY(), b.getZ() + 0.5);
       }
       case ShapeGeometry.COLUMN:
-        return Targeting.ray(ctx, Math.max(4.0, Math.min(64.0, spec.range())), false).end();
+        return Targeting.ray(ctx, com.arcane.config.ArcaneConfig.RAY_RANGE.get(), false).end();
       case ShapeGeometry.CONE:
         return ctx.position().add(0, caster.getBbHeight() * 0.5, 0);
       default:
@@ -83,6 +83,15 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
       // A coluna nasce do chao: assenta o centro na celula de ar sobre o chao (se nao ha chao, ver mayManifest).
       var cell = Targeting.groundCell(ctx.level(), center);
       if (cell.isPresent()) center = new Vec3(center.x, cell.get().getY(), center.z);
+      else {
+        // Mira no alto (criatura no ceu, ou olhar para baixo de uma torre): a coluna desce ate o chao logo abaixo do ponto.
+        // Olhar para o ceu vazio continua sem coluna (ver mayManifest): so desce se a mira aponta para baixo ou pega uma criatura.
+        boolean onCreature = !ctx.level().getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(1.5), e -> e != ctx.caster() && e.isAlive()).isEmpty();
+        if (onCreature || ctx.look().y < -0.05) {
+          var dropped = Targeting.dropToGround(ctx.level(), ctx.caster(), center);
+          if (dropped.isPresent()) center = dropped.get();
+        }
+      }
       center = com.arcane.execution.CastChannels.lockAnchor(center); // mantido: nao acompanha a mira
     }
     // A coluna sobe ate o limite de construcao do mundo (o "ceu"); o restante dos formatos mantem as alturas de sempre.

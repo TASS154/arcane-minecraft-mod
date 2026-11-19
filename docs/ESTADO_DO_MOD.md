@@ -284,6 +284,19 @@ Cobertos por GameTest (206 passam). Não visto em jogo.
 - **Animação do compasso:** ao usar o compasso, a tinta e a caneta flutuam do inventário/mão; a caneta molha na tinta e só então começa a desenhar (não é instantâneo).
 - A definir antes de codar: quais tipos de caneta existem, o que cada desenho faz em cada tipo de objeto, custo/receita, e como os modelos 3D serão feitos (sem editor externo: geração por código, como as outras peças).
 
+### Decisões do Everton (19 nov 2026, design fechado, nada construído)
+- **Efeito:** o glifo no objeto dispara a magia no uso natural dele: comida com Cura cura ao comer; espada com Detonar explode ao atacar. Um modelo só para todos os objetos.
+- **Canetas (onde desenhar):** ar (caneta de fênix, cara), blocos por material, poções, redstone, criaturas (só por loot), armas, comidas, itens. 90% craftáveis e também achadas em loot.
+- **Blocos por material:** terra/cascalho/areia = um grupo; pedra/tijolos/minérios e afins de pedra = outro; obsidiana, blocos de metal/diamante, bigorna = outro; neve, etc. Agrupamento configurável.
+- **Desenho em bloco:** adapta o sistema atual (armadilha por condição, ex.: ao pisar). Cada caneta de bloco também pode dar propriedades. Magia **persistente** (não se desfaz ao ativar) exige um glifo modificador próprio: Persistência.
+- **Capacidade:** bloco comum = 1 desenho por face (a face em que se desenha importa). Item pequeno (diamante) = 1 glifo; item grande (espada) = 2.
+- **Tinta = propriedade, caneta = onde se pode desenhar.** Tinta comum dura 10 dias in-game, sangue 20, invisível 7. Nova **tinta permanente** (um pouco mais cara) nunca se desgasta; misturada a outra, a torna permanente (ex.: invisível permanente). Apagar: pó solvente no objeto/bloco. Não se sobrescreve. Cada glifo a mais deixa o objeto instável: pode quebrar a cada uso e a potência fica imprevisível.
+- **Custo:** a tinta fica no inventário; cada glifo gasta uma quantia; cada pote tem quantidade finita.
+- **Animação do compasso:** só visual (tinta e caneta flutuam, a caneta molha e desenha), duração proporcional ao tamanho do círculo, não interrompível, exceto no altar.
+- **Modelos:** cada caneta com forma própria, método livre, acabamento polido.
+- **Quem desenha:** qualquer objeto, inclusive de outros jogadores e criaturas (especial). Desenho visível a todos; tinta invisível esconde até do autor.
+- **Corte jogável inicial:** caneta de arma, caneta de bloco (pedra) e animação do compasso. Tetos e tipos configuráveis.
+
 ## Coluna da gravidade (glitch roxo)
 
 - Implementado, não testado no jogo: quando a magia tem elemento FORCE (Gravidade e afins: empurrar, atrair, levitar, flutuar, telecinese) e forma Coluna, `ShapeFxRenderer.glitchColumn` desenha a coluna semitransparente e arroxeada, com fatias que tremem de lado, piscam e têm buracos; o padrão desliza para baixo. Só efeito visual (cliente); a mecânica não mudou. Conferir no jogo: `pillar` + `gravity`.

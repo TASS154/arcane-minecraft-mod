@@ -37,6 +37,8 @@ public final class FloatFlightClient {
   private static final double PIVOT = 1.5;
   private static final Set<UUID> PUSHED = new HashSet<>();
   private static boolean wasFloating;
+  /** Nivel de alta velocidade do jogador local (0 = normal). */
+  private static int boost;
   /** Jogadores em voo rapido (sprint): a onda de choque dispara quando entram nesta lista. */
   private static final Set<UUID> FAST = new HashSet<>();
   /** Aumento de FOV do jogador local no voo rapido (0 a 1), suavizado. */
@@ -57,12 +59,29 @@ public final class FloatFlightClient {
     MobEffectInstance effect = player.getEffect(ModEffects.FLOAT_FLIGHT.get());
     if (effect == null) {
       if (wasFloating) { player.setNoGravity(false); wasFloating = false; }
+      boost = 0;
       return;
     }
     wasFloating = true;
     player.setNoGravity(true);
     player.fallDistance = 0.0f;
-    double speed = speedOf(effect) * (player.isSprinting() ? 2.0 : 1.0);
+    // Alta velocidade em 3 niveis: Ctrl liga o nivel 1 e cada novo toque no Ctrl (ainda correndo) sobe um nivel;
+    // largar a corrida volta ao voo normal. O servidor sabe o nivel e cobra mais mana em cada um.
+    var sprintKey = Minecraft.getInstance().options.keySprint;
+    int wantBoost = boost;
+    int clicks = 0;
+    while (sprintKey.consumeClick()) clicks++;
+    if (!player.isSprinting()) wantBoost = 0;
+    else if (boost == 0) wantBoost = 1; // o toque que comecou a corrida so liga o nivel 1
+    else wantBoost = Math.min(com.arcane.execution.FlightService.MAX_BOOST, boost + clicks);
+    if (wantBoost != boost) {
+      if (wantBoost > 1) player.displayClientMessage(net.minecraft.network.chat.Component.translatable("hud.arcane.flight_boost", wantBoost)
+          .withStyle(net.minecraft.ChatFormatting.AQUA), true);
+      if (wantBoost > boost && wantBoost > 1) shockwave(Minecraft.getInstance(), player);
+      boost = wantBoost;
+      com.arcane.network.ModNetwork.CHANNEL.sendToServer(new com.arcane.network.packet.C2SFlightBoostPacket(boost));
+    }
+    double speed = speedOf(effect) * com.arcane.execution.FlightService.BOOST_SPEED[boost];
     Vec3 look = player.getLookAngle();
     Vec3 left = new Vec3(look.z, 0, -look.x).normalize();
     float fwd = player.input.forwardImpulse;
@@ -178,9 +197,18 @@ public final class FloatFlightClient {
     double sideSpeed = dx * -Math.cos(yawRad) + dz * -Math.sin(yawRad); // positivo = para a direita de quem voa
     float fwd = (float) Mth.clamp(fwdSpeed / 0.2, -1.0, 1.0);
     float side = (float) Mth.clamp(sideSpeed / 0.15, -1.0, 1.0);
+    double vy = player.getY() - player.yo;
     float leanTarget;
-    if (fwd > 0.2f) leanTarget = 78.0f * Math.min(1f, (fwd - 0.2f) / 0.5f) + 10.0f * (float) Mth.clamp((fwdSpeed - 0.2) / 0.2, 0.0, 1.0);
-    else leanTarget = fwd < -0.2f ? 10.0f * fwd : 0.0f; // para tras: so um leve recuo do tronco
+    if (fwd > 0.2f) {
+      float k = Math.min(1f, (fwd - 0.2f) / 0.5f);
+      leanTarget = 78.0f * k + 10.0f * (float) Mth.clamp((fwdSpeed - 0.2) / 0.2, 0.0, 1.0);
+      // O corpo segue a trajetoria: avancando e descendo (camera para baixo) mergulha de cabeca; subindo, empina.
+      // Angulo da trajetoria em relacao ao chao: positivo = descendo.
+      float dive = (float) Math.toDegrees(Math.atan2(-vy, Math.max(1.0e-3, fwdSpeed)));
+      leanTarget += Mth.clamp(dive, -70f, 80f) * k;
+    } else {
+      leanTarget = fwd < -0.2f ? 10.0f * fwd : 0.0f; // para tras: so um leve recuo do tronco
+    }
     float rollTarget = 12.0f * side;
     float[] m = MOTION.computeIfAbsent(player.getUUID(), k -> new float[4]);
     m[0] += (leanTarget - m[0]) * 0.08f; // as pernas demoram: o corpo acompanha aos poucos

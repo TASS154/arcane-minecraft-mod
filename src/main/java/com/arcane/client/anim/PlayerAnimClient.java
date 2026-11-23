@@ -82,19 +82,21 @@ public final class PlayerAnimClient {
         // A cabeca fica SEMPRE em pe, olhando adiante: desfaz a inclinacao do corpo (a pose inteira esta girada em FloatFlightClient)
         head.xRot = -lean + headPitch * Mth.DEG_TO_RAD * 0.35f;
         head.yRot = netHeadYaw * Mth.DEG_TO_RAD * 0.5f;
-        // tronco: gira para o lado em que se vai, e recua um pouco para tras
-        body.yRot = side * 0.30f;
+        // Inercia: os membros ficam para tras do movimento. Indo para a direita, bracos e pernas pendem para a esquerda
+        // (e vice-versa), os dois juntos; quanto mais rapido o deslize, mais eles arrastam. O tronco quase nao gira.
+        float drag = -side;
+        body.yRot = side * 0.08f;
         body.xRot = back * 0.12f;
-        // pernas: arrastam atras ao avancar; abrem para os lados ao deslizar; passo curto para tras
+        // pernas: arrastam atras ao avancar; ao deslizar pendem juntas para o lado oposto; passo curto para tras
         leftLeg.xRot = 0.10f + ahead * 0.18f - back * 0.55f + sway;
         rightLeg.xRot = 0.05f + ahead * 0.10f - back * 0.30f - sway;
-        leftLeg.zRot = -0.05f - sideAbs * 0.30f + side * 0.10f;
-        rightLeg.zRot = 0.05f + sideAbs * 0.30f + side * 0.10f;
-        // bracos: esticados a frente ao avancar; abertos para equilibrar nos lados; para tras vao um pouco a frente
+        leftLeg.zRot = -0.05f - sideAbs * 0.06f + drag * 0.32f;
+        rightLeg.zRot = 0.05f + sideAbs * 0.06f + drag * 0.32f;
+        // bracos: esticados a frente ao avancar; ao deslizar pendem juntos para o lado oposto; para tras vao a frente
         leftArm.xRot = 0.15f - ahead * 0.55f - back * 0.45f - sway;
         rightArm.xRot = 0.15f - ahead * 0.55f - back * 0.45f + sway;
-        leftArm.zRot = -0.12f - sideAbs * 0.45f + side * 0.20f;
-        rightArm.zRot = 0.12f + sideAbs * 0.45f + side * 0.20f;
+        leftArm.zRot = -0.12f - sideAbs * 0.10f + drag * 0.40f;
+        rightArm.zRot = 0.12f + sideAbs * 0.10f + drag * 0.40f;
         leftSleeve.copyFrom(leftArm); rightSleeve.copyFrom(rightArm);
         leftPants.copyFrom(leftLeg); rightPants.copyFrom(rightLeg);
         jacket.copyFrom(body); hat.copyFrom(head);

@@ -48,8 +48,32 @@ public class RadialScreen extends Screen {
     onClose();
   }
 
+  /**
+   * Com a roda aberta o jogo solta as teclas de movimento; aqui elas sao lidas direto do teclado a cada tick, entao
+   * da para andar, pular, correr e agachar enquanto escolhe a magia (a camera fica parada porque o mouse aponta a roda).
+   */
+  private static void keepMoving() {
+    var mc = Minecraft.getInstance();
+    long window = mc.getWindow().getWindow();
+    var o = mc.options;
+    for (var k : new net.minecraft.client.KeyMapping[] {o.keyUp, o.keyDown, o.keyLeft, o.keyRight, o.keyJump, o.keySprint, o.keyShift}) {
+      var key = k.getKey();
+      if (key.getType() == InputConstants.Type.KEYSYM && key.getValue() != InputConstants.UNKNOWN.getValue()) {
+        k.setDown(InputConstants.isKeyDown(window, key.getValue()));
+      }
+    }
+  }
+
+  @Override
+  public void removed() {
+    var o = Minecraft.getInstance().options;
+    for (var k : new net.minecraft.client.KeyMapping[] {o.keyUp, o.keyDown, o.keyLeft, o.keyRight, o.keyJump, o.keySprint, o.keyShift}) k.setDown(false);
+    super.removed();
+  }
+
   @Override
   public void tick() {
+    keepMoving();
     if (ClientPrefs.latch() || ClientSetup.RADIAL_KEY == null) return;
     var key = ClientSetup.RADIAL_KEY.getKey();
     if (key.getType() == InputConstants.Type.KEYSYM) {

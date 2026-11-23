@@ -18,11 +18,15 @@ public class HealEffectHandler implements EffectHandler {
         // Plantas crescem onde a cura toca (como farinha de osso); no ar, nada acontece.
         if (!com.arcane.execution.Targeting.mayAlterWorld(context)) return;
         int grown = 0;
-        java.util.List<net.minecraft.core.BlockPos> spots = new java.util.ArrayList<>();
-        for (var block : targets.blocks()) spots.add(block.pos());
+        // A plantacao fica sobre terra arada (que nao e "solida" em cima), entao em vez de procurar o chao olha o
+        // proprio ponto, um acima e dois abaixo: acha a planta mirada direto, a muda no chao ou a planta sob os pes.
+        java.util.Set<net.minecraft.core.BlockPos> spots = new java.util.LinkedHashSet<>();
+        for (var block : targets.blocks()) { spots.add(block.pos()); spots.add(block.pos().above()); }
+        // Curar uma criatura que esta no meio da plantacao tambem cura as plantas aos pes dela.
+        for (var e : targets.entities()) spots.add(e.blockPosition());
         for (var point : targets.points()) {
-            var cell = com.arcane.execution.Targeting.groundCell(context.level(), point);
-            if (cell.isPresent()) { spots.add(cell.get()); spots.add(cell.get().below()); }
+            var c = net.minecraft.core.BlockPos.containing(point);
+            spots.add(c); spots.add(c.below()); spots.add(c.above()); spots.add(c.below(2));
         }
         for (var pos : spots) {
             if (grown >= 4) break;

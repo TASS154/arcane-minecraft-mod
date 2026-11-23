@@ -24,7 +24,22 @@ public final class FlightService {
   /** O voo rapido (sprint) gasta isto vezes mais mana por tick. */
   public static final double SPRINT_COST_FACTOR = 2.5;
 
+  /** Niveis de alta velocidade (Ctrl em voo; cada toque a mais no Ctrl sobe um nivel). Indice 0 = voo normal. */
+  public static final double[] BOOST_SPEED = {1.0, 2.0, 3.2, 4.8};
+  public static final double[] BOOST_COST = {1.0, SPRINT_COST_FACTOR, 5.0, 9.0};
+  public static final int MAX_BOOST = 3;
+  private static final java.util.Map<java.util.UUID, Integer> BOOST = new java.util.concurrent.ConcurrentHashMap<>();
+
   private FlightService() {}
+
+  public static int boostOf(net.minecraft.world.entity.player.Player player) {
+    if (!player.isSprinting()) return 0;
+    return Math.max(1, BOOST.getOrDefault(player.getUUID(), 1));
+  }
+
+  public static void setBoost(ServerPlayer player, int level) {
+    BOOST.put(player.getUUID(), Math.max(0, Math.min(MAX_BOOST, level)));
+  }
 
   /** Velocidade (blocos por tick) guardada na amplificacao do efeito: 5 bits em decimos. */
   public static double speedOf(int amplifier) { return Math.max(0.3, (amplifier & 31) / 10.0); }
@@ -48,7 +63,7 @@ public final class FlightService {
     if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
     var effect = player.getEffect(ModEffects.FLOAT_FLIGHT.get());
     if (effect == null || player.isSpectator()) return;
-    double cost = upkeep(effect.getAmplifier()) * (player.isSprinting() ? SPRINT_COST_FACTOR : 1.0);
+    double cost = upkeep(effect.getAmplifier()) * BOOST_COST[boostOf(player)];
     if (cost <= 0) return;
     var mana = GrimoireAttachments.getManaOrCreate(player);
     if (mana.current() < cost) {

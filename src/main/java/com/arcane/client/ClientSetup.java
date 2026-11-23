@@ -42,6 +42,13 @@ public class ClientSetup {
   @SubscribeEvent
   public static void onClientSetup(FMLClientSetupEvent event) {
     event.enqueueWork(() -> MenuScreens.register(ModMenuTypes.ARCANE_WORKBENCH.get(), ArcaneWorkbenchScreen::new));
+    // Cetro: a ponta e a haste escolhem o modelo (ver models/item/scepter.json).
+    event.enqueueWork(() -> {
+      net.minecraft.client.renderer.item.ItemProperties.register(com.arcane.registry.ModItems.SCEPTER.get(), new net.minecraft.resources.ResourceLocation("arcane", "head"),
+          (stack, level, entity, seed) -> com.arcane.item.ScepterItem.head(stack));
+      net.minecraft.client.renderer.item.ItemProperties.register(com.arcane.registry.ModItems.SCEPTER.get(), new net.minecraft.resources.ResourceLocation("arcane", "shaft"),
+          (stack, level, entity, seed) -> com.arcane.item.ScepterItem.shaft(stack));
+    });
     // Botao "Config" da aba Mods: abre as opcoes do Arcane (preferencias e, num mundo local, as regras do mundo).
     net.minecraftforge.fml.ModLoadingContext.get().registerExtensionPoint(net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory.class,
         () -> new net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new com.arcane.client.screen.ArcaneOptionsScreen(parent)));
@@ -52,6 +59,7 @@ public class ClientSetup {
     event.registerEntityRenderer(ModEntities.GRIMOIRE.get(), GrimoireRenderer::new);
     event.registerEntityRenderer(ModEntities.ARCANE_PROJECTILE.get(), ArcaneProjectileRenderer::new);
     event.registerEntityRenderer(ModEntities.NPC_MAGE.get(), NPCMageRenderer::new);
+    event.registerEntityRenderer(ModEntities.HYDRA.get(), com.arcane.client.render.HydraRenderer::new);
     event.registerEntityRenderer(ModEntities.SPECTRAL_WOLF.get(), com.arcane.client.render.SummonRenderers.Wolf::new);
     event.registerEntityRenderer(ModEntities.ARCANE_GOLEM.get(), com.arcane.client.render.SummonRenderers.Golem::new);
   }
@@ -78,6 +86,7 @@ public class ClientSetup {
   @SubscribeEvent
   public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
     event.registerLayerDefinition(com.arcane.client.model.SummonModels.WOLF_LAYER, com.arcane.client.model.SummonLayers::wolf);
+    event.registerLayerDefinition(com.arcane.client.render.HydraRenderer.LAYER, com.arcane.client.render.HydraRenderer.HydraModel::createLayer);
     event.registerLayerDefinition(com.arcane.client.model.SummonModels.GOLEM_LAYER, com.arcane.client.model.SummonLayers::golem);
   }
 

@@ -1,0 +1,153 @@
+package com.arcane.client.render;
+
+import com.arcane.entity.HydraEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.model.HierarchicalModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.EyesLayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+
+/**
+ * Hidra: corpo de reptil com quatro patas, cauda de tres gomos e ate 9 pescocos (cada um com dois gomos, cabeca e
+ * mandibula). O estagio de vida escolhe quantos pescocos aparecem, o tamanho e a cor: verde-claro na recem-nascida,
+ * azul-petroleo no meio da vida e carmesim-dourado na anciã. Os olhos brilham no escuro.
+ */
+public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraModel> {
+  public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation("arcane", "hydra"), "main");
+  private static final ResourceLocation TEXTURE = new ResourceLocation("arcane", "textures/entity/hydra/hydra.png");
+  private static final ResourceLocation EYES = new ResourceLocation("arcane", "textures/entity/hydra/hydra_eyes.png");
+
+  public HydraRenderer(EntityRendererProvider.Context context) {
+    super(context, new HydraModel(context.bakeLayer(LAYER)), 1.2f);
+    addLayer(new Eyes(this));
+  }
+
+  @Override
+  public ResourceLocation getTextureLocation(HydraEntity entity) { return TEXTURE; }
+
+  @Override
+  protected void scale(HydraEntity entity, PoseStack pose, float partialTick) {
+    float s = HydraEntity.scaleFor(entity.stage());
+    pose.scale(s, s, s);
+    this.shadowRadius = 1.2f * s;
+  }
+
+  private static final class Eyes extends EyesLayer<HydraEntity, HydraModel> {
+    private static final RenderType TYPE = RenderType.eyes(EYES);
+
+    Eyes(RenderLayerParent<HydraEntity, HydraModel> parent) { super(parent); }
+
+    @Override
+    public RenderType renderType() { return TYPE; }
+  }
+
+  /** Cor do couro por estagio (1 a 14), em tres paradas. */
+  static float[] tint(int stage) {
+    float t = (Math.max(1, Math.min(14, stage)) - 1) / 13f;
+    float[] a = {0.62f, 1.0f, 0.58f}, b = {0.42f, 0.72f, 1.0f}, c = {1.0f, 0.5f, 0.32f};
+    float[] out = new float[3];
+    for (int i = 0; i < 3; i++) out[i] = t < 0.5f ? Mth.lerp(t * 2, a[i], b[i]) : Mth.lerp((t - 0.5f) * 2, b[i], c[i]);
+    return out;
+  }
+
+  public static final class HydraModel extends HierarchicalModel<HydraEntity> {
+    public static final int NECKS = 9;
+    private final ModelPart root, body, tail1, tail2, tail3;
+    private final ModelPart[] legs = new ModelPart[4];
+    private final ModelPart[] neck = new ModelPart[NECKS], neck2 = new ModelPart[NECKS], head = new ModelPart[NECKS], jaw = new ModelPart[NECKS];
+    private float r = 1, g = 1, b = 1;
+
+    public HydraModel(ModelPart root) {
+      this.root = root;
+      this.body = root.getChild("body");
+      for (int i = 0; i < 4; i++) legs[i] = root.getChild("leg" + i);
+      tail1 = root.getChild("tail1");
+      tail2 = tail1.getChild("tail2");
+      tail3 = tail2.getChild("tail3");
+      for (int i = 0; i < NECKS; i++) {
+        neck[i] = root.getChild("neck" + i);
+        neck2[i] = neck[i].getChild("neck2");
+        head[i] = neck2[i].getChild("head");
+        jaw[i] = head[i].getChild("jaw");
+      }
+    }
+
+    public static LayerDefinition createLayer() {
+      MeshDefinition mesh = new MeshDefinition();
+      PartDefinition p = mesh.getRoot();
+      p.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-8, -6, -12, 16, 12, 24), PartPose.offset(0, 12, 0));
+      int[][] legPos = {{-6, -8}, {6, -8}, {-6, 8}, {6, 8}};
+      for (int i = 0; i < 4; i++) {
+        p.addOrReplaceChild("leg" + i, CubeListBuilder.create().texOffs(0, 40).addBox(-3, 0, -3, 6, 8, 6), PartPose.offset(legPos[i][0], 16, legPos[i][1]));
+      }
+      PartDefinition t1 = p.addOrReplaceChild("tail1", CubeListBuilder.create().texOffs(0, 60).addBox(-4, -4, 0, 8, 8, 10), PartPose.offset(0, 11, 11));
+      PartDefinition t2 = t1.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(40, 60).addBox(-3, -3, 0, 6, 6, 10), PartPose.offset(0, 0, 9));
+      t2.addOrReplaceChild("tail3", CubeListBuilder.create().texOffs(72, 60).addBox(-2, -2, 0, 4, 4, 10), PartPose.offset(0, 0, 9));
+      for (int i = 0; i < NECKS; i++) {
+        PartDefinition n1 = p.addOrReplaceChild("neck" + i, CubeListBuilder.create().texOffs(84, 0).addBox(-2, -2, -10, 4, 4, 10), PartPose.offset(0, 8, -10));
+        PartDefinition n2 = n1.addOrReplaceChild("neck2", CubeListBuilder.create().texOffs(84, 16).addBox(-1.5f, -1.5f, -9, 3, 3, 9), PartPose.offset(0, 0, -9));
+        PartDefinition hd = n2.addOrReplaceChild("head", CubeListBuilder.create().texOffs(84, 30).addBox(-3, -2.5f, -8, 6, 5, 8)
+            .texOffs(112, 30).addBox(-2.5f, -4.5f, -3, 1, 2, 2).texOffs(112, 30).addBox(1.5f, -4.5f, -3, 1, 2, 2), PartPose.offset(0, 0, -8));
+        hd.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(84, 46).addBox(-2.5f, 0, -7, 5, 2, 7), PartPose.offset(0, 1.5f, -0.5f));
+      }
+      return LayerDefinition.create(mesh, 128, 128);
+    }
+
+    @Override
+    public ModelPart root() { return root; }
+
+    @Override
+    public void setupAnim(HydraEntity e, float limbSwing, float limbSwingAmount, float age, float netHeadYaw, float headPitch) {
+      root.getAllParts().forEach(ModelPart::resetPose);
+      float[] c = tint(e.stage());
+      r = c[0]; g = c[1]; b = c[2];
+      // patas: passada de reptil (diagonais juntas)
+      float walk = Mth.cos(limbSwing * 0.6f) * 0.9f * limbSwingAmount;
+      legs[0].xRot = walk; legs[3].xRot = walk; legs[1].xRot = -walk; legs[2].xRot = -walk;
+      body.zRot = Mth.sin(limbSwing * 0.6f) * 0.04f * limbSwingAmount;
+      // cauda: serpenteia
+      tail1.xRot = -0.25f + Mth.sin(age * 0.05f) * 0.05f;
+      tail1.yRot = Mth.sin(age * 0.07f) * 0.25f;
+      tail2.yRot = Mth.sin(age * 0.07f - 0.8f) * 0.3f;
+      tail3.yRot = Mth.sin(age * 0.07f - 1.6f) * 0.35f;
+      tail2.xRot = 0.15f; tail3.xRot = 0.1f;
+      int n = e.heads();
+      boolean casting = e.power() != 0;
+      for (int i = 0; i < NECKS; i++) {
+        boolean show = i < n;
+        neck[i].visible = show;
+        if (!show) continue;
+        // pescocos em leque na frente do corpo; com muitos, ha duas fileiras (as do meio mais altas)
+        float spread = n == 1 ? 0f : (i / (float) (n - 1)) * 2f - 1f;
+        neck[i].x = spread * 6.5f;
+        neck[i].y = 7f - (1f - Math.abs(spread)) * 2f - (i % 2) * 1.5f;
+        neck[i].yRot = spread * 0.75f + netHeadYaw * Mth.DEG_TO_RAD * 0.4f;
+        float sway = Mth.sin(age * 0.09f + i * 1.3f) * 0.12f;
+        neck[i].xRot = -0.85f - (i % 2) * 0.2f + sway + (casting ? -0.25f : 0f);
+        neck2[i].xRot = 0.55f + Mth.sin(age * 0.11f + i) * 0.1f;
+        neck2[i].yRot = Mth.sin(age * 0.06f + i * 2.1f) * 0.15f;
+        head[i].xRot = 0.35f + headPitch * Mth.DEG_TO_RAD * 0.5f;
+        float bite = casting ? 0.55f + Mth.sin(age * 0.8f + i) * 0.15f : Math.max(0f, Mth.sin(age * 0.05f + i * 3f)) * 0.15f;
+        jaw[i].xRot = bite + (attackTime > 0 ? 0.5f : 0f);
+      }
+    }
+
+    @Override
+    public void renderToBuffer(PoseStack pose, VertexConsumer consumer, int light, int overlay, float red, float green, float blue, float alpha) {
+      root.render(pose, consumer, light, overlay, red * r, green * g, blue * b, alpha);
+    }
+  }
+}

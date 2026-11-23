@@ -34,6 +34,11 @@ public final class ModEntities {
             () -> EntityType.Builder.<com.arcane.entity.ArcaneGolemEntity>of(com.arcane.entity.ArcaneGolemEntity::new, MobCategory.MISC)
                     .sized(1.4f, 2.7f).clientTrackingRange(10).build("arcane_golem"));
 
+    /** Hidra dos covis: o tamanho base e o da recem-nascida; o estagio escala (ver HydraEntity.getDimensions). */
+    public static final RegistryObject<EntityType<com.arcane.entity.HydraEntity>> HYDRA = ENTITIES.register("hydra",
+            () -> EntityType.Builder.<com.arcane.entity.HydraEntity>of(com.arcane.entity.HydraEntity::new, MobCategory.MONSTER)
+                    .sized(1.6f, 1.6f).clientTrackingRange(16).fireImmune().build("hydra"));
+
     private ModEntities() {}
 
     public static void register(IEventBus bus) {

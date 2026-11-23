@@ -1,0 +1,31 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:annihilate",
+    "magnitude_keys": [
+      "radius",
+      "damage"
+    ]
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 10.0,
+      "min": 2.0,
+      "max": 48.0
+    },
+    "damage": {
+      "type": "float",
+      "default": 30.0,
+      "min": 1.0,
+      "max": 100.0
+    }
+  },
+  "cost": {
+    "mana": 50
+  },
+  "tier": 5,
+  "families": [
+    "original"
+  ]
+}

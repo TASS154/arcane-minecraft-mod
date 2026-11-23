@@ -1,0 +1,30 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:light",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 2400.0,
+      "min": 0.0,
+      "max": 72000.0
+    },
+    "brightness": {
+      "type": "int",
+      "default": 15.0,
+      "min": 1.0,
+      "max": 15.0
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 1,
+  "families": [
+    "knowledge"
+  ]
+}

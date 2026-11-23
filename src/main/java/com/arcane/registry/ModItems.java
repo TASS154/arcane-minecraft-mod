@@ -41,6 +41,7 @@ public final class ModItems {
     public static final RegistryObject<Item> WEAPON_PEN = ITEMS.register("weapon_pen", () -> new com.arcane.item.ObjectPenItem(new Item.Properties(), com.arcane.inscribing.ItemDrawings.Kind.WEAPON));
     public static final RegistryObject<Item> POTION_PEN = ITEMS.register("potion_pen", () -> new com.arcane.item.ObjectPenItem(new Item.Properties(), com.arcane.inscribing.ItemDrawings.Kind.POTION));
     public static final RegistryObject<Item> REDSTONE_PEN = ITEMS.register("redstone_pen", () -> new com.arcane.item.BlockPenItem(new Item.Properties(), "redstone"));
+    public static final RegistryObject<Item> SCEPTER = ITEMS.register("scepter", () -> new com.arcane.item.ScepterItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE)));
     public static final RegistryObject<Item> PHOENIX_PEN = ITEMS.register("phoenix_pen", () -> new com.arcane.item.AirPenItem(new Item.Properties()));
     public static final RegistryObject<Item> CREATURE_PEN = ITEMS.register("creature_pen", () -> new com.arcane.item.CreaturePenItem(new Item.Properties()));
     public static final RegistryObject<Item> PERMANENT_INK = ITEMS.register("permanent_ink", () -> new InkItem(new Item.Properties(), "permanent"));

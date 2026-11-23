@@ -1835,6 +1835,9 @@ public class ArcaneGameTests {
     com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 16);
     Pig caster = pigAt(h, 17, 10);
     h.getLevel().setWeatherParameters(6000, 0, false, false);
+    // outro teste do mesmo lote pode ter feito chover: a chuva some aos poucos, entao zera o nivel na hora
+    h.getLevel().setRainLevel(0f);
+    h.getLevel().setThunderLevel(0f);
     h.assertTrue(!h.getLevel().isRaining(), "comeca com tempo limpo");
 
     var noStar = ritual(h, caster, stock(Blocks.LIGHTNING_ROD.asItem(), 1), true, g("self"), g("weather", "mode", 2.0));
@@ -2514,6 +2517,201 @@ public class ArcaneGameTests {
     h.assertTrue(!com.arcane.inscribing.PenRegistry.canWriteOnBlock(player, solid, level), "e nao em bloco solido");
     var menu = new com.arcane.menu.ArcaneWorkbenchMenu(0, player.getInventory(), air, com.arcane.menu.ArcaneWorkbenchMenu.BLOCK);
     h.assertTrue(menu.stillValid(player), "o menu da caneta de ar fica aberto");
+    h.succeed();
+  }
+
+  // ================================================================== Magias nao-combate, cura nas plantas, voo
+  @GameTest(template = "empty", batch = "utility_grow")
+  public static void growAndHealMakeCropsGrow(GameTestHelper h) {
+    // Arbusto de amora: cresce com farinha de osso e nao precisa de luz para continuar de pe (o trigo, no escuro da
+    // estrutura de teste, cai quando o vizinho cresce).
+    floor(h);
+    for (int i = 1; i <= 3; i++) {
+      h.setBlock(new BlockPos(i, 0, 2), Blocks.GRASS_BLOCK);
+      h.setBlock(new BlockPos(i, 1, 2), Blocks.SWEET_BERRY_BUSH);
+    }
+    Pig caster = pig(h, 2, 4);
+    cast(h, caster, g("self"), g("grow", "radius", 3.0, "strength", 2.0));
+    for (int i = 1; i <= 3; i++) {
+      var st = h.getBlockState(new BlockPos(i, 1, 2));
+      h.assertTrue(st.is(Blocks.SWEET_BERRY_BUSH), "o arbusto " + i + " continua la (" + st + ")");
+      int age = st.getValue(net.minecraft.world.level.block.SweetBerryBushBlock.AGE);
+      h.assertTrue(age > 0, "Crescer fez o arbusto " + i + " crescer (idade " + age + ")");
+    }
+    // Cura numa criatura parada no meio das plantas faz a planta aos pes dela crescer.
+    h.setBlock(new BlockPos(5, 0, 5), Blocks.GRASS_BLOCK);
+    h.setBlock(new BlockPos(5, 1, 5), Blocks.SWEET_BERRY_BUSH);
+    Pig healer = pig(h, 5, 5);
+    cast(h, healer, g("self"), g("heal"));
+    int after = h.getBlockState(new BlockPos(5, 1, 5)).getValue(net.minecraft.world.level.block.SweetBerryBushBlock.AGE);
+    h.assertTrue(after > 0, "a Cura fez o arbusto crescer (idade " + after + ")");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "utility_light", timeoutTicks = 100)
+  public static void lightPlacesATemporaryLightThatGoesOut(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 3);
+    cast(h, caster, g("self"), g("light", "duration", 20.0));
+    java.util.List<BlockPos> lit = new java.util.ArrayList<>();
+    for (int y = 1; y <= 5; y++) if (h.getBlockState(new BlockPos(3, y, 3)).is(Blocks.LIGHT)) lit.add(new BlockPos(3, y, 3));
+    h.assertTrue(lit.size() == 1, "acendeu uma luz acima do conjurador (" + lit.size() + ")");
+    h.runAfterDelay(50, () -> {
+      h.assertTrue(!h.getBlockState(lit.get(0)).is(Blocks.LIGHT), "a luz apagou depois do tempo");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", batch = "utility_water", timeoutTicks = 80)
+  public static void waterWalkKeepsACreatureOnTheSurface(GameTestHelper h) {
+    for (int x = 0; x < 5; x++) for (int z = 0; z < 5; z++) {
+      h.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
+      h.setBlock(new BlockPos(x, 2, z), Blocks.WATER);
+      h.setBlock(new BlockPos(x, 3, z), Blocks.WATER);
+    }
+    var walker = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(2, 4, 2));
+    var sinker = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 4, 3));
+    walker.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.arcane.registry.ModEffects.WATER_WALK.get(), 400));
+    h.runAfterDelay(60, () -> {
+      double surface = h.absolutePos(new BlockPos(0, 4, 0)).getY();
+      h.assertTrue(walker.getY() > surface - 0.3, "com Andar na Agua fica na superficie (y " + walker.getY() + ", tona " + surface + ")");
+      h.assertTrue(sinker.getY() < walker.getY() - 0.3, "sem o efeito afunda (" + sinker.getY() + ")");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", batch = "flight_boost")
+  public static void flightBoostLevelsCostMoreManaEach(GameTestHelper h) {
+    var e = com.arcane.execution.FlightService.BOOST_COST;
+    var v = com.arcane.execution.FlightService.BOOST_SPEED;
+    for (int i = 1; i < e.length; i++) {
+      h.assertTrue(e[i] > e[i - 1] && v[i] > v[i - 1], "o nivel " + i + " e mais rapido e mais caro que o anterior");
+    }
+    var player = casterWith(h);
+    h.assertTrue(com.arcane.execution.FlightService.boostOf(player) == 0, "sem correr, voo normal");
+    com.arcane.execution.FlightService.setBoost((net.minecraft.server.level.ServerPlayer) player, 9);
+    player.setSprinting(true);
+    h.assertTrue(com.arcane.execution.FlightService.boostOf(player) == com.arcane.execution.FlightService.MAX_BOOST, "o servidor limita ao nivel 3");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "scepter")
+  public static void scepterHoldsSixSpellsCyclesAndCastsAt120Percent(GameTestHelper h) {
+    var scepter = new net.minecraft.world.item.ItemStack(com.arcane.registry.ModItems.SCEPTER.get());
+    for (int i = 0; i < 7; i++) {
+      var spell = new Inscription(List.of(g("self"), g("heal")));
+      com.arcane.item.ScepterItem.store(scepter, spell);
+    }
+    h.assertTrue(com.arcane.item.ScepterItem.spells(scepter).size() == com.arcane.item.ScepterItem.SLOTS, "guarda no maximo 6 magias");
+    int sel = com.arcane.item.ScepterItem.selected(scepter);
+    com.arcane.item.ScepterItem.cycle(scepter);
+    h.assertTrue(com.arcane.item.ScepterItem.selected(scepter) == (sel + 1) % 6, "agachar passa para a proxima");
+    h.assertTrue(com.arcane.item.ScepterItem.restyle(scepter, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.EMERALD))
+        && com.arcane.item.ScepterItem.head(scepter) == 2, "esmeralda troca a ponta");
+    h.assertTrue(com.arcane.item.ScepterItem.restyle(scepter, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE))
+        && com.arcane.item.ScepterItem.shaft(scepter) == 3, "osso troca a haste");
+    h.assertTrue(!com.arcane.item.ScepterItem.restyle(scepter, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIRT)), "terra nao muda nada");
+    h.assertTrue(Math.abs(com.arcane.item.ScepterItem.POWER - 1.2) < 1e-9, "forca de 120%");
+    // Conjurar com o cetro: a cura sai mais forte que a mesma magia sem cetro.
+    var player = learn(casterWith(h), "self", "heal");
+    player.setHealth(2f);
+    var plain = com.arcane.execution.CastingService.tryCast(player, new Inscription(List.of(g("self"), g("heal"))), com.arcane.execution.PrecisionSnapshot.FIELD);
+    float healedPlain = player.getHealth() - 2f;
+    player.setHealth(2f);
+    var boosted = com.arcane.execution.CastingService.tryCast(player, new Inscription(List.of(g("self"), g("heal"))),
+        new com.arcane.execution.PrecisionSnapshot(com.arcane.item.ScepterItem.POWER, 1.0, false));
+    float healedBoost = player.getHealth() - 2f;
+    h.assertTrue(plain.success() && boosted.success(), "as duas conjuracoes funcionam (" + plain.message() + " / " + boosted.message() + ")");
+    h.assertTrue(healedBoost > healedPlain, "com o cetro cura mais (" + healedPlain + " -> " + healedBoost + ")");
+    h.succeed();
+  }
+
+  // ================================================================== Hidras e glifos originais
+  @GameTest(template = "empty", batch = "hydra_rules")
+  public static void hydraStagesFirstIsHatchlingLastIsElderMiddleAreDistinct(GameTestHelper h) {
+    var rnd = net.minecraft.util.RandomSource.create(42);
+    java.util.List<Integer> used = new java.util.ArrayList<>();
+    for (int n = 0; n < com.arcane.world.HydraLairs.COUNT; n++) {
+      int st = com.arcane.world.HydraLairs.nextStage(used, n, rnd);
+      if (n == 0) h.assertTrue(st == 1, "o primeiro covil encontrado tem a recem-nascida (" + st + ")");
+      else if (n == 6) h.assertTrue(st == 14, "o ultimo tem a ancia (" + st + ")");
+      else h.assertTrue(st >= 2 && st <= 13 && !used.contains(st), "os do meio sorteiam 2..13 sem repetir (" + st + ")");
+      used.add(st);
+    }
+    h.assertTrue(com.arcane.entity.HydraEntity.headsFor(1) == 1 && com.arcane.entity.HydraEntity.headsFor(14) == 9, "1 cabeca na recem-nascida, 9 na ancia");
+    h.assertTrue(com.arcane.entity.HydraEntity.playerWeight(1, 0) == 1.0, "um jogador sozinho = forca base");
+    h.assertTrue(com.arcane.entity.HydraEntity.playerWeight(2, 0) > com.arcane.entity.HydraEntity.playerWeight(1, 3)
+        && com.arcane.entity.HydraEntity.playerWeight(1, 3) > com.arcane.entity.HydraEntity.playerWeight(1, 0), "por perto pesa mais que online longe");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "hydra_entity", timeoutTicks = 60)
+  public static void hydraStageScalesSizeHealthAndPowers(GameTestHelper h) {
+    floor(h);
+    var young = h.spawnWithNoFreeWill(com.arcane.registry.ModEntities.HYDRA.get(), new BlockPos(1, 1, 1));
+    young.setStage(1);
+    var elder = h.spawnWithNoFreeWill(com.arcane.registry.ModEntities.HYDRA.get(), new BlockPos(5, 1, 5));
+    elder.setStage(14);
+    h.assertTrue(elder.getBbWidth() > young.getBbWidth() * 3, "a ancia e muito maior (" + young.getBbWidth() + " -> " + elder.getBbWidth() + ")");
+    h.assertTrue(elder.effectiveMaxHealth() > young.effectiveMaxHealth() * 20, "e muito mais forte (" + young.effectiveMaxHealth() + " -> " + elder.effectiveMaxHealth() + ")");
+    h.assertTrue(elder.heads() == 9 && young.heads() == 1, "cabecas pelo estagio");
+    Pig victim = pig(h, 3, 3);
+    float before = victim.getHealth();
+    elder.use(com.arcane.entity.HydraEntity.SWEEP, victim);
+    h.assertTrue(victim.getHealth() < before, "o golpe de cauda fere quem esta perto");
+    var tag = new net.minecraft.nbt.CompoundTag();
+    elder.addAdditionalSaveData(tag);
+    h.assertTrue(tag.getInt("HydraStage") == 14, "o estagio e salvo");
+    young.discard();
+    elder.discard();
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "original_glyphs", timeoutTicks = 80)
+  public static void originalGlyphsStopTimeRewindAndBendSpace(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 1, 1);
+    Pig target = pig(h, 4, 4);
+    // Parar o tempo: a criatura alvo congela no ar.
+    cast(h, caster, g("self"), g("time_stop", "radius", 8.0, "duration", 40.0));
+    h.assertTrue(com.arcane.execution.handlers.OriginalGlyphs.isFrozen(target), "o porco foi congelado");
+    h.assertTrue(!com.arcane.execution.handlers.OriginalGlyphs.isFrozen(caster), "o conjurador continua livre");
+    target.setDeltaMovement(0, 1.5, 0);
+    // Retroceder: o conjurador volta para onde estava.
+    com.arcane.execution.handlers.OriginalGlyphs.record(caster);
+    var home = caster.position();
+    caster.teleportTo(home.x + 3, home.y, home.z + 2);
+    cast(h, caster, g("self"), g("rewind", "seconds", 1.0));
+    h.assertTrue(caster.position().distanceTo(home) < 0.5, "Retroceder devolveu o conjurador (" + caster.position() + ")");
+    // Genese: cura total.
+    caster.setHealth(2f);
+    cast(h, caster, g("self"), g("genesis", "radius", 6.0));
+    h.assertTrue(caster.getHealth() >= caster.getMaxHealth() - 0.01f, "Genese curou tudo");
+    // Inversao da gravidade: levitacao forte em quem esta perto.
+    Pig floaty = pig(h, 2, 5);
+    cast(h, caster, g("self"), g("gravity_inversion", "radius", 8.0));
+    h.assertTrue(floaty.hasEffect(MobEffects.LEVITATION), "a gravidade virou");
+    h.runAfterDelay(10, () -> {
+      h.assertTrue(target.getDeltaMovement().lengthSqr() < 1.0e-6, "congelado nao se mexe");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", batch = "original_space")
+  public static void spaceCollapsePullsAndAnnihilateErasesBlocks(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 1, 1);
+    Pig far = pig(h, 6, 6);
+    float before = far.getHealth();
+    cast(h, caster, g("self"), g("space_collapse", "radius", 10.0));
+    h.assertTrue(far.position().distanceTo(caster.position()) < 2.0, "o porco foi arrancado ate o ponto (" + far.position() + ")");
+    h.assertTrue(far.getHealth() < before || far.isDeadOrDying(), "e esmagado");
+    for (int y = 1; y <= 3; y++) h.setBlock(new BlockPos(5, y, 1), Blocks.STONE);
+    Pig eraser = pig(h, 5, 2);
+    cast(h, eraser, g("self"), g("annihilate", "radius", 3.0));
+    int left = 0;
+    for (int y = 1; y <= 3; y++) if (!h.getBlockState(new BlockPos(5, y, 1)).isAir()) left++;
+    h.assertTrue(left == 0, "Aniquilacao apagou os blocos (" + left + " ficaram)");
     h.succeed();
   }
 

@@ -1,0 +1,31 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:space_collapse",
+    "magnitude_keys": [
+      "radius",
+      "damage"
+    ]
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 24.0,
+      "min": 4.0,
+      "max": 64.0
+    },
+    "damage": {
+      "type": "float",
+      "default": 14.0,
+      "min": 1.0,
+      "max": 60.0
+    }
+  },
+  "cost": {
+    "mana": 45
+  },
+  "tier": 5,
+  "families": [
+    "original"
+  ]
+}

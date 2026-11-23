@@ -176,6 +176,72 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:grow\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:light\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:water_walk\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:breathe\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:night_eye\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{glyph:\"arcane:feather\"}"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcane:glyph_note",
           "weight": 1,
           "functions": [
             {

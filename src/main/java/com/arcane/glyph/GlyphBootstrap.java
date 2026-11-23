@@ -72,6 +72,20 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("blink"), new BlinkEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("ignite"), new IgniteEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("dig"), new DigEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("grow"), new com.arcane.execution.handlers.GrowEffectHandler());
+        // Glifos originais (so das Hidras)
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("time_stop"), new com.arcane.execution.handlers.OriginalGlyphs.TimeStop());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("rewind"), new com.arcane.execution.handlers.OriginalGlyphs.Rewind());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("space_collapse"), new com.arcane.execution.handlers.OriginalGlyphs.SpaceCollapse());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("annihilate"), new com.arcane.execution.handlers.OriginalGlyphs.Annihilate());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("eclipse"), new com.arcane.execution.handlers.OriginalGlyphs.Eclipse());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("genesis"), new com.arcane.execution.handlers.OriginalGlyphs.Genesis());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("gravity_inversion"), new com.arcane.execution.handlers.OriginalGlyphs.GravityInversion());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("light"), new com.arcane.execution.handlers.LightEffectHandler());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("water_walk"), new PotionEffectHandler(com.arcane.registry.ModEffects.WATER_WALK.get(), 24000));
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("breathe"), new PotionEffectHandler(MobEffects.WATER_BREATHING, 24000));
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("night_eye"), new PotionEffectHandler(MobEffects.NIGHT_VISION, 24000));
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("feather"), new PotionEffectHandler(MobEffects.SLOW_FALLING, 24000));
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("weather"), new com.arcane.execution.handlers.WorldRitualEffects.Weather());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("warp"), new com.arcane.execution.handlers.WorldRitualEffects.Warp());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("mark"), new MarkEffectHandler());

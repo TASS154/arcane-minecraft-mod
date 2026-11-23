@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **147 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **160 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -72,7 +72,7 @@ Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para
 | **Madeira** | `arcane:wood` | 1 | 1 | Terra | — | Filtro: só blocos de madeira (troncos e tábuas). |
 | **Forasteiros** | `arcane:outsiders` | 2 | 3 | Arcano | — | Filtro: afeta só quem NÃO é você nem está na sua lista de convidados (comando /arcane guest add|remove|list). Animais domesticados e invocações de você ou dos seus convidados também ficam de fora. Útil em inscrições e zonas que protegem a sua casa. |
 
-## Efeitos (65)
+## Efeitos (78)
 
 O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro principal (o dobro do dano custa o dobro).
 
@@ -92,6 +92,19 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Salto** | `arcane:blink` | 3 | 3 | Vazio | `distance` 8 (2–24) | Efeito: você é teleportado para o ponto que está mirando. |
 | **Incendiar** | `arcane:ignite` | 2 | 1 | Fogo | — | Efeito: acende fogo no bloco alvo, se houver espaço livre acima. |
 | **Escavar** | `arcane:dig` | 3 | 2 | Terra | `power` 2 (0.5–5) | Efeito: quebra o bloco alvo se for mole (terra, areia, madeira, pedra comum). Não quebra baús. |
+| **Crescer** | `arcane:grow` | 2 | 2 | Vida | `radius` 3 (1–16), `strength` 2 (1–8) | Efeito: as plantas em volta do alvo crescem como com farinha de osso (raio 3; força = quantas doses). |
+| **Luz** | `arcane:light` | 1 | 1 | Conhecimento | `duration` 2400 (0–72000), `brightness` 15 (1–15) | Efeito: acende uma luz invisível no ponto mirado (ou acima da criatura). Duração 0 = para sempre. |
+| **Andar na Água** | `arcane:water_walk` | 2 | 2 | Gelo | `duration` 1200 (20–24000) | Efeito: a superfície da água sustenta o alvo como chão. Agachar afunda. |
+| **Respirar** | `arcane:breathe` | 2 | 2 | Vida | `duration` 1200 (20–24000) | Efeito: o alvo respira debaixo d'água por um tempo. |
+| **Olhos Noturnos** | `arcane:night_eye` | 2 | 2 | Conhecimento | `duration` 2400 (20–24000) | Efeito: o alvo enxerga no escuro por um tempo. |
+| **Pena** | `arcane:feather` | 1 | 1 | Força | `duration` 600 (20–24000) | Efeito: o alvo cai devagar como uma pena, sem dano de queda. |
+| **Parar o Tempo** | `arcane:time_stop` | 40 | 5 | original | `radius` 16 (4–64), `duration` 100 (20–600) | Original: o tempo para numa esfera (raio 16). Criaturas, projéteis e blocos caindo congelam; só você se move. |
+| **Retroceder** | `arcane:rewind` | 30 | 5 | original | `seconds` 10 (1–10) | Original: o alvo (ou você) volta para onde estava, com a vida que tinha, há até 10 segundos. Apaga fogo e males. |
+| **Colapso Espacial** | `arcane:space_collapse` | 45 | 5 | original | `radius` 24 (4–64), `damage` 14 (1–60) | Original: o espaço se dobra. Toda criatura no raio (24) é arrancada até o ponto e esmagada. |
+| **Aniquilação** | `arcane:annihilate` | 50 | 5 | original | `radius` 10 (2–48), `damage` 30 (1–100) | Original: apaga da existência uma esfera de blocos (raio 10) e fere tudo dentro. Rocha-mãe e baús resistem. |
+| **Eclipse** | `arcane:eclipse` | 35 | 5 | original | `radius` 64 (8–96) | Original: a noite e a tempestade chegam na hora, e raios caem sobre até 12 monstros em volta (raio 64). |
+| **Gênese** | `arcane:genesis` | 40 | 5 | original | `radius` 24 (4–64) | Original: cura total, limpa os males e protege todos os jogadores e criaturas pacíficas no raio (24), e a terra floresce. |
+| **Inversão da Gravidade** | `arcane:gravity_inversion` | 40 | 5 | original | `radius` 20 (4–64), `duration` 80 (20–600) | Original: a gravidade se inverte no raio (20): tudo sobe com força e despenca quando acaba. Projéteis viram para cima. |
 | **Marcar** | `arcane:mark` | 1 | 2 | Conhecimento | `duration` 200 (20–1200) | Efeito: marca o alvo (ele brilha). Os Marcados podem ser escolhidos depois pelo filtro Marcados. |
 | **Gravidade** | `arcane:gravity` | 3 | 4 | Força | `strength` 1 (0.3–4) | Efeito: o alvo fica pesado e é puxado para baixo (cai com força). Derruba areia, cascalho e bigornas. Vários Gravidade somam. |
 | **Atrair** | `arcane:attract` | 2 | 2 | Força | `strength` 1 (0.3–3) | Efeito: puxa o alvo na sua direção. |

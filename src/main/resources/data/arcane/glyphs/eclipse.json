@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:eclipse"
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 64.0,
+      "min": 8.0,
+      "max": 96.0
+    }
+  },
+  "cost": {
+    "mana": 35
+  },
+  "tier": 5,
+  "families": [
+    "original"
+  ]
+}

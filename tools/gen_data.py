@@ -146,6 +146,8 @@ def main():
     shapeless("potion_pen", ["arcane:arcane_pen", "minecraft:glass_bottle", "minecraft:nether_wart", "minecraft:glowstone_dust"])
     shapeless("redstone_pen", ["arcane:arcane_pen", "minecraft:redstone", "minecraft:redstone", "minecraft:quartz"])
     # Caneta de Fenix: cara (lagrima de ghast, po de blaze, diamante). A Caneta de Criatura so aparece em loot.
+    # Cetro: guarda 6 magias a 120%. Ametista na ponta, ouro e um diamante.
+    shapeless("scepter", ["minecraft:amethyst_shard", "minecraft:gold_ingot", "minecraft:gold_ingot", "minecraft:stick", "minecraft:diamond", "arcane:arcane_pen"])
     shapeless("phoenix_pen", ["arcane:arcane_pen", "minecraft:ghast_tear", "minecraft:blaze_powder", "minecraft:blaze_powder", "minecraft:diamond"])
     shapeless("solvent_powder", ["minecraft:sugar", "minecraft:ink_sac"], 2)
 

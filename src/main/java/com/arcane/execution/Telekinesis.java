@@ -146,17 +146,74 @@ public final class Telekinesis {
     }
     if (hold.held.isEmpty()) return 0;
     for (Held h : hold.held) h.entity.setNoGravity(true);
+    // Pegar: cada objeto solta um estouro de forca e um anel; o conjurador ouve o "zumbido" da telecinese.
+    for (int i = 0; i < Math.min(hold.held.size(), 16); i++) {
+      Entity e = hold.held.get(i).entity;
+      Vec3 c = e.position().add(0, e.getBbHeight() * 0.5, 0);
+      level.sendParticles(com.arcane.registry.ModParticles.ARCANE_FORCE.get(), c.x, c.y, c.z, 10, 0.35, 0.35, 0.35, 0.08);
+      level.sendParticles(net.minecraft.core.particles.ParticleTypes.REVERSE_PORTAL, c.x, c.y, c.z, 8, 0.3, 0.3, 0.3, 0.05);
+    }
+    level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), net.minecraft.sounds.SoundEvents.BEACON_ACTIVATE,
+        net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, 1.6f);
     HOLDS.put(caster.getUUID(), hold);
     return hold.held.size();
+  }
+
+  /** Soltar: cada objeto (ate 16) solta um estouro; som de energia se desfazendo. */
+  private static void releaseFx(Hold hold) {
+    int n = 0;
+    for (Held h : hold.held) {
+      if (!h.entity.isAlive() || n++ >= 16) continue;
+      Vec3 c = h.entity.position().add(0, h.entity.getBbHeight() * 0.5, 0);
+      hold.level.sendParticles(com.arcane.registry.ModParticles.ARCANE_FORCE.get(), c.x, c.y, c.z, 6, 0.3, 0.3, 0.3, 0.12);
+    }
+    if (!hold.held.isEmpty()) {
+      Vec3 c = hold.held.get(0).entity.position();
+      hold.level.playSound(null, c.x, c.y, c.z, net.minecraft.sounds.SoundEvents.BEACON_DEACTIVATE, net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 1.8f);
+    }
   }
 
   public static void release(UUID caster) {
     Hold hold = HOLDS.remove(caster);
     if (hold == null) return;
+    releaseFx(hold);
     for (Held h : hold.held) {
       if (!h.entity.isAlive()) continue;
       h.entity.setNoGravity(h.hadNoGravity && !h.block);
       h.entity.hurtMarked = true;
+    }
+  }
+
+  private static final net.minecraft.core.particles.DustParticleOptions TETHER =
+      new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.72f, 0.45f, 1.0f), 0.9f);
+
+  /**
+   * Enquanto segura: um fio de energia ondulante sai da mao do conjurador ate o ponto de ancora, e cada objeto preso
+   * (amostra de ate 10 por tick, alternando) tem uma aura girando em volta. Leve: poucas particulas, so a cada 2 ticks.
+   */
+  private static void heldFx(Hold hold, Entity caster, Vec3 anchor) {
+    long t = hold.level.getGameTime();
+    if ((t & 1) != 0 || hold.held.isEmpty()) return;
+    Vec3 look = caster.getLookAngle();
+    Vec3 right = new Vec3(-look.z, 0, look.x).normalize();
+    Vec3 hand = (caster instanceof LivingEntity le ? le.getEyePosition() : caster.position()).add(right.scale(0.35)).add(0, -0.35, 0).add(look.scale(0.4));
+    Vec3 up = look.cross(right).normalize();
+    int steps = 12;
+    for (int i = 1; i < steps; i++) {
+      double f = i / (double) steps;
+      double wave = Math.sin(f * Math.PI) * Math.sin(t * 0.35 + f * 9.0) * 0.25;
+      Vec3 p = hand.lerp(anchor, f).add(up.scale(wave)).add(right.scale(Math.cos(t * 0.3 + f * 7.0) * 0.12 * Math.sin(f * Math.PI)));
+      hold.level.sendParticles(TETHER, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+    }
+    int n = hold.held.size();
+    int start = (int) ((t / 2) % Math.max(1, n));
+    for (int k = 0; k < Math.min(10, n); k++) {
+      Entity e = hold.held.get((start + k) % n).entity;
+      double r = Math.max(0.55, e.getBbWidth() * 0.8);
+      double a = t * 0.25 + k * 1.7;
+      Vec3 c = e.position().add(0, e.getBbHeight() * 0.5, 0);
+      hold.level.sendParticles(com.arcane.registry.ModParticles.ARCANE_FORCE.get(), c.x + Math.cos(a) * r, c.y + Math.sin(a * 0.7) * 0.3, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+      hold.level.sendParticles(net.minecraft.core.particles.ParticleTypes.REVERSE_PORTAL, c.x - Math.cos(a) * r, c.y, c.z - Math.sin(a) * r, 1, 0, 0, 0, 0);
     }
   }
 
@@ -167,6 +224,7 @@ public final class Telekinesis {
       Entity caster = hold.level.getEntity(hold.caster);
       if (caster == null || !caster.isAlive() || caster.level() != hold.level || hold.level.getGameTime() >= hold.endTick) {
         it.remove();
+        releaseFx(hold);
         for (Held h : hold.held) {
           if (!h.entity.isAlive()) continue;
           h.entity.setNoGravity(h.hadNoGravity && !h.block);
@@ -177,6 +235,7 @@ public final class Telekinesis {
       Vec3 eye = caster instanceof LivingEntity le ? le.getEyePosition() : caster.position();
       Vec3 anchor = eye.add(caster.getLookAngle().scale(hold.distance));
       hold.held.removeIf(h -> !h.entity.isAlive());
+      heldFx(hold, caster, anchor);
       for (Held h : hold.held) {
         Vec3 wanted = anchor.add(h.offset);
         Entity e = h.entity;

@@ -23,6 +23,9 @@ public final class ModEffects {
     /** Petrificado: marcador sincronizado com o cliente (o estado real fica em Phase4State); faz o modelo virar pedra. */
     public static final RegistryObject<MobEffect> PETRIFIED = EFFECTS.register("petrified", () -> new MobEffect(MobEffectCategory.HARMFUL, 0x8E8E93) {});
 
+    /** Andar na agua: a superficie da agua sustenta quem tem o efeito; agachar afunda (ver WaterWalk). */
+    public static final RegistryObject<MobEffect> WATER_WALK = EFFECTS.register("water_walk", () -> new Marker(0x3FA9F5));
+
     private ModEffects() {}
 
     public static void register(IEventBus bus) { EFFECTS.register(bus); }

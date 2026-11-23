@@ -120,6 +120,75 @@ glyph("dig", "effect", 3,
       ["..#####.", ".#....#.", "......##", "....#.##", "...#..#.", "..#.....", ".#......", "#......."],
       params={"power": (2.0, 0.5, 5.0, "float")})
 
+# ------------------------------------------------------------------ NAO-COMBATE (utilidade)
+glyph("grow", "effect", 2,
+      ("Crescer", "Efeito: as plantas em volta do alvo crescem como com farinha de osso (raio 3; força = quantas doses)."),
+      ("Grow", "Effect: plants around the target grow as if bone-mealed (radius 3; strength = how many doses)."),
+      ["...##...", "..#..#..", "...##...", "#..##..#", ".#.##.#.", "..####..", "...##...", ".######."],
+      params={"radius": (3.0, 1.0, 16.0, "float"), "strength": (2.0, 1.0, 8.0, "int")}, magnitude=["radius"])
+glyph("light", "effect", 1,
+      ("Luz", "Efeito: acende uma luz invisível no ponto mirado (ou acima da criatura). Duração 0 = para sempre."),
+      ("Light", "Effect: lights an invisible light at the aimed spot (or above the creature). Duration 0 = forever."),
+      ["...##...", "#..##..#", ".#....#.", "...##...", "..####..", "...##...", ".#....#.", "#..##..#"],
+      params={"duration": (2400.0, 0.0, 72000.0, "int"), "brightness": (15.0, 1.0, 15.0, "int")}, magnitude=["duration"])
+glyph("water_walk", "effect", 2,
+      ("Andar na Água", "Efeito: a superfície da água sustenta o alvo como chão. Agachar afunda."),
+      ("Water Walk", "Effect: the water surface holds the target like ground. Sneak to sink."),
+      ["...##...", "..####..", "...##...", "..#..#..", "........", "#.#.#.#.", ".#.#.#.#", "........"],
+      params={"duration": (1200.0, 20.0, 24000.0, "int")}, magnitude=["duration"])
+glyph("breathe", "effect", 2,
+      ("Respirar", "Efeito: o alvo respira debaixo d'água por um tempo."),
+      ("Breathe", "Effect: the target breathes underwater for a while."),
+      ["..###...", ".#...#..", ".#...#..", "..###...", "....#.#.", ".....#..", "...#..#.", "....#..."],
+      params={"duration": (1200.0, 20.0, 24000.0, "int")}, magnitude=["duration"])
+glyph("night_eye", "effect", 2,
+      ("Olhos Noturnos", "Efeito: o alvo enxerga no escuro por um tempo."),
+      ("Night Eyes", "Effect: the target sees in the dark for a while."),
+      ["........", "..####..", ".#....#.", "#..##..#", "#..##..#", ".#....#.", "..####..", "........"],
+      params={"duration": (2400.0, 20.0, 24000.0, "int")}, magnitude=["duration"])
+glyph("feather", "effect", 1,
+      ("Pena", "Efeito: o alvo cai devagar como uma pena, sem dano de queda."),
+      ("Feather", "Effect: the target falls slowly like a feather, with no fall damage."),
+      [".....##.", "....###.", "...###..", "..###...", ".###....", ".##.....", "#.......", "........"],
+      params={"duration": (600.0, 20.0, 24000.0, "int")}, magnitude=["duration"])
+
+# ------------------------------------------------------------------ ORIGINAIS (so das Hidras; tier 5 nao sai em bau)
+glyph("time_stop", "effect", 40,
+      ("Parar o Tempo", "Original: o tempo para numa esfera (raio 16). Criaturas, projéteis e blocos caindo congelam; só você se move."),
+      ("Time Stop", "Original: time stops in a sphere (radius 16). Creatures, projectiles and falling blocks freeze; only you move."),
+      ["########", "#......#", ".#....#.", "..#..#..", "..#..#..", ".#.##.#.", "#.####.#", "########"],
+      params={"radius": (16.0, 4.0, 64.0, "float"), "duration": (100.0, 20.0, 600.0, "int")}, magnitude=["radius", "duration"], tier=5)
+glyph("rewind", "effect", 30,
+      ("Retroceder", "Original: o alvo (ou você) volta para onde estava, com a vida que tinha, há até 10 segundos. Apaga fogo e males."),
+      ("Rewind", "Original: the target (or you) returns to where it was, with the health it had, up to 10 seconds ago. Clears fire and ailments."),
+      ["..####..", ".#....#.", "#..#...#", "#..#...#", "#..###.#", "#......#", ".#....#.", "#.####.."],
+      params={"seconds": (10.0, 1.0, 10.0, "int")}, tier=5)
+glyph("space_collapse", "effect", 45,
+      ("Colapso Espacial", "Original: o espaço se dobra. Toda criatura no raio (24) é arrancada até o ponto e esmagada."),
+      ("Space Collapse", "Original: space folds. Every creature in the radius (24) is torn to the point and crushed."),
+      ["#......#", ".#....#.", "..#..#..", "...##...", "...##...", "..#..#..", ".#....#.", "#......#"],
+      params={"radius": (24.0, 4.0, 64.0, "float"), "damage": (14.0, 1.0, 60.0, "float")}, magnitude=["radius", "damage"], tier=5)
+glyph("annihilate", "effect", 50,
+      ("Aniquilação", "Original: apaga da existência uma esfera de blocos (raio 10) e fere tudo dentro. Rocha-mãe e baús resistem."),
+      ("Annihilate", "Original: erases a sphere of blocks from existence (radius 10) and wounds everything inside. Bedrock and chests resist."),
+      ["..####..", ".#.##.#.", "#..##..#", "########", "########", "#..##..#", ".#.##.#.", "..####.."],
+      params={"radius": (10.0, 2.0, 48.0, "float"), "damage": (30.0, 1.0, 100.0, "float")}, magnitude=["radius", "damage"], tier=5)
+glyph("eclipse", "effect", 35,
+      ("Eclipse", "Original: a noite e a tempestade chegam na hora, e raios caem sobre até 12 monstros em volta (raio 64)."),
+      ("Eclipse", "Original: night and storm fall at once, and lightning strikes up to 12 monsters around (radius 64)."),
+      ["..####..", ".######.", "####..##", "###....#", "###....#", "####..##", ".######.", "..####.."],
+      params={"radius": (64.0, 8.0, 96.0, "float")}, tier=5)
+glyph("genesis", "effect", 40,
+      ("Gênese", "Original: cura total, limpa os males e protege todos os jogadores e criaturas pacíficas no raio (24), e a terra floresce."),
+      ("Genesis", "Original: full healing, cures ailments and shields every player and peaceful creature in the radius (24), and the land blooms."),
+      ["...##...", "..####..", ".##..##.", "##.##.##", "##.##.##", ".##..##.", "..####..", "...##..."],
+      params={"radius": (24.0, 4.0, 64.0, "float")}, magnitude=["radius"], tier=5)
+glyph("gravity_inversion", "effect", 40,
+      ("Inversão da Gravidade", "Original: a gravidade se inverte no raio (20): tudo sobe com força e despenca quando acaba. Projéteis viram para cima."),
+      ("Gravity Inversion", "Original: gravity flips in the radius (20): everything rises hard and plummets when it ends. Projectiles turn upward."),
+      ["...##...", "..####..", ".######.", "...##...", "...##...", ".######.", "..####..", "...##..."],
+      params={"radius": (20.0, 4.0, 64.0, "float"), "duration": (80.0, 20.0, 600.0, "int")}, magnitude=["radius", "duration"], tier=5)
+
 # ------------------------------------------------------------------ FILTROS
 glyph("hostile", "filter", 1,
       ("Hostis", "Filtro: só afeta criaturas hostis."),
@@ -786,12 +855,13 @@ _g("chorus", "modifier", 2,
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
         "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group",
-        "taunt", "wet", "read_item", "sense", "emit_signal"],
+        "taunt", "wet", "read_item", "sense", "emit_signal", "light", "feather"],
     2: ["focus", "slow", "poison", "speed", "players", "animals", "undead", "nearest", "wounded", "allies", "delay", "lengthen",
         "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
         "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave",
         "rain", "charge", "glide", "fear", "rumble", "darkness", "lifesteal", "life_transfer", "invert", "on_jump",
         "target_health", "region", "holding", "raining",
+        "grow", "water_walk", "breathe", "night_eye",
         "hook", "climb", "arcane_sight", "reveal", "decoy", "drain_mana", "stealth", "false_trace", "bind", "on_signal", "on_near"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
         "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain", "sleep", "on_kill", "on_fall",
@@ -801,12 +871,12 @@ TIERS = {
 }
 FAMILIES = {
     "fire": ["fire", "ignite", "explode", "blast"],
-    "ice": ["slow", "freeze", "shield", "wet", "rain", "petrify"],
+    "ice": ["water_walk", "slow", "freeze", "shield", "wet", "rain", "petrify"],
     "storm": ["thunder", "ray", "pillar", "rain", "rumble", "raining", "wet", "electrify", "on_signal", "emit_signal"],
     "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill", "acid", "curse", "reanimate", "contagion", "overcharge", "after_hits"],
-    "life": ["chorus", "heal", "shield", "speed", "allies", "players", "animals"],
-    "force": ["hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
-    "knowledge": ["pocket", "mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
+    "life": ["grow", "breathe", "chorus", "heal", "shield", "speed", "allies", "players", "animals"],
+    "force": ["feather", "hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
+    "knowledge": ["light", "night_eye", "pocket", "mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "persistence", "on_near", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert", "phase", "recall", "swap", "link", "silence", "drain_mana", "decoy", "stealth", "false_trace", "bind"],
     "earth": ["restore", "summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
@@ -818,7 +888,7 @@ for _fam, _ids in FAMILIES.items():
     for _gid in _ids:
         G[_gid].setdefault("families", []).append(_fam)
 for _gid, _g in G.items():
-    _g.setdefault("families", ["arcane"])
+    _g.setdefault("families", ["original"] if _g["tier"] == 5 else ["arcane"])
 
 ORDER = list(G.keys())
 CATEGORY_ORDER = ["form", "filter", "effect", "modifier", "condition", "activator"]

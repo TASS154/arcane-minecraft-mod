@@ -1,0 +1,30 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:grow",
+    "magnitude_keys": [
+      "radius"
+    ]
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 3.0,
+      "min": 1.0,
+      "max": 16.0
+    },
+    "strength": {
+      "type": "int",
+      "default": 2.0,
+      "min": 1.0,
+      "max": 8.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 2,
+  "families": [
+    "life"
+  ]
+}

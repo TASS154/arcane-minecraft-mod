@@ -190,7 +190,8 @@ class CompilerSemanticsTest {
   @Test
   void everyGlyphHasATierAndAFamily() {
     for (var def : com.arcane.glyph.GlyphRegistry.all().values()) {
-      assertTrue(def.tier() >= 1 && def.tier() <= 4, def.id() + " tier");
+      // 5 = glifo original (so das Hidras)
+      assertTrue(def.tier() >= 1 && def.tier() <= 5, def.id() + " tier");
       assertFalse(def.families().isEmpty(), def.id() + " familias");
     }
   }

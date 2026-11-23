@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:rewind"
+  },
+  "parameters": {
+    "seconds": {
+      "type": "int",
+      "default": 10.0,
+      "min": 1.0,
+      "max": 10.0
+    }
+  },
+  "cost": {
+    "mana": 30
+  },
+  "tier": 5,
+  "families": [
+    "original"
+  ]
+}

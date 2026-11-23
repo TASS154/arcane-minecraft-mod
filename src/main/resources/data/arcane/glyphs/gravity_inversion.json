@@ -1,0 +1,31 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:gravity_inversion",
+    "magnitude_keys": [
+      "radius",
+      "duration"
+    ]
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 20.0,
+      "min": 4.0,
+      "max": 64.0
+    },
+    "duration": {
+      "type": "int",
+      "default": 80.0,
+      "min": 20.0,
+      "max": 600.0
+    }
+  },
+  "cost": {
+    "mana": 40
+  },
+  "tier": 5,
+  "families": [
+    "original"
+  ]
+}

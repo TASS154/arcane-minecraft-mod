@@ -203,5 +203,15 @@ public final class CastingService {
         level.sendParticles(element.particle(),
                 caster.getX(), caster.getY() + caster.getBbHeight() * 0.6, caster.getZ(),
                 12, 0.4, 0.4, 0.4, 0.02);
+        // Espiral que sobe dos pes ate acima da cabeca, na cor do elemento, e um clarao na mao que conjura.
+        double h = caster.getBbHeight();
+        for (int i = 0; i < 18; i++) {
+            double f = i / 18.0, a = f * Math.PI * 4 + caster.getYRot() * Math.PI / 180.0;
+            double r = 0.75 - 0.35 * f;
+            level.sendParticles(element.particle(), caster.getX() + Math.cos(a) * r, caster.getY() + f * (h + 0.4), caster.getZ() + Math.sin(a) * r,
+                    1, 0, 0, 0, 0);
+        }
+        var hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.7)).add(0, -0.3, 0);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, hand.x, hand.y, hand.z, 6, 0.1, 0.1, 0.1, 0.06);
     }
 }

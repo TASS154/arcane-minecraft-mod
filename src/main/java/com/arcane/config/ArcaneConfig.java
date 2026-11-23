@@ -19,6 +19,8 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.BooleanValue AREA_HARD_CAPS;
   public static final ForgeConfigSpec.IntValue RAY_RANGE;
   public static final ForgeConfigSpec.IntValue COMPASS_TICKS_PER_BLOCK;
+  public static final ForgeConfigSpec.IntValue CRATER_MAX_RADIUS;
+  public static final ForgeConfigSpec.IntValue CRATER_BLOCKS_PER_TICK;
   public static final ForgeConfigSpec.IntValue ITEM_EXTRA_DRAWINGS;
   public static final ForgeConfigSpec.IntValue INK_DAYS_COMMON;
   public static final ForgeConfigSpec.IntValue INK_DAYS_BLOOD;
@@ -91,6 +93,10 @@ public class ArcaneConfig {
         .defineInRange("inkDaysBlood", 20, 0, 100000);
     INK_DAYS_INVISIBLE = builder.comment("In-game days a drawing in invisible ink lasts before it fades. 0 = never")
         .defineInRange("inkDaysInvisible", 7, 0, 100000);
+    CRATER_MAX_RADIUS = builder.comment("Largest crater radius of a destructive explosion when areaHardCaps is OFF (with it ON the crater stops at 24). 0 = no limit. A sphere of radius R holds about 4.2 R^3 blocks: 128 is ~9 million")
+        .defineInRange("craterMaxRadius", 128, 0, 4096);
+    CRATER_BLOCKS_PER_TICK = builder.comment("Blocks a big crater removes per server tick (the rest is spread over the next ticks so the server does not freeze)")
+        .defineInRange("craterBlocksPerTick", 10000, 500, 1000000);
     AREA_HARD_CAPS = builder.comment("Keep the fixed maximum radius of area spells/forms (24 to 64 blocks). false = no fixed maximum, only the crystal and charge limits apply")
         .define("areaHardCaps", true);
     RITUAL_MIN_COMPLETENESS = builder.comment("Fraction of the circle's traces that must be drawn for a ritual to work")

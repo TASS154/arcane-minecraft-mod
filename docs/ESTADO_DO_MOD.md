@@ -324,3 +324,10 @@ Cobertos por GameTest (217 passam). **Não visto em jogo** (interface, modelos, 
 - **Tinta e solvente:** a tinta de cada desenho se desgasta como nos blocos; o pó solvente na mão principal com o item na outra apaga os desenhos (menos tinta permanente pura).
 - **Limites conhecidos:** a arma só dispara em golpe corpo a corpo (arco, besta e tridente arremessado não); poção arremessada não dispara (só ao beber); armadura não tem gatilho próprio (usa o botão direito de item, que veste a peça, então na prática não dispara); o pote de tinta ainda gasta 1 frasco por desenho.
 - **Entrega 3b (falta):** caneta de ar (círculo flutuante), desenho em criaturas, pote de tinta com quantidade, propriedades de bloco.
+
+### Cratera sem teto escondido (22 nov 2026)
+Cobertas por GameTest (219 passam). **Não visto em jogo com raio grande.**
+- **Causa do buraco que não crescia:** `RoundCrater.MAX_RADIUS` fixo em 24 limitava a esfera de blocos removidos, em qualquer configuração. Os mobs morriam num raio maior porque o dano de explosão usa o raio real.
+- **Agora:** com "Raio máximo fixo das áreas" ligado a cratera continua parando em 24. Desligado, vale `craterMaxRadius` (padrão 128, 0 = sem limite).
+- **Fila de blocos** (`CraterQueue`): crateras grandes saem aos poucos (`craterBlocksPerTick`, padrão 10 mil por tick), em vez de travar o servidor. Cada bloco entra no diário do Restaurar. Raio 96 tem cerca de 3,7 milhões de blocos, então leva alguns segundos para abrir inteira.
+- **Limites:** a varredura da esfera em si ainda roda de uma vez (raio 128 varre ~17 milhões de posições); o diário do Restaurar guarda um registro por bloco, então uma cratera enorme usa bastante memória. Com `blastDropsLoot` ligado o caminho do vanilla continua o antigo.

@@ -14,16 +14,31 @@ import java.util.List;
  * mais curta em blocos resistentes (a pedra aguenta mais que a terra; obsidiana e rocha-mae ficam).
  */
 public final class RoundCrater {
-  /** Raio maximo varrido (esfera de 24 = ~58 mil blocos, ainda barato de uma vez). */
+  /** Raio maximo com o teto fixo de area ligado (esfera de 24 = ~58 mil blocos, barato de uma vez). */
   public static final float MAX_RADIUS = 24f;
+
+  /** Raio maximo da cratera: 24 com o teto fixo ligado; desligado, craterMaxRadius da config (0 = sem limite). */
+  public static float maxRadius() {
+    if (com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.get()) return MAX_RADIUS;
+    int cfg = com.arcane.config.ArcaneConfig.CRATER_MAX_RADIUS.get();
+    return cfg <= 0 ? 4096f : (float) cfg;
+  }
   /** Blocos com resistencia a explosao acima disso nunca quebram. */
   static final float UNBREAKABLE = 40f;
 
   private RoundCrater() {}
 
   public static List<BlockPos> blocks(ServerLevel level, Vec3 center, float radius) {
-    float r = Math.min(MAX_RADIUS, radius);
     List<BlockPos> out = new ArrayList<>();
+    var longs = blockLongs(level, center, radius);
+    for (int i = 0; i < longs.size(); i++) out.add(BlockPos.of(longs.getLong(i)));
+    return out;
+  }
+
+  /** Igual a {@link #blocks}, mas guarda cada posicao como um long (8 bytes): uma cratera enorme nao enche a memoria de objetos. */
+  public static it.unimi.dsi.fastutil.longs.LongArrayList blockLongs(ServerLevel level, Vec3 center, float radius) {
+    float r = Math.min(maxRadius(), radius);
+    it.unimi.dsi.fastutil.longs.LongArrayList out = new it.unimi.dsi.fastutil.longs.LongArrayList();
     int reach = (int) Math.ceil(r);
     BlockPos origin = BlockPos.containing(center);
     BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
@@ -40,7 +55,7 @@ public final class RoundCrater {
           if (resistance >= UNBREAKABLE || state.getDestroySpeed(level, pos) < 0f) continue;
           // borda: a casca externa (acima de 85% do raio) pode sobrar um pouco, e blocos duros cedem menos
           double edge = r * (0.88 + 0.12 * hash01(pos)) - resistance * 0.12;
-          if (dist <= edge) out.add(pos.immutable());
+          if (dist <= edge) out.add(pos.asLong());
         }
       }
     }

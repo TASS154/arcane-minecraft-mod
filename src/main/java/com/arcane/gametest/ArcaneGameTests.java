@@ -2458,6 +2458,55 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "empty", batch = "crater_limits")
+  public static void craterRadiusFollowsTheFixedCapRuleAndItsOwnConfig(GameTestHelper h) {
+    boolean caps = com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.get();
+    int cfg = com.arcane.config.ArcaneConfig.CRATER_MAX_RADIUS.get();
+    try {
+      com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.set(true);
+      h.assertTrue(com.arcane.execution.RoundCrater.maxRadius() == 24f, "com o teto fixo ligado a cratera para em 24");
+      com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.set(false);
+      com.arcane.config.ArcaneConfig.CRATER_MAX_RADIUS.set(128);
+      h.assertTrue(com.arcane.execution.RoundCrater.maxRadius() == 128f, "desligado, vale craterMaxRadius");
+      com.arcane.config.ArcaneConfig.CRATER_MAX_RADIUS.set(0);
+      h.assertTrue(com.arcane.execution.RoundCrater.maxRadius() >= 4096f, "0 = sem limite");
+    } finally {
+      com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.set(caps);
+      com.arcane.config.ArcaneConfig.CRATER_MAX_RADIUS.set(cfg);
+    }
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "crater_queue", timeoutTicks = 80)
+  public static void aBigCraterIsRemovedOverSeveralTicksNotAllAtOnce(GameTestHelper h) {
+    var level = h.getLevel();
+    int per = com.arcane.config.ArcaneConfig.CRATER_BLOCKS_PER_TICK.get();
+    var list = new it.unimi.dsi.fastutil.longs.LongArrayList();
+    BlockPos origin = h.absolutePos(new BlockPos(0, 2, 0));
+    for (int x = 0; x < 9; x++) for (int z = 0; z < 9; z++) for (int y = 0; y < 9; y++) {
+      BlockPos pos = origin.offset(x, y, z);
+      level.setBlock(pos, Blocks.DIRT.defaultBlockState(), 2);
+      list.add(pos.asLong());
+    }
+    com.arcane.config.ArcaneConfig.CRATER_BLOCKS_PER_TICK.set(500);
+    try {
+      com.arcane.execution.CraterQueue.submit(level, list);
+      int left = com.arcane.execution.CraterQueue.pending(level);
+      h.assertTrue(left > 0 && left < list.size(), "so parte saiu no primeiro tick (sobram " + left + " de " + list.size() + ")");
+      h.runAfterDelay(5, () -> {
+        h.assertTrue(com.arcane.execution.CraterQueue.pending(level) == 0, "a fila terminou");
+        int solid = 0;
+        for (int i = 0; i < list.size(); i++) if (!level.getBlockState(BlockPos.of(list.getLong(i))).isAir()) solid++;
+        h.assertTrue(solid == 0, "todos os blocos da cratera sairam (" + solid + " ficaram)");
+        com.arcane.config.ArcaneConfig.CRATER_BLOCKS_PER_TICK.set(per);
+        h.succeed();
+      });
+    } catch (RuntimeException e) {
+      com.arcane.config.ArcaneConfig.CRATER_BLOCKS_PER_TICK.set(per);
+      throw e;
+    }
+  }
+
   // ================================================================== Revisao 2: cratera redonda, oferendas, pilar mantido
   @GameTest(template = "empty", batch = "rev_crater", timeoutTicks = 60)
   public static void blastCraterIsASphereNotACube(GameTestHelper h) {

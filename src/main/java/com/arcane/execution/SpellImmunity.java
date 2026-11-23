@@ -64,7 +64,12 @@ public final class SpellImmunity {
       // A cratera do vanilla sai de raios em grade e fica quadrada/espinhosa em raios grandes: troca por uma esfera.
       var blocks = event.getAffectedBlocks();
       blocks.clear();
-      blocks.addAll(RoundCrater.blocks(crater, event.getExplosion().getPosition(), round));
+      if (com.arcane.restore.BlockJournal.dropsLoot()) {
+        blocks.addAll(RoundCrater.blocks(crater, event.getExplosion().getPosition(), round));
+      } else {
+        // Sem loot: a fila remove os blocos aos poucos (crateras enormes nao travam o servidor).
+        CraterQueue.submit(crater, RoundCrater.blockLongs(crater, event.getExplosion().getPosition(), round));
+      }
     }
     // Explosoes de magia que destroem blocos: por padrao nao soltam item e entram no diario do Restaurar.
     // Com blastDropsLoot ligado seguem o caminho do vanilla (com loot) e ficam fora do diario.

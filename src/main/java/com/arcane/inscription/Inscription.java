@@ -44,8 +44,12 @@ public record Inscription(
 
     public int totalManaCost(GlyphRegistryAccessor registry) {
         int total = 0;
+        int pierces = 0;
         for (GlyphInstance instance : glyphs) {
-            total += registry.get(instance.glyphId()).map(g -> g.cost().mana()).orElse(0);
+            int cost = registry.get(instance.glyphId()).map(g -> g.cost().mana()).orElse(0);
+            // Perfurar empilha sem limite, mas cada camada custa o dobro da anterior (5 camadas = 100%, 31x o custo).
+            if (instance.glyphId().getPath().equals("pierce")) cost = (int) Math.min(1_000_000L, (long) cost << Math.min(20, pierces++));
+            total += cost;
         }
         return total;
     }

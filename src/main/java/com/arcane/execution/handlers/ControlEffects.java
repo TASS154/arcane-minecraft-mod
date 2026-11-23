@@ -280,6 +280,13 @@ public final class ControlEffects {
         if (self) living.clearFire();
         context.level().sendParticles(ParticleTypes.POOF, living.getX(), living.getY() + 1.0, living.getZ(), 12, 0.4, 0.5, 0.4, 0.05);
       }
+      // Trancas e selos de bancada: o dono tira de graca; os outros precisam de uma magia forte (30+ de mana).
+      double power = com.arcane.execution.CreatureLevels.spellMana(context);
+      for (var b : targets.blocks()) {
+        if (com.arcane.execution.WorldMarks.unseal(context.level(), b.pos(), context.caster().getUUID(), power)) {
+          context.level().sendParticles(ParticleTypes.POOF, b.pos().getX() + 0.5, b.pos().getY() + 0.5, b.pos().getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
+        }
+      }
     }
   }
 

@@ -15,9 +15,11 @@ public class DamageEffectHandler implements EffectHandler {
         float amount = (float) context.amplify(call.parameters().getOrDefault("amount", 4.0), call.magnitudeKeys(), "amount");
         DamageSource source = context.level().damageSources().indirectMagic(context.caster(), context.caster());
         com.arcane.execution.SpellElement element = com.arcane.execution.SpellElement.of(context.plan());
+        double pierce = Math.max(0.0, Math.min(1.0, call.parameters().getOrDefault("pierce", 0.0)));
         for (Entity entity : targets.entities()) {
             double mult = com.arcane.execution.ElementInteractions.damageMultiplier(context.level(), element, entity);
-            entity.hurt(source, (float) (amount * mult));
+            if (pierce <= 0.0) entity.hurt(source, (float) (amount * mult));
+            else com.arcane.execution.Pierce.hurt(context, entity, source, (float) (amount * mult), pierce);
             com.arcane.execution.ElementInteractions.afterHit(context.level(), element, entity);
         }
         if (com.arcane.execution.Chain.enabled(call)) {

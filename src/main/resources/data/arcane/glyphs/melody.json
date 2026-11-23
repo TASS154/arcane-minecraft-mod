@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:melody"
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 64.0,
+      "min": 32.0,
+      "max": 400.0
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 1,
+  "families": [
+    "life"
+  ]
+}

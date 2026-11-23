@@ -50,8 +50,10 @@ public class WorldRulesScreen extends Screen {
     for (int i = 0; i < FLAGS.length; i++) add(left, y + i * 24, FLAGS[i]);
     for (int i = 0; i < NUMBERS.length; i++) add(right, y + i * 24, NUMBERS[i]);
     add(right, y + NUMBERS.length * 24, UNIQUE);
+    add(left, y + FLAGS.length * 24, "hydra_devastation");
+    add(width / 2 - 90, y - 28, "profile");
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.close"), b -> onClose())
-        .bounds(width / 2 - 50, y + 130, 100, 20).build());
+        .bounds(width / 2 - 50, y + 150, 100, 20).build());
   }
 
   private void add(int x, int y, String key) {
@@ -64,6 +66,8 @@ public class WorldRulesScreen extends Screen {
   private Component label(String key) {
     double v = values.getOrDefault(key, 0.0);
     String name = "gui.arcane.rule." + key;
+    if (key.equals("profile")) return Component.translatable(name, Component.translatable("gui.arcane.rule.profile." + (int) v));
+    if (key.equals("hydra_devastation")) return Component.translatable(name, Component.translatable(v > 0.5 ? "gui.arcane.on" : "gui.arcane.off"));
     for (String f : FLAGS) if (f.equals(key)) return Component.translatable(name, Component.translatable(v > 0.5 ? "gui.arcane.on" : "gui.arcane.off"));
     if (key.equals(UNIQUE)) return Component.translatable(name, Component.translatable(v > 0.5 ? "gui.arcane.on" : "gui.arcane.off"));
     if (v <= 0) return Component.translatable(name, Component.translatable("gui.arcane.rule.unlimited"));

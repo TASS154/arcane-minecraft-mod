@@ -1,0 +1,13 @@
+{
+  "category": "condition",
+  "behavior": {
+    "handler": "arcane:on_see_cast"
+  },
+  "cost": {
+    "mana": 0
+  },
+  "tier": 4,
+  "families": [
+    "void"
+  ]
+}

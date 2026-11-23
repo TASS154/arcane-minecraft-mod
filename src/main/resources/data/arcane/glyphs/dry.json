@@ -1,0 +1,24 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:dry",
+    "magnitude_keys": [
+      "radius"
+    ]
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 2.0,
+      "min": 1.0,
+      "max": 6.0
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 1,
+  "families": [
+    "fire"
+  ]
+}

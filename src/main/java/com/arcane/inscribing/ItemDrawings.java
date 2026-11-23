@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Desenhos em objetos (comida, armas, itens, pocoes). Cada item guarda uma lista de desenhos (cada um com a sua tinta
  * e a data em que foi feito, como nos blocos) e cada desenho dispara no uso natural do objeto:
- * comida e pocao ao consumir, arma ao ferir, qualquer outro item ao usar (botao direito).
+ * comida e pocao ao consumir, arma ao ferir, armadura e escudo quando quem os usa leva dano, qualquer outro item ao usar.
  * Um item pequeno comporta 1 desenho, um grande (arma, ferramenta, armadura) comporta 2. Alem disso ele fica instavel:
  * cada desenho acima da capacidade deixa o uso imprevisivel e pode quebrar o objeto.
  */
@@ -37,7 +37,7 @@ public final class ItemDrawings {
   /** Evita que a magia disparada por um desenho dispare outros desenhos em cadeia infinita. */
   private static final ThreadLocal<Integer> DEPTH = ThreadLocal.withInitial(() -> 0);
 
-  public enum Kind { FOOD, WEAPON, POTION, OTHER }
+  public enum Kind { FOOD, WEAPON, POTION, ARMOR, OTHER }
 
   private ItemDrawings() {}
 
@@ -46,6 +46,7 @@ public final class ItemDrawings {
     if (item instanceof PotionItem) return Kind.POTION;
     if (item instanceof SwordItem || item instanceof AxeItem || item instanceof DiggerItem || item instanceof TridentItem
         || item instanceof BowItem || item instanceof CrossbowItem) return Kind.WEAPON;
+    if (item instanceof ArmorItem || item instanceof ShieldItem) return Kind.ARMOR;
     if (stack.isEdible()) return Kind.FOOD;
     return Kind.OTHER;
   }

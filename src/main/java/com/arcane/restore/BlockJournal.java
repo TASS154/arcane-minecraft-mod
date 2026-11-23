@@ -102,6 +102,18 @@ public final class BlockJournal {
     return used.size();
   }
 
+  /** Posicoes mudadas por magia ha pouco (dentro da janela do Restaurar) perto de um ponto, sem tirar nada do diario. */
+  public static List<BlockPos> changedNear(ServerLevel level, Vec3 center, double radius, int max) {
+    JournalLog<Entry> log = log(level);
+    long now = level.getGameTime();
+    List<BlockPos> out = new ArrayList<>();
+    for (JournalLog.Stamped<Entry> s : log.live(now, window())) {
+      if (out.size() >= max) break;
+      if (Vec3.atCenterOf(s.value().pos()).distanceToSqr(center) <= radius * radius) out.add(s.value().pos());
+    }
+    return out;
+  }
+
   /** Quantos blocos ainda esperam a vez de voltar nesta dimensao. */
   public static int pending(ServerLevel level) {
     var q = PENDING.get(level.dimension());

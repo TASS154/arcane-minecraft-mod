@@ -1,0 +1,13 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:lock"
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 2,
+  "families": [
+    "earth"
+  ]
+}

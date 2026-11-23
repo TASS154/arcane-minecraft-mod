@@ -48,6 +48,11 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
   @Override
   public void render(GrimoireEntity entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
     float time = entity.tickCount + partialTick;
+    if (entity.anchor().isPresent()) {
+      renderOnDesk(entity, time, partialTick, pose, buffers, light);
+      super.render(entity, yaw, partialTick, pose, buffers, light);
+      return;
+    }
     pose.pushPose();
     follow(entity, partialTick, pose);
     pose.translate(0.0, 0.4 + Mth.sin(time * 0.08f) * 0.08, 0.0);
@@ -77,6 +82,41 @@ public class GrimoireRenderer extends EntityRenderer<GrimoireEntity> {
     renderOrbit(entity, time, pose, buffers, stage);
     pose.popPose();
     super.render(entity, yaw, partialTick, pose, buffers, light);
+  }
+
+  /**
+   * Livro pousado na bancada: aberto e quieto sobre o tampo. Enquanto a pena escreve (1 s por glifo), uma pena vai e
+   * vem sobre as paginas, as paginas viram de vez em quando e pingos de tinta saem da ponta (as particulas vem do servidor).
+   */
+  private void renderOnDesk(GrimoireEntity entity, float time, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+    long now = entity.level() == null ? 0L : entity.level().getGameTime();
+    boolean writing = entity.writingUntil() > now;
+    int stage = entity.visualStage();
+    pose.pushPose();
+    pose.translate(0.0, 0.08, 0.0);
+    pose.mulPose(Axis.ZP.rotationDegrees(90.0f));
+    pose.mulPose(Axis.XP.rotationDegrees(0.0f));
+    float size = stage <= 1 ? 0.6f : 0.85f;
+    pose.scale(size, size, size);
+    float flip = writing ? (Mth.sin(time * 0.15f) * 0.5f + 0.5f) * 0.35f : 0f;
+    book.setupAnim(time, flip, 0f, 1.2f);
+    if (stage < 6) {
+      VertexConsumer consumer = buffers.getBuffer(book.renderType(cover(stage, time)));
+      book.renderToBuffer(pose, consumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+    }
+    pose.popPose();
+    if (writing) {
+      // a pena: desliza de um lado a outro da pagina, inclinada, com a ponta tocando o papel
+      pose.pushPose();
+      float sx = Mth.sin(time * 0.55f) * 0.18f, sz = Mth.cos(time * 0.23f) * 0.08f;
+      pose.translate(0.12 + sx, 0.32 + Math.abs(Mth.sin(time * 1.1f)) * 0.03, sz);
+      pose.mulPose(Axis.YP.rotationDegrees(35f));
+      pose.mulPose(Axis.ZP.rotationDegrees(-30f + Mth.sin(time * 1.1f) * 6f));
+      pose.scale(0.55f, 0.55f, 0.55f);
+      net.minecraft.client.Minecraft.getInstance().getItemRenderer().renderStatic(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.FEATHER),
+          net.minecraft.world.item.ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, pose, buffers, entity.level(), entity.getId());
+      pose.popPose();
+    }
   }
 
   /** Estado suavizado de cada livro (posicao no mundo e direcao da visao), atualizado a cada quadro. */

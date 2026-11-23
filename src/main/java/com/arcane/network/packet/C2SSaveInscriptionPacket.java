@@ -90,6 +90,8 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String i
       if (noPages) {
         player.displayClientMessage(Component.translatable("message.arcane.workbench.no_pages").withStyle(ChatFormatting.RED), true);
       } else if (validation.valid() && menu.saveToGrimoire(player)) {
+        // A pena escreve 1 s por glifo; na bancada o livro fica pousado nela ate o dono o pegar de perto.
+        com.arcane.grimoire.GrimoireDesk.startWriting(player, menu.mode() == ArcaneWorkbenchMenu.BENCH ? menu.targetPos() : null, menu.building().size());
         player.displayClientMessage(Component.translatable(menu.mode() == ArcaneWorkbenchMenu.FIELD ? "message.arcane.workbench.saved_field" : "message.arcane.workbench.saved",
             menu.spellName().isBlank() ? Component.translatable("gui.arcane.unnamed") : Component.literal(menu.spellName()))
             .withStyle(ChatFormatting.LIGHT_PURPLE), true);
@@ -137,8 +139,9 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String i
           player.displayClientMessage(Component.translatable("message.arcane.pen.wrong_item").withStyle(ChatFormatting.RED), true);
           return;
         }
-      } else if (!scroll && com.arcane.inscribing.ItemDrawings.kindOf(held) != com.arcane.inscribing.ItemDrawings.Kind.OTHER) {
-        // Comida, arma e pocao pedem a caneta propria; a Pena Arcana escreve em papel e nos demais objetos.
+      } else if (!scroll && com.arcane.inscribing.ItemDrawings.kindOf(held) != com.arcane.inscribing.ItemDrawings.Kind.OTHER
+          && com.arcane.inscribing.ItemDrawings.kindOf(held) != com.arcane.inscribing.ItemDrawings.Kind.ARMOR) {
+        // Comida, arma e pocao pedem a caneta propria; a Pena Arcana escreve em papel, armadura, escudo e nos demais objetos.
         player.displayClientMessage(Component.translatable("message.arcane.pen.need_object_pen").withStyle(ChatFormatting.RED), true);
         return;
       }

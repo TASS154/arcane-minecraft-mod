@@ -1,0 +1,24 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:collect",
+    "magnitude_keys": [
+      "radius"
+    ]
+  },
+  "parameters": {
+    "radius": {
+      "type": "float",
+      "default": 16.0,
+      "min": 8.0,
+      "max": 32.0
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 1,
+  "families": [
+    "force"
+  ]
+}

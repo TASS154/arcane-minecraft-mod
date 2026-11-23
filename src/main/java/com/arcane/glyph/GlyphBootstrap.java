@@ -142,12 +142,52 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("swap"), new com.arcane.execution.handlers.UtilityEffects.Swap());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("reveal"), new com.arcane.execution.handlers.UtilityEffects.Reveal());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("decoy"), new com.arcane.execution.handlers.UtilityEffects.Decoy());
+        // rodada de 23 nov (lista aceita)
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("illusion"), new com.arcane.execution.handlers.LoreEffects.Illusion());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("mend"), new com.arcane.execution.handlers.LifeEffects.Mend());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("organize"), new com.arcane.execution.handlers.LifeEffects.Organize());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("collect"), new com.arcane.execution.handlers.LifeEffects.Collect());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("mark_point"), new com.arcane.execution.handlers.LifeEffects.MarkPoint());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("donate_mana"), new com.arcane.execution.handlers.LifeEffects.DonateMana());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("warm"), new com.arcane.execution.handlers.LifeEffects.Warm());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("rest_zone"), new com.arcane.execution.handlers.LifeEffects.RestZone());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("last_breath"), new com.arcane.execution.handlers.LifeEffects.LastBreath());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("cook"), new com.arcane.execution.handlers.LifeEffects.Cook());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("dry"), new com.arcane.execution.handlers.LifeEffects.Dry());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("harvest"), new com.arcane.execution.handlers.LifeEffects.Harvest());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("herd"), new com.arcane.execution.handlers.LifeEffects.Herd());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("pet"), new com.arcane.execution.handlers.LifeEffects.Pet());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("echo"), new com.arcane.execution.handlers.LifeEffects.Echo());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("prospect"), new com.arcane.execution.handlers.LifeEffects.Prospect());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("remember"), new com.arcane.execution.handlers.LifeEffects.Remember());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("echo_past"), new com.arcane.execution.handlers.LifeEffects.EchoOfPast());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("arcane_fireworks"), new com.arcane.execution.handlers.LifeEffects.Fireworks());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("flower_trail"), new com.arcane.execution.handlers.LifeEffects.FlowerTrail());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("bubbles"), new com.arcane.execution.handlers.LifeEffects.Bubbles());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("tickle"), new com.arcane.execution.handlers.LifeEffects.Tickle());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("twirl"), new com.arcane.execution.handlers.LifeEffects.Twirl());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("playful_shadow"), new com.arcane.execution.handlers.LifeEffects.PlayfulShadow());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("starry_sky"), new com.arcane.execution.handlers.LifeEffects.StarrySky());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("melody"), new com.arcane.execution.handlers.LifeEffects.Melody());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("glow_item"), new com.arcane.execution.handlers.LifeEffects.GlowItem());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("seal_creature"), new com.arcane.execution.handlers.LoreEffects.SealCreature());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("read_residue"), new com.arcane.execution.handlers.LoreEffects.ReadResidue());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("track_possession"), new com.arcane.execution.handlers.LoreEffects.TrackPossession());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("paired_portal"), new com.arcane.execution.handlers.LoreEffects.PairedPortal());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("counterspell"), new com.arcane.execution.handlers.LoreEffects.Counterspell());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("lock"), new com.arcane.execution.handlers.LoreEffects.Lock());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("seal_bench"), new com.arcane.execution.handlers.LoreEffects.SealBench());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("baptize"), new com.arcane.execution.handlers.LoreEffects.Baptize());
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("silent_step"), new PotionEffectHandler(com.arcane.registry.ModEffects.SILENT_STEP.get(), 6000));
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("curse"), new com.arcane.execution.handlers.ControlEffects.Curse());
 
         // Filtros
         GlyphHandlerRegistry.registerFilter(ArcaneIds.HOSTILE, new HostileFilterResolver());
         GlyphHandlerRegistry.registerFilter(ArcaneIds.SELF_FILTER, new SelfFilterResolver());
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("outsiders"), new com.arcane.execution.handlers.OutsidersFilterResolver());
+        GlyphHandlerRegistry.registerFilter(ArcaneIds.of("named"), new PredicateFilter((c, e) -> e.hasCustomName()));
+        GlyphHandlerRegistry.registerFilter(ArcaneIds.of("aerial"), new PredicateFilter((c, e) -> e instanceof net.minecraft.world.entity.animal.FlyingAnimal
+            || e instanceof net.minecraft.world.entity.FlyingMob || (!e.onGround() && !e.isInWater() && !e.isPassenger())));
         GlyphHandlerRegistry.registerFilter(ArcaneIds.BLOCKS, new BlocksFilterResolver());
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("players"), new PredicateFilter((c, e) -> e instanceof Player));
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("animals"), new PredicateFilter((c, e) -> e instanceof Animal));
@@ -181,6 +221,10 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_death"), new PredicateCondition(c -> "death".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_zone_end"), new PredicateCondition(c -> "zone_end".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_zone_enter"), new PredicateCondition(c -> "zone_enter".equals(c.trigger().type())));
+        for (String[] t : new String[][] {{"on_sleep", "sleep"}, {"on_fish", "fish"}, {"on_dawn", "dawn"}, {"on_eat", "eat"}, {"on_see_cast", "see_cast"}}) {
+            GlyphHandlerRegistry.registerCondition(ArcaneIds.of(t[0]), new PredicateCondition(c -> t[1].equals(c.trigger().type())));
+        }
+        GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_barrier_break"), new PredicateCondition(c -> "barrier_break".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_zone_exit"), new PredicateCondition(c -> "zone_exit".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("on_hurt"), new PredicateCondition(c -> "hurt".equals(c.trigger().type())));
         GlyphHandlerRegistry.registerCondition(ArcaneIds.of("low_mana"), new PredicateCondition(c ->

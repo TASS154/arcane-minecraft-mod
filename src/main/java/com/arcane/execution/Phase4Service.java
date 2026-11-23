@@ -183,7 +183,7 @@ public final class Phase4Service {
     if (victim.level().isClientSide) return;
     Entity attackerEntity = event.getSource().getEntity();
     if (Phase4State.active(victim, Phase4State.CURSE)) event.setAmount(event.getAmount() * 1.25f);
-    if (Phase4State.active(victim, Phase4State.PETRIFY)) event.setAmount(event.getAmount() * 0.5f);
+    if (Phase4State.active(victim, Phase4State.PETRIFY) && !Pierce.is(event.getSource())) event.setAmount(event.getAmount() * 0.5f);
 
     // aliados reanimados: o dono apanha ou bate, eles vao atras de quem foi.
     if (victim instanceof LivingEntity && attackerEntity instanceof LivingEntity attacker) {

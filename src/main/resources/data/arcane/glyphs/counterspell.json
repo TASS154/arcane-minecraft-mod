@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:counterspell"
+  },
+  "parameters": {
+    "strength": {
+      "type": "float",
+      "default": 1.0,
+      "min": 0.5,
+      "max": 3.0
+    }
+  },
+  "cost": {
+    "mana": 6
+  },
+  "tier": 4,
+  "families": [
+    "void"
+  ]
+}

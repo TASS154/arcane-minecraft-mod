@@ -1,13 +1,13 @@
 # Arcane: estado atual, roteiro de testes e status das funcionalidades
 
-Data: 6 nov 2026. Tudo aqui foi conferido no código e, onde indicado, em teste automático (73 testes unitários e 60 GameTests passando) ou em captura do jogo real.
+Atualizado em 23 nov 2026. Este topo é um resumo; o detalhe de cada rodada está nas seções do fim, e a lista do que falta está em "O que ainda falta no projeto".
 
 ---
 
 ## 1. O que existe no mod
 
 ### Núcleo do sistema de magia
-- **81 glifos** em 6 categorias: 1 ativador, 11 condições, 13 filtros, 22 modificadores, 24 efeitos e 10 formas. Cada glifo tem tier (1 a 4), custo de mana, ícone 8x8 e nome em PT e EN. A lista completa está em `docs/GLIFOS.md`.
+- **207 glifos** em 6 categorias: 1 ativador, 30 condições, 16 filtros, 35 modificadores, 114 efeitos e 11 formas. Cada glifo tem tier (1 a 4), custo de mana, ícone 8x8 e nome em PT e EN. A lista completa está em `docs/GLIFOS.md`.
 - **A ordem dos glifos importa.** O compilador monta um plano de execução a partir da sequência: forma, filtros, condições, efeitos, modificadores, grupos (`grupo` / `fim de grupo`), repetição e atraso entre segmentos.
 - **Até 10 glifos por magia**, com custo de mana crescendo de forma exponencial (fator 1,3; os 3 primeiros são grátis de multiplicador).
 - **Formas:** projétil, raio, aura, onda, pilar, barreira, invocação, entre outras.
@@ -18,7 +18,8 @@ Data: 6 nov 2026. Tudo aqui foi conferido no código e, onde indicado, em teste 
 ### Bancada e grimório
 - **Bancada Arcana** com GUI própria: monte a sequência de glifos, dê nome, salve. Bancada = 100% de poder; em campo = 30%.
 - **Grimório** (item e entidade): abas Magias, Glifos e Diário. Guarda magias salvas, glifos conhecidos e o registro de descobertas.
-- **O grimório sempre cai ao morrer, com todo o conteúdo**, e só o dono o recupera. Sem ele há penalidade de mana por 3 dias ou até recuperá-lo.
+- **O grimório sempre cai ao morrer, com todo o conteúdo**, e só o dono o recupera. Sem ele há penalidade de mana por 3 dias ou até recuperá-lo. Exceção: se ele estiver pousado na bancada, fica lá e não há penalidade.
+- **Grimório na bancada (23 nov):** gravar uma magia pousa o livro na bancada e a pena escreve 1 s por glifo; sem o livro o mago não conjura. O dono o pega de volta estando a até ~4 blocos. Outro mago pode pegá-lo da mesa (vira portador, nunca dono: conjura com 60%, glifos desconhecidos como ???) e estudá-lo numa bancada, 1 glifo por dia de jogo.
 - **Estágios do grimório** (por número de páginas): a capa muda do 1 ao 4; páginas arcanas aumentam a capacidade.
 - **Mana**: barra no HUD, regeneração, zonas de mana (cristais), mana poisoning, armaduras que reduzem o envenenamento.
 
@@ -378,6 +379,59 @@ Suite inteira: **238/238** (numa rodada anterior, 2 testes antigos falharam ao a
 - **Barreira**: o raio ja parava no primeiro bloco da barreira; agora a barreira tambem nao pode ser cavada por magia (Cavar), resiste a explosoes (resistencia 1200) e **protege o que esta atras dela** das crateras de magia e da Hidra (`BarrierShadow`: o que esta na "sombra" da barreira, visto do centro, fica). No cliente: pilar atras da barreira 6/6 blocos, pilar sem barreira 0/6.
 - **Explosao em onda**: crateras (explosao destrutiva, Aniquilacao, Hidra) abrem de dentro para fora: uma frente sai do centro a `craterSpreadSpeed` blocos/tick (padrao 1; raio 20 = 1 s), com poeira dos blocos, estouros e uma cupula de onda de choque no cliente. O orcamento por tick continua.
 
+## Rodada de 23 nov (tarde): bancada, posse, glifos aceitos, Hidra, perfis
+
+Cobertos por GameTest: **251 de 251 passam** na rodada final. Em rodadas anteriores falharam uma vez cada, e passaram depois sem mudança, "desenho por proximidade" e "golpe de cauda da Hidra"; parecem interferência entre testes que rodam juntos. O teste da cratera dependia da fila global e foi corrigido para olhar só os próprios blocos.
+
+**Visto no cliente** (roteiro automático, capturas em `run/screenshots/autotest_*`, não teclado e mouse de verdade):
+- a pena escrevendo no livro sobre a bancada;
+- o zumbi invisível como contorno turvo, sem armadura nem espada;
+- os 3 clones da Ilusão com a skin do jogador e outras armas;
+- a coluna e os pontos azuis do círculo de raio 16.
+
+Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. Não vistos: correntes do Selamento, títulos do Batizar, tela de perfis, Contramagia em jogo.
+
+**Pendências antigas (etapa F)**
+- A lista antiga estava desatualizada: zonas já eram salvas e "Ao Entrar na Zona" já existia.
+- Novo: condição **Ao Quebrar a Barreira** (`BarrierBreaks`). Roda uma vez, no ponto da quebra, nas criaturas a até 3 blocos. Só conta quebra à mão ou com ferramenta, porque explosões e magias não quebram barreira.
+- Desenhos em **armadura e escudo** disparam quando quem os usa leva golpe de outra criatura, no máximo 1 vez por segundo. A Pena Arcana escreve neles.
+- Ficou para depois: "propriedades de bloco" das canetas de bloco (o design não diz o que cada material faz).
+
+**Grimório na bancada (regras de posse e escrita)**, em `GrimoireDesk`:
+- A pena escreve 1 s por glifo (pena 3D sobre o livro, tinta e som). Enquanto escreve, ou com o livro na mesa, o dono não conjura. Escrever no campo também espera, mas o livro fica com o mago.
+- Afastado, o livro fica na mesa; a até 4,5 blocos, o dono o pega sozinho.
+- Outro mago clica na bancada e leva o livro. O dono perde o conteúdo e leva a penalidade até recuperar. O portador conjura com 60% (agachado troca de magia) e vê os glifos desconhecidos como ???.
+- O portador clica numa bancada com o livro na mão para estudar: 1 glifo por dia de jogo (24.000 ticks; dormir adianta; com o ciclo do dia parado, conta 1 por tick). Tirar o livro da mesa pausa e o progresso fica salvo no livro.
+- Morrer com o livro na mesa: ele fica lá, sem penalidade.
+- Limite: roubar da mesa só funciona com o dono online, porque com ele offline o livro não aparece na mesa.
+
+**Decisões aplicadas**
+- **Perfis de config** na tela de regras: Seguro, Épico (o padrão) e Sem limites. Mudar uma regra sozinha vira Personalizado. Regra nova: "Hidra devasta regiões".
+- **Mana vazando**: todo círculo de ritual de raio 16 ou mais, completo em volta de um altar, solta sinais. São partículas azuis na área, uma coluna azul vista a raio × 8 blocos, um zumbido a cada 10 s e um aviso de direção para quem está a até raio × 10 (`RitualLeaks`).
+- **Raio do ritual cresce com as oferendas**: × (1 + 0,5 × valor/100), até o dobro.
+- **Hidra**: com mais jogadores, além de vida e dano, ganha velocidade, ataques mais rápidos (espera até a metade) e poderes de estágios acima (1 por jogador a mais). Com 2 ou mais jogadores mira o mais ferido; com 3 ou mais, prefere quem está conjurando.
+- **Hidra devora grimórios**: livros caídos perto dela somem, o dono é avisado e ela passa a lançar as magias deles. Ao morrer, devolve todos.
+- **Nível de criatura** contra controle (Petrificar, Congelar, Sono, Medo, Silêncio, Levitar, Maldição, Selamento):
+  - O nível é vida máxima + 2 × armadura, e a magia precisa de `controlManaPerLevel` (0,2) × nível de força.
+  - De 50% a 100% da força, o efeito sai mais curto; abaixo de 50%, a criatura resiste.
+  - Jogadores não têm nível. Chefes resistem sempre.
+- **Perfurar**: +20% do dano vira perfurante por camada, sem limite de camadas, e cada camada custa o dobro da anterior. Dano de magia já ignorava armadura no vanilla; a parte perfurante ignora também encantamentos de proteção, Resistência, a redução do Petrificar e a dureza de chefes (tipo de dano `arcane:pierce`).
+- **Invisibilidade**: sem partículas; esconde corpo, armadura, itens e flechas presas. Fica uma distorção turva (o corpo quase transparente, tremulando) que aparece mais quanto mais rápido a criatura se move (`InvisibilityRender`, no cliente). Vale também para a poção vanilla.
+
+**Glifos novos (45, total 207)**
+- Ciclo: Selamento (vira o item Criatura Selada), Selar Bancada, Ler Resíduo, Rastrear Posse, Portal Pareado, Ilusão (entidade com a skin do dono).
+- Combate: Perfurar, Contramagia e a condição Ao Ver Conjuração. A magia vista é anulada se a força da contramagia for pelo menos o custo dela.
+- Utilitários: Trancar, Remendar, Organizar, Passo Surdo, Marcar Ponto, Recolher.
+- Apoio: Doar Mana, Aquecer, Zona de Descanso, Fôlego Final.
+- Cotidiano: Cozinhar, Secar, Colheita, Pastorear, Carinho, Eco, Prospecção, Lembrar, Eco do Passado.
+- Charme: Cor, Fogos Arcanos, Rastro de Flores, Bolhas, Cócegas, Pirueta, Sombra Brincalhona, Céu Estrelado, Brilhar Item, Melodia.
+- Condições Ao Dormir, Ao Pescar, Ao Amanhecer e Ao Comer: armadas, esperam até 1 dia de jogo.
+- Filtros Nomeados e Aéreos.
+- Modificador Aleatório: força de 0,5× a 2× por conjuração.
+- Batizar: o nome da área é o nome da própria magia, sem campo novo.
+
+**Build**: `gradle.properties` não fixa mais o caminho do JDK, porque o JDK 17 daquele caminho tinha sumido da máquina. O Gradle usa o toolchain 17 (`~/.gradle/jdks`). O JDK 21 instalado em `JAVA_HOME` está quebrado ("Failed setting boot class path"), então para rodar o Gradle aponte `JAVA_HOME` para um JDK 17 que funcione.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):
@@ -388,9 +442,12 @@ Nao visto no jogo / nao jogado de verdade:
 - Golem Runico e Lobo Espectral contra mobs reais; zonas/cristais entre sessoes.
 
 Funcionalidades pendentes:
-- desenhos em objetos: corte inicial decidido (caneta de arma, caneta de bloco de pedra, animacao do compasso) e "propriedades de bloco" das canetas de bloco; tinta permanente e pó solvente conforme o design de 19 nov;
-- condicoes "Ao quebrar a barreira" e "Ao entrar na zona"; `ArmedSpells` (ao sofrer dano / ao morrer) no barramento; zonas persistirem entre sessoes;
-- decisao em aberto: o raio do ritual crescer com oferendas (k = 0,5).
+- "propriedades de bloco" das canetas de bloco (o design não define o efeito de cada material);
+- `ArmedSpells` ainda não passa pelo barramento `SpellEvents` (refatoração interna, sem efeito para o jogador);
+- caçadores sem magia (munição anti-conjuração, armadilhas): Everton pediu para virar outro módulo, depois;
+- roubar o grimório da bancada só funciona com o dono online.
+
+Não visto no jogo (rodada de 23 nov, tarde): pena escrevendo na bancada, distorção da invisibilidade, clones da Ilusão com a skin do dono, correntes do Selamento, sinais de mana vazando, títulos do Batizar, tela de perfis.
 
 Acabamento:
 - modelo da Hidra mais detalhado (hoje caixas) e animacoes de ataque;

@@ -48,6 +48,7 @@ public final class ModItems {
     public static final RegistryObject<Item> MIXED_COMMON_INK = ITEMS.register("mixed_common_ink", () -> new InkItem(new Item.Properties(), "common_perm"));
     public static final RegistryObject<Item> MIXED_BLOOD_INK = ITEMS.register("mixed_blood_ink", () -> new InkItem(new Item.Properties(), "blood_perm"));
     public static final RegistryObject<Item> MIXED_INVISIBLE_INK = ITEMS.register("mixed_invisible_ink", () -> new InkItem(new Item.Properties(), "invisible_perm"));
+    public static final RegistryObject<Item> SEALED_CREATURE = ITEMS.register("sealed_creature", () -> new com.arcane.item.SealedCreatureItem(new Item.Properties()));
     public static final RegistryObject<Item> SOLVENT_POWDER = ITEMS.register("solvent_powder", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> GLYPH_NOTE = ITEMS.register("glyph_note", () -> new GlyphNoteItem(new Item.Properties()));
     public static final RegistryObject<Item> ARCANE_MASK = ITEMS.register("arcane_mask",

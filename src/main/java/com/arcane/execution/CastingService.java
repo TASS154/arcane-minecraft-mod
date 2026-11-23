@@ -20,6 +20,20 @@ import java.util.Optional;
 public final class CastingService {
     private CastingService() {}
 
+    /** Conjurando de um grimorio alheio: o portador nao precisa conhecer os glifos. */
+    private static final ThreadLocal<Boolean> FOREIGN = ThreadLocal.withInitial(() -> false);
+
+    /** Conjura uma magia de grimorio alheio com a fracao {@code power} do poder (60% pela regra do portador). */
+    public static ExecutionResult castForeign(ServerPlayer player, Inscription inscription, double power) {
+        FOREIGN.set(true);
+        try {
+            PrecisionSnapshot base = PrecisionSnapshot.of(inscription);
+            return cast(player, inscription, new PrecisionSnapshot(base.powerMultiplier() * power, base.manaCostMultiplier(), false), 1.0, false);
+        } finally {
+            FOREIGN.set(false);
+        }
+    }
+
     public static ExecutionResult tryCast(ServerPlayer player, Inscription inscription, PrecisionSnapshot precision) {
         return cast(player, inscription, precision, 1.0, false);
     }
@@ -44,7 +58,7 @@ public final class CastingService {
      */
     public static ExecutionResult cast(ServerPlayer player, Inscription inscription, PrecisionSnapshot precision, double scale, boolean free, boolean silent) {
         Optional<GrimoireState> grimoire = GrimoireAttachments.get(player);
-        InscriptionValidator.ValidationResult validation = InscriptionValidator.validate(inscription, grimoire);
+        InscriptionValidator.ValidationResult validation = InscriptionValidator.validate(inscription, FOREIGN.get() ? Optional.empty() : grimoire);
         if (!validation.valid()) {
             return ExecutionResult.fail(validation.message().getString());
         }
@@ -103,15 +117,20 @@ public final class CastingService {
         if (!free && !mana.trySpend(manaCost)) {
             return ExecutionResult.fail("message.arcane.mana.insufficient");
         }
+        // Contramagia: quem viu a conjuracao e tinha "Ao Ver Conjuracao" pode anula-la (a mana ja foi gasta).
+        if (!silent && com.arcane.execution.handlers.LoreEffects.Counterspell.intercept(player, manaCost)) {
+            return new ExecutionResult(false, "message.arcane.counterspell.countered", manaCost);
+        }
 
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
             GrimoireAttachments.get(player).ifPresent(g -> g.prefs().touch(inscription.id(), player.level().getGameTime()));
             Vows.pay(player, inscription);
+            com.arcane.execution.handlers.LoreEffects.Illusion.ownerCast(player);
             if (!silent) {
                 PlayerAnims.onCast(player, plan);
                 ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint(), SpellElement.of(plan).ordinal()));
-                if (!Traces.stealthy(inscription)) castFx((ServerLevel) player.level(), player, SpellElement.of(plan));
+                if (!Traces.stealthy(inscription)) castFx((ServerLevel) player.level(), player, SpellElement.of(plan), inscription);
             }
         }
         return new ExecutionResult(result.success(), result.message(), manaCost);
@@ -158,7 +177,7 @@ public final class CastingService {
         context.setRitualLevel(bonus.level());
         if (bonus.radius() > 0 && bonus.center() != null) context.setRitual(bonus.radius(), bonus.center());
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
-        if (result.success() && !Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()));
+        if (result.success() && !Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()), inscription);
         return result;
     }
 
@@ -185,15 +204,57 @@ public final class CastingService {
                 PrecisionSnapshot.of(inscription),
                 ExecutionContext.TriggerEvent.cast()
         );
+        if (com.arcane.execution.handlers.LoreEffects.Counterspell.intercept(caster, plan.baseManaCost())) {
+            return ExecutionResult.fail("message.arcane.counterspell.countered");
+        }
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
             Vows.pay(caster, inscription);
-            if (!Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()));
+            if (!Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()), inscription);
         }
         return result;
     }
 
     /** Som e particulas de conjuracao, visiveis para todos por perto. */
+    /** Paleta do glifo Cor (16 cores, parametro "hue"). */
+    public static final int[] PALETTE = {0xFFFFFF, 0xFF4040, 0xFF9020, 0xFFE040, 0x80FF40, 0x20C060, 0x40FFE0, 0x40A0FF,
+            0x3050FF, 0x9040FF, 0xFF40E0, 0xFF80B0, 0xA06030, 0x808080, 0x202020, 0xFFD700};
+
+    /** Cor da conjuracao: a do glifo Cor, se a magia tiver um; senao, a do elemento. */
+    public static int spellColor(Inscription inscription, SpellElement element) {
+        for (var g : inscription.glyphs()) {
+            if (g.glyphId().getPath().equals("color")) {
+                int hue = (int) Math.round(g.parameters().getOrDefault("hue", 0.0));
+                return PALETTE[Math.floorMod(hue, PALETTE.length)];
+            }
+        }
+        return element.color();
+    }
+
+    private static void castFx(ServerLevel level, LivingEntity caster, SpellElement element, Inscription inscription) {
+        int color = spellColor(inscription, element);
+        if (color != element.color()) {
+            castFxColored(level, caster, element, color);
+            return;
+        }
+        castFx(level, caster, element);
+    }
+
+    /** Como castFx, mas com a cor escolhida pelo glifo Cor no circulo e na espiral. */
+    private static void castFxColored(ServerLevel level, LivingEntity caster, SpellElement element, int color) {
+        level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
+                com.arcane.registry.ModSounds.SPELL_CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 0.9f + caster.getRandom().nextFloat() * 0.2f);
+        ElementSounds.playCast(level, caster.position(), element);
+        ModNetwork.sendShape(level, S2CShapeFxPacket.CAST, caster.position(), net.minecraft.world.phys.Vec3.ZERO, 1.5f, color, element.ordinal(), 16);
+        var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(((color >> 16) & 255) / 255f, ((color >> 8) & 255) / 255f, (color & 255) / 255f), 1.2f);
+        double h = caster.getBbHeight();
+        for (int i = 0; i < 24; i++) {
+            double f = i / 24.0, a = f * Math.PI * 4 + caster.getYRot() * Math.PI / 180.0;
+            double r = 0.75 - 0.35 * f;
+            level.sendParticles(dust, caster.getX() + Math.cos(a) * r, caster.getY() + f * (h + 0.4), caster.getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+        }
+    }
+
     private static void castFx(ServerLevel level, LivingEntity caster, SpellElement element) {
         level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
                 com.arcane.registry.ModSounds.SPELL_CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS,

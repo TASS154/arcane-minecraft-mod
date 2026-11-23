@@ -90,6 +90,10 @@ public class HydraEntity extends Monster {
   private int powerCooldown = 60;
   private int powerTicks;
   private double playerFactor = 1.0;
+  /** Grimorios que a Hidra devorou (itens inteiros, devolvidos ao morrer); as magias deles viram poderes dela. */
+  private final java.util.List<net.minecraft.world.item.ItemStack> devoured = new java.util.ArrayList<>();
+  private static final UUID SPEED_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a03");
+  public static final int DEVOURED_SPELL = 8;
   /**
    * A vida do Minecraft tem teto de 1024. Acima disso a Hidra fica "mais dura": o dano recebido e dividido por este
    * fator, entao a vida efetiva e vida x dureza (a barra de chefe mostra a fracao, que e a mesma).
@@ -298,6 +302,7 @@ public class HydraEntity extends Monster {
     float frac = getHealth() / getMaxHealth();
     applyHealth(baseHealth(stage()) * (1.0 + 0.75 * (f - 1)));
     setModifier(getAttribute(Attributes.ATTACK_DAMAGE), DAMAGE_ID, 0.35 * (f - 1));
+    setModifier(getAttribute(Attributes.MOVEMENT_SPEED), SPEED_ID, Math.min(0.6, 0.12 * (f - 1)));
     setHealth(frac * getMaxHealth());
   }
 
@@ -308,6 +313,89 @@ public class HydraEntity extends Monster {
   }
 
   public double playerFactor() { return playerFactor; }
+
+  /** Ataca mais rapido com mais jogadores: a espera entre poderes cai (ate a metade). */
+  public static double cooldownFactor(double players) { return 1.0 / Math.min(2.0, 1.0 + 0.25 * (players - 1)); }
+
+  /** Variacao: cada jogador a mais libera os poderes como se a Hidra fosse 1 estagio acima (dano e vida nao mudam). */
+  public static int varietyStage(int stage, double players) { return clampStage(stage + (int) Math.floor(players - 1)); }
+
+  /**
+   * Inteligencia: com 2 ou mais jogadores ela troca de alvo para o mais vulneravel (menor fracao de vida) e, com 3 ou
+   * mais, prefere quem acabou de conjurar (o mago e a ameaca). Sozinho o jogador enfrenta o comportamento base.
+   */
+  private void thinkAboutTarget() {
+    if (playerFactor < 2.0 || !(level() instanceof ServerLevel sl)) return;
+    LivingEntity best = getTarget();
+    double bestScore = best == null ? Double.MAX_VALUE : score(best);
+    for (ServerPlayer p : sl.players()) {
+      if (p.isSpectator() || p.isCreative() || !p.isAlive() || p.distanceToSqr(this) > 48 * 48) continue;
+      double sc = score(p);
+      if (sc < bestScore - 0.1) { best = p; bestScore = sc; }
+    }
+    if (best != null && best != getTarget()) setTarget(best);
+  }
+
+  private double score(LivingEntity e) {
+    double sc = e.getHealth() / Math.max(1f, e.getMaxHealth());
+    if (playerFactor >= 3.0 && e instanceof ServerPlayer p && com.arcane.execution.CastChannels.isActive(p.getUUID())) sc -= 0.5;
+    return sc;
+  }
+
+  // ------------------------------------------------------------------ grimorios devorados
+  public int devouredCount() { return devoured.size(); }
+
+  /** Donos dos grimorios que ela devorou (Rastrear Posse aponta para ela). */
+  public java.util.Set<UUID> devouredOwners() {
+    java.util.Set<UUID> out = new java.util.HashSet<>();
+    for (var b : devoured) if (b.hasTag() && b.getTag().hasUUID(com.arcane.item.GrimoireItem.OWNER)) out.add(b.getTag().getUUID(com.arcane.item.GrimoireItem.OWNER));
+    return out;
+  }
+
+  /** Magias de todos os grimorios devorados. */
+  public java.util.List<com.arcane.inscription.Inscription> devouredSpells() {
+    java.util.List<com.arcane.inscription.Inscription> out = new java.util.ArrayList<>();
+    for (var book : devoured) {
+      var contents = com.arcane.item.GrimoireItem.contents(book);
+      if (contents == null) continue;
+      var st = new com.arcane.grimoire.GrimoireState();
+      st.load(contents);
+      out.addAll(st.spellbook().values());
+    }
+    return out;
+  }
+
+  /** Engole os grimorios caidos ao alcance (some o item; volta inteiro quando a Hidra morre). */
+  public int devourNearby() {
+    if (!(level() instanceof ServerLevel sl)) return 0;
+    double r = 4.0 + getBbWidth();
+    int n = 0;
+    for (var item : sl.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, getBoundingBox().inflate(r),
+        it -> com.arcane.item.GrimoireItem.contents(it.getItem()) != null)) {
+      devoured.add(item.getItem().copy());
+      var tag = item.getItem().getTag();
+      if (tag != null && tag.hasUUID(com.arcane.item.GrimoireItem.OWNER)) {
+        ServerPlayer owner = sl.getServer().getPlayerList().getPlayer(tag.getUUID(com.arcane.item.GrimoireItem.OWNER));
+        if (owner != null) owner.displayClientMessage(Component.translatable("message.arcane.hydra.devoured").withStyle(net.minecraft.ChatFormatting.DARK_RED), false);
+      }
+      item.discard();
+      n++;
+      sl.sendParticles(ParticleTypes.ENCHANT, item.getX(), item.getY() + 0.5, item.getZ(), 40, 0.5, 0.5, 0.5, 1.0);
+      sl.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL, net.minecraft.sounds.SoundSource.HOSTILE, 2.0f, 1.3f);
+    }
+    return n;
+  }
+
+  /** Lanca uma das magias devoradas no alvo (com o seu proprio poder de criatura). */
+  private void castDevoured(LivingEntity target) {
+    var spells = devouredSpells();
+    if (spells.isEmpty() || !(level() instanceof ServerLevel sl)) return;
+    var spell = spells.get(random.nextInt(spells.size()));
+    getLookControl().setLookAt(target, 180f, 90f);
+    lookAt(target, 180f, 90f);
+    com.arcane.execution.CastingService.tryCast(this, spell, sl);
+    sl.sendParticles(ParticleTypes.WITCH, getX(), getY() + getBbHeight(), getZ(), 30, getBbWidth() * 0.4, 0.5, getBbWidth() * 0.4, 0.1);
+  }
 
   /** Vida alvo: o que cabe no atributo (ate 1024) vira vida; o resto vira dureza. */
   private void applyHealth(double wanted) {
@@ -324,6 +412,8 @@ public class HydraEntity extends Monster {
     super.aiStep();
     if (level().isClientSide) return;
     if (tickCount % 100 == 1) updatePlayerFactor();
+    if (tickCount % 20 == 7) devourNearby();
+    if (tickCount % 100 == 51) thinkAboutTarget();
     bossBar.setProgress(getHealth() / getMaxHealth());
     if (sealed()) {
       // dormindo: so respira fumaca; nada de poderes
@@ -344,8 +434,14 @@ public class HydraEntity extends Monster {
     LivingEntity target = getTarget();
     if (target == null || !target.isAlive()) return;
     if (--powerCooldown > 0) return;
-    int s = stage();
-    powerCooldown = Math.max(24, (int) (120 / Math.sqrt(reach(s)))) + random.nextInt(40);
+    int s = varietyStage(stage(), playerFactor);
+    powerCooldown = (int) ((Math.max(24, (int) (120 / Math.sqrt(reach(stage())))) + random.nextInt(40)) * cooldownFactor(playerFactor));
+    if (!devoured.isEmpty() && random.nextInt(100) < 25) {
+      entityData.set(POWER, DEVOURED_SPELL);
+      powerTicks = 20; // a pose de conjurar dura 1 s e volta ao normal
+      castDevoured(target);
+      return;
+    }
     double d = distanceTo(target);
     int choice;
     int roll = random.nextInt(100);
@@ -650,7 +746,7 @@ public class HydraEntity extends Monster {
       return false;
     }
     if (source.getEntity() instanceof ServerPlayer p) fighters.add(p.getUUID());
-    return super.hurt(source, (float) (amount / toughness));
+    return super.hurt(source, (float) (com.arcane.execution.Pierce.is(source) ? amount : amount / toughness));
   }
 
   @Override
@@ -661,6 +757,17 @@ public class HydraEntity extends Monster {
   @Override
   public void die(DamageSource source) {
     super.die(source);
+    // os grimorios devorados voltam inteiros (e protegidos, como quando o dono morre)
+    if (level() instanceof ServerLevel sl0) {
+      for (var book : devoured) {
+        var it = new net.minecraft.world.entity.item.ItemEntity(sl0, getX(), getY() + 1, getZ(), book.copy());
+        it.setUnlimitedLifetime();
+        it.setInvulnerable(true);
+        it.setGlowingTag(true);
+        sl0.addFreshEntity(it);
+      }
+      devoured.clear();
+    }
     if (level() instanceof ServerLevel sl) com.arcane.world.HydraLairs.onHydraDeath(sl, this);
   }
 
@@ -695,6 +802,9 @@ public class HydraEntity extends Monster {
     tag.putLong("HydraHome", home().asLong());
     tag.putBoolean("HydraInLair", inLair);
     tag.putInt("HydraAwake", awakeTicks);
+    var books = new net.minecraft.nbt.ListTag();
+    for (var b : devoured) books.add(b.save(new CompoundTag()));
+    tag.put("HydraDevoured", books);
   }
 
   @Override
@@ -710,6 +820,8 @@ public class HydraEntity extends Monster {
     entityData.set(HOME, BlockPos.of(tag.getLong("HydraHome")));
     inLair = tag.getBoolean("HydraInLair");
     awakeTicks = tag.getInt("HydraAwake");
+    devoured.clear();
+    for (var t : tag.getList("HydraDevoured", net.minecraft.nbt.Tag.TAG_COMPOUND)) devoured.add(net.minecraft.world.item.ItemStack.of((CompoundTag) t));
     if (inLair) restrictTo(home(), com.arcane.world.HydraLairs.CHAMBER_R - 2);
     updateBossName();
   }

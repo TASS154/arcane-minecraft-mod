@@ -62,10 +62,12 @@ public final class InscriptionCompiler {
         double mana = 0;       // tudo que nao e efeito (formas, modificadores...): pago uma vez
         double effectMana = 0; // efeitos: repetem a cada pulso de uma zona
         GlyphDefinition formDef = null;
+        int pierces = 0; // Perfurar: cada camada a mais na mesma magia custa o dobro da anterior
 
         for (GlyphInstance instance : inscription.glyphs()) {
             GlyphDefinition def = GlyphRegistry.getOrThrow(instance.glyphId());
             double glyphCost = def.manaCost(instance.parameters()) * def.formFactor(instance.parameters());
+            if (instance.glyphId().getPath().equals("pierce")) glyphCost *= Math.pow(2, Math.min(20, pierces++));
             if (def.category() == GlyphCategory.EFFECT) effectMana += glyphCost; else mana += glyphCost;
 
             switch (def.category()) {

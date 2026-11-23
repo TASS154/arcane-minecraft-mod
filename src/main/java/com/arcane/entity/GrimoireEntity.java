@@ -29,6 +29,29 @@ public class GrimoireEntity extends Entity {
       SynchedEntityData.defineId(GrimoireEntity.class, EntityDataSerializers.LONG);
   public static final int FLIP_TICKS = 16;
 
+  /** Bancada onde o livro esta pousado (o cliente o desenha parado, aberto sobre ela). */
+  private static final EntityDataAccessor<java.util.Optional<net.minecraft.core.BlockPos>> ANCHOR =
+      SynchedEntityData.defineId(GrimoireEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
+  /** Ate quando a pena escreve (o cliente desenha a pena e a tinta ate esse tick). */
+  private static final EntityDataAccessor<Long> WRITING_UNTIL =
+      SynchedEntityData.defineId(GrimoireEntity.class, EntityDataSerializers.LONG);
+  /** Livro de estudo: pousado sem dono presente (outro mago estudando um grimorio alheio). */
+  private boolean study;
+
+  public java.util.Optional<net.minecraft.core.BlockPos> anchor() { return this.entityData.get(ANCHOR); }
+  public long writingUntil() { return this.entityData.get(WRITING_UNTIL); }
+  public void setAnchor(net.minecraft.core.BlockPos pos) {
+    this.entityData.set(ANCHOR, java.util.Optional.ofNullable(pos));
+    if (pos != null) setPos(pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5);
+  }
+  public void setWritingUntil(long tick) { this.entityData.set(WRITING_UNTIL, tick); }
+  public void markStudy(net.minecraft.core.BlockPos pos, int stage) {
+    this.study = true;
+    this.entityData.set(STAGE, Math.max(1, stage));
+    setAnchor(pos);
+  }
+  public boolean isStudy() { return study; }
+
   public long flipUntil() { return this.entityData.get(FLIP_UNTIL); }
   public void flip() { this.entityData.set(FLIP_UNTIL, level().getGameTime() + FLIP_TICKS); }
 
@@ -57,12 +80,21 @@ public class GrimoireEntity extends Entity {
             getX() + Math.cos(a) * 0.35, getY() + 0.3 + random.nextDouble() * 0.3, getZ() + Math.sin(a) * 0.35, 0.0, 0.01, 0.0);
       }
     }
+    if (!level().isClientSide && study) {
+      if (anchor().isEmpty() || tickCount % 20 == 0 && !com.arcane.grimoire.GrimoireDesk.studyAt(level(), anchor().get())) discard();
+      return;
+    }
     if (!level().isClientSide && ownerId == null && tickCount > 40) {
       discard(); // grimorio sem dono (sobra de teste ou dado antigo)
       return;
     }
     if (!level().isClientSide && ownerId != null) {
       Player owner = level().getPlayerByUUID(ownerId);
+      if (anchor().isPresent()) {
+        if (owner == null) discard(); // dono saiu do jogo: volta a aparecer na bancada quando ele entrar
+        else setAnchor(anchor().get());
+        return;
+      }
       if (owner == null || !owner.isAlive()) {
         discard();
         return;
@@ -78,6 +110,8 @@ public class GrimoireEntity extends Entity {
     this.entityData.define(STAGE, 1);
     this.entityData.define(OWNER, java.util.Optional.empty());
     this.entityData.define(FLIP_UNTIL, 0L);
+    this.entityData.define(ANCHOR, java.util.Optional.empty());
+    this.entityData.define(WRITING_UNTIL, 0L);
   }
 
   @Override

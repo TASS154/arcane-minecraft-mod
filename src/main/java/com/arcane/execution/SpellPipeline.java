@@ -49,6 +49,11 @@ public final class SpellPipeline {
                 Zones.attachEnd(context, segment);
                 continue;
             }
+            // "Ao quebrar a barreira": espera alguem quebrar um bloco da barreira desta conjuracao.
+            if (BarrierBreaks.isBreakSegment(segment)) {
+                if ("cast".equals(context.trigger().type())) BarrierBreaks.attach(context, segment);
+                continue;
+            }
             // Trechos com gatilho (Ao Sofrer Dano) ficam armados no conjurador em vez de rodar agora.
             if ("cast".equals(context.trigger().type()) && ArmedSpells.isTriggerSegment(segment)) {
                 ArmedSpells.arm(context, segment);
@@ -99,6 +104,8 @@ public final class SpellPipeline {
         for (EffectCallCompiled effectCompiled : segment.effects()) {
             // Inverter troca o efeito pelo oposto (Dano <-> Cura, Empurrao <-> Atrair...).
             EffectCall call = Inversion.resolve(EffectCall.fromCompiled(effectCompiled));
+            // Aleatorio: a forca do efeito sorteia de 50% a 200% a cada conjuracao.
+            if (call.parameters().getOrDefault("random", 0.0) > 0.0) call = randomize(context, call);
             EffectHandler handler = GlyphHandlerRegistry.getEffect(call.handler()).orElse(null);
             if (handler != null) {
                 TargetList effective = targets;
@@ -107,13 +114,24 @@ public final class SpellPipeline {
                         && targets.entities().contains(context.caster())) {
                     effective = new TargetList(targets.entities().stream().filter(e -> e != context.caster()).toList(), targets.blocks(), targets.points());
                 }
-                handler.apply(context, call, effective);
+                // Controle (Petrificar, Sono...) respeita o nivel de cada criatura contra a forca da magia.
+                if (CreatureLevels.isControl(call.glyphId().getPath())) CreatureLevels.apply(context, call, effective, handler);
+                else handler.apply(context, call, effective);
                 // Sobrecarga: o excesso de forca cobra seu preco (nunca mata: so ate sobrar 1,5 coracao).
                 if (call.parameters().getOrDefault("overcharge", 0.0) > 0.0 && context.caster().getHealth() > 3.0f) {
                     context.caster().hurt(context.level().damageSources().magic(), 2.0f);
                 }
             }
         }
+    }
+
+    public static final java.util.Set<String> RANDOM_KEYS = java.util.Set.of("amount", "strength", "duration", "radius", "power", "level");
+
+    public static EffectCall randomize(ExecutionContext context, EffectCall call) {
+        double f = Math.pow(2.0, context.level().random.nextDouble() * 2.0 - 1.0); // 0,5x a 2x, com a mesma chance de subir ou cair
+        java.util.Map<String, Double> params = new java.util.HashMap<>(call.parameters());
+        params.replaceAll((k, v) -> RANDOM_KEYS.contains(k) ? (k.equals("level") ? Math.max(0, Math.round(v * f)) : v * f) : v);
+        return new EffectCall(call.glyphId(), call.handler(), params, call.magnitudeKeys());
     }
 
     private void applyChainRules(ExecutionContext context, ExecutionSegment segment) {

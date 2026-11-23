@@ -26,7 +26,8 @@ import java.util.UUID;
  *
  * O que cai quando o dono morre leva o CONTEUDO dele (magias, conhecimento, diario) e o UUID do dono:
  *  - o dono o recupera pegando-o do chao (ou com Shift + botao direito): tudo volta;
- *  - outro jogador, com Shift + botao direito, ESTUDA: copia as formulas e passa a suspeitar dos glifos.
+ *  - outro jogador e so PORTADOR: botao direito conjura as magias dele com 60% (Shift troca de magia) e, pousado numa
+ *    bancada, ele estuda um glifo desconhecido por dia de jogo (ver GrimoireDesk).
  */
 public class GrimoireItem extends Item {
   public static final String OWNER = "owner";
@@ -63,6 +64,11 @@ public class GrimoireItem extends Item {
   @Override
   public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
     ItemStack stack = player.getItemInHand(hand);
+    if (contents(stack) != null && !isOwnedBy(stack, player.getUUID())) {
+      // Grimorio alheio: o portador conjura com 60% (agachado troca de magia). Estudar: pousa-lo numa bancada.
+      if (!level.isClientSide && player instanceof ServerPlayer sp) com.arcane.grimoire.GrimoireDesk.useForeign(sp, stack, player.isShiftKeyDown());
+      return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    }
     boolean handlesContents = player.isShiftKeyDown() && contents(stack) != null;
     boolean toggles = player.isShiftKeyDown() && contents(stack) == null;
     if (toggles) {

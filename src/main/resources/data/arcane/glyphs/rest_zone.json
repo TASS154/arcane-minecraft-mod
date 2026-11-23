@@ -1,0 +1,13 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:rest_zone"
+  },
+  "cost": {
+    "mana": 4
+  },
+  "tier": 3,
+  "families": [
+    "life"
+  ]
+}

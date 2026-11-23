@@ -1,0 +1,21 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:donate_mana"
+  },
+  "parameters": {
+    "amount": {
+      "type": "float",
+      "default": 20.0,
+      "min": 5.0,
+      "max": 200.0
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 2,
+  "families": [
+    "life"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:track_possession"
+  },
+  "cost": {
+    "mana": 4
+  },
+  "tier": 3,
+  "families": [
+    "knowledge"
+  ]
+}

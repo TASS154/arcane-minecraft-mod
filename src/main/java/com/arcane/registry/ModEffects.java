@@ -21,6 +21,8 @@ public final class ModEffects {
     public static final RegistryObject<MobEffect> FLOAT_FLIGHT = EFFECTS.register("float_flight", FloatFlight::new);
 
     /** Petrificado: marcador sincronizado com o cliente (o estado real fica em Phase4State); faz o modelo virar pedra. */
+    /** Passo Surdo: enquanto durar, a criatura nao faz som nem vibracao ao se mover (ver WorldMarks). */
+    public static final RegistryObject<MobEffect> SILENT_STEP = EFFECTS.register("silent_step", () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x404858) {});
     public static final RegistryObject<MobEffect> PETRIFIED = EFFECTS.register("petrified", () -> new MobEffect(MobEffectCategory.HARMFUL, 0x8E8E93) {});
 
     /** Andar na agua: a superficie da agua sustenta quem tem o efeito; agachar afunda (ver WaterWalk). */

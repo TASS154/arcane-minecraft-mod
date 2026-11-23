@@ -195,78 +195,75 @@ public final class DevAutoTest {
         base = p.position();
         write("base " + base);
       }
+      // 1) a pena escreve na bancada; o livro fica la ate o dono voltar
       case 60 -> server(sp -> {
         ServerLevel l = sp.serverLevel();
-        BlockPos o = sp.blockPosition();
-        for (int x = -30; x <= 30; x++) for (int z = -4; z <= 60; z++) {
-          l.setBlock(o.offset(x, -1, z), Blocks.SMOOTH_STONE.defaultBlockState(), 2);
-          for (int y = 0; y < 22; y++) l.setBlock(o.offset(x, y, z), Blocks.AIR.defaultBlockState(), 2);
-        }
-        sp.getInventory().setItem(sp.getInventory().selected, new ItemStack(com.arcane.registry.ModItems.SCEPTER.get()));
-        write("plataforma pronta, cetro na mao");
-      });
-      // ---- cetros: 10 visuais em terceira pessoa de frente
-      case 70 -> { tp(base.x, base.y, base.z, 180f, 0f); mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT); }
-      case 80, 92, 104, 116, 128, 140, 152, 164, 176, 188 -> styleHeld(STYLES[(t - 80) / 12]);
-      case 88, 100, 112, 124, 136, 148, 160, 172, 184, 196 -> shot("scepter_style_" + ((t - 88) / 12));
-      case 200 -> { styleHeld(STYLES[0]); mc.options.setCameraType(CameraType.FIRST_PERSON); }
-      case 212 -> shot("scepter_first_person");
-      case 214 -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-      case 226 -> shot("scepter_third_back");
-      case 228 -> { mc.options.setCameraType(CameraType.FIRST_PERSON); mc.options.hideGui = false; com.arcane.client.ClientHooks.openScepter(); }
-      case 245 -> shot("scepter_screen");
-      case 247 -> { mc.setScreen(null); mc.options.hideGui = false; }
-      case 250 -> shot("scepter_hotbar");
-      case 252 -> mc.options.hideGui = true;
-      // ---- telecinese: pega um bloco e gira a camera; mede no CLIENTE a distancia do bloco ate a mira
-      case 260 -> server(sp -> {
-        ServerLevel l = sp.serverLevel();
-        BlockPos o = sp.blockPosition();
-        sp.getInventory().setItem(sp.getInventory().selected, ItemStack.EMPTY);
-        l.setBlock(o.offset(0, 1, 4), Blocks.GOLD_BLOCK.defaultBlockState(), 3);
-        sp.connection.teleport(o.getX() + 0.5, o.getY(), o.getZ() + 0.5, 0f, 3f);
-      });
-      case 270 -> server(sp -> {
-        var r = com.arcane.execution.CastingService.tryCast(sp, new Inscription(List.of(g("ray"), g("telekinesis", "distance", 4.0, "duration", 400.0))),
-            com.arcane.execution.PrecisionSnapshot.FIELD);
-        write("telecinese: conjurou=" + r.success() + " " + r.message() + " segurando=" + com.arcane.execution.Telekinesis.heldCount(sp.getUUID()));
-      });
-      case 300 -> mc.options.setCameraType(CameraType.FIRST_PERSON);
-      case 360 -> server(sp -> com.arcane.execution.Telekinesis.release(sp.getUUID()));
-      // ---- explosao destrutiva: onda de choque; uma barreira protege um pilar
-      case 380 -> server(sp -> {
-        ServerLevel l = sp.serverLevel();
         BlockPos o = BlockPos.containing(base);
-        // pilar de pedra protegido por uma parede de barreira entre ele e a explosao, e outro pilar sem protecao
-        for (int y = 0; y < 6; y++) {
-          l.setBlock(o.offset(6, y, 30), Blocks.STONE_BRICKS.defaultBlockState(), 2);
-          l.setBlock(o.offset(-6, y, 30), Blocks.STONE_BRICKS.defaultBlockState(), 2);
+        for (int x = -24; x <= 24; x++) for (int z = -4; z <= 40; z++) {
+          l.setBlock(o.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState(), 2);
+          for (int y = 0; y < 8; y++) l.setBlock(o.offset(x, y, z), Blocks.AIR.defaultBlockState(), 2);
         }
-        for (int x = 4; x <= 8; x++) for (int y = 0; y < 6; y++) l.setBlock(o.offset(x, y, 28), com.arcane.registry.ModBlocks.ARCANE_BARRIER.get().defaultBlockState(), 2);
-        sp.connection.teleport(o.getX() + 0.5, o.getY() + 12, o.getZ() + 8.5, 0f, 30f);
+        BlockPos bench = o.offset(0, 0, 3);
+        l.setBlock(bench, com.arcane.registry.ModBlocks.ARCANE_WORKBENCH.get().defaultBlockState(), 3);
+        com.arcane.grimoire.GrimoireLifecycleHandler.spawnGrimoire(sp);
+        com.arcane.grimoire.GrimoireDesk.startWriting(sp, bench, 6);
+        write("escrevendo: bloqueio=" + com.arcane.grimoire.GrimoireDesk.blockedReason(sp));
       });
-      case 400 -> server(sp -> {
-        ServerLevel l = sp.serverLevel();
-        var at = base.add(0, 0, 26);
-        com.arcane.execution.SpellImmunity.explodeAs(sp, net.minecraft.world.level.Level.ExplosionInteraction.BLOCK, 11f,
-            () -> l.explode(sp, at.x, at.y, at.z, 11f, net.minecraft.world.level.Level.ExplosionInteraction.BLOCK));
-        write("explosao: blocos na fila logo depois = " + com.arcane.execution.CraterQueue.pending(l));
-      });
-      case 403 -> shot("blast_wave_1");
-      case 407 -> { shot("blast_wave_2"); server(sp -> write("explosao: na fila depois de 7 ticks = " + com.arcane.execution.CraterQueue.pending(sp.serverLevel()))); }
-      case 412 -> shot("blast_wave_3");
-      case 440 -> server(sp -> {
-        BlockPos o = BlockPos.containing(base);
+      case 62 -> tp(base.x + 0.5, base.y, base.z + 1.2, 0f, 35f);
+      case 80 -> shot("desk_writing_1");
+      case 95 -> shot("desk_writing_2");
+      case 140 -> tp(base.x + 0.5, base.y, base.z + 14, 180f, 10f);
+      case 160 -> { shot("desk_left_behind"); server(sp -> write("longe: bloqueio=" + com.arcane.grimoire.GrimoireDesk.blockedReason(sp))); }
+      case 165 -> tp(base.x + 0.5, base.y, base.z + 1.0, 0f, 20f);
+      case 175 -> server(sp -> write("perto de novo: bloqueio=" + com.arcane.grimoire.GrimoireDesk.blockedReason(sp)));
+      // 2) invisibilidade: parado quase some; andando, a distorcao aparece
+      case 180 -> server(sp -> {
         var l = sp.serverLevel();
-        int kept = 0, lost = 0;
-        for (int y = 0; y < 6; y++) {
-          if (!l.getBlockState(o.offset(6, y, 30)).isAir()) kept++;
-          if (!l.getBlockState(o.offset(-6, y, 30)).isAir()) lost++;
-        }
-        write("depois da explosao: pilar atras da barreira " + kept + "/6 blocos, pilar sem barreira " + lost + "/6, fila " + com.arcane.execution.CraterQueue.pending(l));
+        var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(l);
+        z.moveTo(base.x + 0.5, base.y, base.z + 6, 180f, 0);
+        z.setNoAi(true);
+        z.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(net.minecraft.world.item.Items.IRON_CHESTPLATE));
+        z.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(net.minecraft.world.item.Items.IRON_SWORD));
+        z.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.INVISIBILITY, 2000, 0, false, false, true));
+        z.setPersistenceRequired();
+        l.addFreshEntity(z);
+        var visible = net.minecraft.world.entity.EntityType.ZOMBIE.create(l);
+        visible.moveTo(base.x + 3.5, base.y, base.z + 6, 180f, 0);
+        visible.setNoAi(true);
+        visible.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(net.minecraft.world.item.Items.IRON_CHESTPLATE));
+        l.addFreshEntity(visible);
       });
-      case 442 -> shot("blast_after");
-      case 460 -> {
+      case 182 -> tp(base.x + 1.5, base.y, base.z + 1.5, 0f, 5f);
+      case 200 -> shot("invisible_still");
+      case 230 -> shot("invisible_moving");
+      // 3) Ilusao: 3 clones com a skin do jogador
+      case 250 -> {
+        cmd("kill @e[type=minecraft:zombie]");
+        server(sp -> {
+          sp.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD));
+          sp.getInventory().add(new ItemStack(net.minecraft.world.item.Items.IRON_AXE));
+          sp.getInventory().add(new ItemStack(net.minecraft.world.item.Items.BOW));
+          var r = com.arcane.execution.CastingService.tryCast(sp, new Inscription(List.of(g("self"), g("illusion", "duration", 600))),
+              com.arcane.execution.PrecisionSnapshot.WORKBENCH);
+          write("ilusao: " + r.success() + " " + r.message() + " clones=" + sp.serverLevel().getEntitiesOfClass(com.arcane.entity.IllusionEntity.class, sp.getBoundingBox().inflate(8)).size());
+        });
+        mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
+      }
+      case 275 -> shot("illusion_front");
+      case 277 -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+      case 290 -> shot("illusion_back");
+      case 292 -> mc.options.setCameraType(CameraType.FIRST_PERSON);
+      // 4) mana vazando de um circulo de raio 16
+      case 300 -> server(sp -> {
+        var l = sp.serverLevel();
+        BlockPos altar = BlockPos.containing(base).offset(0, 0, 22);
+        l.setBlock(altar, com.arcane.registry.ModBlocks.ARCANE_ALTAR.get().defaultBlockState(), 3);
+        com.arcane.ritual.RitualService.drawPerfectCircle(l, altar, 16);
+        write("circulo: raio que vaza=" + com.arcane.ritual.RitualLeaks.leakingRadius(l, altar) + " registrado=" + com.arcane.ritual.RitualLeaks.registered(l, altar));
+      });
+      case 302 -> tp(base.x + 0.5, base.y + 6, base.z - 2, 0f, 15f);
+      case 360 -> shot("ritual_leak");
+      case 380 -> {
         cmd("gamemode creative");
         mc.options.hideGui = false;
         mc.options.pauseOnLostFocus = oldPause;
@@ -276,25 +273,14 @@ public final class DevAutoTest {
       default -> {
       }
     }
-    if (t >= 272 && t < 340 && t % 4 == 0) {
+    // a criatura invisivel anda de um lado para o outro (distorcao em movimento)
+    if (t >= 205 && t < 232) {
       int now = t;
       server(sp -> {
-        var held = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.item.FallingBlockEntity.class, sp.getBoundingBox().inflate(12));
-        write("servidor t" + now + ": segurando=" + com.arcane.execution.Telekinesis.heldCount(sp.getUUID()) + " blocos-entidade=" + held.size()
-            + (held.isEmpty() ? "" : String.format(" pos=(%.1f,%.1f,%.1f) chao=%s", held.get(0).getX(), held.get(0).getY(), held.get(0).getZ(), held.get(0).onGround())));
+        for (var z : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, sp.getBoundingBox().inflate(12))) {
+          if (z.isInvisible()) z.teleportTo(base.x + 0.5 + Math.sin(now * 0.35) * 1.5, base.y, base.z + 6);
+        }
       });
-      write("cliente t" + now + ": blocos-entidade=" + mc.level.getEntitiesOfClass(net.minecraft.world.entity.item.FallingBlockEntity.class, p.getBoundingBox().inflate(12)).size());
-    }
-    // telecinese: gira a camera 9 graus por tick por 2 s e mede o bloco no cliente
-    if (t >= 280 && t < 340) {
-      look(p.getYRot() + (t < 310 ? 9f : -9f), 25f);
-      var fb = mc.level.getEntitiesOfClass(net.minecraft.world.entity.item.FallingBlockEntity.class, p.getBoundingBox().inflate(10));
-      if (!fb.isEmpty()) {
-        Vec3 anchor = p.getEyePosition().add(p.getLookAngle().scale(4.0));
-        Vec3 at = fb.get(0).position().add(0, 0.49, 0);
-        write(String.format("telecinese t%d: bloco a %.2f da mira (cliente)", t, at.distanceTo(anchor)));
-      }
-      if (t == 295) shot("telekinesis_turning");
     }
   }
 }

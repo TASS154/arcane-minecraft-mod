@@ -23,6 +23,7 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue INK_UNITS_PER_GLYPH;
   public static final ForgeConfigSpec.BooleanValue AIR_DRAWINGS_NEVER_FADE;
   public static final ForgeConfigSpec.BooleanValue HYDRA_DEVASTATION;
+  public static final ForgeConfigSpec.DoubleValue CONTROL_MANA_PER_LEVEL;
   public static final ForgeConfigSpec.IntValue HYDRA_BREAKOUT_SECONDS;
   public static final ForgeConfigSpec.IntValue CRATER_MAX_RADIUS;
   public static final ForgeConfigSpec.IntValue CRATER_BLOCKS_PER_TICK;
@@ -111,6 +112,8 @@ public class ArcaneConfig {
         .defineInRange("inkUnitsPerGlyph", 1, 1, 1000);
     AIR_DRAWINGS_NEVER_FADE = builder.comment("true = drawings made in the air with the Phoenix Pen never fade (ignores the ink's days). false = they last as long as their ink")
         .define("airDrawingsNeverFade", false);
+    CONTROL_MANA_PER_LEVEL = builder.comment("Control spells (petrify, freeze, sleep, fear, silence, levitate, curse, seal) need this much spell mana per creature level (max health + 2 x armor). Below 100% the effect is weaker, below 50% the creature resists. Players have no level; bosses always resist. 0 = no levels")
+        .defineInRange("controlManaPerLevel", 0.2, 0.0, 10.0);
     HYDRA_DEVASTATION = builder.comment("true = awake Hydras of stage 5 or more destroy the terrain (craters, fire, storms) and can burst out of their lair. Also needs the mobGriefing game rule")
         .define("hydraDevastation", true);
     HYDRA_BREAKOUT_SECONDS = builder.comment("Seconds an awake Hydra of stage 5+ stays in its lair before it digs its way to the surface (it leaves sooner if nobody fights it for a third of this time)")

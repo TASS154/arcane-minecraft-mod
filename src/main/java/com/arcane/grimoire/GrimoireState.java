@@ -20,6 +20,11 @@ public class GrimoireState {
     private boolean grimoirePresent = true;
     private long grimoireDestroyedUntilTick = 0L;
     private UUID activeInscriptionId = null;
+    /** Bancada onde o livro esta pousado (escrevendo ou esquecido); nulo = o livro esta com o dono. */
+    private net.minecraft.core.BlockPos deskPos = null;
+    private String deskDim = "";
+    /** Ate quando (tick do jogo) a pena ainda esta escrevendo: nesse tempo o livro nao serve para conjurar. */
+    private long writingUntil = 0L;
     private final SpellPrefs prefs = new SpellPrefs();
 
     public Map<ResourceLocation, GlyphKnowledge> knowledge() { return knowledge; }
@@ -72,6 +77,12 @@ public class GrimoireState {
     public boolean grimoirePresent() { return grimoirePresent; }
     public long grimoireDestroyedUntilTick() { return grimoireDestroyedUntilTick; }
     public Optional<UUID> activeInscriptionId() { return Optional.ofNullable(activeInscriptionId); }
+
+    public Optional<net.minecraft.core.BlockPos> deskPos() { return Optional.ofNullable(deskPos); }
+    public String deskDim() { return deskDim; }
+    public long writingUntil() { return writingUntil; }
+    public void setDesk(net.minecraft.core.BlockPos pos, String dim) { this.deskPos = pos == null ? null : pos.immutable(); this.deskDim = dim == null ? "" : dim; }
+    public void setWritingUntil(long tick) { this.writingUntil = tick; }
 
     public void setActiveInscription(UUID id) { this.activeInscriptionId = id; }
     public void setGrimoirePresent(boolean present) { this.grimoirePresent = present; }
@@ -148,6 +159,11 @@ public class GrimoireState {
         if (activeInscriptionId != null) {
             tag.putUUID("activeInscription", activeInscriptionId);
         }
+        if (deskPos != null) {
+            tag.putLong("deskPos", deskPos.asLong());
+            tag.putString("deskDim", deskDim);
+        }
+        tag.putLong("writingUntil", writingUntil);
         prefs.save(tag);
     }
 
@@ -179,6 +195,9 @@ public class GrimoireState {
         grimoirePresent = !tag.contains("grimoirePresent") || tag.getBoolean("grimoirePresent");
         grimoireDestroyedUntilTick = tag.getLong("destroyedUntil");
         activeInscriptionId = tag.hasUUID("activeInscription") ? tag.getUUID("activeInscription") : null;
+        deskPos = tag.contains("deskPos") ? net.minecraft.core.BlockPos.of(tag.getLong("deskPos")) : null;
+        deskDim = tag.getString("deskDim");
+        writingUntil = tag.getLong("writingUntil");
         prefs.load(tag);
     }
 

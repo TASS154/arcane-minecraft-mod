@@ -1,0 +1,24 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:paired_portal",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 200.0,
+      "min": 40.0,
+      "max": 600.0
+    }
+  },
+  "cost": {
+    "mana": 8
+  },
+  "tier": 4,
+  "families": [
+    "void"
+  ]
+}

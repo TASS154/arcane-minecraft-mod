@@ -81,6 +81,8 @@ public class GrimoireLifecycleHandler {
   public void onDeath(LivingDeathEvent event) {
     if (!(event.getEntity() instanceof ServerPlayer player)) return;
     GrimoireAttachments.get(player).ifPresent(grimoire -> {
+      // Livro pousado na bancada: fica la, sem penalidade (o dono o pega ao voltar).
+      if (grimoire.deskPos().isPresent()) return;
       // O grimorio SEMPRE cai, levando todo o conteudo. Fica no chao sem expirar e a prova de fogo e lava
       // (so o vazio o destroi); quem fica com o jogador e um grimorio provisorio, em branco.
       CompoundTag snapshot = new CompoundTag();
@@ -208,6 +210,12 @@ public class GrimoireLifecycleHandler {
     GrimoireEntity grimoire = new GrimoireEntity(ModEntities.GRIMOIRE.get(), level);
     grimoire.bind(player, stage);
     grimoire.getPersistentData().putUUID("owner", player.getUUID());
+    var st = GrimoireAttachments.get(player).orElse(null);
+    if (st != null && st.deskPos().isPresent()) {
+      if (!level.dimension().location().toString().equals(st.deskDim())) return; // pousado em outra dimensao
+      grimoire.setAnchor(st.deskPos().get());
+      grimoire.setWritingUntil(st.writingUntil());
+    }
     level.addFreshEntity(grimoire);
     level.playSound(null, player.blockPosition(), com.arcane.registry.ModSounds.GRIMOIRE_SUMMON.get(),
         net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, 1.0f);

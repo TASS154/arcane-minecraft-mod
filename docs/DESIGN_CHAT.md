@@ -22,7 +22,7 @@ Pilar: *magia é conhecimento; conhecimento gera poder; poder gera reputação; 
 | Grimório guarda magias ilimitadas vezes | Magias salvas se conjuram quantas vezes quiser; a capacidade são as **páginas** (8 no início; +2 por Página Arcana) | `pagesSetTheSpellCapacity…` |
 | **Grimório sempre cai e leva tudo** | Ao morrer, cai o item com magias, descobertas, diário e páginas; não expira, resiste a fogo e lava, brilha; o jogador fica com um provisório em branco | `ownerRecoveringTheGrimoire…` |
 | Penalidade de morte | Metade da mana até recuperar o grimório ou por 3 dias de jogo; depois o provisório vira o seu | lógica no `GrimoireLifecycleHandler` |
-| Outro jogador fica com suas magias | Shift + direito no grimório alheio **estuda**: copia as fórmulas, mas só *suspeita* dos glifos | `studyingSomeoneElses…` |
+| Outro jogador fica com suas magias | (regra nova, 23 nov) quem pega um grimório alheio é só **portador**: conjura com 60% e não muda nada. Pousado numa bancada, ele **estuda** 1 glifo desconhecido por dia de jogo; o livro não serve para conjurar enquanto isso | `studyIdentifiesOneUnknownGlyphPerDay…` |
 | **Compartilhar magias** | **Copiar** escreve a magia num pergaminho (1 papel + 1 tinta); quem recebe lança ou estuda (Shift + direito) | `studyingTheSameSpellTwice…` |
 | Nome da magia é do jogador | A bancada pede o nome; salvar com o mesmo nome substitui (editar) | — |
 | Descoberta por experimentação / observação / pesquisa | Ver magos conjurar → *suspeitar*; experimentar → entender; notas e estudo → identificar; diário registra | `SyncTest`, GameTests |
@@ -55,7 +55,7 @@ Ordenado do que mais valeria fazer a seguir.
 - **8 páginas iniciais** e 2 por Página Arcana. Páginas só em baús de estruturas de nível 2+; faltam as formas de crescimento por ritual.
 - **Penalidade de 3 dias:** entendi como "dura até recuperar o grimório **ou** por 3 dias de jogo, o que vier primeiro". Se quiser que dure até recuperar (sem teto), é uma linha.
 - **Se o grimório for destruído** (só o vazio o destrói), o jogador perde o conteúdo e fica com o provisório. Ou prefere um backup parcial?
-- **Estudar não consome** o grimório alheio (dá para estudar de novo; não duplica). O pergaminho **é consumido** ao estudar.
+- **Estudar não consome** o grimório alheio, mas agora leva 1 dia de jogo por glifo, na bancada, e o progresso fica salvo no livro (regra de 23 nov). O pergaminho **é consumido** ao estudar.
 - **A magia "Faísca"** (Projétil→Dano) já vem no grimório novo, para o jogador conseguir conjurar logo. O design diz "nunca nomeie magias": quer que o grimório comece vazio?
 - **Raio, Pilar, Onda, Barreira** respeitam `mobGriefing` quando quem conjura é um mago NPC.
 

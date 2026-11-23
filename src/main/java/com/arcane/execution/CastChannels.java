@@ -224,6 +224,11 @@ public final class CastChannels {
   public static void press(ServerPlayer player, UUID spellId) {
     var grimoire = GrimoireAttachments.get(player).orElse(null);
     if (grimoire == null) return;
+    String blocked = com.arcane.grimoire.GrimoireDesk.blockedReason(player);
+    if (blocked != null) {
+      player.displayClientMessage(net.minecraft.network.chat.Component.translatable(blocked).withStyle(net.minecraft.ChatFormatting.GRAY), true);
+      return;
+    }
     Inscription inscription = grimoire.getInscription(spellId).orElse(null);
     if (inscription == null) return;
     CastMode mode = grimoire.prefs().mode(spellId);

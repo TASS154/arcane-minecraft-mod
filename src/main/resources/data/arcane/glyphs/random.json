@@ -1,0 +1,23 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:random"
+  },
+  "modifier_scope": {
+    "target": "previous_effect",
+    "kind": "effect",
+    "mutate": {
+      "random": {
+        "op": "put",
+        "value": 1.0
+      }
+    }
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 2,
+  "families": [
+    "void"
+  ]
+}

@@ -66,6 +66,14 @@ public final class RitualService {
     public boolean success() { return outcome == Outcome.SUCCESS || outcome == Outcome.STORED; }
   }
 
+  /**
+   * As oferendas tambem aumentam o raio (decisao de 23 nov): area x (1 + 0,5 x valor/100), ate o dobro.
+   * Ex.: 100% de oferenda = raio x1,5; 200% ou mais = x2.
+   */
+  public static double offeringArea(int offeringPct) {
+    return Math.min(2.0, 1.0 + 0.5 * Math.max(0, offeringPct) / 100.0);
+  }
+
   // ------------------------------------------------------------------ circulo
   /** Mede o circulo em volta do altar: o maior raio (16, 8, 4) cuja completude passa do minimo; senao, o melhor relato. */
   public static CircleReport evaluate(ServerLevel level, BlockPos altar) {
@@ -355,7 +363,7 @@ public final class RitualService {
     }
     int effective = legendary ? RitualLevel.LEGENDARY.number() : circle.level().number();
     double power = OfferingValue.total(sizePercent(circle), offeringPct, offerings.unique()) / 100.0 * circle.quality();
-    double area = circle.level().areaScale();
+    double area = circle.level().areaScale() * offeringArea(offeringPct);
     ExecutionResult cast = CastingService.castRitual(performer, spell, level,
         new CastingService.RitualBonus(effective, power, area, legendary, circle.radius(), net.minecraft.world.phys.Vec3.atCenterOf(altar)));
     if (be != null) be.setCooldownUntil(level.getGameTime() + RitualSettings.COOLDOWN_TICKS);
@@ -433,7 +441,7 @@ public final class RitualService {
       }
       altar.setCooldownUntil(level.getGameTime() + RitualSettings.COOLDOWN_TICKS);
       CastingService.castRitual(activator, spell, level,
-          new CastingService.RitualBonus(effective, power, circle.level().areaScale(), legendary, circle.radius(), net.minecraft.world.phys.Vec3.atCenterOf(altar.getBlockPos())));
+          new CastingService.RitualBonus(effective, power, circle.level().areaScale() * offeringArea(altar.storedOffering()), legendary, circle.radius(), net.minecraft.world.phys.Vec3.atCenterOf(altar.getBlockPos())));
       RitualFx.play(level, altar.getBlockPos(), circle, legendary);
       fired++;
     }

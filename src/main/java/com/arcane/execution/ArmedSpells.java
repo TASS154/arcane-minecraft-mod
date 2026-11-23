@@ -34,7 +34,11 @@ public final class ArmedSpells {
   private static final Set<ResourceLocation> TRIGGER_CONDITIONS = Set.of(
       new ResourceLocation("arcane", "on_hurt"), new ResourceLocation("arcane", "on_death"), new ResourceLocation("arcane", "on_kill"),
       new ResourceLocation("arcane", "on_fall"), new ResourceLocation("arcane", "on_jump"),
-      new ResourceLocation("arcane", "after_hits"));
+      new ResourceLocation("arcane", "after_hits"),
+      new ResourceLocation("arcane", "on_sleep"), new ResourceLocation("arcane", "on_fish"), new ResourceLocation("arcane", "on_dawn"),
+      new ResourceLocation("arcane", "on_eat"), new ResourceLocation("arcane", "on_see_cast"));
+  /** Gatilhos do dia a dia esperam ate 1 dia de jogo (os de combate, 1 minuto). */
+  private static final Set<String> LONG_WAIT = Set.of("on_sleep", "on_fish", "on_dawn", "on_eat", "on_see_cast");
 
   private record Armed(ExecutionContext context, CompiledExecutionPlan.ExecutionSegment segment, long expiresAt, int[] hits) {}
 
@@ -51,7 +55,8 @@ public final class ArmedSpells {
     List<Armed> list = ARMED.computeIfAbsent(context.caster().getUUID(), id -> new ArrayList<>());
     synchronized (list) {
       while (list.size() >= MAX_ARMED) list.remove(0);
-      list.add(new Armed(context, segment, context.level().getGameTime() + EXPIRE_TICKS, new int[1]));
+      boolean longWait = segment.condition().map(c -> LONG_WAIT.contains(c.conditionId().getPath())).orElse(false);
+      list.add(new Armed(context, segment, context.level().getGameTime() + (longWait ? 24000L : EXPIRE_TICKS), new int[1]));
     }
     if (context.caster() instanceof Player player) {
       player.displayClientMessage(Component.translatable("message.arcane.armed"), true);
@@ -104,6 +109,54 @@ public final class ArmedSpells {
   @SubscribeEvent
   public static void onJump(net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent event) {
     trigger(event.getEntity(), "jump", "on_jump", null);
+  }
+
+  /** Ao Dormir: quando o jogador pega no sono. */
+  @SubscribeEvent
+  public static void onSleepTick(TickEvent.PlayerTickEvent event) {
+    if (event.phase == TickEvent.Phase.END && event.player.isSleeping() && event.player.getSleepTimer() == 2) trigger(event.player, "sleep", "on_sleep", null);
+  }
+
+  /** Ao Pescar: ao puxar algo da agua. */
+  @SubscribeEvent
+  public static void onFish(net.minecraftforge.event.entity.player.ItemFishedEvent event) {
+    trigger(event.getEntity(), "fish", "on_fish", event.getHookEntity());
+  }
+
+  /** Ao Comer: ao terminar de comer qualquer comida. */
+  @SubscribeEvent
+  public static void onEat(net.minecraftforge.event.entity.living.LivingEntityUseItemEvent.Finish event) {
+    if (event.getItem().isEdible()) trigger(event.getEntity(), "eat", "on_eat", null);
+  }
+
+  private static final Map<net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>, Long> LAST_DAY = new ConcurrentHashMap<>();
+
+  /** Ao Amanhecer: quando o relogio do dia passa pelo nascer do sol (tambem depois de dormir). */
+  @SubscribeEvent
+  public static void onDawnTick(TickEvent.LevelTickEvent event) {
+    if (event.phase != TickEvent.Phase.END || !(event.level instanceof net.minecraft.server.level.ServerLevel level) || level.getGameTime() % 10 != 0) return;
+    long day = level.getDayTime() % 24000L;
+    Long before = LAST_DAY.put(level.dimension(), day);
+    if (before == null || day >= before || ARMED.isEmpty()) return; // passou de 23999 para 0: amanheceu
+    for (UUID id : new ArrayList<>(ARMED.keySet())) {
+      var e = level.getEntity(id);
+      if (e instanceof LivingEntity l) trigger(l, "dawn", "on_dawn", null);
+    }
+  }
+
+  /** Para os testes: dispara o amanhecer em quem estiver armado nesta dimensao. */
+  public static void dawnNow(net.minecraft.server.level.ServerLevel level) {
+    for (UUID id : new ArrayList<>(ARMED.keySet())) if (level.getEntity(id) instanceof LivingEntity l) trigger(l, "dawn", "on_dawn", null);
+  }
+
+  /** Ao Ver Conjuracao: quem armou e esta a ate 24 blocos, enxergando quem conjura, reage (a magia vista e o "outro"). */
+  public static void seeCast(LivingEntity caster) {
+    if (ARMED.isEmpty() || !(caster.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+    for (UUID id : new ArrayList<>(ARMED.keySet())) {
+      if (id.equals(caster.getUUID())) continue;
+      if (!(level.getEntity(id) instanceof LivingEntity watcher) || watcher.distanceTo(caster) > 24 || !watcher.hasLineOfSight(caster)) continue;
+      trigger(watcher, "see_cast", "on_see_cast", caster);
+    }
   }
 
   private static void trigger(LivingEntity victim, String type, String conditionPath, net.minecraft.world.entity.Entity source) {

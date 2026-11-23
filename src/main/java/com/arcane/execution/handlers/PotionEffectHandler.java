@@ -26,7 +26,9 @@ public class PotionEffectHandler implements EffectHandler {
     int level = (int) Math.max(0, Math.min(5, Math.round(call.parameters().getOrDefault("level", 0.0))));
     for (Entity entity : targets.entities()) {
       if (entity instanceof LivingEntity living) {
-        living.addEffect(new MobEffectInstance(effect, ticks, level), context.caster());
+        // Invisibilidade arcana nao solta particulas (so a distorcao turva desenhada no cliente a denuncia).
+        boolean quiet = effect == net.minecraft.world.effect.MobEffects.INVISIBILITY;
+        living.addEffect(quiet ? new MobEffectInstance(effect, ticks, level, false, false, true) : new MobEffectInstance(effect, ticks, level), context.caster());
         // Vincular: o efeito acaba se o conjurador morrer ou se afastar.
         if (call.parameters().getOrDefault("bind", 0.0) > 0.0 && living != context.caster()) {
           com.arcane.execution.Phase4Service.bind(context.caster(), living, effect);

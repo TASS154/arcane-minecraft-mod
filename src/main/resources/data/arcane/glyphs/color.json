@@ -1,0 +1,26 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:color"
+  },
+  "parameters": {
+    "hue": {
+      "type": "int",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 15.0
+    }
+  },
+  "modifier_scope": {
+    "target": "flag",
+    "kind": "effect",
+    "mutate": {}
+  },
+  "cost": {
+    "mana": 0
+  },
+  "tier": 1,
+  "families": [
+    "knowledge"
+  ]
+}

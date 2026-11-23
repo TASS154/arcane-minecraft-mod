@@ -1,0 +1,24 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:mend",
+    "magnitude_keys": [
+      "strength"
+    ]
+  },
+  "parameters": {
+    "strength": {
+      "type": "float",
+      "default": 1.0,
+      "min": 0.5,
+      "max": 3.0
+    }
+  },
+  "cost": {
+    "mana": 6
+  },
+  "tier": 3,
+  "families": [
+    "earth"
+  ]
+}

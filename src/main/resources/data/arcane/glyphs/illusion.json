@@ -1,0 +1,30 @@
+{
+  "category": "effect",
+  "behavior": {
+    "handler": "arcane:illusion",
+    "magnitude_keys": [
+      "duration"
+    ]
+  },
+  "parameters": {
+    "duration": {
+      "type": "int",
+      "default": 300.0,
+      "min": 60.0,
+      "max": 1200.0
+    },
+    "count": {
+      "type": "int",
+      "default": 3.0,
+      "min": 1.0,
+      "max": 5.0
+    }
+  },
+  "cost": {
+    "mana": 7
+  },
+  "tier": 4,
+  "families": [
+    "void"
+  ]
+}

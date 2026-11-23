@@ -36,6 +36,25 @@ public final class ItemDrawingEvents {
     ItemDrawings.fire(player, held);
   }
 
+  /** Proxima vez (tick do jogo) em que a armadura de cada jogador pode disparar de novo: 1 s entre disparos. */
+  private static final java.util.Map<java.util.UUID, Long> ARMOR_READY = new java.util.concurrent.ConcurrentHashMap<>();
+
+  /**
+   * Armadura e escudo: disparam quando quem os usa leva dano de outra criatura ou projetil (queda, fome e afogamento
+   * nao). Cada peca vestida (e o escudo levantado) dispara os seus desenhos; no maximo uma vez por segundo.
+   */
+  @SubscribeEvent
+  public static void onWearerHurt(LivingHurtEvent event) {
+    if (!(event.getEntity() instanceof ServerPlayer player) || event.getSource().getEntity() == null || event.getSource().getEntity() == player) return;
+    long now = player.level().getGameTime();
+    if (ARMOR_READY.getOrDefault(player.getUUID(), 0L) > now) return;
+    int fired = 0;
+    for (ItemStack piece : player.getArmorSlots()) if (ItemDrawings.count(piece) > 0) fired += ItemDrawings.fire(player, piece);
+    ItemStack used = player.getUseItem();
+    if (player.isBlocking() && ItemDrawings.kindOf(used) == ItemDrawings.Kind.ARMOR && ItemDrawings.count(used) > 0) fired += ItemDrawings.fire(player, used);
+    if (fired > 0) ARMOR_READY.put(player.getUUID(), now + 20);
+  }
+
   /** Criatura desenhada: dispara os desenhos dela sempre que ataca (o desenho some depois, salvo Persistencia). */
   @SubscribeEvent
   public static void onCreatureAttack(LivingHurtEvent event) {

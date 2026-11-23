@@ -102,6 +102,34 @@ public class ArcaneGameTests {
     });
   }
 
+  @GameTest(template = "empty", timeoutTicks = 60)
+  public static void onBarrierBreakFiresOnceWhereTheBarrierWasBroken(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 1, 1);
+    cast(h, caster, g("barrier", "duration", 400.0), g("on_barrier_break"), g("damage", "amount", 4.0));
+    BlockPos found = null;
+    var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get();
+    for (BlockPos p : BlockPos.betweenClosed(h.absolutePos(new BlockPos(-6, 0, -6)), h.absolutePos(new BlockPos(8, 8, 8)))) {
+      if (h.getLevel().getBlockState(p).is(barrier)) { found = p.immutable(); break; }
+    }
+    h.assertTrue(found != null, "a barreira foi criada");
+    BlockPos at = found;
+    var thief = h.spawnWithNoFreeWill(EntityType.PIG, h.relativePos(at.above(0)));
+    thief.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 1.8);
+    float start = thief.getHealth(), casterStart = caster.getHealth();
+    h.assertTrue(com.arcane.execution.BarrierBreaks.watched() > 0, "os blocos da barreira estao vigiados");
+    h.runAfterDelay(2, () -> {
+      com.arcane.execution.BarrierBreaks.broken(h.getLevel(), at);
+      h.getLevel().removeBlock(at, false);
+      com.arcane.execution.BarrierBreaks.broken(h.getLevel(), at); // de novo: nao repete
+    });
+    h.runAfterDelay(6, () -> {
+      h.assertTrue(thief.getHealth() == start - 4.0f, "quem estava perto da quebra levou o dano uma vez (vida " + thief.getHealth() + " de " + start + ")");
+      h.assertTrue(caster.getHealth() == casterStart || caster.distanceTo(thief) < 4, "o dono nao e atingido se estiver longe");
+      h.succeed();
+    });
+  }
+
   @GameTest(template = "empty", timeoutTicks = 100)
   public static void zoneEnterAndExitConditionsFireOnlyOnTransitions(GameTestHelper h) {
     floor(h);
@@ -2442,6 +2470,28 @@ public class ArcaneGameTests {
   }
 
   @GameTest(template = "empty", batch = "item_ink")
+  public static void armorDrawingFiresWhenTheWearerIsHitAtMostOncePerSecond(GameTestHelper h) {
+    var player = learn(casterWith(h), "self", "shield", "persistence");
+    var chest = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_CHESTPLATE);
+    com.arcane.inscribing.ItemDrawings.add(chest, objectSpell("common_perm", h.getLevel().getGameTime(), true));
+    player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, chest);
+    Pig attacker = pig(h, 3, 3);
+    var hit = player.damageSources().mobAttack(attacker);
+    net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingHurtEvent(player, player.damageSources().fall(), 2f));
+    h.assertTrue(!player.hasEffect(MobEffects.ABSORPTION), "queda nao dispara a armadura");
+    net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingHurtEvent(player, hit, 2f));
+    h.assertTrue(player.hasEffect(MobEffects.ABSORPTION), "levar golpe com o peitoral desenhado dispara o desenho");
+    player.removeAllEffects();
+    net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingHurtEvent(player, hit, 2f));
+    h.assertTrue(!player.hasEffect(MobEffects.ABSORPTION), "no mesmo segundo nao dispara de novo");
+    h.runAfterDelay(21, () -> {
+      net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingHurtEvent(player, hit, 2f));
+      h.assertTrue(player.hasEffect(MobEffects.ABSORPTION), "um segundo depois dispara de novo (Persistencia)");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", batch = "item_ink")
   public static void itemDrawingsFadeWithInkAndSolventSparesOnlyPurePermanentInk(GameTestHelper h) {
     var player = learn(casterWith(h), "self", "shield");
     long now = h.getLevel().getGameTime();
@@ -2724,6 +2774,34 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "empty", batch = "hydra_devour")
+  public static void hydraScalesVarietyAndSpeedWithPlayersAndDevoursGrimoires(GameTestHelper h) {
+    floor(h);
+    h.assertTrue(com.arcane.entity.HydraEntity.varietyStage(2, 1.0) == 2 && com.arcane.entity.HydraEntity.varietyStage(2, 3.0) == 4,
+        "cada jogador a mais libera poderes de 1 estagio acima");
+    h.assertTrue(com.arcane.entity.HydraEntity.cooldownFactor(1.0) == 1.0 && com.arcane.entity.HydraEntity.cooldownFactor(9.0) == 0.5,
+        "mais jogadores, ataques mais rapidos (ate a metade da espera)");
+    var owner = learn(casterWith(h), "self", "heal");
+    addSpell(owner, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("self"), g("heal"));
+    var tag = new net.minecraft.nbt.CompoundTag();
+    com.arcane.grimoire.GrimoireAttachments.get(owner).orElseThrow().save(tag);
+    var hydra = h.spawnWithNoFreeWill(com.arcane.registry.ModEntities.HYDRA.get(), new BlockPos(2, 1, 2));
+    hydra.setStage(1);
+    var drop = h.absoluteVec(new net.minecraft.world.phys.Vec3(4.5, 1, 2.5));
+    var item = new net.minecraft.world.entity.item.ItemEntity(h.getLevel(), drop.x, drop.y, drop.z, com.arcane.item.GrimoireItem.createFor(owner, tag));
+    h.getLevel().addFreshEntity(item);
+    h.assertTrue(hydra.devourNearby() == 1 && item.isRemoved(), "o grimorio caido perto dela foi devorado");
+    h.assertTrue(hydra.devouredSpells().stream().anyMatch(sp -> sp.glyphs().size() == 2), "ela passa a conhecer as magias dele");
+    hydra.kill();
+    h.runAfterDelay(2, () -> {
+      var back = h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(2, 1, 2))).inflate(8),
+          it -> com.arcane.item.GrimoireItem.isOwnedBy(it.getItem(), owner.getUUID()));
+      h.assertTrue(back.size() == 1, "matar a Hidra devolve o grimorio");
+      back.forEach(net.minecraft.world.entity.Entity::discard);
+      h.succeed();
+    });
+  }
+
   @GameTest(template = "empty", batch = "hydra_devastation", timeoutTicks = 120)
   public static void stageFiveHydraAnnouncesThenCratersTheGround(GameTestHelper h) {
     floor(h);
@@ -2834,7 +2912,10 @@ public class ArcaneGameTests {
       h.assertTrue(!level.getBlockState(h.absolutePos(new BlockPos(0, 1, 0))).isAir(), "o canto longe ainda esta la");
     });
     h.runAfterDelay(30, () -> {
-      h.assertTrue(com.arcane.execution.CraterQueue.pending(level) == 0, "a onda chegou ate a borda");
+      // confere so os blocos desta cratera (outros testes em paralelo tambem usam a fila do mundo)
+      int left = 0;
+      for (long l : list) if (!level.getBlockState(BlockPos.of(l)).isAir()) left++;
+      h.assertTrue(left == 0, "a onda chegou ate a borda (faltam " + left + ")");
       h.assertTrue(level.getBlockState(h.absolutePos(new BlockPos(0, 1, 0))).isAir(), "e levou o canto");
       h.succeed();
     });
@@ -3013,6 +3094,271 @@ public class ArcaneGameTests {
     var grimoire = com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow();
     for (String id : ids) grimoire.learnGlyph(new ResourceLocation("arcane", id), com.arcane.grimoire.GlyphKnowledge.MASTERED);
     return player;
+  }
+
+  @GameTest(template = "empty")
+  public static void configProfilesSwitchSeveralRulesAtOnce(GameTestHelper h) {
+    var before = com.arcane.config.WorldRules.snapshot();
+    try {
+      com.arcane.config.WorldRules.applyProfile(1);
+      h.assertTrue(com.arcane.config.WorldRules.profile() == 1, "perfil Seguro reconhecido");
+      h.assertTrue(!com.arcane.config.ArcaneConfig.BLOCK_BREAKING_SPELLS.get() && !com.arcane.config.ArcaneConfig.HYDRA_DEVASTATION.get(), "Seguro: magia nao quebra blocos e a Hidra nao devasta");
+      com.arcane.config.WorldRules.applyProfile(3);
+      h.assertTrue(com.arcane.config.WorldRules.profile() == 3 && !com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.get(), "Sem limites tira os tetos");
+      com.arcane.config.WorldRules.advance("scars");
+      h.assertTrue(com.arcane.config.WorldRules.profile() == 0, "mudar uma regra sozinha vira personalizado");
+      com.arcane.config.WorldRules.advance("profile");
+      h.assertTrue(com.arcane.config.WorldRules.profile() == 1, "avancar o perfil a partir do personalizado vai para o Seguro");
+    } finally {
+      com.arcane.config.WorldRules.applyProfile(2);
+      for (var r : com.arcane.config.WorldRules.ALL) if (!r.key().equals("profile")) r.set().accept(before.get(r.key()));
+      com.arcane.config.WorldRules.refresh();
+    }
+    h.succeed();
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 40)
+  public static void ritualCirclesOfRadiusSixteenOrMoreLeakMana(GameTestHelper h) {
+    arena(h);
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 8);
+    h.assertTrue(com.arcane.ritual.RitualLeaks.leakingRadius(h.getLevel(), altarAbs(h)) == 0, "circulo de raio 8 nao vaza");
+    com.arcane.ritual.RitualService.drawCircle(h.getLevel(), altarAbs(h), 16);
+    h.assertTrue(com.arcane.ritual.RitualLeaks.leakingRadius(h.getLevel(), altarAbs(h)) == 16, "circulo de raio 16 vaza mana");
+    h.assertTrue(com.arcane.ritual.RitualLeaks.senseReach(64) > com.arcane.ritual.RitualLeaks.senseReach(16)
+        && com.arcane.ritual.RitualLeaks.soundReach(32) == 192, "quanto maior o circulo, mais longe chegam os sinais");
+    h.assertTrue("ne".equals(com.arcane.ritual.RitualLeaks.direction(new BlockPos(0, 0, 0), new BlockPos(10, 0, -10))), "direcao do vazamento");
+    h.assertTrue(com.arcane.ritual.RitualService.offeringArea(0) == 1.0 && com.arcane.ritual.RitualService.offeringArea(100) == 1.5
+        && com.arcane.ritual.RitualService.offeringArea(900) == 2.0, "oferendas aumentam o raio do ritual (k = 0,5, ate o dobro)");
+    h.runAfterDelay(2, () -> h.assertTrue(com.arcane.ritual.RitualLeaks.registered(h.getLevel(), altarAbs(h)), "o altar carregado se registrou"));
+    h.runAfterDelay(30, () -> {
+      h.assertTrue(com.arcane.ritual.RitualLeaks.measuredRadius(h.getLevel(), altarAbs(h)) == 16, "o servico mediu o circulo sozinho e ele esta vazando");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty")
+  public static void pierceStacksTwentyPercentPerLayerAndEachLayerCostsDouble(GameTestHelper h) {
+    floor(h);
+    Pig plain = pig(h, 1, 1), pierced = pig(h, 4, 4);
+    for (Pig p : List.of(plain, pierced)) p.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 200, 3));
+    cast(h, plain, g("self"), g("damage", "amount", 5.0));
+    cast(h, pierced, g("self"), g("damage", "amount", 5.0), g("pierce"), g("pierce"), g("pierce"), g("pierce"), g("pierce"));
+    float lostPlain = plain.getMaxHealth() - plain.getHealth(), lostPierced = pierced.getMaxHealth() - pierced.getHealth();
+    h.assertTrue(lostPlain < 1.5f, "Resistencia IV segura 80% do dano comum (perdeu " + lostPlain + ")");
+    h.assertTrue(Math.abs(lostPierced - 5.0f) < 0.3f, "5 camadas de Perfurar passam o dano inteiro (perdeu " + lostPierced + ")");
+    Inscription.GlyphRegistryAccessor reg = com.arcane.glyph.GlyphRegistry::get;
+    int one = new Inscription(List.of(g("self"), g("damage"), g("pierce"))).totalManaCost(reg);
+    int three = new Inscription(List.of(g("self"), g("damage"), g("pierce"), g("pierce"), g("pierce"))).totalManaCost(reg);
+    h.assertTrue(three - one == 8 * 2 + 8 * 4, "a 2a camada custa o dobro e a 3a o quadruplo (" + one + " -> " + three + ")");
+    var p1 = com.arcane.execution.CastingService.manaCostOf(new Inscription(List.of(g("self"), g("damage"), g("pierce"))), com.arcane.execution.PrecisionSnapshot.WORKBENCH);
+    var p5 = com.arcane.execution.CastingService.manaCostOf(new Inscription(List.of(g("self"), g("damage"), g("pierce"), g("pierce"), g("pierce"), g("pierce"), g("pierce"))), com.arcane.execution.PrecisionSnapshot.WORKBENCH);
+    h.assertTrue(p5 > p1 * 10, "100% de perfuracao custa muito caro (" + p1 + " -> " + p5 + " de mana)");
+    h.succeed();
+  }
+
+  // ------------------------------------------------------------------ glifos da lista aceita (rodada de 23 nov)
+
+  @GameTest(template = "empty", batch = "r23_util")
+  public static void organizeLockAndBaptizeWork(GameTestHelper h) {
+    floor(h);
+    var box = new net.minecraft.world.SimpleContainer(5);
+    box.setItem(0, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STONE, 10));
+    box.setItem(1, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIRT, 5));
+    box.setItem(3, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STONE, 60));
+    com.arcane.execution.handlers.LifeEffects.Organize.sort(box, 0, 5);
+    h.assertTrue(box.getItem(0).is(net.minecraft.world.item.Items.DIRT) && box.getItem(1).getCount() == 64 && box.getItem(2).getCount() == 6,
+        "Organizar junta as pilhas e ordena (" + box.getItem(0) + ", " + box.getItem(1) + ", " + box.getItem(2) + ")");
+    var owner = casterWith(h);
+    var other = casterWith(h);
+    BlockPos door = h.absolutePos(new BlockPos(2, 1, 2));
+    com.arcane.execution.WorldMarks.lock(h.getLevel(), door, owner.getUUID());
+    h.assertTrue(com.arcane.execution.WorldMarks.mayOpen(h.getLevel(), door, owner) && !com.arcane.execution.WorldMarks.mayOpen(h.getLevel(), door, other),
+        "so o dono abre o que foi trancado");
+    com.arcane.execution.GuestLists.get(h.getLevel().getServer()).add(owner.getUUID(), other.getUUID());
+    h.assertTrue(com.arcane.execution.WorldMarks.mayOpen(h.getLevel(), door, other), "convidado do dono tambem abre");
+    com.arcane.execution.GuestLists.get(h.getLevel().getServer()).remove(owner.getUUID(), other.getUUID());
+    h.assertTrue(com.arcane.execution.WorldMarks.unseal(h.getLevel(), door, owner.getUUID(), 1) && com.arcane.execution.WorldMarks.lockOwner(h.getLevel(), door) == null,
+        "o dono tira a tranca com Dissipar fraco");
+    var centre = h.absoluteVec(new net.minecraft.world.phys.Vec3(2, 1, 2));
+    com.arcane.execution.WorldMarks.baptize(h.getLevel(), centre, 6, "Vale Teste", owner.getUUID());
+    var area = com.arcane.execution.WorldMarks.areaAt(h.getLevel(), centre.add(3, 0, 0));
+    h.assertTrue(area != null && area.name().equals("Vale Teste"), "dentro da area batizada");
+    h.assertTrue(com.arcane.execution.WorldMarks.areaAt(h.getLevel(), centre.add(30, 0, 0)) == null, "fora dela, sem nome");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "r23_life")
+  public static void lastBreathSavesOncePerDayAndSealBanishesIntoAnItem(GameTestHelper h) {
+    floor(h);
+    Pig lucky = pig(h, 1, 1);
+    com.arcane.execution.WorldMarks.grantLastBreath(lucky, h.getLevel().getGameTime() + 1000);
+    lucky.hurt(h.getLevel().damageSources().magic(), 100f);
+    h.assertTrue(lucky.isAlive() && lucky.getHealth() >= 1.0f, "Folego Final segura a primeira morte com 1 de vida");
+    com.arcane.execution.WorldMarks.grantLastBreath(lucky, h.getLevel().getGameTime() + 1000);
+    lucky.invulnerableTime = 0;
+    lucky.removeAllEffects();
+    lucky.hurt(h.getLevel().damageSources().magic(), 100f);
+    h.assertTrue(!lucky.isAlive(), "no mesmo dia nao salva de novo");
+
+    Pig sealed = pig(h, 4, 4);
+    sealed.setCustomName(net.minecraft.network.chat.Component.literal("Bacon"));
+    var named = com.arcane.glyph.GlyphHandlerRegistry.getFilter(com.arcane.glyph.ArcaneIds.of("named")).orElseThrow();
+    h.assertTrue(named.matchesEntity(null, sealed) && !named.matchesEntity(null, pig(h, 6, 6)), "filtro Nomeados");
+    var item = com.arcane.execution.handlers.LoreEffects.SealCreature.banish(h.getLevel(), sealed);
+    h.assertTrue(sealed.isRemoved() && item.is(com.arcane.registry.ModItems.SEALED_CREATURE.get()) && item.getTag().contains("entity"),
+        "o selamento guarda a criatura num item");
+    var golem = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(1, 1, 5));
+    var caster = pig(h, 0, 0);
+    var spell = new Inscription(List.of(g("self"), g("petrify")));
+    var ctx = new com.arcane.execution.ExecutionContext(h.getLevel(), caster, spell, com.arcane.inscription.CompiledPlanCache.getOrCompile(spell),
+        com.arcane.ambient.AmbientFieldResolver.resolve(h.getLevel(), caster.blockPosition()), com.arcane.execution.PrecisionSnapshot.WORKBENCH,
+        com.arcane.execution.ExecutionContext.TriggerEvent.cast());
+    h.assertTrue(com.arcane.execution.CreatureLevels.fraction(ctx, golem) == 0.0, "uma magia pequena nao petrifica um golem de ferro (nivel alto)");
+    h.assertTrue(com.arcane.execution.CreatureLevels.fraction(ctx, pig(h, 7, 2)) == 1.0, "mas petrifica um porco");
+    golem.discard();
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "r23_counter", timeoutTicks = 40)
+  public static void counterspellCancelsASpellItSeesAndDawnFiresArmedSpells(GameTestHelper h) {
+    floor(h);
+    Pig watcher = pig(h, 1, 1), caster = pig(h, 4, 1);
+    watcher.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, caster.position());
+    var arm = CastingService.tryCast(watcher, new Inscription(List.of(g("self"), g("on_see_cast"), g("counterspell", "strength", 3.0))), h.getLevel());
+    h.assertTrue(arm.success() && com.arcane.execution.ArmedSpells.armedCount(watcher.getUUID()) == 1, "a contramagia fica armada");
+    float hp = caster.getHealth();
+    var hit = CastingService.tryCast(caster, new Inscription(List.of(g("self"), g("damage", "amount", 3.0))), h.getLevel());
+    h.assertTrue(!hit.success() && caster.getHealth() == hp, "a magia vista foi anulada (" + hit.message() + ")");
+    var again = CastingService.tryCast(caster, new Inscription(List.of(g("self"), g("damage", "amount", 3.0))), h.getLevel());
+    h.assertTrue(again.success() && caster.getHealth() < hp, "a contramagia so vale uma vez");
+
+    Pig sleeper = pig(h, 6, 6);
+    sleeper.hurt(h.getLevel().damageSources().magic(), 4f);
+    float hurt = sleeper.getHealth();
+    CastingService.tryCast(sleeper, new Inscription(List.of(g("self"), g("on_dawn"), g("heal", "amount", 4.0))), h.getLevel());
+    h.assertTrue(sleeper.getHealth() == hurt, "armada, a cura espera o amanhecer");
+    com.arcane.execution.ArmedSpells.dawnNow(h.getLevel());
+    h.assertTrue(sleeper.getHealth() > hurt, "ao amanhecer a cura acontece");
+
+    var call = new com.arcane.execution.EffectCall(new ResourceLocation("arcane", "damage"), new ResourceLocation("arcane", "damage"),
+        Map.of("amount", 4.0, "random", 1.0), List.of());
+    var plain = new Inscription(List.of(g("self"), g("damage")));
+    var rctx = new com.arcane.execution.ExecutionContext(h.getLevel(), sleeper, plain, com.arcane.inscription.CompiledPlanCache.getOrCompile(plain),
+        com.arcane.ambient.AmbientFieldResolver.resolve(h.getLevel(), sleeper.blockPosition()), com.arcane.execution.PrecisionSnapshot.WORKBENCH,
+        com.arcane.execution.ExecutionContext.TriggerEvent.cast());
+    java.util.Set<Long> seen = new java.util.HashSet<>();
+    for (int i = 0; i < 40; i++) {
+      double a = com.arcane.execution.SpellPipeline.randomize(rctx, call).parameters().get("amount");
+      h.assertTrue(a >= 2.0 - 1e-6 && a <= 8.0 + 1e-6, "Aleatorio fica entre metade e o dobro (" + a + ")");
+      seen.add(Math.round(a * 100));
+    }
+    h.assertTrue(seen.size() > 10, "e varia a cada conjuracao");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "r23_illusion", timeoutTicks = 40)
+  public static void illusionMakesThreeHarmlessClonesThatConfuseMobs(GameTestHelper h) {
+    floor(h);
+    var player = learn(casterWith(h), "self", "illusion");
+    h.getLevel().addNewPlayer(player);
+    var r = CastingService.tryCast(player, new Inscription(List.of(g("self"), g("illusion"))), com.arcane.execution.PrecisionSnapshot.WORKBENCH);
+    var clones = h.getLevel().getEntitiesOfClass(com.arcane.entity.IllusionEntity.class, player.getBoundingBox().inflate(8));
+    h.assertTrue(r.success() && clones.size() == 3, "3 clones (" + clones.size() + ", " + r.message() + ")");
+    java.util.Set<Object> picks = new java.util.HashSet<>();
+    var rnd = net.minecraft.util.RandomSource.create(7);
+    for (int i = 0; i < 40; i++) picks.add(com.arcane.entity.IllusionEntity.confuse(player, rnd));
+    h.assertTrue(picks.size() >= 3, "as criaturas escolhem entre o dono e os clones (" + picks.size() + " escolhas diferentes)");
+    var one = clones.get(0);
+    one.hurt(h.getLevel().damageSources().magic(), 1f);
+    h.assertTrue(one.isRemoved(), "um golpe desfaz a ilusao");
+    clones.forEach(net.minecraft.world.entity.Entity::discard);
+    h.succeed();
+  }
+
+  // ------------------------------------------------------------------ grimorio na bancada (posse e estudo)
+
+  @GameTest(template = "empty", batch = "grimoire_desk")
+  public static void writingLeavesTheBookOnTheDeskUntilTheOwnerComesBack(GameTestHelper h) {
+    floor(h);
+    var player = learn(casterWith(h), "self", "heal");
+    h.getLevel().addNewPlayer(player);
+    BlockPos desk = h.absolutePos(new BlockPos(1, 1, 1));
+    com.arcane.grimoire.GrimoireDesk.startWriting(player, desk, 3);
+    var st = com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow();
+    h.assertTrue(st.writingUntil() == h.getLevel().getGameTime() + 60, "3 glifos = 3 s de escrita");
+    h.assertTrue("message.arcane.grimoire.writing".equals(com.arcane.grimoire.GrimoireDesk.blockedReason(player)), "escrevendo nao conjura");
+    st.setWritingUntil(h.getLevel().getGameTime() - 5);
+    var far = h.absoluteVec(new net.minecraft.world.phys.Vec3(10.5, 1, 10.5));
+    player.moveTo(far.x, far.y, far.z);
+    com.arcane.grimoire.GrimoireDesk.tickPlayer(player);
+    h.assertTrue("message.arcane.grimoire.on_desk".equals(com.arcane.grimoire.GrimoireDesk.blockedReason(player)), "longe, o livro fica na mesa");
+    var near = h.absoluteVec(new net.minecraft.world.phys.Vec3(3.5, 1, 1.5));
+    player.moveTo(near.x, near.y, near.z);
+    com.arcane.grimoire.GrimoireDesk.tickPlayer(player);
+    h.assertTrue(com.arcane.grimoire.GrimoireDesk.blockedReason(player) == null && st.deskPos().isEmpty(), "a ate 4 blocos o dono pega o livro");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "grimoire_desk")
+  public static void anotherMageTakesTheBookFromTheDeskAndCastsItAtSixtyPercent(GameTestHelper h) {
+    floor(h);
+    var owner = learn(casterWith(h), "self", "heal");
+    var thief = casterWith(h);
+    h.getLevel().addNewPlayer(owner);
+    h.getLevel().addNewPlayer(thief);
+    var spell = addSpell(owner, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("self"), g("heal", "amount", 10.0));
+    owner.setHealth(2f);
+    var r = com.arcane.execution.CastingService.tryCast(owner, spell, com.arcane.execution.PrecisionSnapshot.WORKBENCH);
+    float ownerHeal = owner.getHealth() - 2f;
+    h.assertTrue(r.success() && ownerHeal > 0, "o dono cura (" + ownerHeal + ")");
+    BlockPos desk = h.absolutePos(new BlockPos(1, 1, 1));
+    com.arcane.grimoire.GrimoireDesk.startWriting(owner, desk, 2);
+    com.arcane.grimoire.GrimoireDesk.steal(thief, owner);
+    var ownerState = com.arcane.grimoire.GrimoireAttachments.get(owner).orElseThrow();
+    h.assertTrue(!ownerState.grimoirePresent() && ownerState.getInscription(spell.id()).isEmpty(), "o dono ficou sem o grimorio");
+    var book = thief.getInventory().items.stream().filter(s -> com.arcane.item.GrimoireItem.contents(s) != null).findFirst().orElse(null);
+    h.assertTrue(book != null && com.arcane.item.GrimoireItem.isOwnedBy(book, owner.getUUID()), "o ladrao carrega o livro, mas o dono continua sendo o outro");
+    thief.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, book);
+    thief.setHealth(2f);
+    com.arcane.grimoire.GrimoireDesk.useForeign(thief, book, false);
+    float thiefHeal = thief.getHealth() - 2f;
+    h.assertTrue(thiefHeal > 0 && Math.abs(thiefHeal / ownerHeal - 0.6f) < 0.12f, "o portador conjura sem conhecer os glifos, com 60% (" + thiefHeal + " de " + ownerHeal + ")");
+    var desc = com.arcane.grimoire.GrimoireDesk.describe(thief, spell).getString();
+    h.assertTrue(desc.contains("???"), "glifos desconhecidos aparecem como ??? (" + desc + ")");
+    com.arcane.grimoire.GrimoireDesk.restoreOwner(owner, book);
+    h.assertTrue(ownerState.grimoirePresent() && ownerState.getInscription(spell.id()).isPresent(), "o dono recupera tudo com o livro");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "grimoire_desk")
+  public static void studyIdentifiesOneUnknownGlyphPerDayAndKeepsProgressInTheBook(GameTestHelper h) {
+    floor(h);
+    var owner = learn(casterWith(h), "self", "heal", "fire");
+    var thief = casterWith(h);
+    h.getLevel().addNewPlayer(owner);
+    h.getLevel().addNewPlayer(thief);
+    addSpell(owner, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("self"), g("heal"));
+    addSpell(owner, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("self"), g("fire"));
+    var tag = new net.minecraft.nbt.CompoundTag();
+    com.arcane.grimoire.GrimoireAttachments.get(owner).orElseThrow().save(tag);
+    var book = com.arcane.item.GrimoireItem.createFor(owner, tag);
+    thief.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, book);
+    var unknown = com.arcane.grimoire.GrimoireDesk.unknownGlyphs(thief, book);
+    h.assertTrue(unknown.size() >= 2, "glifos desconhecidos (" + unknown + ")");
+    BlockPos desk = h.absolutePos(new BlockPos(1, 1, 1));
+    com.arcane.grimoire.GrimoireDesk.startStudy(thief, h.getLevel(), desk, book);
+    h.assertTrue(thief.getMainHandItem().isEmpty() && com.arcane.grimoire.GrimoireDesk.studyAt(h.getLevel(), desk), "o livro foi pousado na mesa");
+    com.arcane.grimoire.GrimoireDesk.advanceStudy(h.getLevel(), desk, com.arcane.grimoire.GrimoireDesk.STUDY_TICKS - 1);
+    com.arcane.grimoire.GrimoireDesk.tickStudies(h.getLevel().getServer());
+    var mine = com.arcane.grimoire.GrimoireAttachments.get(thief).orElseThrow();
+    h.assertTrue(mine.knowsGlyph(unknown.get(0), com.arcane.grimoire.GlyphKnowledge.IDENTIFIED), "um dia de estudo identifica o primeiro glifo");
+    h.assertTrue(!mine.knowsGlyph(unknown.get(1), com.arcane.grimoire.GlyphKnowledge.IDENTIFIED), "so um por dia");
+    com.arcane.grimoire.GrimoireDesk.advanceStudy(h.getLevel(), desk, 5000);
+    h.assertTrue(com.arcane.grimoire.GrimoireDesk.onWorkbenchUse(thief, h.getLevel(), desk), "botao direito tira o livro da mesa");
+    var back = thief.getInventory().items.stream().filter(s -> com.arcane.item.GrimoireItem.contents(s) != null).findFirst().orElseThrow();
+    h.assertTrue(com.arcane.grimoire.GrimoireDesk.savedProgress(back, thief.getUUID()) >= 5000, "o progresso do segundo glifo ficou salvo no livro");
+    h.assertTrue(!com.arcane.grimoire.GrimoireDesk.studyAt(h.getLevel(), desk), "fora da mesa o estudo pausa");
+    h.succeed();
   }
 
   @GameTest(template = "empty", batch = "rev_toggle", timeoutTicks = 60)

@@ -32,7 +32,51 @@ public final class WorldRules {
       new Rule("crystal_cap", AREA_CAPS, ArcaneConfig.CRYSTAL_AREA_CAP::get, ArcaneConfig.CRYSTAL_AREA_CAP::set),
       new Rule("charge_cap", CHARGE_CAPS, ArcaneConfig.CHARGE_MAX_SCALE::get, ArcaneConfig.CHARGE_MAX_SCALE::set),
       new Rule("ritual_cap", RITUAL_CAPS, ArcaneConfig.RITUAL_MAX_PERCENT::get, v -> ArcaneConfig.RITUAL_MAX_PERCENT.set((int) v)),
-      flag("unique_break", ArcaneConfig.UNIQUE_OFFERINGS_BREAK_CAP));
+      flag("unique_break", ArcaneConfig.UNIQUE_OFFERINGS_BREAK_CAP),
+      flag("hydra_devastation", ArcaneConfig.HYDRA_DEVASTATION),
+      new Rule("profile", new double[] {1, 2, 3}, WorldRules::profile, v -> applyProfile((int) v)));
+
+  /**
+   * Perfis prontos (1 Seguro, 2 Epico = o padrao, 3 Sem limites). Cada linha: terreno, quebrar blocos, interacoes,
+   * cicatrizes, tetos fixos, teto do cristal, teto da carga, teto do ritual, oferendas unicas, devastacao da Hidra.
+   */
+  public static final double[][] PROFILES = {
+      {1, 0, 1, 0, 1, 4, 3, 500, 0, 0},
+      {1, 1, 1, 1, 1, 32, 6, 1500, 1, 1},
+      {1, 1, 1, 1, 0, 0, 0, 0, 1, 1},
+  };
+  private static final String[] PROFILE_KEYS = {"world_altering", "block_breaking", "interactions", "scars", "hard_caps",
+      "crystal_cap", "charge_cap", "ritual_cap", "unique_break", "hydra_devastation"};
+
+  /** Perfil que bate com os valores atuais (1..3) ou 0 = personalizado. */
+  public static double profile() {
+    for (int p = 0; p < PROFILES.length; p++) {
+      boolean all = true;
+      for (int i = 0; i < PROFILE_KEYS.length && all; i++) all = Math.abs(value(PROFILE_KEYS[i]) - PROFILES[p][i]) < 1.0e-6;
+      if (all) return p + 1;
+    }
+    return 0;
+  }
+
+  private static double value(String key) {
+    for (Rule r : ALL) if (r.key().equals(key)) return r.get().getAsDouble();
+    return Double.NaN;
+  }
+
+  /** Aplica um perfil inteiro (cada valor e salvo no arquivo de config do servidor). */
+  public static void applyProfile(int profile) {
+    if (profile < 1 || profile > PROFILES.length) return;
+    for (int i = 0; i < PROFILE_KEYS.length; i++) {
+      for (Rule r : ALL) if (r.key().equals(PROFILE_KEYS[i])) r.set().accept(PROFILES[profile - 1][i]);
+    }
+    refresh();
+  }
+
+  /** Copia para o ritual os valores que ele guarda a parte (teto e oferendas unicas). */
+  public static void refresh() {
+    RitualSettings.setMaxPercent(ArcaneConfig.RITUAL_MAX_PERCENT.get());
+    RitualSettings.setUnique(ArcaneConfig.UNIQUE_OFFERINGS_BREAK_CAP.get(), ArcaneConfig.UNIQUE_OFFERINGS.get());
+  }
 
   private WorldRules() {}
 

@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **160 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **207 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -51,7 +51,7 @@ Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única
 | **Invocar Golem** | `arcane:summon_golem` | 6 | 3 | Terra | `size` 1 (1–3), `duration` 2400 (400–12000) | Forma de RITUAL (médio): ergue um Golem Rúnico que protege você por um tempo. Um golem só, e você escolhe o tamanho (size 1–3: Guardião, Colosso, Titã, cada um com modelo próprio): quanto maior e mais duradouro, mais mana. O golem é o alvo do que vem depois. |
 | **Foco** | `arcane:focus` | 2 | 2 | Arcano | `range` 24 (4–48) | Forma: entrega só a criatura viva sob a sua mira (até 24 blocos, não atravessa paredes). Não toca blocos nem pontos vazios e não faz efeito próprio: serve para Atrair, Marcar, Elo e outros que só fazem sentido com uma criatura. Sem criatura na mira, a magia falha e não gasta mana. |
 
-## Filtros (14)
+## Filtros (16)
 
 Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para os trechos seguintes.
 
@@ -71,8 +71,10 @@ Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para
 | **Aliados** | `arcane:allies` | 1 | 2 | Vida | — | Filtro: jogadores, animais domesticados, aldeões e golens de ferro. |
 | **Madeira** | `arcane:wood` | 1 | 1 | Terra | — | Filtro: só blocos de madeira (troncos e tábuas). |
 | **Forasteiros** | `arcane:outsiders` | 2 | 3 | Arcano | — | Filtro: afeta só quem NÃO é você nem está na sua lista de convidados (comando /arcane guest add|remove|list). Animais domesticados e invocações de você ou dos seus convidados também ficam de fora. Útil em inscrições e zonas que protegem a sua casa. |
+| **Nomeados** | `arcane:named` | 1 | 2 | Conhecimento | — | Filtro: só criaturas com nome (etiqueta de nome). |
+| **Aéreos** | `arcane:aerial` | 1 | 2 | Força | — | Filtro: só quem está no ar: criaturas voadoras e quem está pulando, caindo ou planando. |
 
-## Efeitos (78)
+## Efeitos (114)
 
 O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro principal (o dobro do dano custa o dobro).
 
@@ -156,8 +158,44 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Maldição** | `arcane:curse` | 3 | 3 | Sangue | `duration` 300 (60–2400) | Efeito: por até 2 min o alvo leva 25% a mais de dano e não recupera vida. Dissipar em si mesmo tira. |
 | **Bolso Arcano** | `arcane:pocket` | 2 | 3 | Conhecimento | — | Efeito: abre o seu Bolso Arcano, um espaço de 13 itens só seu (como um Baú do Fim), que permanece quando você morre. Não abre durante combate recente nem aceita shulkers, o grimório ou páginas. |
 | **Restaurar** | `arcane:restore` | 4 | 3 | Terra | `radius` 10 (2–16) | Efeito: recompõe, num raio de 2–16 blocos (padrão 10), aos poucos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta. |
+| **Selamento** | `arcane:seal_creature` | 9 | 4 | Vazio | — | Efeito: correntes douradas prendem a criatura por 2 s e depois a banem para dentro de um item (Criatura Selada), que a solta de novo ao ser usado num bloco. Precisa de mana suficiente para o nível da criatura (vida + armadura); com pouca, as correntes se partem. Chefes resistem; jogadores só ficam presos. |
+| **Ler Resíduo** | `arcane:read_residue` | 3 | 2 | Conhecimento | — | Efeito: no resíduo de magia mais perto do ponto mirado (até 8 blocos), mostra quantos glifos a magia tinha e em que ordem. Os que você não conhece aparecem como ???. |
+| **Rastrear Posse** | `arcane:track_possession` | 4 | 3 | Conhecimento | — | Efeito: sente para que lado está o SEU grimório perdido ou roubado (no chão, com alguém, numa bancada de estudo ou dentro de uma Hidra), até 500 blocos e na mesma dimensão. A direção tem erro de até 30 graus, que diminui ao chegar perto. |
+| **Portal Pareado** | `arcane:paired_portal` | 8 | 4 | Vazio | `duration` 200 (40–600) | Efeito: liga onde você está ao ponto mirado por alguns segundos (até 30 s): quem entra num círculo sai no outro. Não atravessa dimensões. |
+| **Contramagia** | `arcane:counterspell` | 6 | 4 | Vazio | `strength` 1 (0.5–3) | Efeito: interrompe magias. Depois de "Ao Ver Conjuração", anula a magia que você viu ser lançada se a força desta (mana com carga, ritual e cristal) for pelo menos o custo daquela; quem lançou perde a mana. Sem essa condição, corta o que os alvos estão canalizando (carregar, segurar, alternar). |
+| **Trancar** | `arcane:lock` | 3 | 2 | Terra | — | Efeito: a porta, alçapão, portão ou baú mirado só abre para você e para os seus convidados. Fica 20 vezes mais duro de quebrar para os outros (não inquebrável). Dissipar tira a tranca (o dono, de graça; os outros, com magia forte). |
+| **Selar Bancada** | `arcane:seal_bench` | 12 | 4 | Conhecimento | — | Efeito: a bancada mirada só obedece a você: ninguém mais a abre, pega o seu grimório pousado nela ou estuda nela. Dura até você tirar o selo com Dissipar; outros magos precisam de uma magia forte (30 de mana ou mais) para quebrá-lo. |
+| **Batizar** | `arcane:baptize` | 4 | 3 | Conhecimento | `radius` 24 (4–128) | Efeito: dá nome à área em volta do ponto mirado (raio 4 a 128). O nome é o nome desta magia. Quem entra vê o nome como título. Cada mago tem até 5 áreas batizadas. |
+| **Remendar** | `arcane:mend` | 6 | 3 | Terra | `strength` 1 (0.5–3) | Efeito: devolve 10% da durabilidade máxima do item na mão do alvo. Fraco e caro de propósito: não substitui o Remendo do encantamento. |
+| **Organizar** | `arcane:organize` | 2 | 1 | Conhecimento | — | Efeito: junta pilhas iguais e ordena o baú mirado; sem baú, organiza o inventário do alvo (a barra de atalhos fica como está). |
+| **Passo Surdo** | `arcane:silent_step` | 3 | 2 | Vazio | `duration` 1200 (200–6000) | Efeito: por um tempo (até 5 min), tudo que o alvo faz para se mover não faz som nem vibração: passos, pulos, quedas, nado e voo. O Warden e os sensores sculk não percebem. |
+| **Marcar Ponto** | `arcane:mark_point` | 1 | 1 | Conhecimento | `duration` 1200 (200–12000) | Efeito: guarda o ponto mirado para você (até 3; o mais antigo sai) e mostra, só para você, uma coluna de luz nele por 1 minuto. Lembrar lista os pontos guardados. |
+| **Recolher** | `arcane:collect` | 2 | 1 | Força | `radius` 16 (8–32) | Efeito: puxa até você todos os itens soltos num raio de 8 a 32 blocos (bem mais longe que pegar do chão). |
+| **Doar Mana** | `arcane:donate_mana` | 1 | 2 | Vida | `amount` 20 (5–200) | Efeito: passa mana sua para os jogadores alvo (até a quantidade escolhida); chega 80% do que sai de você. |
+| **Aquecer** | `arcane:warm` | 2 | 2 | Fogo | `radius` 3 (1–8) | Efeito: o inverso de Congelar. Tira o frio e a lentidão das criaturas alvo e derrete gelo e neve perto delas. |
+| **Zona de Descanso** | `arcane:rest_zone` | 4 | 3 | Vida | — | Efeito: regeneração lenta e fome mais lenta nos alvos, mas só em quem não deu nem levou dano nos últimos 2 minutos. Combine com Zona e um filtro (Aliados, Exceto Eu...) para a lista de quem descansa. |
+| **Fôlego Final** | `arcane:last_breath` | 10 | 4 | Vida | — | Efeito: pelos próximos 10 minutos, a primeira morte do alvo vira 1 de vida, com a animação do totem e um clarão. Só uma vez por dia de jogo para cada criatura. |
+| **Cozinhar** | `arcane:cook` | 2 | 1 | Fogo | — | Efeito: assa até 5 comidas cruas por vez (itens no chão perto dos alvos ou na sua mão secundária). Não serve para metal nem para outras receitas de fornalha. |
+| **Secar** | `arcane:dry` | 1 | 1 | Fogo | `radius` 2 (1–6) | Efeito: seca as criaturas alvo (tira o molhado e o fogo); perto dos alvos, esponja molhada seca e lama vira terra. |
+| **Colheita** | `arcane:harvest` | 2 | 1 | Vida | `radius` 5 (1–16) | Efeito: colhe as plantações maduras em volta dos alvos (raio até 16) e replanta. |
+| **Pastorear** | `arcane:herd` | 2 | 1 | Vida | `duration` 400 (100–1200) | Efeito: os animais alvo seguem você por um tempo (até 1 min). |
+| **Carinho** | `arcane:pet` | 1 | 1 | Vida | — | Efeito: o animal alvo ganha corações e recupera um pouco de vida. |
+| **Eco** | `arcane:echo` | 2 | 1 | Conhecimento | `radius` 20 (4–32) | Efeito: um pulso mostra, só para você, o contorno das cavernas em volta (pontos de luz nas paredes escondidas), num raio de até 32. |
+| **Prospecção** | `arcane:prospect` | 2 | 1 | Terra | `radius` 12 (4–24) | Efeito: dá uma dica vaga dos minérios em volta (poucos, alguns, muitos), qual é o mais comum e para que lado fica o maior veio. |
+| **Lembrar** | `arcane:remember` | 1 | 1 | Conhecimento | — | Efeito: mostra onde você morreu e onde dormiu pela última vez, e os pontos que marcou. |
+| **Eco do Passado** | `arcane:echo_past` | 5 | 3 | Conhecimento | `radius` 12 (4–32) | Efeito: mostra, só para você, silhuetas de onde os jogadores passaram nos últimos 10 minutos e brilhos onde a magia mudou o terreno há pouco, em volta do ponto mirado. |
+| **Fogos Arcanos** | `arcane:arcane_fireworks` | 1 | 1 | Fogo | — | Efeito: estouros coloridos de fogos sobre os alvos. Só luz e som, sem dano. |
+| **Rastro de Flores** | `arcane:flower_trail` | 1 | 1 | Vida | `duration` 600 (100–2400) | Efeito: por um tempo, o alvo deixa flores na grama por onde anda. |
+| **Bolhas** | `arcane:bubbles` | 1 | 1 | Vida | `duration` 400 (100–2400) | Efeito: bolhas estouram em volta da cabeça do alvo por um tempo. |
+| **Cócegas** | `arcane:tickle` | 1 | 1 | Força | `duration` 80 (20–400) | Efeito: o alvo não consegue ficar parado: dá pulinhos e risadas por alguns segundos. |
+| **Pirueta** | `arcane:twirl` | 1 | 1 | Força | `duration` 20 (20–200) | Efeito: o alvo dá uma volta inteira em um segundo. |
+| **Sombra Brincalhona** | `arcane:playful_shadow` | 1 | 1 | Vazio | `duration` 600 (100–2400) | Efeito: uma sombrinha pula em volta dos pés do alvo por um tempo. |
+| **Céu Estrelado** | `arcane:starry_sky` | 1 | 1 | Conhecimento | `duration` 600 (100–2400) | Efeito: um céu de estrelinhas aparece acima do alvo por um tempo, visível a quem está perto. |
+| **Brilhar Item** | `arcane:glow_item` | 1 | 1 | Conhecimento | `duration` 1200 (200–6000), `radius` 8 (2–24) | Efeito: os itens soltos perto dos alvos ganham contorno brilhante (visível através das paredes) por um tempo. Bom para achar o que caiu. |
+| **Melodia** | `arcane:melody` | 1 | 1 | Vida | `duration` 64 (32–400) | Efeito: uma melodia curta de harpa toca no alvo. |
+| **Ilusão** | `arcane:illusion` | 7 | 4 | Vazio | `duration` 300 (60–1200), `count` 3 (1–5) | Efeito: cria 3 clones seus (só visuais, até 15 s) que imitam a sua intenção: andam e correm com você, atacam com outras armas do seu inventário quando você ataca e fingem outras magias quando você conjura. Não ferem nem tocam em nada; um golpe os desfaz. Criaturas que miram você podem escolher um clone. |
 
-## Modificadores (32)
+## Modificadores (35)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -195,8 +233,11 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Sobrecarga** | `arcane:overcharge` | 3 | 3 | Sangue | — | Modificador: dobra a força do efeito anterior (dano, cura, empurrão, raio, potência) e 50% de duração, mas você sofre 1 coração de dano mágico a cada efeito sobrecarregado (nunca fatal: só se você tiver mais de 1,5 coração). Mais forte que Potência, com preço. |
 | **Vincular** | `arcane:bind` | 2 | 2 | Vazio | — | Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular. |
 | **Coro** | `arcane:chorus` | 2 | 3 | Vida | `min` 2 (2–4) | Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga. |
+| **Perfurar** | `arcane:pierce` | 8 | 4 | Sangue | — | Modificador: +20% do dano do efeito anterior vira perfurante, que ignora armadura, encantamentos de proteção, Resistência, a redução do Petrificar e a dureza de chefes. Empilha sem limite (5 camadas = 100%), mas cada Perfurar a mais na mesma magia custa o dobro do anterior. |
+| **Aleatório** | `arcane:random` | 1 | 2 | Vazio | — | Modificador: a força do efeito anterior (dano, cura, raio, duração...) é sorteada a cada conjuração, de metade ao dobro. |
+| **Cor** | `arcane:color` | 0 | 1 | Conhecimento | `hue` 0 (0–15) | Modificador: muda a cor do círculo e da espiral de conjuração desta magia (16 cores, no parâmetro). Só aparência. |
 
-## Condições (24)
+## Condições (30)
 
 Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira.
 
@@ -226,6 +267,12 @@ Abrem um trecho novo do feitiço que só acontece se a condição for verdadeira
 | **Após N Acertos** | `arcane:after_hits` | 0 | 3 | Sangue | `n` 3 (2–10) | Condição: arma a magia em você: o que vem depois só acontece depois de você acertar N golpes em outras criaturas (N 2–10, padrão 3; por até 60 s). |
 | **Ativar por Sinal** | `arcane:on_signal` | 0 | 2 | Tempestade | — | Condição: em uma inscrição no mundo, troca o gatilho: ela dispara quando o bloco recebe sinal de redstone (na subida do sinal), tendo como origem a criatura mais perto (6 blocos). Fora de inscrições, não faz nada. |
 | **Ativar por Proximidade** | `arcane:on_near` | 0 | 2 | Conhecimento | — | Condição: em uma inscrição no mundo, troca o gatilho: ela dispara quando uma criatura chega a 2,5 blocos do bloco (a criatura mais perto é a origem). Fora de inscrições, não faz nada. |
+| **Ao Quebrar a Barreira** | `arcane:on_barrier_break` | 0 | 3 | Conhecimento | — | Condição: o que vem depois espera alguém quebrar na mão ou com ferramenta um bloco (explosões e magias não quebram barreira) da barreira desta magia; roda uma vez, no ponto da quebra, nas criaturas a até 3 blocos dali. A barreira sumir sozinha não conta. Sem barreira, nunca acontece. Espera até 15 min. |
+| **Ao Dormir** | `arcane:on_sleep` | 0 | 2 | Conhecimento | — | Condição: arma a magia em você: o que vem depois acontece quando você pegar no sono (espera até 1 dia de jogo). |
+| **Ao Pescar** | `arcane:on_fish` | 0 | 2 | Vida | — | Condição: arma a magia em você: o que vem depois acontece quando você puxar algo da água com a vara (espera até 1 dia de jogo). |
+| **Ao Amanhecer** | `arcane:on_dawn` | 0 | 2 | Conhecimento | — | Condição: arma a magia em você: o que vem depois acontece no próximo nascer do sol (também depois de dormir; espera até 1 dia de jogo). |
+| **Ao Comer** | `arcane:on_eat` | 0 | 2 | Vida | — | Condição: arma a magia em você: o que vem depois acontece quando você terminar de comer qualquer comida (espera até 1 dia de jogo). |
+| **Ao Ver Conjuração** | `arcane:on_see_cast` | 0 | 4 | Vazio | — | Condição: arma a magia em você: o que vem depois acontece quando você vir outra criatura conjurar uma magia a até 24 blocos (quem conjurou vira o alvo de Contramagia). Espera até 1 dia de jogo. |
 
 ## Ativadores (1)
 

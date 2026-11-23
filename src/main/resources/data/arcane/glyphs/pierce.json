@@ -1,0 +1,23 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:pierce"
+  },
+  "modifier_scope": {
+    "target": "previous_effect",
+    "kind": "effect",
+    "mutate": {
+      "pierce": {
+        "op": "stack",
+        "value": 0.2
+      }
+    }
+  },
+  "cost": {
+    "mana": 8
+  },
+  "tier": 4,
+  "families": [
+    "blood"
+  ]
+}

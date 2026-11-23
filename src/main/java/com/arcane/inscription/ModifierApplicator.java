@@ -22,6 +22,10 @@ public final class ModifierApplicator {
                 result.put(key, mutation.param().map(p -> modifier.param(p, mutation.value())).orElse(mutation.value()));
                 continue;
             }
+            if ("stack".equals(mutation.op())) { // empilha mesmo sem o parametro na forma (Perfurar: +20% por camada)
+                result.put(key, result.getOrDefault(key, 0.0) + mutation.value());
+                continue;
+            }
             if (!result.containsKey(key)) continue;
             double current = result.get(key);
             if ("vow".equals(mutation.op())) { // juramento: o multiplicador vem da formula, nunca de um valor cru

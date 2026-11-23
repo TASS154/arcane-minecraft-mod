@@ -1,0 +1,13 @@
+{
+  "category": "filter",
+  "behavior": {
+    "handler": "arcane:aerial"
+  },
+  "cost": {
+    "mana": 1
+  },
+  "tier": 2,
+  "families": [
+    "force"
+  ]
+}

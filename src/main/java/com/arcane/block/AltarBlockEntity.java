@@ -24,6 +24,18 @@ public class AltarBlockEntity extends BlockEntity {
     super(ModBlockEntities.ARCANE_ALTAR.get(), pos, state);
   }
 
+  @Override
+  public void onLoad() {
+    super.onLoad();
+    if (level != null && !level.isClientSide) com.arcane.ritual.RitualLeaks.register(level, worldPosition);
+  }
+
+  @Override
+  public void setRemoved() {
+    super.setRemoved();
+    if (level != null && !level.isClientSide) com.arcane.ritual.RitualLeaks.unregister(level, worldPosition);
+  }
+
   @Nullable public Inscription stored() { return stored; }
   @Nullable public UUID owner() { return owner; }
   public boolean storedLegendary() { return storedLegendary; }

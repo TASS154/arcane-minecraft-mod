@@ -852,6 +852,216 @@ _g("chorus", "modifier", 2,
    params={"min": (2.0, 2.0, 4.0, "int")},
    scope={"target": "flag", "kind": "effect", "mutate": {}})
 # ---------------------------------------------------------------- raridade (tier 1-4) e familias (especialidades de dungeon)
+# ------------------------------------------------------------------ RODADA 23 NOV (TARDE)
+_g("on_barrier_break", "condition", 0,
+   ("Ao Quebrar a Barreira", "Condição: o que vem depois espera alguém quebrar na mão ou com ferramenta um bloco (explosões e magias não quebram barreira) da barreira desta magia; roda uma vez, no ponto da quebra, nas criaturas a até 3 blocos dali. A barreira sumir sozinha não conta. Sem barreira, nunca acontece. Espera até 15 min."),
+   ("On Barrier Break", "Condition: what follows waits for someone to break by hand or with a tool a block (explosions and spells do not break barriers) of this spell's barrier; it runs once, at the break point, on creatures within 3 blocks of it. The barrier fading by itself does not count. Without a barrier it never happens. Waits up to 15 min."),
+   ["########", "#..#...#", "#..#...#", "#...#..#", "#..#...#", "#...#..#", "#..#...#", "########"])
+
+_g("pierce", "modifier", 8,
+   ("Perfurar", "Modificador: +20% do dano do efeito anterior vira perfurante, que ignora armadura, encantamentos de proteção, Resistência, a redução do Petrificar e a dureza de chefes. Empilha sem limite (5 camadas = 100%), mas cada Perfurar a mais na mesma magia custa o dobro do anterior."),
+   ("Pierce", "Modifier: +20% of the previous effect's damage becomes piercing, ignoring armor, protection enchantments, Resistance, Petrify's reduction and boss toughness. Stacks without limit (5 layers = 100%), but each extra Pierce in the same spell costs double the previous one."),
+   ["#.......", ".##.....", ".####...", "..#####.", "..#####.", ".####...", ".##.....", "#......."],
+   scope={"target": "previous_effect", "kind": "effect", "mutate": {"pierce": {"op": "stack", "value": 0.2}}})
+
+# ------------------------------------------------------------------ RODADA 23 NOV: lista aceita
+_g('seal_creature', 'effect', 9,
+   ('Selamento', 'Efeito: correntes douradas prendem a criatura por 2 s e depois a banem para dentro de um item (Criatura Selada), que a solta de novo ao ser usado num bloco. Precisa de mana suficiente para o nível da criatura (vida + armadura); com pouca, as correntes se partem. Chefes resistem; jogadores só ficam presos.'),
+   ('Seal', "Effect: golden chains hold the creature for 2 s and then banish it into an item (Sealed Creature), which releases it again when used on a block. Needs enough mana for the creature's level (health + armor); with too little, the chains snap. Bosses resist; players are only held."),
+   ['#..##..#', '.#.##.#.', '..####..', '########', '########', '..####..', '.#.##.#.', '#..##..#'])
+_g('read_residue', 'effect', 3,
+   ('Ler Resíduo', 'Efeito: no resíduo de magia mais perto do ponto mirado (até 8 blocos), mostra quantos glifos a magia tinha e em que ordem. Os que você não conhece aparecem como ???.'),
+   ('Read Residue', 'Effect: on the spell residue closest to the aimed point (up to 8 blocks), shows how many glyphs the spell had and in which order. The ones you do not know show as ???.'),
+   ['........', '.#.#.#..', '........', '#.#.#.#.', '........', '.#.#.#..', '........', '###.###.'])
+_g('track_possession', 'effect', 4,
+   ('Rastrear Posse', 'Efeito: sente para que lado está o SEU grimório perdido ou roubado (no chão, com alguém, numa bancada de estudo ou dentro de uma Hidra), até 500 blocos e na mesma dimensão. A direção tem erro de até 30 graus, que diminui ao chegar perto.'),
+   ('Track Possession', 'Effect: senses which way YOUR lost or stolen grimoire is (on the ground, with someone, on a study desk or inside a Hydra), up to 500 blocks and in the same dimension. The direction is off by up to 30 degrees, less as you get closer.'),
+   ['...#....', '..###...', '.#.#.#..', '...#....', '...#....', '.#####..', '.#...#..', '.#####..'])
+_g('paired_portal', 'effect', 8,
+   ('Portal Pareado', 'Efeito: liga onde você está ao ponto mirado por alguns segundos (até 30 s): quem entra num círculo sai no outro. Não atravessa dimensões.'),
+   ('Paired Portal', 'Effect: links where you stand to the aimed point for a few seconds (up to 30 s): whoever steps into one circle comes out of the other. Does not cross dimensions.'),
+   ['.##..##.', '#..##..#', '#..##..#', '.##..##.', '........', '.##..##.', '#..##..#', '.##..##.'],
+   params={'duration': (200.0, 40.0, 600.0, 'int')}, magnitude=['duration'])
+_g('counterspell', 'effect', 6,
+   ('Contramagia', 'Efeito: interrompe magias. Depois de "Ao Ver Conjuração", anula a magia que você viu ser lançada se a força desta (mana com carga, ritual e cristal) for pelo menos o custo daquela; quem lançou perde a mana. Sem essa condição, corta o que os alvos estão canalizando (carregar, segurar, alternar).'),
+   ('Counterspell', 'Effect: interrupts spells. After "On Seeing a Cast", it cancels the spell you saw being cast if this one\'s strength (mana with charge, ritual and crystal) is at least that spell\'s cost; the caster loses the mana. Without that condition, it cuts what the targets are channeling (charge, hold, toggle).'),
+   ['#......#', '.#....#.', '..#..#..', '...##...', '...##...', '..#..#..', '.#....#.', '#......#'],
+   params={'strength': (1.0, 0.5, 3.0, 'float')})
+_g('lock', 'effect', 3,
+   ('Trancar', 'Efeito: a porta, alçapão, portão ou baú mirado só abre para você e para os seus convidados. Fica 20 vezes mais duro de quebrar para os outros (não inquebrável). Dissipar tira a tranca (o dono, de graça; os outros, com magia forte).'),
+   ('Lock', 'Effect: the aimed door, trapdoor, gate or chest only opens for you and your guests. It becomes 20 times harder for others to break (not unbreakable). Dispel removes the lock (free for the owner; others need a strong spell).'),
+   ['..####..', '.#....#.', '.#....#.', '########', '###..###', '###..###', '####.###', '########'])
+_g('seal_bench', 'effect', 12,
+   ('Selar Bancada', 'Efeito: a bancada mirada só obedece a você: ninguém mais a abre, pega o seu grimório pousado nela ou estuda nela. Dura até você tirar o selo com Dissipar; outros magos precisam de uma magia forte (30 de mana ou mais) para quebrá-lo.'),
+   ('Seal Workbench', 'Effect: the aimed workbench obeys only you: nobody else opens it, takes your grimoire resting on it or studies on it. Lasts until you remove it with Dispel; other mages need a strong spell (30+ mana) to break it.'),
+   ['########', '#......#', '#.####.#', '#.#..#.#', '#.####.#', '#......#', '########', '.#....#.'])
+_g('baptize', 'effect', 4,
+   ('Batizar', 'Efeito: dá nome à área em volta do ponto mirado (raio 4 a 128). O nome é o nome desta magia. Quem entra vê o nome como título. Cada mago tem até 5 áreas batizadas.'),
+   ('Baptize', "Effect: names the area around the aimed point (radius 4 to 128). The name is this spell's name. Anyone who enters sees it as a title. Each mage can have up to 5 named areas."),
+   ['...##...', '..####..', '...##...', '########', '...##...', '...##...', '..#..#..', '.#....#.'],
+   params={'radius': (24.0, 4.0, 128.0, 'float')}, magnitude=['radius'])
+_g('mend', 'effect', 6,
+   ('Remendar', 'Efeito: devolve 10% da durabilidade máxima do item na mão do alvo. Fraco e caro de propósito: não substitui o Remendo do encantamento.'),
+   ('Mend', "Effect: restores 10% of the max durability of the target's held item. Weak and expensive on purpose: it does not replace the Mending enchantment."),
+   ['......##', '.....##.', '....##..', '...##...', '..##.#..', '.##...#.', '##.....#', '#.......'],
+   params={'strength': (1.0, 0.5, 3.0, 'float')}, magnitude=['strength'])
+_g('organize', 'effect', 2,
+   ('Organizar', 'Efeito: junta pilhas iguais e ordena o baú mirado; sem baú, organiza o inventário do alvo (a barra de atalhos fica como está).'),
+   ('Organize', "Effect: merges equal stacks and sorts the aimed chest; without a chest, sorts the target's inventory (the hotbar is left alone)."),
+   ['###.###.', '###.###.', '........', '###.###.', '###.###.', '........', '###.###.', '###.###.'])
+_g('silent_step', 'effect', 3,
+   ('Passo Surdo', 'Efeito: por um tempo (até 5 min), tudo que o alvo faz para se mover não faz som nem vibração: passos, pulos, quedas, nado e voo. O Warden e os sensores sculk não percebem.'),
+   ('Silent Step', 'Effect: for a while (up to 5 min), everything the target does to move makes no sound and no vibration: steps, jumps, falls, swimming and flying. The Warden and sculk sensors do not notice.'),
+   ['........', '.##.....', '.##..##.', '.....##.', '##......', '##..##..', '....##..', '#......#'],
+   params={'duration': (1200.0, 200.0, 6000.0, 'int')}, magnitude=['duration'])
+_g('mark_point', 'effect', 1,
+   ('Marcar Ponto', 'Efeito: guarda o ponto mirado para você (até 3; o mais antigo sai) e mostra, só para você, uma coluna de luz nele por 1 minuto. Lembrar lista os pontos guardados.'),
+   ('Mark Point', 'Effect: saves the aimed point for you (up to 3; the oldest goes) and shows, only to you, a column of light on it for 1 minute. Remember lists the saved points.'),
+   ['...##...', '..####..', '..####..', '...##...', '...##...', '...##...', '..####..', '.######.'],
+   params={'duration': (1200.0, 200.0, 12000.0, 'int')}, magnitude=['duration'])
+_g('collect', 'effect', 2,
+   ('Recolher', 'Efeito: puxa até você todos os itens soltos num raio de 8 a 32 blocos (bem mais longe que pegar do chão).'),
+   ('Collect', 'Effect: pulls every loose item within 8 to 32 blocks to you (much farther than picking things up).'),
+   ['#..#..#.', '.#.#.#..', '..###...', '########', '..###...', '.#.#.#..', '#..#..#.', '........'],
+   params={'radius': (16.0, 8.0, 32.0, 'float')}, magnitude=['radius'])
+_g('donate_mana', 'effect', 1,
+   ('Doar Mana', 'Efeito: passa mana sua para os jogadores alvo (até a quantidade escolhida); chega 80% do que sai de você.'),
+   ('Donate Mana', 'Effect: passes your mana to the target players (up to the chosen amount); 80% of what leaves you arrives.'),
+   ['..#.....', '.###....', '..#..#..', '....###.', '.....#..', '........', '#####...', '........'],
+   params={'amount': (20.0, 5.0, 200.0, 'float')})
+_g('warm', 'effect', 2,
+   ('Aquecer', 'Efeito: o inverso de Congelar. Tira o frio e a lentidão das criaturas alvo e derrete gelo e neve perto delas.'),
+   ('Warm', 'Effect: the reverse of Freeze. Removes cold and slowness from the target creatures and melts ice and snow near them.'),
+   ['...#....', '..#.#...', '..#.#...', '.#...#..', '.#.#.#..', '#..#..#.', '#.###.#.', '.#####..'],
+   params={'radius': (3.0, 1.0, 8.0, 'float')}, magnitude=['radius'])
+_g('rest_zone', 'effect', 4,
+   ('Zona de Descanso', 'Efeito: regeneração lenta e fome mais lenta nos alvos, mas só em quem não deu nem levou dano nos últimos 2 minutos. Combine com Zona e um filtro (Aliados, Exceto Eu...) para a lista de quem descansa.'),
+   ('Rest Zone', 'Effect: slow regeneration and slower hunger on the targets, but only for those who neither dealt nor took damage in the last 2 minutes. Combine with Zone and a filter (Allies, Not Me...) for the list of who rests.'),
+   ['........', '..####..', '.#....#.', '#..##..#', '#.####.#', '########', '#......#', '#......#'])
+_g('last_breath', 'effect', 10,
+   ('Fôlego Final', 'Efeito: pelos próximos 10 minutos, a primeira morte do alvo vira 1 de vida, com a animação do totem e um clarão. Só uma vez por dia de jogo para cada criatura.'),
+   ('Last Breath', "Effect: for the next 10 minutes, the target's first death becomes 1 health instead, with the totem animation and a flash. Only once per game day for each creature."),
+   ['..#..#..', '.##..##.', '########', '########', '.######.', '..####..', '...##...', '........'])
+_g('cook', 'effect', 2,
+   ('Cozinhar', 'Efeito: assa até 5 comidas cruas por vez (itens no chão perto dos alvos ou na sua mão secundária). Não serve para metal nem para outras receitas de fornalha.'),
+   ('Cook', 'Effect: roasts up to 5 raw foods at a time (items on the ground near the targets or in your off hand). Does not work on metal or other furnace recipes.'),
+   ['..#.#...', '.#.#....', '..#.#...', '########', '#......#', '#......#', '.######.', '........'])
+_g('dry', 'effect', 1,
+   ('Secar', 'Efeito: seca as criaturas alvo (tira o molhado e o fogo); perto dos alvos, esponja molhada seca e lama vira terra.'),
+   ('Dry', 'Effect: dries the target creatures (removes wetness and fire); near the targets, wet sponges dry and mud turns to dirt.'),
+   ['...#....', '..###...', '.#####..', '.#####..', '..###...', '........', '#.#.#.#.', '.#.#.#..'],
+   params={'radius': (2.0, 1.0, 6.0, 'float')}, magnitude=['radius'])
+_g('harvest', 'effect', 2,
+   ('Colheita', 'Efeito: colhe as plantações maduras em volta dos alvos (raio até 16) e replanta.'),
+   ('Harvest', 'Effect: harvests the ripe crops around the targets (radius up to 16) and replants them.'),
+   ['#..#..#.', '#..#..#.', '.#.#.#..', '..###...', '...#....', '...#....', '#######.', '........'],
+   params={'radius': (5.0, 1.0, 16.0, 'float')}, magnitude=['radius'])
+_g('herd', 'effect', 2,
+   ('Pastorear', 'Efeito: os animais alvo seguem você por um tempo (até 1 min).'),
+   ('Herd', 'Effect: the target animals follow you for a while (up to 1 min).'),
+   ['......#.', '.....##.', '..####..', '.#####..', '.#...#..', '........', '#..#..#.', '#..#..#.'],
+   params={'duration': (400.0, 100.0, 1200.0, 'int')}, magnitude=['duration'])
+_g('pet', 'effect', 1,
+   ('Carinho', 'Efeito: o animal alvo ganha corações e recupera um pouco de vida.'),
+   ('Pet', 'Effect: the target animal gets hearts and recovers a little health.'),
+   ['.##.##..', '#######.', '#######.', '.#####..', '..###...', '...#....', '........', '........'])
+_g('echo', 'effect', 2,
+   ('Eco', 'Efeito: um pulso mostra, só para você, o contorno das cavernas em volta (pontos de luz nas paredes escondidas), num raio de até 32.'),
+   ('Echo', 'Effect: a pulse shows, only to you, the outline of the caves around you (dots of light on hidden walls), within up to 32 blocks.'),
+   ['#......#', '.#....#.', '..#..#..', '...##...', '..#..#..', '.#....#.', '#......#', '........'],
+   params={'radius': (20.0, 4.0, 32.0, 'float')}, magnitude=['radius'])
+_g('prospect', 'effect', 2,
+   ('Prospecção', 'Efeito: dá uma dica vaga dos minérios em volta (poucos, alguns, muitos), qual é o mais comum e para que lado fica o maior veio.'),
+   ('Prospect', 'Effect: gives a vague hint of the ores around (few, some, many), which is the most common and which way the biggest vein lies.'),
+   ['....###.', '...#..#.', '..#..#..', '.#..#...', '#.##....', '.#.#....', '#...#...', '#....#..'],
+   params={'radius': (12.0, 4.0, 24.0, 'float')}, magnitude=['radius'])
+_g('remember', 'effect', 1,
+   ('Lembrar', 'Efeito: mostra onde você morreu e onde dormiu pela última vez, e os pontos que marcou.'),
+   ('Remember', 'Effect: shows where you last died and last slept, and the points you marked.'),
+   ['..####..', '.#....#.', '#..#...#', '#..#...#', '#..###.#', '#......#', '.#....#.', '..####..'])
+_g('echo_past', 'effect', 5,
+   ('Eco do Passado', 'Efeito: mostra, só para você, silhuetas de onde os jogadores passaram nos últimos 10 minutos e brilhos onde a magia mudou o terreno há pouco, em volta do ponto mirado.'),
+   ('Echo of the Past', 'Effect: shows, only to you, silhouettes of where players walked in the last 10 minutes and glows where magic changed the terrain recently, around the aimed point.'),
+   ['..##....', '..##..#.', '.####...', '#.##.#..', '..##....', '.#..#.#.', '.#..#...', '#....#..'],
+   params={'radius': (12.0, 4.0, 32.0, 'float')}, magnitude=['radius'])
+_g('arcane_fireworks', 'effect', 1,
+   ('Fogos Arcanos', 'Efeito: estouros coloridos de fogos sobre os alvos. Só luz e som, sem dano.'),
+   ('Arcane Fireworks', 'Effect: colorful firework bursts over the targets. Only light and sound, no damage.'),
+   ['#..#..#.', '.#.#.#..', '..###...', '###.###.', '..###...', '.#.#.#..', '#..#..#.', '...#....'])
+_g('flower_trail', 'effect', 1,
+   ('Rastro de Flores', 'Efeito: por um tempo, o alvo deixa flores na grama por onde anda.'),
+   ('Flower Trail', 'Effect: for a while, the target leaves flowers on the grass wherever it walks.'),
+   ['.#......', '###.....', '.#...#..', '.#..###.', '.#...#..', '##...#..', '.#..##..', '########'],
+   params={'duration': (600.0, 100.0, 2400.0, 'int')}, magnitude=['duration'])
+_g('bubbles', 'effect', 1,
+   ('Bolhas', 'Efeito: bolhas estouram em volta da cabeça do alvo por um tempo.'),
+   ('Bubbles', "Effect: bubbles pop around the target's head for a while."),
+   ['.##.....', '#..#..#.', '.##..#.#', '......#.', '..##....', '.#..#...', '.#..#...', '..##....'],
+   params={'duration': (400.0, 100.0, 2400.0, 'int')}, magnitude=['duration'])
+_g('tickle', 'effect', 1,
+   ('Cócegas', 'Efeito: o alvo não consegue ficar parado: dá pulinhos e risadas por alguns segundos.'),
+   ('Tickle', 'Effect: the target cannot keep still: it hops and giggles for a few seconds.'),
+   ['#.#.#.#.', '.#.#.#..', '........', '..####..', '.#....#.', '.#.##.#.', '..####..', '........'],
+   params={'duration': (80.0, 20.0, 400.0, 'int')}, magnitude=['duration'])
+_g('twirl', 'effect', 1,
+   ('Pirueta', 'Efeito: o alvo dá uma volta inteira em um segundo.'),
+   ('Twirl', 'Effect: the target spins a full turn in one second.'),
+   ['..####..', '.#....#.', '#......#', '#..#...#', '#...#..#', '.#...##.', '..###.#.', '......#.'],
+   params={'duration': (20.0, 20.0, 200.0, 'int')})
+_g('playful_shadow', 'effect', 1,
+   ('Sombra Brincalhona', 'Efeito: uma sombrinha pula em volta dos pés do alvo por um tempo.'),
+   ('Playful Shadow', "Effect: a little shadow hops around the target's feet for a while."),
+   ['........', '..##....', '.####...', '..##....', '.#..#...', '........', '....###.', '..######'],
+   params={'duration': (600.0, 100.0, 2400.0, 'int')}, magnitude=['duration'])
+_g('starry_sky', 'effect', 1,
+   ('Céu Estrelado', 'Efeito: um céu de estrelinhas aparece acima do alvo por um tempo, visível a quem está perto.'),
+   ('Starry Sky', 'Effect: a sky of little stars appears above the target for a while, visible to anyone nearby.'),
+   ['#....#..', '...#...#', '.#......', '......#.', '..#.#...', '#.......', '....#..#', '.#......'],
+   params={'duration': (600.0, 100.0, 2400.0, 'int')}, magnitude=['duration'])
+_g('glow_item', 'effect', 1,
+   ('Brilhar Item', 'Efeito: os itens soltos perto dos alvos ganham contorno brilhante (visível através das paredes) por um tempo. Bom para achar o que caiu.'),
+   ('Glow Item', 'Effect: loose items near the targets get a glowing outline (visible through walls) for a while. Good for finding what you dropped.'),
+   ['#..#..#.', '.#...#..', '..###...', '##.#.##.', '..###...', '.#...#..', '#..#..#.', '........'],
+   params={'duration': (1200.0, 200.0, 6000.0, 'int'), 'radius': (8.0, 2.0, 24.0, 'float')}, magnitude=['duration'])
+_g('melody', 'effect', 1,
+   ('Melodia', 'Efeito: uma melodia curta de harpa toca no alvo.'),
+   ('Melody', 'Effect: a short harp melody plays at the target.'),
+   ['....###.', '....#.#.', '....#.#.', '....#.#.', '..###.#.', '.####.#.', '.###.##.', '....###.'],
+   params={'duration': (64.0, 32.0, 400.0, 'int')})
+_g('on_sleep', 'condition', 0,
+   ('Ao Dormir', 'Condição: arma a magia em você: o que vem depois acontece quando você pegar no sono (espera até 1 dia de jogo).'),
+   ('On Sleep', 'Condition: arms the spell on you: what follows happens when you fall asleep (waits up to 1 game day).'),
+   ['......##', '.....#..', '....#...', '.....#..', '#.....##', '##......', '########', '#......#'])
+_g('on_fish', 'condition', 0,
+   ('Ao Pescar', 'Condição: arma a magia em você: o que vem depois acontece quando você puxar algo da água com a vara (espera até 1 dia de jogo).'),
+   ('On Fish', 'Condition: arms the spell on you: what follows happens when you reel something out of the water (waits up to 1 game day).'),
+   ['#.......', '.#......', '..#.....', '...#....', '...#....', '...#..#.', '...#.###', '....#.#.'])
+_g('on_dawn', 'condition', 0,
+   ('Ao Amanhecer', 'Condição: arma a magia em você: o que vem depois acontece no próximo nascer do sol (também depois de dormir; espera até 1 dia de jogo).'),
+   ('On Dawn', 'Condition: arms the spell on you: what follows happens at the next sunrise (also after sleeping; waits up to 1 game day).'),
+   ['...#....', '.#.#.#..', '..###...', '#######.', '........', '########', '........', '........'])
+_g('on_eat', 'condition', 0,
+   ('Ao Comer', 'Condição: arma a magia em você: o que vem depois acontece quando você terminar de comer qualquer comida (espera até 1 dia de jogo).'),
+   ('On Eat', 'Condition: arms the spell on you: what follows happens when you finish eating any food (waits up to 1 game day).'),
+   ['...##...', '..#..#..', '.#.##.#.', '#.####.#', '#.####.#', '.#.##.#.', '..#..#..', '...##...'])
+_g('on_see_cast', 'condition', 0,
+   ('Ao Ver Conjuração', 'Condição: arma a magia em você: o que vem depois acontece quando você vir outra criatura conjurar uma magia a até 24 blocos (quem conjurou vira o alvo de Contramagia). Espera até 1 dia de jogo.'),
+   ('On Seeing a Cast', "Condition: arms the spell on you: what follows happens when you see another creature cast a spell within 24 blocks (the caster becomes Counterspell's target). Waits up to 1 game day."),
+   ['........', '..####..', '.#....#.', '#..##..#', '#..##..#', '.#....#.', '..####..', '........'])
+_g('named', 'filter', 1,
+   ('Nomeados', 'Filtro: só criaturas com nome (etiqueta de nome).'),
+   ('Named', 'Filter: only creatures with a name (name tag).'),
+   ['........', '#######.', '#.....#.', '#.###.#.', '#.....#.', '#######.', '...#....', '...#....'])
+_g('aerial', 'filter', 1,
+   ('Aéreos', 'Filtro: só quem está no ar: criaturas voadoras e quem está pulando, caindo ou planando.'),
+   ('Aerial', 'Filter: only those in the air: flying creatures and anyone jumping, falling or gliding.'),
+   ['........', '#......#', '.#....#.', '..#..#..', '...##...', '........', '........', '########'])
+_g('random', 'modifier', 1,
+   ('Aleatório', 'Modificador: a força do efeito anterior (dano, cura, raio, duração...) é sorteada a cada conjuração, de metade ao dobro.'),
+   ('Random', "Modifier: the previous effect's strength (damage, heal, radius, duration...) is rolled each cast, from half to double."),
+   ['######..', '#....#..', '#.#..#..', '#....###', '#..#.#.#', '######.#', '.....#.#', '.....###'],
+   scope={'target': 'previous_effect', 'kind': 'effect', 'mutate': {'random': {'op': 'put', 'value': 1.0}}})
+
 TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
         "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group",
@@ -864,20 +1074,20 @@ TIERS = {
         "grow", "water_walk", "breathe", "night_eye",
         "hook", "climb", "arcane_sight", "reveal", "decoy", "drain_mana", "stealth", "false_trace", "bind", "on_signal", "on_near"],
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
-        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "outsiders", "chain", "sleep", "on_kill", "on_fall",
+        "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "on_barrier_break", "outsiders", "chain", "sleep", "on_kill", "on_fall",
         "satellites", "link", "trail", "recall", "imbue", "acid", "electrify", "contagion", "dispel", "reflect", "silence", "swap",
         "curse", "overcharge", "after_hits", "pocket", "restore", "chorus", "domain", "persistence"],
-    4: ["thunder", "gravity", "invisible", "blast", "float", "telekinesis", "phase", "petrify", "reanimate"],
+    4: ["pierce", "thunder", "gravity", "invisible", "blast", "float", "telekinesis", "phase", "petrify", "reanimate"],
 }
 FAMILIES = {
     "fire": ["fire", "ignite", "explode", "blast"],
     "ice": ["water_walk", "slow", "freeze", "shield", "wet", "rain", "petrify"],
     "storm": ["thunder", "ray", "pillar", "rain", "rumble", "raining", "wet", "electrify", "on_signal", "emit_signal"],
-    "blood": ["damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill", "acid", "curse", "reanimate", "contagion", "overcharge", "after_hits"],
+    "blood": ["pierce", "damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill", "acid", "curse", "reanimate", "contagion", "overcharge", "after_hits"],
     "life": ["grow", "breathe", "chorus", "heal", "shield", "speed", "allies", "players", "animals"],
     "force": ["feather", "hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
     "knowledge": ["light", "night_eye", "pocket", "mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
-                  "group", "end_group", "lengthen", "weaken", "persistence", "on_near", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
+                  "group", "end_group", "lengthen", "weaken", "persistence", "on_near", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "on_barrier_break", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert", "phase", "recall", "swap", "link", "silence", "drain_mana", "decoy", "stealth", "false_trace", "bind"],
     "earth": ["restore", "summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
 }
@@ -887,8 +1097,64 @@ for _tier, _ids in TIERS.items():
 for _fam, _ids in FAMILIES.items():
     for _gid in _ids:
         G[_gid].setdefault("families", []).append(_fam)
+G['seal_creature']["tier"] = 4; G['seal_creature'].setdefault("families", []).extend(['void'])
+G['read_residue']["tier"] = 2; G['read_residue'].setdefault("families", []).extend(['knowledge'])
+G['track_possession']["tier"] = 3; G['track_possession'].setdefault("families", []).extend(['knowledge'])
+G['paired_portal']["tier"] = 4; G['paired_portal'].setdefault("families", []).extend(['void'])
+G['counterspell']["tier"] = 4; G['counterspell'].setdefault("families", []).extend(['void'])
+G['lock']["tier"] = 2; G['lock'].setdefault("families", []).extend(['earth'])
+G['seal_bench']["tier"] = 4; G['seal_bench'].setdefault("families", []).extend(['knowledge'])
+G['baptize']["tier"] = 3; G['baptize'].setdefault("families", []).extend(['knowledge'])
+G['mend']["tier"] = 3; G['mend'].setdefault("families", []).extend(['earth'])
+G['organize']["tier"] = 1; G['organize'].setdefault("families", []).extend(['knowledge'])
+G['silent_step']["tier"] = 2; G['silent_step'].setdefault("families", []).extend(['void'])
+G['mark_point']["tier"] = 1; G['mark_point'].setdefault("families", []).extend(['knowledge'])
+G['collect']["tier"] = 1; G['collect'].setdefault("families", []).extend(['force'])
+G['donate_mana']["tier"] = 2; G['donate_mana'].setdefault("families", []).extend(['life'])
+G['warm']["tier"] = 2; G['warm'].setdefault("families", []).extend(['fire'])
+G['rest_zone']["tier"] = 3; G['rest_zone'].setdefault("families", []).extend(['life'])
+G['last_breath']["tier"] = 4; G['last_breath'].setdefault("families", []).extend(['life'])
+G['cook']["tier"] = 1; G['cook'].setdefault("families", []).extend(['fire'])
+G['dry']["tier"] = 1; G['dry'].setdefault("families", []).extend(['fire'])
+G['harvest']["tier"] = 1; G['harvest'].setdefault("families", []).extend(['life'])
+G['herd']["tier"] = 1; G['herd'].setdefault("families", []).extend(['life'])
+G['pet']["tier"] = 1; G['pet'].setdefault("families", []).extend(['life'])
+G['echo']["tier"] = 1; G['echo'].setdefault("families", []).extend(['knowledge'])
+G['prospect']["tier"] = 1; G['prospect'].setdefault("families", []).extend(['earth'])
+G['remember']["tier"] = 1; G['remember'].setdefault("families", []).extend(['knowledge'])
+G['echo_past']["tier"] = 3; G['echo_past'].setdefault("families", []).extend(['knowledge'])
+G['arcane_fireworks']["tier"] = 1; G['arcane_fireworks'].setdefault("families", []).extend(['fire'])
+G['flower_trail']["tier"] = 1; G['flower_trail'].setdefault("families", []).extend(['life'])
+G['bubbles']["tier"] = 1; G['bubbles'].setdefault("families", []).extend(['life'])
+G['tickle']["tier"] = 1; G['tickle'].setdefault("families", []).extend(['force'])
+G['twirl']["tier"] = 1; G['twirl'].setdefault("families", []).extend(['force'])
+G['playful_shadow']["tier"] = 1; G['playful_shadow'].setdefault("families", []).extend(['void'])
+G['starry_sky']["tier"] = 1; G['starry_sky'].setdefault("families", []).extend(['knowledge'])
+G['glow_item']["tier"] = 1; G['glow_item'].setdefault("families", []).extend(['knowledge'])
+G['melody']["tier"] = 1; G['melody'].setdefault("families", []).extend(['life'])
+G['on_sleep']["tier"] = 2; G['on_sleep'].setdefault("families", []).extend(['knowledge'])
+G['on_fish']["tier"] = 2; G['on_fish'].setdefault("families", []).extend(['life'])
+G['on_dawn']["tier"] = 2; G['on_dawn'].setdefault("families", []).extend(['knowledge'])
+G['on_eat']["tier"] = 2; G['on_eat'].setdefault("families", []).extend(['life'])
+G['on_see_cast']["tier"] = 4; G['on_see_cast'].setdefault("families", []).extend(['void'])
+G['named']["tier"] = 2; G['named'].setdefault("families", []).extend(['knowledge'])
+G['aerial']["tier"] = 2; G['aerial'].setdefault("families", []).extend(['force'])
+G['random']["tier"] = 2; G['random'].setdefault("families", []).extend(['void'])
+_g('illusion', 'effect', 7,
+   ('Ilusão', 'Efeito: cria 3 clones seus (só visuais, até 15 s) que imitam a sua intenção: andam e correm com você, atacam com outras armas do seu inventário quando você ataca e fingem outras magias quando você conjura. Não ferem nem tocam em nada; um golpe os desfaz. Criaturas que miram você podem escolher um clone.'),
+   ('Illusion', 'Effect: creates 3 clones of you (visual only, up to 15 s) that copy your intent: they walk and run with you, attack with other weapons from your inventory when you attack and fake other spells when you cast. They hurt and touch nothing; one hit dispels them. Creatures aiming at you may pick a clone.'),
+   ['..#..#..', '.###.###', '..#..#..', '.#.#.#.#', '........', '...##...', '..####..', '..#..#..'],
+   params={'duration': (300.0, 60.0, 1200.0, 'int'), 'count': (3.0, 1.0, 5.0, 'int')}, magnitude=['duration'])
+_g('color', 'modifier', 0,
+   ('Cor', 'Modificador: muda a cor do círculo e da espiral de conjuração desta magia (16 cores, no parâmetro). Só aparência.'),
+   ("Color", "Modifier: changes the color of this spell's casting circle and spiral (16 colors, in the parameter). Looks only."),
+   ['##..##..', '##..##..', '........', '..##..##', '..##..##', '........', '##..##..', '##..##..'],
+   params={'hue': (0.0, 0.0, 15.0, 'int')}, scope={'target': 'flag', 'kind': 'effect', 'mutate': {}})
+G['illusion']["tier"] = 4; G['illusion'].setdefault("families", []).extend(['void'])
+G['color']["tier"] = 1; G['color'].setdefault("families", []).extend(['knowledge'])
 for _gid, _g in G.items():
     _g.setdefault("families", ["original"] if _g["tier"] == 5 else ["arcane"])
+
 
 ORDER = list(G.keys())
 CATEGORY_ORDER = ["form", "filter", "effect", "modifier", "condition", "activator"]

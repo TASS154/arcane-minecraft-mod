@@ -235,7 +235,13 @@ idea {
 
 
 // Os GameTests sempre comecam num mundo novo (o mundo deles fica em build/gametest-run, nao em run/).
+// Semente fixa (a mesma do mundo de testes antigo): o terreno em volta das estruturas e sempre igual.
 def gameTestWorld = file('build/gametest-run/world')
+def gameTestProps = file('build/gametest-run/server.properties')
 tasks.matching { it.name == 'runGameTestServer' }.configureEach {
-    doFirst { gameTestWorld.deleteDir() }
+    doFirst {
+        gameTestWorld.deleteDir()
+        gameTestProps.parentFile.mkdirs()
+        gameTestProps.text = 'level-seed=-3150191866398678708' + System.lineSeparator()
+    }
 }

@@ -50,6 +50,8 @@ public final class InscriptionCompiler {
     public static CompiledExecutionPlan compile(Inscription inscription) {
         List<SegmentBuilder> built = new ArrayList<>();
         SegmentBuilder current = new SegmentBuilder();
+        // Ticks ja passados desde a conjuracao ate o trecho atual (soma dos atrasos anteriores).
+        int elapsed = 0;
         List<CompiledExecutionPlan.FilterSpec> filters = new ArrayList<>();
         List<GlyphInstance> queuedEffectModifiers = new ArrayList<>();
         List<GlyphInstance> deliveryModifiers = new ArrayList<>();
@@ -123,7 +125,9 @@ public final class InscriptionCompiler {
                             double seconds = def.resolveParam(scope.delayParam().orElse("seconds"), instance.parameters());
                             flush(built, current, filters);
                             current = new SegmentBuilder();
-                            current.delayTicks = (int) Math.round(seconds * 20);
+                            // Atrasos em sequencia se somam: "depois de 1 s ... depois de 1 s" = 1 s e 2 s.
+                            elapsed += (int) Math.round(seconds * 20);
+                            current.delayTicks = elapsed;
                         }
                         default -> {
                         }
@@ -136,7 +140,8 @@ public final class InscriptionCompiler {
                     current.condition = Optional.of(new CompiledExecutionPlan.ConditionGate(
                             instance.glyphId(), def.behavior().handler(), def.resolveParams(instance.parameters())));
                     if (def.parameters().containsKey("seconds")) {
-                        current.delayTicks = (int) Math.round(def.resolveParam("seconds", instance.parameters()) * 20);
+                        elapsed += (int) Math.round(def.resolveParam("seconds", instance.parameters()) * 20);
+                        current.delayTicks = elapsed;
                     }
                 }
                 case ACTIVATOR -> current.chainRules.add(new CompiledExecutionPlan.ChainRule("activate", built.size()));

@@ -341,3 +341,19 @@ Cobertas por GameTest (219 passam). **Não visto em jogo com raio grande.**
 - Testes novos: unidades de tinta, criatura desenhada, caneta de ar. Passaram.
 - **Honestidade**: a suite de GameTest tem 5 falhas (electrify, link, lifesteal, attract, swap) que tambem aparecem sem estas mudancas (em HEAD deram ate 9, variando). Suspeita: estado persistido em `run/world` (ex.: `arcane_zones.dat` com cristais de testes antigos); nao confirmado, nao apaguei o mundo. Falta testar a 3b no cliente (menus, modelos, renderizar o circulo de ar).
 - Pendente: bloco com propriedades, e o item (c) magias longas com `after_seconds` (atrasos sao absolutos por segmento, nao acumulados).
+
+## Rodada de 2026-11-23 (madrugada): R andando, voo, cura, utilidade, Cetro, Hidras, glifos originais
+
+Tudo com GameTest; suite inteira: **231/231** (mundo de teste novo a cada execucao, semente fixa).
+
+- **Roda R**: da para andar, pular, correr e agachar com a roda aberta (as teclas de movimento sao lidas direto do teclado). A camera fica parada (o mouse aponta a roda). Nao testado com teclado real: o roteiro automatico nao aperta teclas fisicas.
+- **Atrasos em sequencia (bug da magia longa)**: cada "Depois de X s" contava a partir da conjuracao, entao varios atrasos disparavam juntos. Agora se somam (1 s, depois mais 1 s = 2 s). Na magia mais recente do grimorio (Eu, Retorno, atraso, Empurrao+Gancho, atraso, Fase, atraso, Retorno) os trechos agora saem em 1, 2 e 3 s. Obs.: o primeiro Retorno so marca o lugar se nao houver marca valida; se sobrou uma marca de menos de 10 min, ele te leva de volta logo no comeco.
+- **Voo**: o corpo segue a trajetoria (mergulha de cabeca ao descer, empina ao subir); ao deslizar, bracos e pernas ficam para tras (inercia). 3 niveis de alta velocidade: Ctrl liga o 1; cada novo toque no Ctrl sobe (x2, x3,2, x4,8 de velocidade; x2,5, x5, x9 de mana). Visto em fotos no cliente (mergulho e deslize). O aumento de nivel pelo Ctrl foi testado no servidor (limite e custo), nao com teclado real.
+- **Cura** volta a crescer plantas (a planta sobre terra arada nao era achada) e cresce a planta aos pes de quem e curado.
+- **Nao-combate**: Crescer, Luz (some sozinha; 0 = para sempre), Andar na Agua, Respirar, Olhos Noturnos, Pena.
+- **Cetro**: 6 magias a 120%. Agachar + usar grava a magia ativa do grimorio ou passa para a proxima; com gema/material na outra mao troca ponta (8) e haste (6) = 48 modelos.
+- **Hidras**: 7 covis (masmorra: marco na superficie, poco com escada, corredor com 2 salas de bau, camara em cupula com grade). O estagio so e sorteado quando alguem chega a 1 bloco da parede da camara ou a ve: 1o covil = recem-nascida (1), 7o = ancia (14), os outros 2-13 sem repetir. 1 a 9 cabecas, tamanho x1 a x4,25, vida efetiva 80 a ~2800 (acima de 1024 vira dureza), poderes por estagio: sopro, cauda, rugido, tempestade, meteoros, cataclismo. Forca ajustada pelos jogadores (perto = 1, online longe = 0,3). Visto no cliente: modelo nos estagios 1, 7 e 14, covil gerado e revelado com a recem-nascida.
+- **Glifos originais** (tier 5, nunca em bau; quem derrota a Hidra aprende o do covil): Parar o Tempo, Retroceder, Colapso Espacial, Aniquilacao, Eclipse, Genese, Inversao da Gravidade.
+- **Visual**: telecinese com fio de energia da mao ate o objeto, aura girando nos objetos e estouros ao pegar/soltar; conjuracao com espiral do elemento e faiscas na mao.
+- **Teste visual automatico** (`client/DevAutoTest`): so roda com `run/arcane_autotest.flag`; fotografa em `run/screenshots/autotest_*.png`.
+- **Falta / limites**: o modelo da Hidra e simples (caixas), sem animacao de ataque propria alem das bocas; os poderes da Hidra nao foram vistos numa luta real; Eclipse e Aniquilacao nao foram vistos no cliente; o covil foi visto so 1 vez.

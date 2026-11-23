@@ -68,6 +68,18 @@ class CompilerSemanticsTest {
   }
 
   @Test
+  void delaysInSequenceAddUp() {
+    // Eu, Retorno, depois de 1 s: Empurrao, depois de 1 s: Fase, depois de 0,5 s: Retorno = 1 s, 2 s e 2,5 s
+    CompiledExecutionPlan p = plan(g("self"), g("recall"), g("after_seconds", "seconds", 1.0), g("push"),
+        g("after_seconds", "seconds", 1.0), g("phase"), g("after_seconds", "seconds", 0.5), g("recall"));
+    assertEquals(4, p.segments().size());
+    assertEquals(0, p.segments().get(0).delayTicks());
+    assertEquals(20, p.segments().get(1).delayTicks());
+    assertEquals(40, p.segments().get(2).delayTicks(), "o segundo atraso conta a partir do primeiro");
+    assertEquals(50, p.segments().get(3).delayTicks());
+  }
+
+  @Test
   void afterSecondsUsesItsDefaultAndDoesNotLeakIntoOtherSegments() {
     CompiledExecutionPlan p = plan(g("self"), g("after_seconds"), g("damage"), g("sneaking"), g("heal"));
     assertEquals(40, p.segments().get(0).delayTicks(), "padrao de 2 s");

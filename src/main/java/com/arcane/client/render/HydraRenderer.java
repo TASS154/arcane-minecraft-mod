@@ -130,13 +130,17 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
         boolean show = i < n;
         neck[i].visible = show;
         if (!show) continue;
-        // pescocos em leque na frente do corpo; com muitos, ha duas fileiras (as do meio mais altas)
+        // pescocos em leque bem aberto na frente do corpo: os de fora saem para os lados, os do meio sobem mais;
+        // com muitas cabecas ha duas fileiras (as pares mais altas e mais para tras)
         float spread = n == 1 ? 0f : (i / (float) (n - 1)) * 2f - 1f;
-        neck[i].x = spread * 6.5f;
-        neck[i].y = 7f - (1f - Math.abs(spread)) * 2f - (i % 2) * 1.5f;
-        neck[i].yRot = spread * 0.75f + netHeadYaw * Mth.DEG_TO_RAD * 0.4f;
+        float row = n > 4 ? (i % 2) : 0;
+        neck[i].x = spread * 7.5f;
+        neck[i].y = 8f - row * 3f;
+        neck[i].z = -10f + row * 3f;
+        neck[i].yRot = spread * (n > 3 ? 1.05f : 0.6f) + netHeadYaw * Mth.DEG_TO_RAD * 0.3f;
+        neck[i].zRot = -spread * 0.35f;
         float sway = Mth.sin(age * 0.09f + i * 1.3f) * 0.12f;
-        neck[i].xRot = -0.85f - (i % 2) * 0.2f + sway + (casting ? -0.25f : 0f);
+        neck[i].xRot = -0.75f - row * 0.35f - (1f - Math.abs(spread)) * 0.2f + sway + (casting ? -0.25f : 0f);
         neck2[i].xRot = 0.55f + Mth.sin(age * 0.11f + i) * 0.1f;
         neck2[i].yRot = Mth.sin(age * 0.06f + i * 2.1f) * 0.15f;
         head[i].xRot = 0.35f + headPitch * Mth.DEG_TO_RAD * 0.5f;

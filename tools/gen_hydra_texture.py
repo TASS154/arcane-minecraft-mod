@@ -24,14 +24,14 @@ def scales(img, box, base, dark, light, seed):
                 c = dark
             elif u == 2 and v == 0:
                 c = light
-            n = rnd.randint(-8, 8)
+            n = rnd.randint(-4, 4)
             img.putpixel((x, y), tuple(max(0, min(255, ch + n)) for ch in c) + (255,))
 
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     img = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
-    base, dark, light = (170, 170, 165), (95, 95, 92), (215, 215, 205)
+    base, dark, light = (176, 176, 170), (140, 140, 134), (198, 198, 190)
     scales(img, (0, 0, 128, 128), base, dark, light, 7)
     # ventre do corpo (face de baixo do corpo: u 40..56, v 0..24) e dos pescocos mais claro e liso
     for (x0, y0, x1, y1) in [(40, 0, 56, 24), (98, 0, 102, 10), (96, 16, 99, 25)]:

@@ -67,6 +67,9 @@ legacyForge {
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            // Mundo proprio dos testes, dentro de build/ e recriado a cada execucao (ver runGameTestServer abaixo):
+            // reaproveitar o mundo deixava cristais, desenhos e blocos de testes antigos e os testes falhavam ao acaso.
+            gameDirectory = project.file('build/gametest-run')
         }
 
         data {
@@ -228,4 +231,11 @@ idea {
         downloadSources = true
         downloadJavadoc = true
     }
+}
+
+
+// Os GameTests sempre comecam num mundo novo (o mundo deles fica em build/gametest-run, nao em run/).
+def gameTestWorld = file('build/gametest-run/world')
+tasks.matching { it.name == 'runGameTestServer' }.configureEach {
+    doFirst { gameTestWorld.deleteDir() }
 }

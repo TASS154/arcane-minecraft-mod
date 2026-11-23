@@ -122,6 +122,13 @@ public class WorldInscriptionIndex extends SavedData {
     return list;
   }
 
+  /** Apaga todos os desenhos deste mundo (so para os testes automaticos). */
+  public void clearAll() {
+    anchors.clear();
+    byChunk.clear();
+    setDirty();
+  }
+
   public boolean isEmpty() {
     return anchors.isEmpty();
   }

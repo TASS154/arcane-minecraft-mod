@@ -57,7 +57,7 @@ public final class InscribingService {
                                  ResourceLocation ink, String trigger, String name, net.minecraft.core.Direction face) {
     if (!PenRegistry.canWriteOnBlock(player, pos, level)) return false;
     Inscription inscription = new Inscription(new ArrayList<>(glyphs), new InscriptionMetadata(
-        name, ink, new ResourceLocation("arcane", "arcane_pen"), com.arcane.execution.PrecisionSnapshot.FIELD_POWER,
+        name, ink, net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(player.getMainHandItem().getItem()), com.arcane.execution.PrecisionSnapshot.FIELD_POWER,
         Optional.of(player.getUUID()), level.getGameTime(), InscriptionSourceKind.WORLD));
     WorldInscriptionIndex.get(level).put(new InscriptionAnchor(pos, inscription, trigger, ink, face));
     if (InkRegistry.isBloodInk(ink)) {
@@ -152,7 +152,8 @@ public final class InscribingService {
     for (InscriptionAnchor anchor : List.copyOf(index.all())) {
       BlockPos pos = anchor.pos();
       if (!level.isLoaded(pos)) continue;
-      if (InkRegistry.expired(anchor.ink(), anchor.inscription().metadata().created(), now)) {
+      boolean immortalAir = PenRegistry.isAirDrawing(anchor) && com.arcane.config.ArcaneConfig.AIR_DRAWINGS_NEVER_FADE.get();
+      if (!immortalAir && InkRegistry.expired(anchor.ink(), anchor.inscription().metadata().created(), now)) {
         index.remove(pos, anchor.face());
         continue;
       }

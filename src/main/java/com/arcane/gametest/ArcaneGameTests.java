@@ -2458,6 +2458,65 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "empty", batch = "ink_units")
+  public static void inkPotsHaveUnitsAndPartialPotsAreUsedFirst(GameTestHelper h) {
+    var player = casterWith(h);
+    int pot = com.arcane.item.InkItem.potUnits();
+    var full = new net.minecraft.world.item.ItemStack(com.arcane.registry.ModItems.COMMON_INK.get(), 2);
+    player.getInventory().add(full);
+    h.assertTrue(com.arcane.item.InkItem.total(player, "common") == 2 * pot, "2 potes cheios somam 2x a quantidade");
+    h.assertTrue(com.arcane.item.InkItem.consume(player, "common", 5), "gasta 5 unidades");
+    h.assertTrue(com.arcane.item.InkItem.total(player, "common") == 2 * pot - 5, "sobraram as unidades certas");
+    h.assertTrue(com.arcane.item.InkItem.consume(player, "common", 3), "gasta mais 3");
+    int partial = 0, fullPots = 0;
+    for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+      var st = player.getInventory().getItem(i);
+      if (st.getItem() instanceof com.arcane.item.InkItem) {
+        if (com.arcane.item.InkItem.units(st) < pot) partial += st.getCount(); else fullPots += st.getCount();
+      }
+    }
+    h.assertTrue(partial == 1 && fullPots == 1, "um pote ficou pela metade e o outro segue cheio (" + partial + "/" + fullPots + ")");
+    h.assertTrue(!com.arcane.item.InkItem.consume(player, "common", 10 * pot), "sem tinta suficiente nao gasta nada");
+    h.assertTrue(com.arcane.item.InkItem.total(player, "common") == 2 * pot - 8, "nada foi gasto na tentativa que falhou");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "creature_drawing")
+  public static void aDrawnCreatureFiresItsSpellWhenItAttacksAndTheDrawingFades(GameTestHelper h) {
+    var level = h.getLevel();
+    Pig pig = pig(h, 3, 3);
+    var data = pig.getPersistentData();
+    var drawings = new java.util.ArrayList<com.arcane.inscription.Inscription>();
+    drawings.add(objectSpell("common", level.getGameTime(), false));
+    com.arcane.inscribing.ItemDrawings.storeIn(data, drawings);
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.listIn(data).size() == 1, "o desenho ficou guardado na criatura");
+    var list = com.arcane.inscribing.ItemDrawings.listIn(data);
+    int fired = com.arcane.inscribing.ItemDrawings.fireOn(pig, level, list, data);
+    h.assertTrue(fired == 1, "a criatura disparou o desenho");
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.listIn(data).isEmpty(), "sem Persistencia o desenho some depois de disparar");
+    // Tinta vencida nao dispara.
+    var old = new java.util.ArrayList<com.arcane.inscription.Inscription>();
+    old.add(objectSpell("common", level.getGameTime() - 11L * com.arcane.inscribing.InkRegistry.DAY_TICKS, false));
+    com.arcane.inscribing.ItemDrawings.storeIn(data, old);
+    h.assertTrue(com.arcane.inscribing.ItemDrawings.fireOn(pig, level, com.arcane.inscribing.ItemDrawings.listIn(data), data) == 0, "tinta vencida nao dispara");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "air_pen")
+  public static void phoenixPenOnlyWritesInFreeAirAndItsDrawingNeverFadesWhenConfigured(GameTestHelper h) {
+    var player = casterWith(h);
+    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(com.arcane.registry.ModItems.PHOENIX_PEN.get()));
+    var level = h.getLevel();
+    BlockPos air = h.absolutePos(new BlockPos(2, 3, 2));
+    BlockPos solid = h.absolutePos(new BlockPos(2, 1, 2));
+    level.setBlock(solid, Blocks.STONE.defaultBlockState(), 3);
+    h.assertTrue(com.arcane.inscribing.PenRegistry.canWriteOnBlock(player, air, level), "a Caneta de Fenix escreve no ar");
+    h.assertTrue(!com.arcane.inscribing.PenRegistry.canWriteOnBlock(player, solid, level), "e nao em bloco solido");
+    var menu = new com.arcane.menu.ArcaneWorkbenchMenu(0, player.getInventory(), air, com.arcane.menu.ArcaneWorkbenchMenu.BLOCK);
+    h.assertTrue(menu.stillValid(player), "o menu da caneta de ar fica aberto");
+    h.succeed();
+  }
+
   @GameTest(template = "empty", batch = "crater_limits")
   public static void craterRadiusFollowsTheFixedCapRuleAndItsOwnConfig(GameTestHelper h) {
     boolean caps = com.arcane.config.ArcaneConfig.AREA_HARD_CAPS.get();

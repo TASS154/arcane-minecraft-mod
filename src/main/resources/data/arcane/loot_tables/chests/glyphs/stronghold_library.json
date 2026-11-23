@@ -1482,6 +1482,11 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "arcane:creature_pen",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
           "name": "arcane:common_ink",
           "weight": 5
         },

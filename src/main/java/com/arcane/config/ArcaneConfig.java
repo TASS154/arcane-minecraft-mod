@@ -19,6 +19,9 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.BooleanValue AREA_HARD_CAPS;
   public static final ForgeConfigSpec.IntValue RAY_RANGE;
   public static final ForgeConfigSpec.IntValue COMPASS_TICKS_PER_BLOCK;
+  public static final ForgeConfigSpec.IntValue INK_POT_UNITS;
+  public static final ForgeConfigSpec.IntValue INK_UNITS_PER_GLYPH;
+  public static final ForgeConfigSpec.BooleanValue AIR_DRAWINGS_NEVER_FADE;
   public static final ForgeConfigSpec.IntValue CRATER_MAX_RADIUS;
   public static final ForgeConfigSpec.IntValue CRATER_BLOCKS_PER_TICK;
   public static final ForgeConfigSpec.IntValue ITEM_EXTRA_DRAWINGS;
@@ -97,6 +100,12 @@ public class ArcaneConfig {
         .defineInRange("craterMaxRadius", 128, 0, 4096);
     CRATER_BLOCKS_PER_TICK = builder.comment("Blocks a big crater removes per server tick (the rest is spread over the next ticks so the server does not freeze)")
         .defineInRange("craterBlocksPerTick", 10000, 500, 1000000);
+    INK_POT_UNITS = builder.comment("Units of ink in one pot (a drawing costs inkUnitsPerGlyph units per glyph; a partly used pot keeps what is left)")
+        .defineInRange("inkPotUnits", 24, 1, 10000);
+    INK_UNITS_PER_GLYPH = builder.comment("Ink units each glyph of a drawing costs")
+        .defineInRange("inkUnitsPerGlyph", 1, 1, 1000);
+    AIR_DRAWINGS_NEVER_FADE = builder.comment("true = drawings made in the air with the Phoenix Pen never fade (ignores the ink's days). false = they last as long as their ink")
+        .define("airDrawingsNeverFade", false);
     AREA_HARD_CAPS = builder.comment("Keep the fixed maximum radius of area spells/forms (24 to 64 blocks). false = no fixed maximum, only the crystal and charge limits apply")
         .define("areaHardCaps", true);
     RITUAL_MIN_COMPLETENESS = builder.comment("Fraction of the circle's traces that must be drawn for a ritual to work")

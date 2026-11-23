@@ -27,6 +27,8 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
 
   /** Modos: 0 bancada (100%), 1 caneta num bloco, 2 escrever no campo (grimorio, 30%), 3 caneta num item da mao secundaria. */
   public static final int BENCH = 0, BLOCK = 1, FIELD = 2, ITEM = 3;
+  /** Escreve numa criatura: a posicao alvo guarda o id da entidade em x. */
+  public static final int CREATURE = 4;
   private final int mode;
   private net.minecraft.core.Direction face = net.minecraft.core.Direction.UP;
 
@@ -50,7 +52,7 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
   public net.minecraft.core.Direction face() { return face; }
   public ArcaneWorkbenchMenu withFace(net.minecraft.core.Direction face) { this.face = face; return this; }
   /** Escreve fora do grimorio (num bloco ou num item) e por isso exige escolher uma tinta do inventario. */
-  public boolean penMode() { return mode == BLOCK || mode == ITEM; }
+  public boolean penMode() { return mode == BLOCK || mode == ITEM || mode == CREATURE; }
   public boolean needsInk() { return penMode(); }
   public BlockPos targetPos() { return workbenchPos; }
   public List<GlyphInstance> building() { return building; }
@@ -108,8 +110,15 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
     if (mode == FIELD) return true;
     if (penMode()) {
       var pen = player.getMainHandItem();
-      return (pen.is(com.arcane.registry.ModItems.ARCANE_PEN.get()) || pen.getItem() instanceof com.arcane.item.BlockPenItem || pen.getItem() instanceof com.arcane.item.ObjectPenItem)
-          && (mode == ITEM ? !player.getOffhandItem().isEmpty() : true)
+      boolean anyPen = pen.is(com.arcane.registry.ModItems.ARCANE_PEN.get()) || pen.getItem() instanceof com.arcane.item.BlockPenItem
+          || pen.getItem() instanceof com.arcane.item.ObjectPenItem || pen.getItem() instanceof com.arcane.item.AirPenItem
+          || pen.getItem() instanceof com.arcane.item.CreaturePenItem;
+      if (!anyPen) return false;
+      if (mode == CREATURE) {
+        var target = player.level().getEntity(workbenchPos.getX());
+        return target != null && target.isAlive() && player.distanceToSqr(target) < 144.0;
+      }
+      return (mode == ITEM ? !player.getOffhandItem().isEmpty() : true)
           && player.distanceToSqr(workbenchPos.getX() + 0.5, workbenchPos.getY() + 0.5, workbenchPos.getZ() + 0.5) < 100.0;
     }
     return stillValid(access, player, com.arcane.registry.ModBlocks.ARCANE_WORKBENCH.get());

@@ -59,12 +59,28 @@ public final class ItemDrawings {
   }
 
   public static List<Inscription> list(ItemStack stack) {
+    if (stack.isEmpty() || !stack.hasTag()) return new ArrayList<>();
+    return listIn(stack.getTag());
+  }
+
+  /** Le a lista de desenhos de qualquer nbt (de um item ou de uma criatura). */
+  public static List<Inscription> listIn(CompoundTag holder) {
     List<Inscription> out = new ArrayList<>();
-    if (stack.isEmpty() || !stack.hasTag() || !stack.getTag().contains(TAG, Tag.TAG_LIST)) return out;
-    for (Tag t : stack.getTag().getList(TAG, Tag.TAG_COMPOUND)) {
+    if (holder == null || !holder.contains(TAG, Tag.TAG_LIST)) return out;
+    for (Tag t : holder.getList(TAG, Tag.TAG_COMPOUND)) {
       Inscription.CODEC.parse(NbtOps.INSTANCE, t).result().ifPresent(out::add);
     }
     return out;
+  }
+
+  public static void storeIn(CompoundTag holder, List<Inscription> all) {
+    if (all.isEmpty()) {
+      holder.remove(TAG);
+      return;
+    }
+    ListTag list = new ListTag();
+    for (Inscription i : all) Inscription.CODEC.encodeStart(NbtOps.INSTANCE, i).result().ifPresent(list::add);
+    holder.put(TAG, list);
   }
 
   private static void store(ItemStack stack, List<Inscription> all) {
@@ -72,9 +88,7 @@ public final class ItemDrawings {
       if (stack.hasTag()) stack.getTag().remove(TAG);
       return;
     }
-    ListTag list = new ListTag();
-    for (Inscription i : all) Inscription.CODEC.encodeStart(NbtOps.INSTANCE, i).result().ifPresent(list::add);
-    stack.getOrCreateTag().put(TAG, list);
+    storeIn(stack.getOrCreateTag(), all);
   }
 
   public static int count(ItemStack stack) {
@@ -146,6 +160,26 @@ public final class ItemDrawings {
       level.playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.ITEM_BREAK, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.0f);
       player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.arcane.drawing.broke").withStyle(net.minecraft.ChatFormatting.RED), true);
       stack.shrink(1);
+    }
+    return fired;
+  }
+
+  /** Dispara os desenhos de uma criatura (guardados no nbt dela): tinta vencida some, Persistencia fica, o resto some ao disparar. */
+  public static int fireOn(net.minecraft.world.entity.LivingEntity creature, ServerLevel level, List<Inscription> drawings, CompoundTag holder) {
+    if (DEPTH.get() > 0) return 0;
+    drawings.removeIf(i -> InkRegistry.expired(i.metadata().ink(), i.metadata().created(), level.getGameTime()));
+    int fired = 0;
+    DEPTH.set(DEPTH.get() + 1);
+    try {
+      List<Inscription> keep = new ArrayList<>();
+      for (Inscription d : drawings) {
+        CastingService.tryCast(creature, d, level);
+        fired++;
+        if (Traces.has(d, "persistence")) keep.add(d);
+      }
+      storeIn(holder, keep);
+    } finally {
+      DEPTH.set(DEPTH.get() - 1);
     }
     return fired;
   }

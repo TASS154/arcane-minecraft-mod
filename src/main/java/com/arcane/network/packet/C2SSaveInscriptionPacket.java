@@ -105,6 +105,9 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String i
   }
 
   /** Modos caneta: a tinta e escolhida na interface e tem de estar no inventario; gasta 1 (menos no criativo). */
+  /** Quantos desenhos uma criatura carrega. */
+  public static final int CREATURE_MAX_DRAWINGS = 2;
+
   private static void penInscribe(ServerPlayer player, ArcaneWorkbenchMenu menu, com.arcane.inscription.InscriptionValidator.ValidationResult validation, String inkChoice) {
     if (!validation.valid()) {
       player.displayClientMessage(Component.translatable("message.arcane.workbench.invalid", validation.message()).withStyle(ChatFormatting.RED), true);
@@ -116,6 +119,11 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String i
       return;
     }
     ResourceLocation inkId = new ResourceLocation("arcane", ((com.arcane.item.InkItem) ink.getItem()).inkId());
+    final int inkCost = com.arcane.item.InkItem.cost(menu.building().size());
+    if (!player.getAbilities().instabuild && com.arcane.item.InkItem.total(player, inkChoice) < inkCost) {
+      player.displayClientMessage(Component.translatable("message.arcane.pen.need_ink_units", inkCost).withStyle(ChatFormatting.RED), true);
+      return;
+    }
     if (menu.mode() == ArcaneWorkbenchMenu.ITEM) {
       var held = player.getOffhandItem();
       if (held.isEmpty() || held.getItem() instanceof com.arcane.item.InkItem || held.is(com.arcane.registry.ModItems.ARCANE_PEN.get())) {
@@ -149,7 +157,7 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String i
         }
         com.arcane.inscribing.ItemDrawings.add(written, inscription);
       }
-      if (!player.getAbilities().instabuild) ink.shrink(1);
+      if (!player.getAbilities().instabuild) com.arcane.item.InkItem.consume(player, inkChoice, inkCost);
       held.shrink(1);
       if (held.isEmpty()) player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, written);
       else if (!player.getInventory().add(written)) player.drop(written, false);
@@ -159,16 +167,37 @@ public record C2SSaveInscriptionPacket(String name, List<Entry> glyphs, String i
       return;
     }
     var level = (net.minecraft.server.level.ServerLevel) player.level();
+    if (menu.mode() == ArcaneWorkbenchMenu.CREATURE) {
+      var target = level.getEntity(menu.targetPos().getX());
+      if (!(target instanceof net.minecraft.world.entity.LivingEntity living) || living instanceof net.minecraft.world.entity.player.Player) return;
+      var data = living.getPersistentData();
+      var drawings = com.arcane.inscribing.ItemDrawings.listIn(data);
+      if (drawings.size() >= CREATURE_MAX_DRAWINGS) {
+        player.displayClientMessage(Component.translatable("message.arcane.drawing.full", CREATURE_MAX_DRAWINGS).withStyle(ChatFormatting.RED), true);
+        return;
+      }
+      drawings.add(new com.arcane.inscription.Inscription(List.copyOf(menu.building()), new com.arcane.inscription.InscriptionMetadata(
+          menu.spellName(), inkId, new ResourceLocation("arcane", "creature_pen"), com.arcane.execution.PrecisionSnapshot.FIELD_POWER,
+          java.util.Optional.of(player.getUUID()), level.getGameTime(), com.arcane.inscription.InscriptionSourceKind.WORLD)));
+      com.arcane.inscribing.ItemDrawings.storeIn(data, drawings);
+      if (!player.getAbilities().instabuild) com.arcane.item.InkItem.consume(player, inkChoice, inkCost);
+      level.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(), living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 14, 0.3, 0.4, 0.3, 0.02);
+      player.displayClientMessage(Component.translatable("message.arcane.creature.written").withStyle(ChatFormatting.LIGHT_PURPLE), true);
+      player.closeContainer();
+      return;
+    }
     var pos = menu.targetPos();
     String trigger = level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity
         ? com.arcane.inscribing.InscribingService.TRIGGER_ON_OPEN : com.arcane.inscribing.InscribingService.TRIGGER_ON_TOUCH;
-    if (menu.building().stream().anyMatch(g -> g.glyphId().getPath().equals("on_signal"))) {
+    if (player.getMainHandItem().getItem() instanceof com.arcane.item.AirPenItem) {
+      trigger = com.arcane.inscribing.InscribingService.TRIGGER_ON_NEAR; // no ar so ha proximidade
+    } else if (menu.building().stream().anyMatch(g -> g.glyphId().getPath().equals("on_signal"))) {
       trigger = com.arcane.inscribing.InscribingService.TRIGGER_ON_SIGNAL; // Ativar por Sinal troca o gatilho
     } else if (menu.building().stream().anyMatch(g -> g.glyphId().getPath().equals("on_near"))) {
       trigger = com.arcane.inscribing.InscribingService.TRIGGER_ON_NEAR; // Ativar por Proximidade
     }
     if (com.arcane.inscribing.InscribingService.inscribe(level, player, pos, menu.building(), inkId, trigger, menu.spellName(), menu.face())) {
-      if (!player.getAbilities().instabuild) ink.shrink(1);
+      if (!player.getAbilities().instabuild) com.arcane.item.InkItem.consume(player, inkChoice, inkCost);
       player.displayClientMessage(Component.translatable("message.arcane.pen.written." + trigger).withStyle(ChatFormatting.LIGHT_PURPLE), true);
       player.closeContainer();
     }

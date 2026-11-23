@@ -87,7 +87,8 @@ def structure_table(tier, families, rolls):
         base = 5 if g["tier"] == tier else (3 if g["tier"] == tier - 1 else 1)
         weight = base * (4 * match if match else 1)
         entries.append(note(f"arcane:{gid}", weight))
-    inks = [{"type": "minecraft:item", "name": "arcane:common_ink", "weight": 5},
+    inks = [{"type": "minecraft:item", "name": "arcane:creature_pen", "weight": 1},
+            {"type": "minecraft:item", "name": "arcane:common_ink", "weight": 5},
             {"type": "minecraft:item", "name": "minecraft:amethyst_shard", "weight": 3,
              "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3 + tier}}]}]
     if tier >= 2:
@@ -144,6 +145,8 @@ def main():
     shapeless("weapon_pen", ["arcane:arcane_pen", "minecraft:iron_sword", "minecraft:flint", "minecraft:blaze_powder"])
     shapeless("potion_pen", ["arcane:arcane_pen", "minecraft:glass_bottle", "minecraft:nether_wart", "minecraft:glowstone_dust"])
     shapeless("redstone_pen", ["arcane:arcane_pen", "minecraft:redstone", "minecraft:redstone", "minecraft:quartz"])
+    # Caneta de Fenix: cara (lagrima de ghast, po de blaze, diamante). A Caneta de Criatura so aparece em loot.
+    shapeless("phoenix_pen", ["arcane:arcane_pen", "minecraft:ghast_tear", "minecraft:blaze_powder", "minecraft:blaze_powder", "minecraft:diamond"])
     shapeless("solvent_powder", ["minecraft:sugar", "minecraft:ink_sac"], 2)
 
     # ---------------------------------------------------------- loot de blocos

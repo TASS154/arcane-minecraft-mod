@@ -96,6 +96,9 @@ public class ClientEvents {
   @SubscribeEvent
   public static void onDrawingTooltip(ItemTooltipEvent event) {
     ItemStack stack = event.getItemStack();
+    if (stack.getItem() instanceof com.arcane.item.InkItem) {
+      event.getToolTip().add(Component.translatable("tooltip.arcane.ink_units", com.arcane.item.InkItem.units(stack), com.arcane.item.InkItem.potUnits()).withStyle(ChatFormatting.AQUA));
+    }
     int n = com.arcane.inscribing.ItemDrawings.count(stack);
     if (n == 0) return;
     int cap = com.arcane.inscribing.ItemDrawings.capacity(stack);

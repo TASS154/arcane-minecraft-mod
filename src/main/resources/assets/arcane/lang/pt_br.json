@@ -782,5 +782,14 @@
   "message.arcane.drawing.unstable": "Desenho escrito, mas o objeto ficou instável: a potência varia e ele pode quebrar",
   "message.arcane.drawing.broke": "O objeto instável se quebrou",
   "tooltip.arcane.drawings": "Desenhos: %s/%s",
-  "tooltip.arcane.drawings.unstable": "Instável: potência imprevisível, pode quebrar"
+  "tooltip.arcane.drawings.unstable": "Instável: potência imprevisível, pode quebrar",
+  "item.arcane.phoenix_pen": "Caneta de Fênix",
+  "item.arcane.phoenix_pen.desc": "Desenha no ar um círculo flutuante que dispara a magia quando uma criatura chega perto. Dura o quanto a tinta durar.\nBotão direito no ar (3 blocos à frente) ou numa face de bloco.",
+  "item.arcane.creature_pen": "Caneta de Criatura",
+  "item.arcane.creature_pen.desc": "Só em baús. Botão direito numa criatura: ela passa a disparar a magia sempre que atacar.",
+  "message.arcane.air.blocked": "Não há espaço livre aqui para desenhar no ar",
+  "message.arcane.creature.written": "A criatura foi marcada: dispara a magia quando atacar",
+  "message.arcane.creature.invalid": "Esta caneta só escreve em criaturas (não em jogadores)",
+  "message.arcane.pen.need_ink_units": "Falta tinta: o desenho gasta %s unidades",
+  "tooltip.arcane.ink_units": "Tinta: %s/%s unidades"
 }

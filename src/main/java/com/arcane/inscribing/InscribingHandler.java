@@ -45,6 +45,51 @@ public class InscribingHandler {
     if (result == InscribingService.Dissolve.ERASED && !player.getAbilities().instabuild) player.getMainHandItem().shrink(1);
   }
 
+  /** Caneta de Fenix num bloco: o desenho fica no ar, junto da face clicada, virado para quem desenha. */
+  @SubscribeEvent(priority = EventPriority.HIGH)
+  public void onAirPenBlock(PlayerInteractEvent.RightClickBlock event) {
+    Player player = event.getEntity();
+    if (event.getHand() != InteractionHand.MAIN_HAND || !(player.getMainHandItem().getItem() instanceof com.arcane.item.AirPenItem)) return;
+    event.setCanceled(true);
+    event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+    if (event.getLevel().isClientSide || !(player instanceof ServerPlayer sp) || event.getFace() == null) return;
+    openAirMenu(sp, event.getPos().relative(event.getFace()));
+  }
+
+  /** Caneta de Fenix no ar: o desenho fica a 3 blocos a frente. */
+  @SubscribeEvent
+  public void onAirPenAir(PlayerInteractEvent.RightClickItem event) {
+    Player player = event.getEntity();
+    if (event.getHand() != InteractionHand.MAIN_HAND || !(player.getMainHandItem().getItem() instanceof com.arcane.item.AirPenItem)) return;
+    event.setCanceled(true);
+    event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+    if (event.getLevel().isClientSide || !(player instanceof ServerPlayer sp)) return;
+    openAirMenu(sp, BlockPos.containing(sp.getEyePosition().add(sp.getLookAngle().scale(3.0))));
+  }
+
+  private static void openAirMenu(ServerPlayer player, BlockPos pos) {
+    if (!player.level().getBlockState(pos).isAir()) {
+      player.displayClientMessage(Component.translatable("message.arcane.air.blocked").withStyle(ChatFormatting.RED), true);
+      return;
+    }
+    openPenMenu(player, pos, com.arcane.menu.ArcaneWorkbenchMenu.BLOCK, player.getDirection().getOpposite());
+  }
+
+  /** Caneta de Criatura numa criatura: abre o menu de escrever nela. */
+  @SubscribeEvent(priority = EventPriority.HIGH)
+  public void onCreaturePen(PlayerInteractEvent.EntityInteract event) {
+    Player player = event.getEntity();
+    if (event.getHand() != InteractionHand.MAIN_HAND || !(player.getMainHandItem().getItem() instanceof com.arcane.item.CreaturePenItem)) return;
+    event.setCanceled(true);
+    event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+    if (event.getLevel().isClientSide || !(player instanceof ServerPlayer sp)) return;
+    if (!(event.getTarget() instanceof net.minecraft.world.entity.LivingEntity living) || living instanceof Player) {
+      sp.displayClientMessage(Component.translatable("message.arcane.creature.invalid").withStyle(ChatFormatting.RED), true);
+      return;
+    }
+    openPenMenu(sp, new BlockPos(living.getId(), 0, 0), com.arcane.menu.ArcaneWorkbenchMenu.CREATURE, net.minecraft.core.Direction.UP);
+  }
+
   /** Pena na mao principal + tinta na secundaria: escreve (ou apaga, agachado) em vez de usar o bloco. */
   @SubscribeEvent(priority = EventPriority.HIGH)
   public void onPenUse(PlayerInteractEvent.RightClickBlock event) {
@@ -104,9 +149,20 @@ public class InscribingHandler {
     ItemStack held = player.getOffhandItem();
     if (held.isEmpty() || held.getItem() instanceof InkItem || player.isShiftKeyDown()) return;
     event.setCanceled(true);
+    // Resultado de sucesso: sem isso o jogo segue para a mao secundaria e comeca a comer/beber o item que ia receber o desenho.
+    event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
     if (!event.getLevel().isClientSide && player instanceof ServerPlayer sp) {
       openPenMenu(sp, sp.blockPosition(), com.arcane.menu.ArcaneWorkbenchMenu.ITEM, net.minecraft.core.Direction.UP);
     }
+  }
+
+  /** Com uma caneta na mao principal, o item da mao secundaria nunca comeca a ser comido/bebido (ele esta sendo desenhado). */
+  @SubscribeEvent
+  public void onOffhandUseWithPen(net.minecraftforge.event.entity.living.LivingEntityUseItemEvent.Start event) {
+    if (!(event.getEntity() instanceof Player player)) return;
+    ItemStack main = player.getMainHandItem();
+    boolean pen = main.is(ModItems.ARCANE_PEN.get()) || main.getItem() instanceof com.arcane.item.ObjectPenItem;
+    if (pen && event.getItem() == player.getOffhandItem() && !(event.getItem().getItem() instanceof InkItem)) event.setCanceled(true);
   }
 
   private static void openPenMenu(ServerPlayer player, BlockPos target, int mode, net.minecraft.core.Direction clicked) {

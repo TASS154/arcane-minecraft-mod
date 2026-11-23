@@ -782,5 +782,14 @@
   "message.arcane.drawing.unstable": "Drawing written, but the object is now unstable: power varies and it may break",
   "message.arcane.drawing.broke": "The unstable object broke",
   "tooltip.arcane.drawings": "Drawings: %s/%s",
-  "tooltip.arcane.drawings.unstable": "Unstable: unpredictable power, may break"
+  "tooltip.arcane.drawings.unstable": "Unstable: unpredictable power, may break",
+  "item.arcane.phoenix_pen": "Phoenix Pen",
+  "item.arcane.phoenix_pen.desc": "Draws a floating circle in the air that fires the spell when a creature comes near. Lasts as long as the ink does.\nRight-click in the air (3 blocks ahead) or on a block face.",
+  "item.arcane.creature_pen": "Creature Pen",
+  "item.arcane.creature_pen.desc": "Chests only. Right-click a creature: it fires the spell every time it attacks.",
+  "message.arcane.air.blocked": "No free space here to draw in the air",
+  "message.arcane.creature.written": "The creature is marked: it fires the spell when it attacks",
+  "message.arcane.creature.invalid": "This pen only writes on creatures (not players)",
+  "message.arcane.pen.need_ink_units": "Not enough ink: the drawing costs %s units",
+  "tooltip.arcane.ink_units": "Ink: %s/%s units"
 }

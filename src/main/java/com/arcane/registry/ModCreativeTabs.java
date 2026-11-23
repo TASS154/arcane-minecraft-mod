@@ -27,6 +27,8 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.WEAPON_PEN.get());
                 output.accept(ModItems.POTION_PEN.get());
                 output.accept(ModItems.REDSTONE_PEN.get());
+                output.accept(ModItems.PHOENIX_PEN.get());
+                output.accept(ModItems.CREATURE_PEN.get());
                 output.accept(ModItems.EARTH_PEN.get());
                 output.accept(ModItems.STONE_PEN.get());
                 output.accept(ModItems.METAL_PEN.get());

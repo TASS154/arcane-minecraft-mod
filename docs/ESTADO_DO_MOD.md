@@ -331,3 +331,13 @@ Cobertas por GameTest (219 passam). **Não visto em jogo com raio grande.**
 - **Agora:** com "Raio máximo fixo das áreas" ligado a cratera continua parando em 24. Desligado, vale `craterMaxRadius` (padrão 128, 0 = sem limite).
 - **Fila de blocos** (`CraterQueue`): crateras grandes saem aos poucos (`craterBlocksPerTick`, padrão 10 mil por tick), em vez de travar o servidor. Cada bloco entra no diário do Restaurar. Raio 96 tem cerca de 3,7 milhões de blocos, então leva alguns segundos para abrir inteira.
 - **Limites:** a varredura da esfera em si ainda roda de uma vez (raio 128 varre ~17 milhões de posições); o diário do Restaurar guarda um registro por bloco, então uma cratera enorme usa bastante memória. Com `blastDropsLoot` ligado o caminho do vanilla continua o antigo.
+
+## Entrega 3b: potes com quantidade, Caneta de Fênix e Caneta de Criatura (2026-11-23)
+
+- **Potes de tinta com quantidade**: cada pote tem `inkPotUnits` (24) unidades e cada glifo gasta `inkUnitsPerGlyph` (1). Pote usado pela metade guarda o resto (nbt `ink_units`); gasta-se antes os potes pela metade. Tooltip mostra `Tinta: x/24`. Sem tinta suficiente o desenho e recusado.
+- **Caneta de Fênix** (craftavel: Pena + lagrima de ghast + 2 po de blaze + diamante): desenha no ar (bloco vazio na face clicada ou 3 blocos a frente), gatilho sempre por proximidade, dura o quanto a tinta durar; `airDrawingsNeverFade = true` na config tira o limite.
+- **Caneta de Criatura** (so em baus): botao direito numa criatura (nao jogador) escreve nela; ate 2 desenhos; ela dispara a magia quando atacar; some depois de disparar, salvo Persistencia; tinta vence como nos outros.
+- Correcao: desenhar em comida/pocao com o item na mao secundaria nao inicia mais o uso (consumia o item).
+- Testes novos: unidades de tinta, criatura desenhada, caneta de ar. Passaram.
+- **Honestidade**: a suite de GameTest tem 5 falhas (electrify, link, lifesteal, attract, swap) que tambem aparecem sem estas mudancas (em HEAD deram ate 9, variando). Suspeita: estado persistido em `run/world` (ex.: `arcane_zones.dat` com cristais de testes antigos); nao confirmado, nao apaguei o mundo. Falta testar a 3b no cliente (menus, modelos, renderizar o circulo de ar).
+- Pendente: bloco com propriedades, e o item (c) magias longas com `after_seconds` (atrasos sao absolutos por segmento, nao acumulados).

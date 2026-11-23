@@ -36,6 +36,17 @@ public final class ItemDrawingEvents {
     ItemDrawings.fire(player, held);
   }
 
+  /** Criatura desenhada: dispara os desenhos dela sempre que ataca (o desenho some depois, salvo Persistencia). */
+  @SubscribeEvent
+  public static void onCreatureAttack(LivingHurtEvent event) {
+    if (!(event.getSource().getEntity() instanceof net.minecraft.world.entity.LivingEntity attacker) || attacker instanceof ServerPlayer
+        || !(attacker.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+    var data = attacker.getPersistentData();
+    var drawings = ItemDrawings.listIn(data);
+    if (drawings.isEmpty()) return;
+    ItemDrawings.fireOn(attacker, level, drawings, data);
+  }
+
   /** Po solvente na mao principal e um item na secundaria: apaga os desenhos do item (a tinta permanente pura fica). */
   @SubscribeEvent
   public static void onSolvent(PlayerInteractEvent.RightClickItem event) {

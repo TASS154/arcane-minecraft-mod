@@ -122,6 +122,16 @@ def block_pen(kind):
         els = [box((7.6, 0, 7.6), (8.4, 2.0, 8.4), "ice_d", r), box((7.2, 2.0, 7.2), (8.8, 3.0, 8.8), "white", r),
                box((7.3, 3.0, 7.3), (8.7, 10.5, 8.7), "ice", r), box((7.1, 10.5, 7.1), (8.9, 11.2, 8.9), "white", r),
                box((7.5, 11.2, 7.5), (8.5, 12.8, 8.5), "ice_d", r), box((7.75, 12.8, 7.75), (8.25, 15.0, 8.25), "white", r)]
+    elif kind == "phoenix":   # corpo vermelho-alaranjado, penacho de chama dourado no topo
+        els = [box((7.6, 0, 7.6), (8.4, 2.0, 8.4), "dark", r), box((7.0, 2.0, 7.0), (9.0, 3.4, 9.0), "gold", r),
+               box((7.2, 3.4, 7.2), (8.8, 10.5, 8.8), "red", r), box((7.0, 6.0, 7.0), (9.0, 6.8, 9.0), "orange", r),
+               box((7.0, 10.5, 7.0), (9.0, 11.5, 9.0), "gold", r), box((7.3, 11.5, 7.3), (8.7, 13.5, 8.7), "orange", r),
+               box((7.6, 13.5, 7.6), (8.4, 15.2, 8.4), "gold", r), box((8.4, 12.0, 7.7), (9.8, 14.0, 8.3), "red", r)]
+    elif kind == "creature":  # corpo roxo escuro e uma caveirinha branca no topo
+        els = [box((7.6, 0, 7.6), (8.4, 2.0, 8.4), "dark", r), box((7.0, 2.0, 7.0), (9.0, 3.0, 9.0), "silver", r),
+               box((7.2, 3.0, 7.2), (8.8, 10.5, 8.8), "violet_d", r), box((7.0, 10.5, 7.0), (9.0, 11.2, 9.0), "silver", r),
+               box((6.6, 11.2, 6.6), (9.4, 14.0, 9.4), "white", r), box((6.8, 12.6, 9.4), (7.6, 13.4, 9.5), "dark", r),
+               box((8.4, 12.6, 9.4), (9.2, 13.4, 9.5), "dark", r)]
     elif kind == "redstone":  # corpo vermelho, pino de redstone no topo e contatos dourados
         els = [box((7.6, 0, 7.6), (8.4, 2.0, 8.4), "dark", r), box((7.0, 2.0, 7.0), (9.0, 3.2, 9.0), "gold", r),
                box((7.2, 3.2, 7.2), (8.8, 11.5, 8.8), "red", r), box((7.0, 6.0, 7.0), (9.0, 6.8, 9.0), "red_d", r),
@@ -181,6 +191,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     models = {
         "arcane_pen": pen(),
+        "phoenix_pen": block_pen("phoenix"),
+        "creature_pen": block_pen("creature"),
         "redstone_pen": block_pen("redstone"),
         "food_pen": block_pen("food"),
         "weapon_pen": block_pen("weapon"),

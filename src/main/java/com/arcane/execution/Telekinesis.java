@@ -243,10 +243,15 @@ public final class Telekinesis {
         Vec3 delta = wanted.subtract(pos).scale(0.28);
         e.fallDistance = 0.0f;
         if (e instanceof FallingBlockEntity fb) {
+          // Bloco: o servidor decide a posicao exata e manda para quem esta vendo TODO tick, com velocidade zero.
+          // Antes ia a velocidade e o cliente (que so recebe a posicao de blocos a cada 20 ticks) extrapolava: a cada
+          // giro de camera o bloco passava do ponto e voltava. Sem colisao: um bloco tirado de dentro da parede sai dela.
           fb.time = 1;
-          Vec3 next = e.position().add(delta);
+          fb.noPhysics = true;
+          Vec3 next = e.position().add(wanted.subtract(pos).scale(0.5));
           e.setPos(next.x, next.y, next.z);
-          e.setDeltaMovement(delta);
+          e.setDeltaMovement(Vec3.ZERO);
+          hold.level.getChunkSource().broadcast(e, new net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket(e));
         } else if (e instanceof net.minecraft.server.level.ServerPlayer) {
           e.setDeltaMovement(delta);
           e.hurtMarked = true;

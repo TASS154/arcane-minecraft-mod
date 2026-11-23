@@ -21,7 +21,7 @@ public final class ModBlocks {
 
     public static final RegistryObject<Block> ARCANE_BARRIER = BLOCKS.register("arcane_barrier",
             () -> new com.arcane.block.ArcaneBarrierBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
-                    .strength(0.8f).noLootTable().noOcclusion().lightLevel(s -> 6)
+                    .strength(0.8f, 1200.0f).noLootTable().noOcclusion().lightLevel(s -> 6)
                     .sound(net.minecraft.world.level.block.SoundType.AMETHYST)
                     .isRedstoneConductor((s, l, p) -> false).isSuffocating((s, l, p) -> false).isViewBlocking((s, l, p) -> false)));
 

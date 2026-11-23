@@ -2606,11 +2606,18 @@ public class ArcaneGameTests {
     int sel = com.arcane.item.ScepterItem.selected(scepter);
     com.arcane.item.ScepterItem.cycle(scepter);
     h.assertTrue(com.arcane.item.ScepterItem.selected(scepter) == (sel + 1) % 6, "agachar passa para a proxima");
-    h.assertTrue(com.arcane.item.ScepterItem.restyle(scepter, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.EMERALD))
-        && com.arcane.item.ScepterItem.head(scepter) == 2, "esmeralda troca a ponta");
-    h.assertTrue(com.arcane.item.ScepterItem.restyle(scepter, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE))
-        && com.arcane.item.ScepterItem.shaft(scepter) == 3, "osso troca a haste");
-    h.assertTrue(!com.arcane.item.ScepterItem.restyle(scepter, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIRT)), "terra nao muda nada");
+    // aparencia: 10 pontas x 8 hastes x 20 gemas x 8 metais; o valor da volta e a cor de cada tinta segue a escolha
+    com.arcane.item.ScepterItem.setStyle(scepter, com.arcane.item.ScepterItem.PART_HEAD, 9);
+    com.arcane.item.ScepterItem.setStyle(scepter, com.arcane.item.ScepterItem.PART_SHAFT, 8);
+    h.assertTrue(com.arcane.item.ScepterItem.head(scepter) == 9 && com.arcane.item.ScepterItem.shaft(scepter) == 0, "ponta 9 existe; haste 8 da a volta para 0");
+    com.arcane.item.ScepterItem.setStyle(scepter, com.arcane.item.ScepterItem.PART_GEM, 7);
+    com.arcane.item.ScepterItem.setStyle(scepter, com.arcane.item.ScepterItem.PART_METAL, 1);
+    h.assertTrue(com.arcane.item.ScepterItem.tint(scepter, 0) == com.arcane.item.ScepterItem.GEM_COLORS[7]
+        && com.arcane.item.ScepterItem.tint(scepter, 1) == com.arcane.item.ScepterItem.METAL_COLORS[1], "a gema e o metal sao pintados com a cor escolhida");
+    h.assertTrue(com.arcane.item.ScepterItem.count(0) * com.arcane.item.ScepterItem.count(1) * com.arcane.item.ScepterItem.count(2) * com.arcane.item.ScepterItem.count(3) >= 10000,
+        "mais de 10 mil combinacoes de aparencia");
+    com.arcane.item.ScepterItem.remove(scepter, 0);
+    h.assertTrue(com.arcane.item.ScepterItem.spells(scepter).size() == 5, "x apaga uma magia");
     h.assertTrue(Math.abs(com.arcane.item.ScepterItem.POWER - 1.2) < 1e-9, "forca de 120%");
     // Conjurar com o cetro: a cura sai mais forte que a mesma magia sem cetro.
     var player = learn(casterWith(h), "self", "heal");
@@ -2783,10 +2790,13 @@ public class ArcaneGameTests {
     for (int y = 1; y <= 3; y++) h.setBlock(new BlockPos(5, y, 1), Blocks.STONE);
     Pig eraser = pig(h, 5, 2);
     cast(h, eraser, g("self"), g("annihilate", "radius", 3.0));
-    int left = 0;
-    for (int y = 1; y <= 3; y++) if (!h.getBlockState(new BlockPos(5, y, 1)).isAir()) left++;
-    h.assertTrue(left == 0, "Aniquilacao apagou os blocos (" + left + " ficaram)");
-    h.succeed();
+    // a cratera abre em onda de choque (do centro para fora): espera a frente passar
+    h.runAfterDelay(10, () -> {
+      int left = 0;
+      for (int y = 1; y <= 3; y++) if (!h.getBlockState(new BlockPos(5, y, 1)).isAir()) left++;
+      h.assertTrue(left == 0, "Aniquilacao apagou os blocos (" + left + " ficaram)");
+      h.succeed();
+    });
   }
 
   @GameTest(template = "empty", batch = "crater_limits")
@@ -2808,7 +2818,70 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
-  @GameTest(template = "empty", batch = "crater_queue", timeoutTicks = 80)
+  @GameTest(template = "empty", batch = "crater_wave", timeoutTicks = 100)
+  public static void aCraterOpensFromTheCentreOutwardLikeAShockwave(GameTestHelper h) {
+    var level = h.getLevel();
+    var list = new it.unimi.dsi.fastutil.longs.LongArrayList();
+    BlockPos c = h.absolutePos(new BlockPos(3, 3, 3));
+    for (int x = 0; x < 7; x++) for (int z = 0; z < 7; z++) for (int y = 1; y < 6; y++) {
+      BlockPos pos = h.absolutePos(new BlockPos(x, y, z));
+      level.setBlock(pos, Blocks.DIRT.defaultBlockState(), 2);
+      list.add(pos.asLong());
+    }
+    com.arcane.execution.CraterQueue.submit(level, list, net.minecraft.world.phys.Vec3.atCenterOf(c));
+    h.runAfterDelay(1, () -> {
+      h.assertTrue(level.getBlockState(c).isAir(), "o centro sai primeiro");
+      h.assertTrue(!level.getBlockState(h.absolutePos(new BlockPos(0, 1, 0))).isAir(), "o canto longe ainda esta la");
+    });
+    h.runAfterDelay(30, () -> {
+      h.assertTrue(com.arcane.execution.CraterQueue.pending(level) == 0, "a onda chegou ate a borda");
+      h.assertTrue(level.getBlockState(h.absolutePos(new BlockPos(0, 1, 0))).isAir(), "e levou o canto");
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", batch = "crater_barrier", timeoutTicks = 100)
+  public static void aBarrierShieldsWhatIsBehindItFromACrater(GameTestHelper h) {
+    var level = h.getLevel();
+    var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get().defaultBlockState();
+    var list = new it.unimi.dsi.fastutil.longs.LongArrayList();
+    for (int x = 0; x < 7; x++) for (int z = 0; z < 7; z++) for (int y = 1; y < 4; y++) {
+      BlockPos rel = new BlockPos(x, y, z);
+      BlockPos pos = h.absolutePos(rel);
+      boolean wall = z == 3 && x >= 1 && x <= 5;
+      level.setBlock(pos, wall ? barrier : Blocks.STONE.defaultBlockState(), 2);
+      list.add(pos.asLong());
+    }
+    com.arcane.execution.CraterQueue.submit(level, list, net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(3, 2, 1))));
+    h.runAfterDelay(30, () -> {
+      h.assertTrue(level.getBlockState(h.absolutePos(new BlockPos(3, 2, 1))).isAir() && level.getBlockState(h.absolutePos(new BlockPos(0, 2, 0))).isAir(),
+          "na frente da barreira a cratera abriu");
+      for (int x = 1; x <= 5; x++) h.assertTrue(level.getBlockState(h.absolutePos(new BlockPos(x, 2, 3))).is(barrier.getBlock()), "a barreira aguentou");
+      for (int z = 4; z < 7; z++) {
+        h.assertTrue(level.getBlockState(h.absolutePos(new BlockPos(3, 2, z))).is(Blocks.STONE), "atras da barreira ficou intacto (z " + z + ")");
+      }
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "empty", batch = "barrier_ray")
+  public static void aBarrierStopsRaysAndCannotBeDugByMagic(GameTestHelper h) {
+    floor(h);
+    var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get().defaultBlockState();
+    for (int x = 1; x <= 5; x++) for (int y = 1; y <= 3; y++) h.setBlock(new BlockPos(x, y, 2), barrier);
+    Pig caster = pig(h, 3, 0);
+    Pig target = pig(h, 3, 4);
+    float hp = target.getHealth();
+    cast(h, caster, g("ray"), g("damage", "amount", 6.0));
+    h.assertTrue(target.getHealth() == hp, "o raio parou na barreira (vida " + hp + " -> " + target.getHealth() + ")");
+    cast(h, caster, g("ray"), g("dig", "power", 5.0));
+    int left = 0;
+    for (int x = 1; x <= 5; x++) for (int y = 1; y <= 3; y++) if (h.getBlockState(new BlockPos(x, y, 2)).is(barrier.getBlock())) left++;
+    h.assertTrue(left == 15, "Cavar nao abre a barreira (" + left + " de 15)");
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "crater_queue", timeoutTicks = 100)
   public static void aBigCraterIsRemovedOverSeveralTicksNotAllAtOnce(GameTestHelper h) {
     var level = h.getLevel();
     int per = com.arcane.config.ArcaneConfig.CRATER_BLOCKS_PER_TICK.get();
@@ -2824,7 +2897,7 @@ public class ArcaneGameTests {
       com.arcane.execution.CraterQueue.submit(level, list);
       int left = com.arcane.execution.CraterQueue.pending(level);
       h.assertTrue(left > 0 && left < list.size(), "so parte saiu no primeiro tick (sobram " + left + " de " + list.size() + ")");
-      h.runAfterDelay(5, () -> {
+      h.runAfterDelay(30, () -> {
         h.assertTrue(com.arcane.execution.CraterQueue.pending(level) == 0, "a fila terminou");
         int solid = 0;
         for (int i = 0; i < list.size(); i++) if (!level.getBlockState(BlockPos.of(list.getLong(i))).isAir()) solid++;
@@ -3598,6 +3671,33 @@ public class ArcaneGameTests {
     for (int x = 0; x < 7; x++) for (int z = 0; z < 7; z++) if (h.getBlockState(new BlockPos(x, 0, z)).is(Blocks.STONE)) after++;
     h.assertTrue(after < before, "a Aura entrega os blocos ao redor aos efeitos (pedras " + before + " -> " + after + ")");
     h.succeed();
+  }
+
+  @GameTest(template = "empty", timeoutTicks = 80)
+  public static void telekinesisBlockGlidesToTheAimWithoutOvershooting(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 1, 1);
+    caster.setYRot(0);
+    h.setBlock(new BlockPos(1, 1, 4), Blocks.STONE);
+    cast(h, caster, g("ray"), g("telekinesis", "distance", 4.0));
+    var fbs = h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.FallingBlockEntity.class, new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(1, 1, 4))).inflate(4));
+    h.assertTrue(fbs.size() == 1, "o bloco virou entidade (" + fbs.size() + ")");
+    var fb = fbs.get(0);
+    java.util.List<Double> dist = new java.util.ArrayList<>();
+    for (int k = 1; k <= 6; k++) {
+      int at = k * 5;
+      h.runAfterDelay(at, () -> {
+        var anchor = caster.getEyePosition().add(caster.getLookAngle().scale(4.0));
+        dist.add(fb.position().add(0, 0.49, 0).distanceTo(anchor));
+      });
+    }
+    h.runAfterDelay(40, () -> {
+      h.assertTrue(fb.isAlive(), "continua no ar (nao caiu nem virou bloco)");
+      h.assertTrue(dist.get(dist.size() - 1) < 0.6, "chegou na mira: " + dist);
+      for (int i = 1; i < dist.size(); i++) h.assertTrue(dist.get(i) <= dist.get(i - 1) + 0.05, "aproxima sem passar do ponto e voltar: " + dist);
+      com.arcane.execution.Telekinesis.release(caster.getUUID());
+      h.succeed();
+    });
   }
 
   @GameTest(template = "empty")

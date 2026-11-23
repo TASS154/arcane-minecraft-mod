@@ -20,7 +20,8 @@ public record S2CShapeFxPacket(int type, Vec3 pos, Vec3 dir, float size, int rgb
    */
   public static final int ORIGINAL = 7;
   public static final int FX_TIME_STOP = 0, FX_REWIND = 1, FX_SPACE_COLLAPSE = 2, FX_ANNIHILATE = 3, FX_ECLIPSE = 4, FX_GENESIS = 5,
-      FX_GRAVITY = 6, FX_WARN = 7, FX_DEVASTATE = 8, FX_BREAKOUT = 9, FX_AWAKEN = 10, FX_ROAR = 11, FX_SEAL_BREAK = 12;
+      FX_GRAVITY = 6, FX_WARN = 7, FX_DEVASTATE = 8, FX_BREAKOUT = 9, FX_AWAKEN = 10, FX_ROAR = 11, FX_SEAL_BREAK = 12,
+      FX_SHOCKWAVE = 13;
 
   public static void encode(S2CShapeFxPacket p, FriendlyByteBuf buf) {
     buf.writeVarInt(p.type);

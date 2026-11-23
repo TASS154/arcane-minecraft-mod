@@ -21,6 +21,8 @@ public class DigEffectHandler implements EffectHandler {
       BlockState state = context.level().getBlockState(block.pos());
       float hardness = state.getDestroySpeed(context.level(), block.pos());
       if (state.isAir() || hardness < 0 || hardness > power || state.hasBlockEntity()) continue;
+      // Barreira e escudo magico: magia nao a cava (ela some sozinha, ou quebrando com a mao)
+      if (state.is(com.arcane.registry.ModBlocks.ARCANE_BARRIER.get())) continue;
       if (context.level().destroyBlock(block.pos(), true, context.caster())) broken++;
     }
   }

@@ -149,7 +149,7 @@ public final class DevAutoTest {
       }
     }
     if (!armed || mc.player == null) return;
-    if (mc.screen != null && !(mc.screen instanceof com.arcane.client.screen.RadialScreen)) mc.setScreen(null);
+    if (mc.screen != null && !(mc.screen instanceof com.arcane.client.screen.RadialScreen) && !(mc.screen instanceof com.arcane.client.screen.ScepterScreen)) mc.setScreen(null);
     t++;
     step(mc);
   }
@@ -159,12 +159,28 @@ public final class DevAutoTest {
     server(sp -> com.arcane.network.ModNetwork.sendShape(sp.serverLevel(), com.arcane.network.packet.S2CShapeFxPacket.ORIGINAL, at, dir, radius, 0xFFFFFF, kind, ticks));
   }
 
-  private static HydraEntity sealedHydra;
-  private static net.minecraft.world.entity.animal.Pig bait;
+  private static int[][] STYLES = {
+      {0, 0, 0, 0},   // lua crescente, haste branca, gema vermelha, ouro
+      {1, 4, 8, 4},   // gaiola, obsidiana, roxa, ferro negro
+      {2, 1, 6, 1},   // aro de monge, madeira, azul-clara, prata
+      {3, 6, 17, 6},  // cristais, haste de cristal, diamante, celeste
+      {4, 7, 4, 3},   // espiral do druida, galho, verde, cobre
+      {5, 5, 19, 0},  // asas, toda de metal, solar, ouro
+      {6, 2, 9, 2},   // estrela, retorcida, magenta, rose
+      {7, 3, 14, 7},  // tridente, osso, negra, carmesim
+      {8, 0, 5, 5},   // aureola, branca, ciano, marfim
+      {9, 1, 16, 0},  // orbe, madeira, ametista, ouro
+  };
+
+  private static void styleHeld(int[] st) {
+    server(sp -> {
+      var stack = sp.getMainHandItem();
+      for (int part = 0; part < 4; part++) com.arcane.item.ScepterItem.setStyle(stack, part, st[part]);
+    });
+  }
 
   private static void step(Minecraft mc) {
     var p = mc.player;
-    Vec3 stage = base == null ? Vec3.ZERO : base.add(0, 0, 18);
     switch (t) {
       case 40 -> {
         cmd("gamemode creative");
@@ -180,126 +196,77 @@ public final class DevAutoTest {
         write("base " + base);
       }
       case 60 -> server(sp -> {
-        // plataforma de pedra limpa
         ServerLevel l = sp.serverLevel();
         BlockPos o = sp.blockPosition();
         for (int x = -30; x <= 30; x++) for (int z = -4; z <= 60; z++) {
           l.setBlock(o.offset(x, -1, z), Blocks.SMOOTH_STONE.defaultBlockState(), 2);
           for (int y = 0; y < 22; y++) l.setBlock(o.offset(x, y, z), Blocks.AIR.defaultBlockState(), 2);
         }
-        for (int i = 0; i < 5; i++) {
-          var pig = net.minecraft.world.entity.EntityType.PIG.create(l);
-          pig.moveTo(o.getX() + (i - 2) * 3 + 0.5, o.getY() + 2 + i % 2, o.getZ() + 18.5, 0f, 0f);
-          pig.addTag("arcane_autotest");
-          l.addFreshEntity(pig);
-        }
-        write("plataforma pronta");
+        sp.getInventory().setItem(sp.getInventory().selected, new ItemStack(com.arcane.registry.ModItems.SCEPTER.get()));
+        write("plataforma pronta, cetro na mao");
       });
-      case 70 -> tp(base.x, base.y + 9, base.z + 2, 0f, 28f);
-      // ---- Parar o Tempo de verdade (conjurado no centro): cupula, relogio e mundo cinza
-      case 100 -> server(sp -> {
-        sp.connection.teleport(stage.x, stage.y, stage.z - 6, 0f, 20f);
-        var r = com.arcane.execution.CastingService.tryCast(sp, new Inscription(List.of(g("self"), g("time_stop", "radius", 12.0, "duration", 120.0))),
+      // ---- cetros: 10 visuais em terceira pessoa de frente
+      case 70 -> { tp(base.x, base.y, base.z, 180f, 0f); mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT); }
+      case 80, 92, 104, 116, 128, 140, 152, 164, 176, 188 -> styleHeld(STYLES[(t - 80) / 12]);
+      case 88, 100, 112, 124, 136, 148, 160, 172, 184, 196 -> shot("scepter_style_" + ((t - 88) / 12));
+      case 200 -> { styleHeld(STYLES[0]); mc.options.setCameraType(CameraType.FIRST_PERSON); }
+      case 212 -> shot("scepter_first_person");
+      case 214 -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+      case 226 -> shot("scepter_third_back");
+      case 228 -> { mc.options.setCameraType(CameraType.FIRST_PERSON); mc.options.hideGui = false; com.arcane.client.ClientHooks.openScepter(); }
+      case 245 -> shot("scepter_screen");
+      case 247 -> { mc.setScreen(null); mc.options.hideGui = false; }
+      case 250 -> shot("scepter_hotbar");
+      case 252 -> mc.options.hideGui = true;
+      // ---- telecinese: pega um bloco e gira a camera; mede no CLIENTE a distancia do bloco ate a mira
+      case 260 -> server(sp -> {
+        ServerLevel l = sp.serverLevel();
+        BlockPos o = sp.blockPosition();
+        sp.getInventory().setItem(sp.getInventory().selected, ItemStack.EMPTY);
+        l.setBlock(o.offset(0, 1, 4), Blocks.GOLD_BLOCK.defaultBlockState(), 3);
+        sp.connection.teleport(o.getX() + 0.5, o.getY(), o.getZ() + 0.5, 0f, 3f);
+      });
+      case 270 -> server(sp -> {
+        var r = com.arcane.execution.CastingService.tryCast(sp, new Inscription(List.of(g("ray"), g("telekinesis", "distance", 4.0, "duration", 400.0))),
             com.arcane.execution.PrecisionSnapshot.FIELD);
-        write("parar o tempo: conjurou=" + r.success() + " " + r.message());
+        write("telecinese: conjurou=" + r.success() + " " + r.message() + " segurando=" + com.arcane.execution.Telekinesis.heldCount(sp.getUUID()));
       });
-      case 102 -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-      case 130 -> shot("original_time_stop");
-      case 106, 116, 126, 136 -> write("t" + t + " filtro cinza: nosso=" + com.arcane.client.render.OriginalFxRenderer.greyOn() + " efeito=" + mc.gameRenderer.currentEffect()
-          + " efeitos ativos=" + com.arcane.client.render.OriginalFxRenderer.active());
-      case 140 -> { mc.options.setCameraType(CameraType.FIRST_PERSON); tp(base.x, base.y + 9, base.z + 2, 0f, 28f); }
-      case 230 -> write("filtro cinza depois do fim: " + (mc.gameRenderer.currentEffect() != null));
-      case 232 -> fx(com.arcane.network.packet.S2CShapeFxPacket.FX_REWIND, stage.add(-4, 0, 0), stage.add(6, 0, 3), 1, 30);
-      case 244 -> shot("original_rewind");
-      case 260 -> fx(com.arcane.network.packet.S2CShapeFxPacket.FX_SPACE_COLLAPSE, stage.add(0, 2, 0), Vec3.ZERO, 12, 44);
-      case 276 -> shot("original_space_collapse");
-      case 310 -> fx(com.arcane.network.packet.S2CShapeFxPacket.FX_ANNIHILATE, stage.add(0, 3, 0), Vec3.ZERO, 7, 40);
-      case 312 -> shot("original_annihilate_flash");
-      case 322 -> shot("original_annihilate_void");
-      case 360 -> server(sp -> {
-        // o Eclipse e no ceu: vai para a superficie
-        int x = (int) base.x + 200, z = (int) base.z;
-        int y = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z);
-        int py = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z - 22);
-        sp.connection.teleport(x + 0.5, Math.max(y, py) + 1, z - 21.5, 0f, -32f);
-        com.arcane.network.ModNetwork.sendShape(sp.serverLevel(), com.arcane.network.packet.S2CShapeFxPacket.ORIGINAL, new Vec3(x + 0.5, y, z + 0.5), Vec3.ZERO, 30, 0xFFFFFF,
-            com.arcane.network.packet.S2CShapeFxPacket.FX_ECLIPSE, 140);
-      });
-      case 362 -> mc.options.setCameraType(CameraType.FIRST_PERSON);
-      case 466 -> mc.options.setCameraType(CameraType.FIRST_PERSON);
-      case 420 -> shot("original_eclipse");
-      case 470 -> { tp(base.x, base.y + 9, base.z + 2, 0f, 28f); fx(com.arcane.network.packet.S2CShapeFxPacket.FX_GENESIS, stage, Vec3.ZERO, 10, 70); }
-      case 505 -> shot("original_genesis");
-      case 545 -> fx(com.arcane.network.packet.S2CShapeFxPacket.FX_GRAVITY, stage, Vec3.ZERO, 9, 100);
-      case 590 -> shot("original_gravity");
-      // ---- Hidra estagio 7 selada por pilares; quebra os selos; desperta; devasta
-      case 650 -> server(sp -> {
+      case 300 -> mc.options.setCameraType(CameraType.FIRST_PERSON);
+      case 360 -> server(sp -> com.arcane.execution.Telekinesis.release(sp.getUUID()));
+      // ---- explosao destrutiva: onda de choque; uma barreira protege um pilar
+      case 380 -> server(sp -> {
         ServerLevel l = sp.serverLevel();
-        for (var e : l.getEntities((net.minecraft.world.entity.Entity) null, sp.getBoundingBox().inflate(80), e -> e.getTags().contains("arcane_autotest"))) e.discard();
-        BlockPos c = BlockPos.containing(stage.add(0, 0, 6));
-        for (int i = 0; i < HydraEntity.PILLARS; i++) {
-          BlockPos top = HydraEntity.pillarTop(i);
-          for (int y = 0; y < top.getY(); y++) l.setBlock(c.offset(top.getX(), y, top.getZ()), Blocks.POLISHED_BLACKSTONE.defaultBlockState(), 2);
-          l.setBlock(c.offset(top), Blocks.SOUL_LANTERN.defaultBlockState(), 2);
+        BlockPos o = BlockPos.containing(base);
+        // pilar de pedra protegido por uma parede de barreira entre ele e a explosao, e outro pilar sem protecao
+        for (int y = 0; y < 6; y++) {
+          l.setBlock(o.offset(6, y, 30), Blocks.STONE_BRICKS.defaultBlockState(), 2);
+          l.setBlock(o.offset(-6, y, 30), Blocks.STONE_BRICKS.defaultBlockState(), 2);
         }
-        HydraEntity h = ModEntities.HYDRA.get().create(l);
-        h.moveTo(c.getX() + 0.5, c.getY(), c.getZ() + 0.5, 180f, 0f);
-        h.setStage(7);
-        h.homeTo(c, 12);
-        h.yBodyRot = 180f;
-        h.yHeadRot = 180f;
-        int mask = HydraEntity.sealMaskFor(7);
-        for (int i = 0; i < HydraEntity.PILLARS; i++) if ((mask & (1 << i)) != 0) l.setBlock(c.offset(HydraEntity.pillarTop(i)), com.arcane.registry.ModBlocks.HYDRA_SEAL.get().defaultBlockState(), 3);
-        h.setSealMask(HydraLairs.sealMaskAt(l, c));
-        h.addTag("arcane_autotest");
-        l.addFreshEntity(h);
-        sealedHydra = h;
-        write("hidra selada: estagio 7, selos=" + Integer.bitCount(h.sealMask()) + ", sem IA=" + h.isNoAi());
-        sp.connection.teleport(c.getX() + 0.5, c.getY() + 7, c.getZ() - 17.5, 0f, 18f);
+        for (int x = 4; x <= 8; x++) for (int y = 0; y < 6; y++) l.setBlock(o.offset(x, y, 28), com.arcane.registry.ModBlocks.ARCANE_BARRIER.get().defaultBlockState(), 2);
+        sp.connection.teleport(o.getX() + 0.5, o.getY() + 12, o.getZ() + 8.5, 0f, 30f);
       });
-      case 690 -> shot("hydra_sealed");
-      case 695 -> server(sp -> {
-        float hp = sealedHydra.getHealth();
-        sealedHydra.hurt(sp.serverLevel().damageSources().playerAttack(sp), 50f);
-        write("golpe na hidra selada: vida " + hp + " -> " + sealedHydra.getHealth());
-        // quebra todos os selos menos um
-        BlockPos c = sealedHydra.home();
-        int left = Integer.bitCount(sealedHydra.sealMask());
-        for (int i = 0; i < HydraEntity.PILLARS && left > 1; i++) {
-          if ((sealedHydra.sealMask() & (1 << i)) == 0) continue;
-          sp.serverLevel().destroyBlock(c.offset(HydraEntity.pillarTop(i)), false, sp);
-          left--;
-        }
-        write("selos depois de quebrar: " + Integer.bitCount(sealedHydra.sealMask()) + ", selada=" + sealedHydra.sealed());
-      });
-      case 702 -> shot("hydra_seal_break");
-      case 730 -> server(sp -> {
-        BlockPos c = sealedHydra.home();
-        for (int i = 0; i < HydraEntity.PILLARS; i++) if ((sealedHydra.sealMask() & (1 << i)) != 0) sp.serverLevel().destroyBlock(c.offset(HydraEntity.pillarTop(i)), false, sp);
-        write("ultimo selo quebrado: selada=" + sealedHydra.sealed() + ", sem IA=" + sealedHydra.isNoAi());
-      });
-      case 738 -> shot("hydra_awaken");
-      case 760 -> server(sp -> {
+      case 400 -> server(sp -> {
         ServerLevel l = sp.serverLevel();
-        sealedHydra.setNoAi(true);
-        bait = net.minecraft.world.entity.EntityType.PIG.create(l);
-        bait.moveTo(sealedHydra.getX() + 10, sealedHydra.getY(), sealedHydra.getZ() - 8, 0f, 0f);
-        bait.setNoAi(true);
-        bait.addTag("arcane_autotest");
-        l.addFreshEntity(bait);
-        sealedHydra.use(HydraEntity.DEVASTATE, bait);
-        write("devastacao anunciada: golpes pendentes=" + sealedHydra.pendingStrikes());
+        var at = base.add(0, 0, 26);
+        com.arcane.execution.SpellImmunity.explodeAs(sp, net.minecraft.world.level.Level.ExplosionInteraction.BLOCK, 11f,
+            () -> l.explode(sp, at.x, at.y, at.z, 11f, net.minecraft.world.level.Level.ExplosionInteraction.BLOCK));
+        write("explosao: blocos na fila logo depois = " + com.arcane.execution.CraterQueue.pending(l));
       });
-      case 775 -> shot("hydra_devastate_warning");
-      case 793 -> shot("hydra_devastate_impact");
-      case 840 -> {
-        shot("hydra_crater");
-        server(sp -> write("depois do golpe: pendentes=" + sealedHydra.pendingStrikes() + ", porco vivo=" + bait.isAlive()));
-      }
-      case 860 -> server(sp -> {
-        for (var e : sp.serverLevel().getEntities((net.minecraft.world.entity.Entity) null, sp.getBoundingBox().inflate(80), e -> e.getTags().contains("arcane_autotest"))) e.discard();
+      case 403 -> shot("blast_wave_1");
+      case 407 -> { shot("blast_wave_2"); server(sp -> write("explosao: na fila depois de 7 ticks = " + com.arcane.execution.CraterQueue.pending(sp.serverLevel()))); }
+      case 412 -> shot("blast_wave_3");
+      case 440 -> server(sp -> {
+        BlockPos o = BlockPos.containing(base);
+        var l = sp.serverLevel();
+        int kept = 0, lost = 0;
+        for (int y = 0; y < 6; y++) {
+          if (!l.getBlockState(o.offset(6, y, 30)).isAir()) kept++;
+          if (!l.getBlockState(o.offset(-6, y, 30)).isAir()) lost++;
+        }
+        write("depois da explosao: pilar atras da barreira " + kept + "/6 blocos, pilar sem barreira " + lost + "/6, fila " + com.arcane.execution.CraterQueue.pending(l));
       });
-      case 870 -> {
+      case 442 -> shot("blast_after");
+      case 460 -> {
         cmd("gamemode creative");
         mc.options.hideGui = false;
         mc.options.pauseOnLostFocus = oldPause;
@@ -308,6 +275,26 @@ public final class DevAutoTest {
       }
       default -> {
       }
+    }
+    if (t >= 272 && t < 340 && t % 4 == 0) {
+      int now = t;
+      server(sp -> {
+        var held = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.item.FallingBlockEntity.class, sp.getBoundingBox().inflate(12));
+        write("servidor t" + now + ": segurando=" + com.arcane.execution.Telekinesis.heldCount(sp.getUUID()) + " blocos-entidade=" + held.size()
+            + (held.isEmpty() ? "" : String.format(" pos=(%.1f,%.1f,%.1f) chao=%s", held.get(0).getX(), held.get(0).getY(), held.get(0).getZ(), held.get(0).onGround())));
+      });
+      write("cliente t" + now + ": blocos-entidade=" + mc.level.getEntitiesOfClass(net.minecraft.world.entity.item.FallingBlockEntity.class, p.getBoundingBox().inflate(12)).size());
+    }
+    // telecinese: gira a camera 9 graus por tick por 2 s e mede o bloco no cliente
+    if (t >= 280 && t < 340) {
+      look(p.getYRot() + (t < 310 ? 9f : -9f), 25f);
+      var fb = mc.level.getEntitiesOfClass(net.minecraft.world.entity.item.FallingBlockEntity.class, p.getBoundingBox().inflate(10));
+      if (!fb.isEmpty()) {
+        Vec3 anchor = p.getEyePosition().add(p.getLookAngle().scale(4.0));
+        Vec3 at = fb.get(0).position().add(0, 0.49, 0);
+        write(String.format("telecinese t%d: bloco a %.2f da mira (cliente)", t, at.distanceTo(anchor)));
+      }
+      if (t == 295) shot("telekinesis_turning");
     }
   }
 }

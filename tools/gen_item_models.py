@@ -60,6 +60,10 @@ COLORS = [
     ("bone", (225, 220, 195, 255)),
     ("blaze", (250, 180, 40, 255)),
     ("obsidian", (30, 18, 50, 255)),
+    # partes tingidas (cor da gema / do metal vem do ItemColors)
+    ("tint", (255, 255, 255, 255)),
+    ("tint_d", (200, 200, 205, 255)),
+    ("grip", (50, 32, 40, 255)),
 ]
 INDEX = {name: i for i, (name, _) in enumerate(COLORS)}
 

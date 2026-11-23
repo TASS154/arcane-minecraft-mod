@@ -26,6 +26,7 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue HYDRA_BREAKOUT_SECONDS;
   public static final ForgeConfigSpec.IntValue CRATER_MAX_RADIUS;
   public static final ForgeConfigSpec.IntValue CRATER_BLOCKS_PER_TICK;
+  public static final ForgeConfigSpec.DoubleValue CRATER_SPREAD_SPEED;
   public static final ForgeConfigSpec.IntValue ITEM_EXTRA_DRAWINGS;
   public static final ForgeConfigSpec.IntValue INK_DAYS_COMMON;
   public static final ForgeConfigSpec.IntValue INK_DAYS_BLOOD;
@@ -102,6 +103,8 @@ public class ArcaneConfig {
         .defineInRange("craterMaxRadius", 128, 0, 4096);
     CRATER_BLOCKS_PER_TICK = builder.comment("Blocks a big crater removes per server tick (the rest is spread over the next ticks so the server does not freeze)")
         .defineInRange("craterBlocksPerTick", 10000, 500, 1000000);
+    CRATER_SPREAD_SPEED = builder.comment("How fast (blocks per tick) the shockwave of a crater spreads from its centre: the crater opens from the inside out instead of all at once. 1.0 = a radius-20 crater takes 1 second")
+        .defineInRange("craterSpreadSpeed", 1.0, 0.1, 64.0);
     INK_POT_UNITS = builder.comment("Units of ink in one pot (a drawing costs inkUnitsPerGlyph units per glyph; a partly used pot keeps what is left)")
         .defineInRange("inkPotUnits", 24, 1, 10000);
     INK_UNITS_PER_GLYPH = builder.comment("Ink units each glyph of a drawing costs")

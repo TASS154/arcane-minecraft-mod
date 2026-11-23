@@ -39,6 +39,12 @@ public class ClientSetup {
   public static KeyMapping CYCLE_KEY;
   public static KeyMapping GRIMOIRE_KEY;
 
+  /** Cetro: a gema (tinta 0) e o metal (tinta 1) sao pintados com as cores escolhidas na tela do cetro. */
+  @SubscribeEvent
+  public static void onItemColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
+    event.register((stack, index) -> com.arcane.item.ScepterItem.tint(stack, index), com.arcane.registry.ModItems.SCEPTER.get());
+  }
+
   @SubscribeEvent
   public static void onClientSetup(FMLClientSetupEvent event) {
     event.enqueueWork(() -> MenuScreens.register(ModMenuTypes.ARCANE_WORKBENCH.get(), ArcaneWorkbenchScreen::new));

@@ -88,6 +88,7 @@ public final class OriginalFxRenderer {
         case FX_ROAR -> CameraShake.add(0.5f, d * 0.4);
         case FX_TIME_STOP -> flash(0.25f * near, 0.9f, 0.85f, 0.6f);
         case FX_SEAL_BREAK -> CameraShake.add(0.3f, d);
+        case FX_SHOCKWAVE -> CameraShake.add(Math.min(0.8f, 0.2f + size * 0.03f), d * 0.5);
         default -> { }
       }
     }
@@ -272,6 +273,7 @@ public final class OriginalFxRenderer {
       case FX_AWAKEN -> awaken(c, pose, f, p);
       case FX_ROAR -> roar(c, pose, f, p);
       case FX_SEAL_BREAK -> sealBreak(c, pose, f, p);
+      case FX_SHOCKWAVE -> shockwave(c, pose, f, p);
       default -> { }
     }
   }
@@ -665,6 +667,26 @@ public final class OriginalFxRenderer {
     }
     ShapeFxRenderer.octahedron(c, pose, f.pos, 0.4f + 1.6f * t, 255, 80, 90, (int) (230 * (1 - t)));
     ShapeFxRenderer.ring(c, pose, f.pos, 0.6f + 3f * t, 0.1f, 0f, TAU, 32, 255, 200, 120, (int) (220 * (1 - t)));
+  }
+
+  // ================================================================ onda de choque das crateras
+  /** Casca de ar quente que corre junto com a frente da cratera (dir.x = velocidade em blocos/tick) e um anel no chao. */
+  private static void shockwave(VertexConsumer c, PoseStack.Pose pose, Fx f, float p) {
+    float age = f.age + p;
+    float speed = (float) Math.max(0.1, f.dir.x);
+    float r = Math.min(f.size + 2f, 1.5f + speed * age);
+    float k = Mth.clamp(r / (f.size + 2f), 0f, 1f);
+    float fade = (1f - k * k) * Mth.clamp((f.total - age) / 6f, 0f, 1f);
+    int a = (int) (200 * fade);
+    if (a <= 0) return;
+    for (int i = -2; i <= 4; i++) {
+      float lat = i * 0.3f;
+      ShapeFxRenderer.ring(c, pose, f.pos.add(0, Math.sin(lat) * r, 0), (float) Math.cos(lat) * r, 0.12f + 0.25f * (1 - k), 0f, TAU, 56,
+          255, 200 - i * 12, 140 - i * 15, (int) (a * (i == 0 ? 1f : 0.45f)));
+    }
+    ShapeFxRenderer.ring(c, pose, f.pos.add(0, -r * 0.3 + 0.1, 0), r * 1.08f, 0.35f * (1 - k) + 0.08f, 0f, TAU, 64, 255, 235, 200, a);
+    // clarao no centro no comeco
+    if (age < 6) ShapeFxRenderer.octahedron(c, pose, f.pos, 0.6f + age * 0.5f, 255, 240, 200, (int) (230 * (1 - age / 6f)));
   }
 
   // ================================================================ geometria

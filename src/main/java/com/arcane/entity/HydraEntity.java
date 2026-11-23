@@ -561,7 +561,7 @@ public class HydraEntity extends Monster {
       if (st.isAir() || st.getDestroySpeed(sl, p) < 0 || st.hasBlockEntity() || st.is(seal)) continue;
       list.add(p.asLong());
     }
-    com.arcane.execution.CraterQueue.submit(sl, list);
+    com.arcane.execution.CraterQueue.submit(sl, list, at);
     // fogo e brasa em volta
     int fires = 8 + n * 2;
     for (int i = 0; i < fires; i++) {
@@ -619,7 +619,7 @@ public class HydraEntity extends Monster {
         if (st.isAir() || st.getDestroySpeed(sl, p) < 0 || st.hasBlockEntity()) continue;
         list.add(p.asLong());
       }
-      com.arcane.execution.CraterQueue.submit(sl, list);
+      com.arcane.execution.CraterQueue.submit(sl, list, position());
     }
     ModNetwork.sendShape(sl, S2CShapeFxPacket.ORIGINAL, position(), new Vec3(0, surface - getY(), 0), getBbWidth() + 2, 0xFF3020, S2CShapeFxPacket.FX_BREAKOUT, 60);
     sl.playSound(null, blockPosition(), SoundEvents.WARDEN_DIG, SoundSource.HOSTILE, 6.0f, 0.5f);

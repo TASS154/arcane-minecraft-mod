@@ -163,7 +163,7 @@ public final class OriginalGlyphs {
           if (st.isAir() || st.getDestroySpeed(level, p) < 0 || st.hasBlockEntity()) continue;
           list.add(p.asLong());
         }
-        com.arcane.execution.CraterQueue.submit(level, list);
+        com.arcane.execution.CraterQueue.submit(level, list, c);
       }
       fx(level, com.arcane.network.packet.S2CShapeFxPacket.FX_ANNIHILATE, c, Vec3.ZERO, r, 40);
       level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 6f, 0.3f);

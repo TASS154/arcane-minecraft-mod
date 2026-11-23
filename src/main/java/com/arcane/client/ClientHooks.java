@@ -13,6 +13,11 @@ public final class ClientHooks {
     if (mc.player != null) mc.setScreen(new com.arcane.client.screen.RitualAltarScreen(altar));
   }
 
+  public static void openScepter() {
+    var mc = net.minecraft.client.Minecraft.getInstance();
+    if (mc.player != null) mc.setScreen(new com.arcane.client.screen.ScepterScreen());
+  }
+
   public static void openGrimoire() {
     Minecraft mc = Minecraft.getInstance();
     if (mc.player != null) {

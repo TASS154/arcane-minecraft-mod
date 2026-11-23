@@ -91,6 +91,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(com.arcane.network.packet.C2SWorldRulePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(com.arcane.network.packet.C2SWorldRulePacket::encode).decoder(com.arcane.network.packet.C2SWorldRulePacket::decode)
         .consumerMainThread(com.arcane.network.packet.C2SWorldRulePacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.C2SScepterPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(com.arcane.network.packet.C2SScepterPacket::encode).decoder(com.arcane.network.packet.C2SScepterPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.C2SScepterPacket::handle).add();
     CHANNEL.messageBuilder(com.arcane.network.packet.C2SFlightBoostPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(com.arcane.network.packet.C2SFlightBoostPacket::encode).decoder(com.arcane.network.packet.C2SFlightBoostPacket::decode)
         .consumerMainThread(com.arcane.network.packet.C2SFlightBoostPacket::handle).add();

@@ -368,3 +368,31 @@ Suite inteira: **234/234**.
 - **Visual unico dos 7 originais** (`client/render/OriginalFxRenderer`): Parar o Tempo (cupula de vidro com meridianos, relogio no chao que freia e para, cacos de luz parados no ar, mundo em preto e branco para quem esta dentro), Retroceder (helice dupla ate o ponto antigo, relogio ao contrario, eco do corpo), Colapso Espacial (singularidade negra com disco de acrecao, linhas de espaco sugadas, clarao final), Aniquilacao (esfera branca que vira vazio negro, coluna ate o ceu, onda e clarao na tela), Eclipse (disco negro com coroa vermelha no ceu, cone carmesim, runas, vinheta vermelha), Genese (mandala de petalas, arvore de luz crescendo, colunas douradas), Inversao da Gravidade (setas e chuva subindo, teto de runas). Hidra: aviso, impacto, rompimento, despertar, rugido e selo quebrado tambem tem visual proprio. "Reduzir clarões" desliga clarao, vinheta e filtro cinza.
 - **Visto no cliente** (`run/screenshots/autotest_*.png`): os 7 originais, Hidra estagio 7 selada com 5 correntes, golpe na selada sem efeito (1024 -> 1024), selos quebrando, despertar, aviso, impacto e cratera com fogo.
 - **Falta / limites**: a fuga para a superficie e a devastacao vagando foram testadas so em codigo/GameTest de partes (nao vistas no cliente); luta real contra Hidra grande ainda nao feita.
+
+## Rodada de 2026-11-23 (tarde): telecinese firme, cajados, barreiras e explosao em onda
+
+Suite inteira: **238/238** (numa rodada anterior, 2 testes antigos falharam ao acaso: Parar o Tempo e Pilar olhando de muito alto; passaram na seguinte).
+
+- **Telecinese**: o bloco seguro "ia e voltava" ao girar a camera. Causa: o servidor mandava a velocidade, e o cliente (que so recebe a posicao de blocos-entidade a cada 20 ticks) extrapolava e passava do ponto. Agora o servidor decide a posicao, envia a cada tick com velocidade zero e o bloco ignora colisao enquanto seguro (um bloco tirado da parede sai dela). GameTest `telekinesisBlockGlidesToTheAimWithoutOvershooting`; no cliente o bloco seguiu a mira (o giro de camera foi simulado pelo roteiro, nao com mouse real).
+- **Cetro virou cajado**: modelo grande (30 de altura, em pe na mao). Aparencia: 10 pontas (lua crescente segurando orbe, gaiola, aro de monge, cachos de cristal, espiral de druida, asas, estrela, tridente, aureola, orbe) x 8 hastes (branca de maga, madeira, retorcida, osso, obsidiana com runas, toda de metal, cristal em gomos, galho vivo) x 20 cores de gema x 8 metais = 12.800 combinacoes. Cor da gema e do metal pelo jogo (ItemColors, tintindex 0/1), entao 80 modelos cobrem tudo (`tools/gen_scepter_models.py`). Agachar + usar abre a **tela do cetro** (previa, setas por parte, 6 espacos: clique escolhe, x apaga, botao grava a magia ativa do grimorio). A troca de aparencia nao gasta mais item. Referencia: arquetipos de cajado de mago (ex.: o estilo de cajado de maga de anime, como o da Frieren), sem copiar nenhum.
+- **Barreira**: o raio ja parava no primeiro bloco da barreira; agora a barreira tambem nao pode ser cavada por magia (Cavar), resiste a explosoes (resistencia 1200) e **protege o que esta atras dela** das crateras de magia e da Hidra (`BarrierShadow`: o que esta na "sombra" da barreira, visto do centro, fica). No cliente: pilar atras da barreira 6/6 blocos, pilar sem barreira 0/6.
+- **Explosao em onda**: crateras (explosao destrutiva, Aniquilacao, Hidra) abrem de dentro para fora: uma frente sai do centro a `craterSpreadSpeed` blocos/tick (padrao 1; raio 20 = 1 s), com poeira dos blocos, estouros e uma cupula de onda de choque no cliente. O orcamento por tick continua.
+
+## O que ainda falta no projeto (lista consolidada, 2026-11-23)
+
+Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):
+- andar com a roda R aberta; niveis de voo pelo Ctrl; telecinese girando a camera com o mouse; tela do cetro com cliques.
+
+Nao visto no jogo / nao jogado de verdade:
+- luta real contra Hidras (principalmente as grandes); Hidra cavando ate a superficie e vagando com devastacao; covis gerados alem do primeiro;
+- Golem Runico e Lobo Espectral contra mobs reais; zonas/cristais entre sessoes.
+
+Funcionalidades pendentes:
+- desenhos em objetos: corte inicial decidido (caneta de arma, caneta de bloco de pedra, animacao do compasso) e "propriedades de bloco" das canetas de bloco; tinta permanente e pó solvente conforme o design de 19 nov;
+- condicoes "Ao quebrar a barreira" e "Ao entrar na zona"; `ArmedSpells` (ao sofrer dano / ao morrer) no barramento; zonas persistirem entre sessoes;
+- decisao em aberto: o raio do ritual crescer com oferendas (k = 0,5).
+
+Acabamento:
+- modelo da Hidra mais detalhado (hoje caixas) e animacoes de ataque;
+- filtro cinza do Parar o Tempo desliga se quem esta dentro sai do raio (ok), mas so foi visto com a camera do roteiro;
+- poucos testes antigos falham ao acaso conforme o estado do mundo de teste (Pilar de muito alto, Parar o Tempo): investigar e deixar deterministas.

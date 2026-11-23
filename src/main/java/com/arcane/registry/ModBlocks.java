@@ -38,6 +38,13 @@ public final class ModBlocks {
             () -> new com.arcane.block.ArcaneAltarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
                     .strength(4.0f, 1200.0f).requiresCorrectToolForDrops().lightLevel(s -> 7).noOcclusion()));
 
+    /** Selo do ritual da Hidra (sem item: so aparece nos covis). Duro, imune a explosoes comuns e a pistoes. */
+    public static final RegistryObject<Block> HYDRA_SEAL = BLOCKS.register("hydra_seal",
+            () -> new com.arcane.block.HydraSealBlock(BlockBehaviour.Properties.of().mapColor(MapColor.CRIMSON_NYLIUM)
+                    .strength(12.0f, 3600000.0f).noLootTable().noOcclusion().lightLevel(s -> 13)
+                    .sound(net.minecraft.world.level.block.SoundType.AMETHYST)
+                    .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
+
     private ModBlocks() {}
 
     public static void register(IEventBus bus) {

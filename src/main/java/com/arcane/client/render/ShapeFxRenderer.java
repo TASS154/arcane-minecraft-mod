@@ -70,6 +70,7 @@ public class ShapeFxRenderer {
   }
 
   public static void add(int type, Vec3 pos, Vec3 dir, float size, int rgb, int element, int ticks) {
+    if (type == S2CShapeFxPacket.ORIGINAL) { OriginalFxRenderer.add(element, pos, dir, size, rgb, ticks); return; }
     var mc = Minecraft.getInstance();
     if (mc.player != null) {
       double d = mc.player.position().distanceTo(pos);
@@ -93,7 +94,7 @@ public class ShapeFxRenderer {
     }
   }
 
-  private static float ease(float t) { return 1f - (1f - t) * (1f - t); }
+  static float ease(float t) { return 1f - (1f - t) * (1f - t); }
 
   // ---------------------------------------------------------------- particulas (tick)
   @SubscribeEvent
@@ -338,7 +339,7 @@ public class ShapeFxRenderer {
     }
   }
 
-  private static float hash01(int a, int b) {
+  static float hash01(int a, int b) {
     int h = a * 73856093 ^ b * 19349663;
     h ^= h >>> 13;
     h *= 0x5bd1e995;
@@ -382,12 +383,12 @@ public class ShapeFxRenderer {
     }
   }
 
-  private static Vec3 pt(Vec3 center, float angle, float radius, float y) {
+  static Vec3 pt(Vec3 center, float angle, float radius, float y) {
     return new Vec3(center.x + Math.cos(angle) * radius, center.y + y, center.z + Math.sin(angle) * radius);
   }
 
   /** Faixa horizontal (anel ou arco) de largura 2*half no plano XZ. */
-  private static void ring(VertexConsumer c, PoseStack.Pose pose, Vec3 center, float radius, float half, float a0, float a1, int seg,
+  static void ring(VertexConsumer c, PoseStack.Pose pose, Vec3 center, float radius, float half, float a0, float a1, int seg,
                            int r, int g, int b, int a) {
     if (radius <= 0.02f || a <= 0) return;
     for (int i = 0; i < seg; i++) {
@@ -398,7 +399,7 @@ public class ShapeFxRenderer {
   }
 
   /** Parede vertical (cilindro ou fatia) que some para cima. */
-  private static void wall(VertexConsumer c, PoseStack.Pose pose, Vec3 center, float radius, float height, float a0, float a1, int seg,
+  static void wall(VertexConsumer c, PoseStack.Pose pose, Vec3 center, float radius, float height, float a0, float a1, int seg,
                            int r, int g, int b, int alphaBottom, int alphaTop) {
     if (radius <= 0.02f || alphaBottom <= 0) return;
     for (int i = 0; i < seg; i++) {
@@ -409,7 +410,7 @@ public class ShapeFxRenderer {
     }
   }
 
-  private static void gradQuad(VertexConsumer c, PoseStack.Pose pose, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4, int r, int g, int b, int a1, int a2) {
+  static void gradQuad(VertexConsumer c, PoseStack.Pose pose, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4, int r, int g, int b, int a1, int a2) {
     BeamRenderer.vtx(c, pose, p1, r, g, b, a1);
     BeamRenderer.vtx(c, pose, p2, r, g, b, a1);
     BeamRenderer.vtx(c, pose, p3, r, g, b, a2);
@@ -420,7 +421,7 @@ public class ShapeFxRenderer {
     BeamRenderer.vtx(c, pose, p1, r, g, b, a1);
   }
 
-  private static void octahedron(VertexConsumer c, PoseStack.Pose pose, Vec3 o, float s, int r, int g, int b, int a) {
+  static void octahedron(VertexConsumer c, PoseStack.Pose pose, Vec3 o, float s, int r, int g, int b, int a) {
     if (a <= 0 || s <= 0.01f) return;
     Vec3[] p = {o.add(s, 0, 0), o.add(-s, 0, 0), o.add(0, s, 0), o.add(0, -s, 0), o.add(0, 0, s), o.add(0, 0, -s)};
     int[][] tri = {{0, 2, 4}, {4, 2, 1}, {1, 2, 5}, {5, 2, 0}, {0, 3, 4}, {4, 3, 1}, {1, 3, 5}, {5, 3, 0}};

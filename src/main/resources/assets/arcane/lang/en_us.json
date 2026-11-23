@@ -524,7 +524,7 @@
   "scepter.arcane.shaft.obsidian": "Obsidian",
   "entity.arcane.hydra": "Hydra",
   "entity.arcane.hydra.stage": "%s Hydra (stage %s/14)",
-  "message.arcane.hydra.awake": "Something huge awakens in the depths... a %s Hydra (stage %s/14).",
+  "message.arcane.hydra.awake": "A %s Hydra (stage %s/14) sleeps in the depths, bound by %s seals. Break the seals on the pillars to face it.",
   "message.arcane.hydra.original": "You learned an original glyph: %s",
   "hydra.arcane.stage.1": "Hatchling",
   "hydra.arcane.stage.2": "Whelp",
@@ -859,5 +859,10 @@
   "glyph.arcane.restore": "Restore",
   "glyph.arcane.restore.desc": "Effect: recomposes, within 2-16 blocks (default 10), gradually, the blocks spells destroyed in the last 2 minutes (explosions, Cut, Damage, ice and fire), where nobody has built since. It returns no items: explosions drop no loot (configurable). Charges a little mana per block that comes back.",
   "glyph.arcane.chorus": "Chorus",
-  "glyph.arcane.chorus.desc": "Modifier: the spell only fires if 2-4 players cast it together, inside the circle that appears on the ground around whoever starts (radius 8, 3 s for the others). Everyone needs the same spell. Strength rises 35% per extra participant (max x2.4) and the mana is split among them. Without enough people nothing happens and nobody pays."
+  "glyph.arcane.chorus.desc": "Modifier: the spell only fires if 2-4 players cast it together, inside the circle that appears on the ground around whoever starts (radius 8, 3 s for the others). Everyone needs the same spell. Strength rises 35% per extra participant (max x2.4) and the mana is split among them. Without enough people nothing happens and nobody pays.",
+  "block.arcane.hydra_seal": "Hydra Seal",
+  "entity.arcane.hydra.sealed": "%s — sealed (%s seals)",
+  "message.arcane.hydra.seal_broken": "A seal shatters... %s left.",
+  "message.arcane.hydra.unsealed": "The ritual is broken! The %s Hydra (stage %s/14) has awakened.",
+  "message.arcane.hydra.breakout": "The %s Hydra burst out of the ground and is ravaging the land near x %s, z %s!"
 }

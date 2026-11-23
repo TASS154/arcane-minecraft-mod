@@ -177,7 +177,7 @@ def main():
     # ---------------------------------------------------------- tags
     write("minecraft/tags/blocks/mineable/pickaxe.json", {"replace": False, "values": ["arcane:mana_crystal"]})
     write("minecraft/tags/blocks/needs_iron_tool.json", {"replace": False, "values": ["arcane:mana_crystal"]})
-    write("minecraft/tags/blocks/mineable/pickaxe.json", {"replace": False, "values": ["arcane:mana_crystal", "arcane:arcane_altar"]})
+    write("minecraft/tags/blocks/mineable/pickaxe.json", {"replace": False, "values": ["arcane:mana_crystal", "arcane:arcane_altar", "arcane:hydra_seal"]})
     write("minecraft/tags/blocks/needs_iron_tool.json", {"replace": False, "values": ["arcane:mana_crystal", "arcane:arcane_altar"]})
     write("arcane/loot_tables/blocks/arcane_altar.json", {
         "type": "minecraft:block",

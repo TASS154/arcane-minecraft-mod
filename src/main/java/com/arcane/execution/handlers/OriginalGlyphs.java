@@ -53,6 +53,11 @@ public final class OriginalGlyphs {
     return Math.min(96.0, ctx.amplify(call.parameters().getOrDefault("radius", def), call.magnitudeKeys(), "radius"));
   }
 
+  /** Visual proprio do glifo original (ver OriginalFxRenderer). */
+  static void fx(ServerLevel level, int kind, Vec3 pos, Vec3 dir, double radius, int ticks) {
+    com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.ORIGINAL, pos, dir, (float) radius, 0xFFFFFF, kind, ticks);
+  }
+
   static List<LivingEntity> living(ServerLevel level, Vec3 c, double r, Entity except) {
     return level.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(r),
         e -> e != except && e.isAlive() && e.position().distanceToSqr(c) <= r * r && !(e instanceof Player p && (p.isCreative() || p.isSpectator())));
@@ -78,11 +83,7 @@ public final class OriginalGlyphs {
         if (e instanceof Mob m) m.setNoAi(true);
         e.setNoGravity(true);
       }
-      for (int i = 0; i < 64; i++) {
-        double a = Math.PI * 2 * i / 64;
-        level.sendParticles(ParticleTypes.END_ROD, c.x + Math.cos(a) * r, c.y + 1, c.z + Math.sin(a) * r, 1, 0, 0.4, 0, 0);
-      }
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x, c.y + 1, c.z, 120, r * 0.4, 1.5, r * 0.4, 0.0);
+      fx(level, com.arcane.network.packet.S2CShapeFxPacket.FX_TIME_STOP, c, Vec3.ZERO, r, ticks);
       level.playSound(null, c.x, c.y, c.z, SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 3f, 0.5f);
     }
   }
@@ -108,7 +109,7 @@ public final class OriginalGlyphs {
         int k = 0;
         for (Iterator<Snapshot> it = h.descendingIterator(); it.hasNext() && k < seconds; k++) s = it.next();
         if (s == null) continue;
-        ctx.level().sendParticles(ParticleTypes.REVERSE_PORTAL, le.getX(), le.getY() + 1, le.getZ(), 60, 0.4, 0.8, 0.4, 0.1);
+        fx(ctx.level(), com.arcane.network.packet.S2CShapeFxPacket.FX_REWIND, s.pos, le.position(), 1, 30);
         le.teleportTo(s.pos.x, s.pos.y, s.pos.z);
         le.setHealth(Math.max(le.getHealth(), s.health));
         le.clearFire();
@@ -136,8 +137,7 @@ public final class OriginalGlyphs {
         e.hurt(ctx.level().damageSources().indirectMagic(ctx.caster(), ctx.caster()), dmg);
         e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 3), ctx.caster());
       }
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x, c.y + 1, c.z, 200, r * 0.3, 1.0, r * 0.3, 0.6);
-      level.sendParticles(ParticleTypes.SONIC_BOOM, c.x, c.y + 1, c.z, 1, 0, 0, 0, 0);
+      fx(level, com.arcane.network.packet.S2CShapeFxPacket.FX_SPACE_COLLAPSE, c, Vec3.ZERO, r, 44);
       level.playSound(null, c.x, c.y, c.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 3f, 0.4f);
     }
   }
@@ -165,8 +165,7 @@ public final class OriginalGlyphs {
         }
         com.arcane.execution.CraterQueue.submit(level, list);
       }
-      level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y, c.z, 4, r * 0.3, r * 0.3, r * 0.3, 0);
-      level.sendParticles(ParticleTypes.SQUID_INK, c.x, c.y, c.z, 200, r * 0.4, r * 0.4, r * 0.4, 0.1);
+      fx(level, com.arcane.network.packet.S2CShapeFxPacket.FX_ANNIHILATE, c, Vec3.ZERO, r, 40);
       level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 6f, 0.3f);
     }
   }
@@ -194,6 +193,7 @@ public final class OriginalGlyphs {
         level.addFreshEntity(bolt);
         bolts++;
       }
+      fx(level, com.arcane.network.packet.S2CShapeFxPacket.FX_ECLIPSE, c, Vec3.ZERO, r, 240);
       level.playSound(null, c.x, c.y, c.z, SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 2f, 1.4f);
     }
   }
@@ -220,7 +220,8 @@ public final class OriginalGlyphs {
       grow.put("radius", Math.min(16.0, r * 0.5));
       grow.put("strength", 4.0);
       new GrowEffectHandler().apply(ctx, new EffectCall(call.glyphId(), call.handler(), grow, List.of()), TargetList.ofPoint(c));
-      level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, c.x, c.y + 1, c.z, 160, r * 0.3, 1.5, r * 0.3, 0.3);
+      fx(level, com.arcane.network.packet.S2CShapeFxPacket.FX_GENESIS, c, Vec3.ZERO, r, 70);
+      level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, c.x, c.y + 1, c.z, 60, r * 0.3, 1.5, r * 0.3, 0.3);
       level.playSound(null, c.x, c.y, c.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 1.5f, 1.2f);
     }
   }
@@ -239,7 +240,7 @@ public final class OriginalGlyphs {
         e.hurtMarked = true;
       }
       for (var proj : level.getEntitiesOfClass(Projectile.class, new AABB(c, c).inflate(r))) proj.setDeltaMovement(proj.getDeltaMovement().multiply(1, -1, 1).add(0, 0.5, 0));
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x, c.y, c.z, 160, r * 0.4, 0.5, r * 0.4, 0.2);
+      fx(level, com.arcane.network.packet.S2CShapeFxPacket.FX_GRAVITY, c, Vec3.ZERO, r, Math.min(200, ticks));
       level.playSound(null, c.x, c.y, c.z, SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 3f, 0.4f);
     }
   }

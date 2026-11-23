@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "arcane:mana_crystal",
-    "arcane:arcane_altar"
+    "arcane:arcane_altar",
+    "arcane:hydra_seal"
   ]
 }

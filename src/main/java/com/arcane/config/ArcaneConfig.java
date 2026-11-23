@@ -22,6 +22,8 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue INK_POT_UNITS;
   public static final ForgeConfigSpec.IntValue INK_UNITS_PER_GLYPH;
   public static final ForgeConfigSpec.BooleanValue AIR_DRAWINGS_NEVER_FADE;
+  public static final ForgeConfigSpec.BooleanValue HYDRA_DEVASTATION;
+  public static final ForgeConfigSpec.IntValue HYDRA_BREAKOUT_SECONDS;
   public static final ForgeConfigSpec.IntValue CRATER_MAX_RADIUS;
   public static final ForgeConfigSpec.IntValue CRATER_BLOCKS_PER_TICK;
   public static final ForgeConfigSpec.IntValue ITEM_EXTRA_DRAWINGS;
@@ -106,6 +108,10 @@ public class ArcaneConfig {
         .defineInRange("inkUnitsPerGlyph", 1, 1, 1000);
     AIR_DRAWINGS_NEVER_FADE = builder.comment("true = drawings made in the air with the Phoenix Pen never fade (ignores the ink's days). false = they last as long as their ink")
         .define("airDrawingsNeverFade", false);
+    HYDRA_DEVASTATION = builder.comment("true = awake Hydras of stage 5 or more destroy the terrain (craters, fire, storms) and can burst out of their lair. Also needs the mobGriefing game rule")
+        .define("hydraDevastation", true);
+    HYDRA_BREAKOUT_SECONDS = builder.comment("Seconds an awake Hydra of stage 5+ stays in its lair before it digs its way to the surface (it leaves sooner if nobody fights it for a third of this time)")
+        .defineInRange("hydraBreakoutSeconds", 180, 10, 36000);
     AREA_HARD_CAPS = builder.comment("Keep the fixed maximum radius of area spells/forms (24 to 64 blocks). false = no fixed maximum, only the crystal and charge limits apply")
         .define("areaHardCaps", true);
     RITUAL_MIN_COMPLETENESS = builder.comment("Fraction of the circle's traces that must be drawn for a ritual to work")

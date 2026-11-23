@@ -38,6 +38,51 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
   @Override
   public ResourceLocation getTextureLocation(HydraEntity entity) { return TEXTURE; }
 
+  /**
+   * Selada: correntes de luz carmesim da Hidra ate cada selo inteiro nos pilares, e aneis de runas apertando o corpo.
+   * Desperta a partir do estagio 5: uma aura de brasas girando em volta (sinal de que ela devasta a regiao).
+   */
+  @Override
+  public void render(HydraEntity e, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
+    super.render(e, yaw, partial, pose, buffers, light);
+    float age = e.tickCount + partial;
+    VertexConsumer c = buffers.getBuffer(RenderType.lightning());
+    PoseStack.Pose last = pose.last();
+    net.minecraft.world.phys.Vec3 body = new net.minecraft.world.phys.Vec3(0, e.getBbHeight() * 0.5, 0);
+    float w = e.getBbWidth();
+    if (e.sealed()) {
+      net.minecraft.world.phys.Vec3 me = e.getPosition(partial);
+      for (int i = 0; i < HydraEntity.PILLARS; i++) {
+        if ((e.sealMask() & (1 << i)) == 0) continue;
+        var top = e.home().offset(HydraEntity.pillarTop(i));
+        net.minecraft.world.phys.Vec3 seal = net.minecraft.world.phys.Vec3.atCenterOf(top).subtract(me);
+        // corrente: elos alternados, com uma leve curva para baixo
+        int links = 18;
+        for (int k = 0; k < links; k++) {
+          float a = k / (float) links, b = (k + 0.7f) / links;
+          var p0 = body.lerp(seal, a).add(0, -Math.sin(a * Math.PI) * 1.2, 0);
+          var p1 = body.lerp(seal, b).add(0, -Math.sin(b * Math.PI) * 1.2, 0);
+          float pulse = 0.6f + 0.4f * Mth.sin(age * 0.2f - k * 0.5f);
+          OriginalFxRenderer.line(c, last, p0, p1, k % 2 == 0 ? 0.07f : 0.04f, 255, 40, 70, (int) (200 * pulse));
+        }
+      }
+      for (int r = 0; r < 3; r++) {
+        float y = (float) body.y + (r - 1) * e.getBbHeight() * 0.3f;
+        float spin = age * 0.03f * (r % 2 == 0 ? 1 : -1);
+        ShapeFxRenderer.ring(c, last, new net.minecraft.world.phys.Vec3(0, y, 0), w * 0.75f, 0.06f, spin, spin + 6.2831855f, 40, 200, 40, 255, 200);
+      }
+      RuneCircle.draw(c, last, new net.minecraft.world.phys.Vec3(0, 0.05, 0), new net.minecraft.world.phys.Vec3(1, 0, 0), new net.minecraft.world.phys.Vec3(0, 0, 1),
+          w * 1.3f, age * 0.01f, 255, 40, 80, 220);
+    } else if (HydraEntity.devastates(e.stage())) {
+      for (int i = 0; i < 10; i++) {
+        float ang = i * 0.628f + age * 0.05f;
+        float rr = w * (0.8f + 0.2f * Mth.sin(age * 0.1f + i));
+        var at = new net.minecraft.world.phys.Vec3(Math.cos(ang) * rr, (i % 5) * e.getBbHeight() * 0.2f + 0.2f, Math.sin(ang) * rr);
+        ShapeFxRenderer.octahedron(c, last, at, 0.08f + 0.02f * e.stage() * 0.3f, 255, 110, 40, 200);
+      }
+    }
+  }
+
   @Override
   protected void scale(HydraEntity entity, PoseStack pose, float partialTick) {
     float s = HydraEntity.scaleFor(entity.stage());

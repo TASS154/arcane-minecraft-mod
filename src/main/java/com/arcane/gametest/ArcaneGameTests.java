@@ -2667,6 +2667,80 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "empty", batch = "hydra_rules")
+  public static void hydraPowerGrowsExponentiallyAndStageFiveDevastates(GameTestHelper h) {
+    double ratio = com.arcane.entity.HydraEntity.baseHealth(2) / com.arcane.entity.HydraEntity.baseHealth(1);
+    for (int s = 2; s < 14; s++) {
+      double r = com.arcane.entity.HydraEntity.baseHealth(s + 1) / com.arcane.entity.HydraEntity.baseHealth(s);
+      h.assertTrue(Math.abs(r - ratio) < 1e-9, "a vida cresce sempre pelo mesmo fator (exponencial)");
+      h.assertTrue(com.arcane.entity.HydraEntity.baseDamage(s + 1) > com.arcane.entity.HydraEntity.baseDamage(s), "o dano sobe a cada estagio");
+    }
+    h.assertTrue(com.arcane.entity.HydraEntity.baseHealth(1) <= 80, "a recem-nascida e uma luta justa");
+    h.assertTrue(com.arcane.entity.HydraEntity.baseHealth(14) > com.arcane.entity.HydraEntity.baseHealth(1) * 200, "a ancia e centenas de vezes mais forte");
+    h.assertTrue(!com.arcane.entity.HydraEntity.devastates(4) && com.arcane.entity.HydraEntity.devastates(5), "do estagio 5 em diante destroi a regiao");
+    h.assertTrue(com.arcane.entity.HydraEntity.devastationRadius(5) >= 6, "a cratera do estagio 5 ja e grande");
+    h.assertTrue(com.arcane.entity.HydraEntity.sealsFor(1) == 2 && com.arcane.entity.HydraEntity.sealsFor(14) == 8, "2 a 8 selos");
+    for (int s = 1; s <= 14; s++) {
+      h.assertTrue(Integer.bitCount(com.arcane.entity.HydraEntity.sealMaskFor(s)) == com.arcane.entity.HydraEntity.sealsFor(s), "um pilar por selo (" + s + ")");
+    }
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "hydra_seal", timeoutTicks = 60)
+  public static void hydraSleepsSealedUntilTheLastSealBreaks(GameTestHelper h) {
+    floor(h);
+    var level = h.getLevel();
+    var hydra = h.spawnWithNoFreeWill(com.arcane.registry.ModEntities.HYDRA.get(), new BlockPos(2, 1, 2));
+    hydra.setStage(1);
+    BlockPos home = hydra.blockPosition();
+    hydra.homeTo(home, 12);
+    int mask = com.arcane.entity.HydraEntity.sealMaskFor(1);
+    java.util.List<BlockPos> seals = new java.util.ArrayList<>();
+    for (int i = 0; i < com.arcane.entity.HydraEntity.PILLARS; i++) {
+      if ((mask & (1 << i)) == 0) continue;
+      BlockPos p = home.offset(com.arcane.entity.HydraEntity.pillarTop(i));
+      level.setBlock(p, com.arcane.registry.ModBlocks.HYDRA_SEAL.get().defaultBlockState(), 3);
+      seals.add(p);
+    }
+    hydra.setSealMask(com.arcane.world.HydraLairs.sealMaskAt(level, home));
+    h.assertTrue(hydra.sealed() && hydra.isNoAi() && seals.size() == 2, "nasce selada e parada, presa por 2 selos");
+    float hp = hydra.getHealth();
+    hydra.hurt(level.damageSources().magic(), 30f);
+    h.assertTrue(hydra.getHealth() == hp, "selada nao pode ser ferida");
+    level.removeBlock(seals.get(0), false);
+    h.assertTrue(hydra.sealed() && Integer.bitCount(hydra.sealMask()) == 1, "um selo quebrado, ainda presa");
+    level.removeBlock(seals.get(1), false);
+    h.assertTrue(!hydra.sealed() && !hydra.isNoAi(), "o ultimo selo quebrado a desperta");
+    hydra.hurt(level.damageSources().magic(), 10f);
+    h.assertTrue(hydra.getHealth() < hp, "desperta, pode ser ferida");
+    hydra.discard();
+    h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "hydra_devastation", timeoutTicks = 120)
+  public static void stageFiveHydraAnnouncesThenCratersTheGround(GameTestHelper h) {
+    floor(h);
+    for (int x = 0; x < 5; x++) for (int z = 0; z < 5; z++) for (int y = 1; y <= 2; y++) h.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+    var hydra = h.spawnWithNoFreeWill(com.arcane.registry.ModEntities.HYDRA.get(), new BlockPos(0, 3, 0));
+    hydra.setStage(5);
+    Pig victim = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(3, 3, 3));
+    float before = victim.getHealth();
+    hydra.use(com.arcane.entity.HydraEntity.DEVASTATE, victim);
+    h.assertTrue(hydra.pendingStrikes() > 0, "primeiro o aviso: o golpe ainda nao caiu");
+    h.assertTrue(victim.getHealth() == before, "durante o aviso da para fugir");
+    h.runAfterDelay(com.arcane.entity.HydraEntity.STRIKE_WARNING + 10, () -> {
+      h.assertTrue(hydra.pendingStrikes() == 0, "o golpe caiu");
+      h.assertTrue(!victim.isAlive() || victim.getHealth() < before, "quem ficou foi ferido");
+      int stone = 0;
+      for (int x = 0; x < 5; x++) for (int z = 0; z < 5; z++) for (int y = 1; y <= 2; y++) {
+        if (h.getBlockState(new BlockPos(x, y, z)).is(Blocks.STONE)) stone++;
+      }
+      h.assertTrue(stone < 25, "o chao virou cratera (sobraram " + stone + " de 50 pedras)");
+      hydra.discard();
+      h.succeed();
+    });
+  }
+
   @GameTest(template = "empty", batch = "original_glyphs", timeoutTicks = 80)
   public static void originalGlyphsStopTimeRewindAndBendSpace(GameTestHelper h) {
     floor(h);

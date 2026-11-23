@@ -1,0 +1,9 @@
+{
+  "parent": "arcane:block/mana_crystal",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "crystal": "arcane:block/hydra_seal",
+    "base": "arcane:block/hydra_seal_base",
+    "particle": "arcane:block/hydra_seal"
+  }
+}

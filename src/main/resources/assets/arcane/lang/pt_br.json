@@ -524,7 +524,7 @@
   "scepter.arcane.shaft.obsidian": "Obsidiana",
   "entity.arcane.hydra": "Hidra",
   "entity.arcane.hydra.stage": "Hidra %s (estágio %s/14)",
-  "message.arcane.hydra.awake": "Algo enorme desperta nas profundezas... uma Hidra %s (estágio %s/14).",
+  "message.arcane.hydra.awake": "Uma Hidra %s (estágio %s/14) dorme nas profundezas, presa por %s selos. Quebre os selos dos pilares para enfrentá-la.",
   "message.arcane.hydra.original": "Você aprendeu um glifo original: %s",
   "hydra.arcane.stage.1": "Recém-nascida",
   "hydra.arcane.stage.2": "Filhote",
@@ -859,5 +859,10 @@
   "glyph.arcane.restore": "Restaurar",
   "glyph.arcane.restore.desc": "Efeito: recompõe, num raio de 2–16 blocos (padrão 10), aos poucos, os blocos que magias destruíram nos últimos 2 minutos (explosões, Cortar, Dano, gelo e fogo), onde ninguém construiu depois. Não devolve itens: explosões não soltam loot (configurável). Cobra um pouco de mana por bloco que volta.",
   "glyph.arcane.chorus": "Coro",
-  "glyph.arcane.chorus.desc": "Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga."
+  "glyph.arcane.chorus.desc": "Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga.",
+  "block.arcane.hydra_seal": "Selo da Hidra",
+  "entity.arcane.hydra.sealed": "%s — selada (%s selos)",
+  "message.arcane.hydra.seal_broken": "Um selo se partiu... restam %s.",
+  "message.arcane.hydra.unsealed": "O ritual se rompeu! A Hidra %s (estágio %s/14) despertou.",
+  "message.arcane.hydra.breakout": "A Hidra %s rompeu a terra e está devastando a região perto de x %s, z %s!"
 }

@@ -161,20 +161,57 @@ public final class HydraLairs extends SavedData {
     setDirty();
     HydraEntity hydra = ModEntities.HYDRA.get().create(level);
     if (hydra == null) return;
-    BlockPos at = lair.centre.above(1);
+    BlockPos at = lair.centre;
     hydra.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
     hydra.setStage(lair.stage);
     hydra.setLairIndex(lair.index);
     hydra.homeTo(lair.centre, CHAMBER_R - 2);
     hydra.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.STRUCTURE, null, null);
     hydra.setStage(lair.stage);
+    // o ritual: um selo no alto de cada pilar escolhido; a Hidra dorme ate o ultimo quebrar
+    int mask = HydraEntity.sealMaskFor(lair.stage);
+    for (int i = 0; i < HydraEntity.PILLARS; i++) {
+      BlockPos top = lair.centre.offset(HydraEntity.pillarTop(i));
+      if ((mask & (1 << i)) != 0) level.setBlock(top, com.arcane.registry.ModBlocks.HYDRA_SEAL.get().defaultBlockState(), 3);
+    }
+    hydra.setSealMask(sealMaskAt(level, lair.centre));
     level.addFreshEntity(hydra);
     level.playSound(null, at, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 6.0f, 1.8f - lair.stage * 0.09f);
     for (ServerPlayer p : level.players()) {
       if (p.distanceToSqr(Vec3.atCenterOf(at)) < 96 * 96) {
-        p.displayClientMessage(Component.translatable("message.arcane.hydra.awake", Component.translatable("hydra.arcane.stage." + lair.stage), lair.stage)
-            .withStyle(ChatFormatting.DARK_PURPLE), false);
+        p.displayClientMessage(Component.translatable("message.arcane.hydra.awake", Component.translatable("hydra.arcane.stage." + lair.stage), lair.stage,
+            Integer.bitCount(hydra.sealMask())).withStyle(ChatFormatting.DARK_PURPLE), false);
       }
+    }
+  }
+
+  /** Quais pilares da camara ainda tem selo (um bit por pilar). */
+  public static int sealMaskAt(ServerLevel level, BlockPos centre) {
+    int mask = 0;
+    var seal = com.arcane.registry.ModBlocks.HYDRA_SEAL.get();
+    for (int i = 0; i < HydraEntity.PILLARS; i++) if (level.getBlockState(centre.offset(HydraEntity.pillarTop(i))).is(seal)) mask |= 1 << i;
+    return mask;
+  }
+
+  /** Um selo foi quebrado: atualiza a Hidra da camara (zerar a desperta). */
+  public static void onSealBroken(ServerLevel level, BlockPos pos) {
+    for (HydraEntity h : level.getEntitiesOfClass(HydraEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(CHAMBER_R * 2.5))) {
+      if (!h.sealed()) continue;
+      BlockPos home = h.home();
+      if (home.distSqr(pos) > (CHAMBER_R + 2) * (CHAMBER_R + 2)) continue;
+      int mask = sealMaskAt(level, home);
+      com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.ORIGINAL, Vec3.atCenterOf(pos),
+          h.position().add(0, h.getBbHeight() * 0.5, 0), 1f, 0xFF3040, com.arcane.network.packet.S2CShapeFxPacket.FX_SEAL_BREAK, 24);
+      level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.BLOCKS, 3f, 0.5f);
+      level.playSound(null, pos, SoundEvents.CHAIN_BREAK, SoundSource.BLOCKS, 3f, 0.6f);
+      if (mask != 0) {
+        for (ServerPlayer p : level.players()) {
+          if (p.distanceToSqr(Vec3.atCenterOf(pos)) < 48 * 48) {
+            p.displayClientMessage(Component.translatable("message.arcane.hydra.seal_broken", Integer.bitCount(mask)).withStyle(ChatFormatting.LIGHT_PURPLE), true);
+          }
+        }
+      }
+      h.setSealMask(mask);
     }
   }
 
@@ -283,11 +320,11 @@ public final class HydraLairs extends SavedData {
       }
     }
     // anel de luz fraca e pilares
-    for (int k = 0; k < 8; k++) {
-      double a = k * Math.PI / 4;
-      int px = (int) Math.round(Math.cos(a) * (R - 3)), pz = (int) Math.round(Math.sin(a) * (R - 3));
-      for (int y = 0; y < 6; y++) set(level, c.offset(px, y, pz), Blocks.POLISHED_BLACKSTONE.defaultBlockState());
-      set(level, c.offset(px, 6, pz), Blocks.SOUL_LANTERN.defaultBlockState());
+    // (os selos do ritual entram no alto dos pilares quando a Hidra e revelada; os pilares sem selo ficam com lanterna)
+    for (int k = 0; k < HydraEntity.PILLARS; k++) {
+      BlockPos top = HydraEntity.pillarTop(k);
+      for (int y = 0; y < top.getY(); y++) set(level, c.offset(top.getX(), y, top.getZ()), Blocks.POLISHED_BLACKSTONE.defaultBlockState());
+      set(level, c.offset(top), Blocks.SOUL_LANTERN.defaultBlockState());
     }
     // corredor para leste: da parede ate 22 blocos, 3 de largura e 4 de altura, com 2 salas laterais
     int start = R + 2, end = R + 24;

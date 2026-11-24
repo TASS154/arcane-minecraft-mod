@@ -11,14 +11,25 @@ import net.minecraft.world.entity.LivingEntity;
 /**
  * Perfurar: a fracao {@code pierce} do dano vira dano perfurante (tipo arcane:pierce), que ignora armadura, encantamentos
  * de protecao, o efeito Resistencia, a reducao do Petrificar e a dureza dos chefes (Hidra). Cada camada de Perfurar
- * soma 20%; 5 camadas = 100%. O resto do dano continua sendo dano magico comum.
+ * soma 20%; 5 camadas = 100%. O resto continua sendo dano de magia comum (arcane:spell), que a armadura reduz.
  */
 public final class Pierce {
   public static final ResourceKey<DamageType> TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("arcane", "pierce"));
 
   private Pierce() {}
 
+  /** Dano comum das magias: como o magico do vanilla, mas a armadura reduz (so o Perfurar a atravessa). */
+  public static final ResourceKey<DamageType> SPELL = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("arcane", "spell"));
+
   public static boolean is(DamageSource source) { return source.is(TYPE); }
+
+  public static boolean isSpell(DamageSource source) { return source.is(SPELL) || source.is(TYPE); }
+
+  /** Fonte de dano de magia de {@code caster} (a armadura conta). */
+  public static DamageSource spell(net.minecraft.world.level.Level level, Entity caster) {
+    var holder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SPELL);
+    return new DamageSource(holder, caster, caster);
+  }
 
   public static DamageSource source(ExecutionContext context) {
     var holder = context.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(TYPE);

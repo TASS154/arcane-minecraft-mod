@@ -134,7 +134,7 @@ public final class OriginalGlyphs {
       for (LivingEntity e : living(level, c, r, ctx.caster())) {
         level.sendParticles(ParticleTypes.PORTAL, e.getX(), e.getY() + 1, e.getZ(), 20, 0.3, 0.6, 0.3, 0.5);
         e.teleportTo(c.x + (level.random.nextDouble() - 0.5), c.y, c.z + (level.random.nextDouble() - 0.5));
-        e.hurt(ctx.level().damageSources().indirectMagic(ctx.caster(), ctx.caster()), dmg);
+        e.hurt(com.arcane.execution.Pierce.spell(ctx.level(), ctx.caster()), dmg);
         e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 3), ctx.caster());
       }
       fx(level, com.arcane.network.packet.S2CShapeFxPacket.FX_SPACE_COLLAPSE, c, Vec3.ZERO, r, 44);
@@ -151,7 +151,7 @@ public final class OriginalGlyphs {
       Vec3 c = centre(ctx, targets);
       double r = Math.min(48, radius(ctx, call, 10));
       float dmg = (float) ctx.amplify(call.parameters().getOrDefault("damage", 30.0), call.magnitudeKeys(), "damage");
-      for (LivingEntity e : living(level, c, r, ctx.caster())) e.hurt(level.damageSources().indirectMagic(ctx.caster(), ctx.caster()), dmg);
+      for (LivingEntity e : living(level, c, r, ctx.caster())) e.hurt(com.arcane.execution.Pierce.spell(level, ctx.caster()), dmg);
       if (Targeting.mayBreakBlocks(ctx)) {
         var list = new it.unimi.dsi.fastutil.longs.LongArrayList();
         int n = (int) Math.ceil(r);

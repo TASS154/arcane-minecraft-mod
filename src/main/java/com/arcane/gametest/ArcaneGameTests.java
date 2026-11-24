@@ -2715,7 +2715,9 @@ public class ArcaneGameTests {
     Pig victim = pig(h, 3, 3);
     float before = victim.getHealth();
     elder.use(com.arcane.entity.HydraEntity.SWEEP, victim);
-    h.assertTrue(victim.getHealth() < before, "o golpe de cauda fere quem esta perto");
+    h.assertTrue(victim.getHealth() < before || victim.isRemoved() || victim.isDeadOrDying(), "o golpe de cauda fere quem esta perto (vida " + victim.getHealth()
+        + ", invuln " + victim.invulnerableTime + ", dist " + String.format("%.1f", victim.distanceTo(elder)) + ", dano " + elder.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)
+        + ", raio " + String.format("%.1f", elder.getBbWidth()) + ")");
     var tag = new net.minecraft.nbt.CompoundTag();
     elder.addAdditionalSaveData(tag);
     h.assertTrue(tag.getInt("HydraStage") == 14, "o estagio e salvo");
@@ -3208,13 +3210,29 @@ public class ArcaneGameTests {
     h.assertTrue(sealed.isRemoved() && item.is(com.arcane.registry.ModItems.SEALED_CREATURE.get()) && item.getTag().contains("entity"),
         "o selamento guarda a criatura num item");
     var golem = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(1, 1, 5));
+    var warden = h.spawnWithNoFreeWill(EntityType.WARDEN, new BlockPos(6, 1, 1));
     var caster = pig(h, 0, 0);
     var spell = new Inscription(List.of(g("self"), g("petrify")));
     var ctx = new com.arcane.execution.ExecutionContext(h.getLevel(), caster, spell, com.arcane.inscription.CompiledPlanCache.getOrCompile(spell),
         com.arcane.ambient.AmbientFieldResolver.resolve(h.getLevel(), caster.blockPosition()), com.arcane.execution.PrecisionSnapshot.WORKBENCH,
         com.arcane.execution.ExecutionContext.TriggerEvent.cast());
-    h.assertTrue(com.arcane.execution.CreatureLevels.fraction(ctx, golem) == 0.0, "uma magia pequena nao petrifica um golem de ferro (nivel alto)");
+    h.assertTrue(com.arcane.execution.CreatureLevels.fraction(ctx, warden) == 0.0, "uma criatura que conjura (100 de mana) nao petrifica um Warden (nivel 500)");
+    warden.discard();
     h.assertTrue(com.arcane.execution.CreatureLevels.fraction(ctx, pig(h, 7, 2)) == 1.0, "mas petrifica um porco");
+    var mage = casterWith(h);
+    var strong = casterWith(h);
+    var mageMana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(mage);
+    var strongMana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(strong);
+    mageMana.setBaseMax(100);
+    var pctx = new com.arcane.execution.ExecutionContext(h.getLevel(), mage, spell, com.arcane.inscription.CompiledPlanCache.getOrCompile(spell),
+        com.arcane.ambient.AmbientFieldResolver.resolve(h.getLevel(), mage.blockPosition()), com.arcane.execution.PrecisionSnapshot.WORKBENCH,
+        com.arcane.execution.ExecutionContext.TriggerEvent.cast());
+    h.assertTrue(com.arcane.execution.CreatureLevels.fraction(pctx, golem) == 1.0, "um mago com 100 de mana maxima controla um golem (nivel 100)");
+    strongMana.setBaseMax(150);
+    double weak = com.arcane.execution.CreatureLevels.fraction(pctx, strong);
+    h.assertTrue(weak > 0.6 && weak < 0.7, "contra um jogador com 150 de mana maxima, o efeito sai mais fraco (" + weak + ")");
+    strongMana.setBaseMax(300);
+    h.assertTrue(com.arcane.execution.CreatureLevels.fraction(pctx, strong) == 0.0, "contra 300 de mana maxima, ele resiste");
     golem.discard();
     h.succeed();
   }
@@ -3273,6 +3291,48 @@ public class ArcaneGameTests {
     h.assertTrue(one.isRemoved(), "um golpe desfaz a ilusao");
     clones.forEach(net.minecraft.world.entity.Entity::discard);
     h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "r23_armor", timeoutTicks = 40)
+  public static void spellDamageRespectsArmorUnlessPiercedAndOnlyTheGlyphVeils(GameTestHelper h) {
+    floor(h);
+    // mesma magia em zumbi sem armadura e com armadura (o elemento muda o dano, entao compara-se sempre a mesma magia)
+    var bare = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
+    var armored = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 1));
+    var bareP = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(5, 1, 1));
+    var armoredP = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(7, 1, 1));
+    for (var z : List.of(armored, armoredP)) {
+      z.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_CHESTPLATE));
+      z.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_LEGGINGS));
+    }
+    // a armadura de um mob so passa a valer depois de um tick (o jogo confere o equipamento no tick)
+    h.runAfterDelay(3, () -> {
+      for (var z : List.of(bare, armored)) cast(h, z, g("self"), g("damage", "amount", 2.0));
+      for (var z : List.of(bareP, armoredP)) cast(h, z, g("self"), g("damage", "amount", 2.0), g("pierce"), g("pierce"), g("pierce"), g("pierce"), g("pierce"));
+      float a = bare.getMaxHealth() - bare.getHealth(), b = armored.getMaxHealth() - armored.getHealth();
+      float c = bareP.getMaxHealth() - bareP.getHealth(), d = armoredP.getMaxHealth() - armoredP.getHealth();
+      h.assertTrue(b < a * 0.8f, "a armadura reduz o dano comum de magia (sem armadura " + a + ", com armadura " + b + ")");
+      h.assertTrue(Math.abs(c - d) < 0.3f, "com 5 camadas de Perfurar a armadura nao reduz nada (" + c + " e " + d + ")");
+    });
+
+    Pig glyph = pig(h, 1, 5), potion = pig(h, 3, 5);
+    cast(h, glyph, g("self"), g("invisible"));
+    potion.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.INVISIBILITY, 200));
+    h.assertTrue(glyph.hasEffect(MobEffects.INVISIBILITY) && glyph.hasEffect(com.arcane.registry.ModEffects.ARCANE_VEIL.get()), "o glifo poe o veu arcano");
+    h.assertTrue(potion.hasEffect(MobEffects.INVISIBILITY) && !potion.hasEffect(com.arcane.registry.ModEffects.ARCANE_VEIL.get()), "a pocao vanilla nao");
+    glyph.removeEffect(MobEffects.INVISIBILITY);
+    h.assertTrue(!glyph.hasEffect(com.arcane.registry.ModEffects.ARCANE_VEIL.get()), "tirar a invisibilidade tira o veu");
+
+    var shot = new com.arcane.entity.ArcaneProjectileEntity(com.arcane.registry.ModEntities.ARCANE_PROJECTILE.get(), h.getLevel());
+    var start = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 4.5, 7.5));
+    shot.setPos(start.x, start.y, start.z);
+    shot.setDeltaMovement(0.05, 0, 0);
+    h.getLevel().addFreshEntity(shot);
+    h.runAfterDelay(15, () -> {
+      h.assertTrue(Math.abs(shot.getY() - start.y) < 0.01, "o projetil nao cai (y " + start.y + " -> " + shot.getY() + ")");
+      shot.discard();
+      h.succeed();
+    });
   }
 
   // ------------------------------------------------------------------ grimorio na bancada (posse e estudo)

@@ -54,7 +54,7 @@ public final class LoreEffects {
     @Override public void apply(ExecutionContext c, EffectCall call, TargetList t) {
       for (Entity e : t.entities()) {
         if (!(e instanceof LivingEntity l) || l == c.caster() || !l.isAlive()) continue;
-        boolean full = l instanceof Player || CreatureLevels.fraction(c, l) >= 1.0;
+        boolean full = CreatureLevels.fraction(c, l) >= 1.0;
         l.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, CHAIN_TICKS + 10, 6, false, false), c.caster());
         if (l instanceof Mob mob) mob.setNoAi(true);
         ServerLevel level = c.level();

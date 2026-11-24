@@ -343,8 +343,8 @@ glyph("wither", "effect", 3,
       ["..####..", ".######.", "##.##.##", "########", ".######.", "..#..#..", "..####..", "...##..."],
       params={"duration": (80.0, 20.0, 300.0, "int"), "level": (0.0, 0.0, 2.0, "int")}, magnitude=["duration"])
 glyph("invisible", "effect", 3,
-      ("Invisibilidade", "Efeito: o alvo fica invisível por um tempo."),
-      ("Invisibility", "Effect: the target turns invisible for a while."),
+      ("Invisibilidade", "Efeito: o alvo fica invisível por um tempo, com armadura e itens, sem soltar partículas. Só uma distorção turva o denuncia, mais visível quanto mais rápido ele se move. Revelar desfaz."),
+      ("Invisibility", "Effect: the target turns invisible for a while, armor and items included, without particles. Only a blurry distortion gives it away, more visible the faster it moves. Reveal undoes it."),
       ["..####..", ".#....#.", "#.#..#.#", "#......#", "#.#..#.#", "#..##..#", ".#....#.", "..####.."],
       params={"duration": (600.0, 100.0, 2400.0, "int")}, magnitude=["duration"])
 glyph("cut", "effect", 2,
@@ -866,8 +866,8 @@ _g("pierce", "modifier", 8,
 
 # ------------------------------------------------------------------ RODADA 23 NOV: lista aceita
 _g('seal_creature', 'effect', 9,
-   ('Selamento', 'Efeito: correntes douradas prendem a criatura por 2 s e depois a banem para dentro de um item (Criatura Selada), que a solta de novo ao ser usado num bloco. Precisa de mana suficiente para o nível da criatura (vida + armadura); com pouca, as correntes se partem. Chefes resistem; jogadores só ficam presos.'),
-   ('Seal', "Effect: golden chains hold the creature for 2 s and then banish it into an item (Sealed Creature), which releases it again when used on a block. Needs enough mana for the creature's level (health + armor); with too little, the chains snap. Bosses resist; players are only held."),
+   ('Selamento', 'Efeito: correntes douradas prendem a criatura por 2 s e depois a banem para dentro de um item (Criatura Selada), que a solta de novo ao ser usado num bloco. A sua mana máxima precisa alcançar o nível da criatura (vida + armadura); se não alcançar, as correntes se partem. Chefes resistem; jogadores só ficam presos, e só se a sua mana máxima alcançar a deles.'),
+   ('Seal', "Effect: golden chains hold the creature for 2 s and then banish it into an item (Sealed Creature), which releases it again when used on a block. Your max mana must reach the creature's level (health + armor); otherwise the chains snap. Bosses resist; players are only held, and only if your max mana reaches theirs."),
    ['#..##..#', '.#.##.#.', '..####..', '########', '########', '..####..', '.#.##.#.', '#..##..#'])
 _g('read_residue', 'effect', 3,
    ('Ler Resíduo', 'Efeito: no resíduo de magia mais perto do ponto mirado (até 8 blocos), mostra quantos glifos a magia tinha e em que ordem. Os que você não conhece aparecem como ???.'),

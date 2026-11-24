@@ -30,7 +30,7 @@ public final class ItemDrawingEvents {
   @SubscribeEvent
   public static void onHit(LivingHurtEvent event) {
     if (!(event.getSource().getEntity() instanceof ServerPlayer player) || event.getSource().getDirectEntity() != player) return;
-    if (event.getSource().is(DamageTypes.MAGIC) || event.getSource().is(DamageTypes.INDIRECT_MAGIC)) return;
+    if (event.getSource().is(DamageTypes.MAGIC) || event.getSource().is(DamageTypes.INDIRECT_MAGIC) || com.arcane.execution.Pierce.isSpell(event.getSource())) return;
     ItemStack held = player.getMainHandItem();
     if (ItemDrawings.kindOf(held) != ItemDrawings.Kind.WEAPON) return;
     ItemDrawings.fire(player, held);

@@ -216,7 +216,7 @@ public final class Phase4Service {
       }
       // Refletir: o agressor sente parte do golpe.
       if (Phase4State.active(victim, Phase4State.REFLECT) && attackerEntity instanceof LivingEntity attacker && attacker != victim) {
-        attacker.hurt(level.damageSources().indirectMagic(victim, victim), amount * 0.4f);
+        attacker.hurt(Pierce.spell(level, victim), amount * 0.4f);
         level.sendParticles(ParticleTypes.ENCHANTED_HIT, attacker.getX(), attacker.getY() + 1.0, attacker.getZ(), 8, 0.3, 0.4, 0.3, 0.2);
       }
       // Arma encantada pelo glifo Encantar.
@@ -359,7 +359,7 @@ public final class Phase4Service {
       ServerLevel level = s.level();
       if (!(level.getEntity(entry.getKey()) instanceof LivingEntity owner) || !owner.isAlive() || s.until() < level.getGameTime()) { it.remove(); continue; }
       double base = level.getGameTime() * 0.25;
-      var source = level.damageSources().indirectMagic(owner, owner);
+      var source = Pierce.spell(level, owner);
       for (int i = 0; i < s.count(); i++) {
         double a = base + i * (2 * Math.PI / s.count());
         Vec3 pos = owner.position().add(Math.cos(a) * 2.0, 1.0 + Math.sin(base * 0.5 + i) * 0.3, Math.sin(a) * 2.0);
@@ -392,7 +392,7 @@ public final class Phase4Service {
         tr.points.add(here);
         tr.expiry.add(now + 120);
       }
-      var source = level.damageSources().indirectMagic(own, own);
+      var source = Pierce.spell(level, own);
       for (Vec3 p : tr.points) {
         level.sendParticles(ParticleTypes.FLAME, p.x, p.y + 0.1, p.z, 1, 0.2, 0.05, 0.2, 0.0);
         for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(p.x - 0.9, p.y - 0.5, p.z - 0.9, p.x + 0.9, p.y + 1.5, p.z + 0.9),

@@ -381,7 +381,7 @@ Suite inteira: **238/238** (numa rodada anterior, 2 testes antigos falharam ao a
 
 ## Rodada de 23 nov (tarde): bancada, posse, glifos aceitos, Hidra, perfis
 
-Cobertos por GameTest: **251 de 251 passam** na rodada final. Em rodadas anteriores falharam uma vez cada, e passaram depois sem mudança, "desenho por proximidade" e "golpe de cauda da Hidra"; parecem interferência entre testes que rodam juntos. O teste da cratera dependia da fila global e foi corrigido para olhar só os próprios blocos.
+Cobertos por GameTest: **252 de 252 passam** na rodada final (24 nov, depois dos ajustes). Instáveis, falham às vezes e passam ao rodar de novo sem mudança: "desenho por proximidade", "golpe de cauda da Hidra" (a mensagem agora mostra vida, distância e dano para achar a causa) e "Foco entrega a criatura na mira". Parecem interferência entre testes que rodam juntos. O teste da cratera dependia da fila global e foi corrigido para olhar só os próprios blocos.
 
 **Visto no cliente** (roteiro automático, capturas em `run/screenshots/autotest_*`, não teclado e mouse de verdade):
 - a pena escrevendo no livro sobre a bancada;
@@ -411,12 +411,17 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
 - **Raio do ritual cresce com as oferendas**: × (1 + 0,5 × valor/100), até o dobro.
 - **Hidra**: com mais jogadores, além de vida e dano, ganha velocidade, ataques mais rápidos (espera até a metade) e poderes de estágios acima (1 por jogador a mais). Com 2 ou mais jogadores mira o mais ferido; com 3 ou mais, prefere quem está conjurando.
 - **Hidra devora grimórios**: livros caídos perto dela somem, o dono é avisado e ela passa a lançar as magias deles. Ao morrer, devolve todos.
-- **Nível de criatura** contra controle (Petrificar, Congelar, Sono, Medo, Silêncio, Levitar, Maldição, Selamento):
-  - O nível é vida máxima + 2 × armadura, e a magia precisa de `controlManaPerLevel` (0,2) × nível de força.
-  - De 50% a 100% da força, o efeito sai mais curto; abaixo de 50%, a criatura resiste.
-  - Jogadores não têm nível. Chefes resistem sempre.
-- **Perfurar**: +20% do dano vira perfurante por camada, sem limite de camadas, e cada camada custa o dobro da anterior. Dano de magia já ignorava armadura no vanilla; a parte perfurante ignora também encantamentos de proteção, Resistência, a redução do Petrificar e a dureza de chefes (tipo de dano `arcane:pierce`).
-- **Invisibilidade**: sem partículas; esconde corpo, armadura, itens e flechas presas. Fica uma distorção turva (o corpo quase transparente, tremulando) que aparece mais quanto mais rápido a criatura se move (`InvisibilityRender`, no cliente). Vale também para a poção vanilla.
+- **Nível contra controle** (Petrificar, Congelar, Sono, Medo, Silêncio, Levitar, Maldição, Selamento). O que conta é a **mana máxima** de quem conjura:
+  - criatura: o nível é vida máxima + 2 × armadura, e a mana máxima do mago precisa chegar a `controlManaPerLevel` (1,0) × nível. Um mago com 100 de mana máxima controla um golem de ferro (nível 100);
+  - jogador: comparam-se as manas máximas dos dois;
+  - de 50% a 100% do necessário, o efeito sai mais curto; abaixo de 50%, o alvo resiste;
+  - chefes resistem sempre;
+  - criaturas que conjuram (magos NPC, Hidra) não têm barra de mana e usam a força da própria magia.
+- **Dano de magia agora respeita a armadura** (tipo `arcane:spell`). Antes usava o dano mágico do vanilla, que atravessa armadura.
+- **Perfurar**: +20% do dano vira perfurante por camada, sem limite de camadas, e cada camada custa o dobro da anterior. A parte perfurante (`arcane:pierce`) ignora armadura, encantamentos de proteção, Resistência, a redução do Petrificar e a dureza de chefes.
+- **Invisibilidade do glifo**: sem partículas; esconde corpo, armadura, itens e flechas presas. Fica uma distorção turva (o corpo quase transparente, tremulando) que aparece mais quanto mais rápido a criatura se move (`InvisibilityRender`, no cliente). O servidor marca quem está sob o glifo (Véu Arcano, `ArcaneVeil` + pacote); a poção vanilla continua como no jogo normal.
+- **Projétil** voa em linha reta, sem gravidade (some em 10 s, como antes).
+- **Rituais**: os sinais de mana vazando valem pelo círculo existir, completo em volta de um altar, mesmo sem ativar.
 
 **Glifos novos (45, total 207)**
 - Ciclo: Selamento (vira o item Criatura Selada), Selar Bancada, Ler Resíduo, Rastrear Posse, Portal Pareado, Ilusão (entidade com a skin do dono).

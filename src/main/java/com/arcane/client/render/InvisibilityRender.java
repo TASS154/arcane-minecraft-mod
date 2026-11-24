@@ -20,13 +20,18 @@ import net.minecraftforge.fml.common.Mod;
  * Invisibilidade (decisao de Everton): o corpo, a armadura e os itens na mao somem; nao ha particulas. O que denuncia
  * quem esta invisivel e uma distorcao turva: o contorno do corpo, quase transparente, que tremula e fica mais visivel
  * quanto mais rapido ele se move (parado e quase nada; correndo da para seguir com atencao).
- * Vale para qualquer criatura invisivel (o glifo e a pocao vanilla).
+ * Vale so para a invisibilidade do glifo (Veu Arcano, avisado pelo servidor); a pocao vanilla continua como sempre.
  */
 @Mod.EventBusSubscriber(modid = ArcaneMod.MODID, value = Dist.CLIENT)
 public final class InvisibilityRender {
   /** Transparencia parado e o maximo em movimento rapido. */
   public static final float STILL_ALPHA = 0.035f, MAX_ALPHA = 0.26f;
   private static boolean drawing;
+  private static final java.util.Set<Integer> VEILED = new java.util.HashSet<>();
+
+  public static void setVeiled(int entityId, boolean on) {
+    if (on) VEILED.add(entityId); else VEILED.remove(entityId);
+  }
 
   private InvisibilityRender() {}
 
@@ -39,7 +44,7 @@ public final class InvisibilityRender {
   @SubscribeEvent
   public static void onRender(RenderLivingEvent.Pre<?, ?> event) {
     LivingEntity entity = event.getEntity();
-    if (drawing || !entity.isInvisible() || entity.isSpectator()) return;
+    if (drawing || !entity.isInvisible() || entity.isSpectator() || !VEILED.contains(entity.getId())) return;
     event.setCanceled(true);
     float partial = event.getPartialTick();
     double moved = Math.sqrt(Mth.square(entity.getX() - entity.xo) + Mth.square(entity.getY() - entity.yo) + Mth.square(entity.getZ() - entity.zo));

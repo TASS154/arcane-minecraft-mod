@@ -60,6 +60,10 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
     this.entityData.define(ELEMENT, 0);
   }
 
+  /** O projetil de magia voa em linha reta: a gravidade nao o puxa para baixo. */
+  @Override
+  protected float getGravity() { return 0.0f; }
+
   @Override
   public void tick() {
     super.tick();

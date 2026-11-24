@@ -74,6 +74,18 @@ public final class LifeEffects {
     return all.isEmpty() ? c.caster().position() : all.get(0);
   }
 
+  /** Invisibilidade do glifo: o efeito vanilla (sem particulas) mais o Veu Arcano, que esconde armadura e itens. */
+  public static class ArcaneInvisibility implements EffectHandler {
+    private final PotionEffectHandler base = new PotionEffectHandler(MobEffects.INVISIBILITY, 2400);
+    @Override public void apply(ExecutionContext c, EffectCall call, TargetList t) {
+      base.apply(c, call, t);
+      for (LivingEntity l : living(t)) {
+        var inv = l.getEffect(MobEffects.INVISIBILITY);
+        if (inv != null) l.addEffect(new MobEffectInstance(com.arcane.registry.ModEffects.ARCANE_VEIL.get(), inv.getDuration(), 0, false, false, false), c.caster());
+      }
+    }
+  }
+
   // ================================================================== utilitarios
   /** Remendar: devolve 10% da durabilidade maxima do item na mao principal de cada alvo (fraco e caro de proposito). */
   public static class Mend implements EffectHandler {

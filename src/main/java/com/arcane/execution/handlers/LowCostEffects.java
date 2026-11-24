@@ -124,7 +124,7 @@ public final class LowCostEffects {
       flat = flat.normalize();
       Vec3 start = caster.position();
       Vec3 end = start.add(flat.scale(distance));
-      var source = context.level().damageSources().indirectMagic(caster, caster);
+      var source = com.arcane.execution.Pierce.spell(context.level(), caster);
       AABB sweep = new AABB(start, end).inflate(1.3, 1.5, 1.3);
       for (LivingEntity e : context.level().getEntitiesOfClass(LivingEntity.class, sweep, x -> x.isAlive() && x != caster)) {
         Vec3 rel = e.position().subtract(start);
@@ -210,7 +210,7 @@ public final class LowCostEffects {
       double radius = Math.min(Math.min(ExecutionContext.cap(48.0), Math.max(8.0, 8.0 * context.areaFactor())), p(context, call, "radius", 3.0) * context.areaFactor());
       float damage = (float) Math.min(12.0, p(context, call, "damage", 2.0));
       List<Vec3> centers = centers(targets);
-      var source = context.level().damageSources().indirectMagic(context.caster(), context.caster());
+      var source = com.arcane.execution.Pierce.spell(context.level(), context.caster());
       for (Vec3 center : centers) {
         context.level().playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5f, 1.4f);
         context.level().sendParticles(ParticleTypes.EXPLOSION, center.x, center.y + 0.5, center.z, 1, 0, 0, 0, 0);
@@ -248,7 +248,7 @@ public final class LowCostEffects {
     public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
       float amount = (float) Math.min(16.0, p(context, call, "amount", 3.0));
       double ratio = Math.max(0.1, Math.min(1.0, call.parameters().getOrDefault("ratio", 0.6)));
-      var source = context.level().damageSources().indirectMagic(context.caster(), context.caster());
+      var source = com.arcane.execution.Pierce.spell(context.level(), context.caster());
       float stolen = 0;
       for (Entity e : targets.entities()) {
         if (!(e instanceof LivingEntity living) || e == context.caster()) continue;

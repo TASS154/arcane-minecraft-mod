@@ -23,6 +23,8 @@ public final class ModEffects {
     /** Petrificado: marcador sincronizado com o cliente (o estado real fica em Phase4State); faz o modelo virar pedra. */
     /** Passo Surdo: enquanto durar, a criatura nao faz som nem vibracao ao se mover (ver WorldMarks). */
     public static final RegistryObject<MobEffect> SILENT_STEP = EFFECTS.register("silent_step", () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x404858) {});
+    /** Veu Arcano: marca a invisibilidade do glifo (esconde armadura e itens; a pocao vanilla nao tem). */
+    public static final RegistryObject<MobEffect> ARCANE_VEIL = EFFECTS.register("arcane_veil", () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x8070C0) {});
     public static final RegistryObject<MobEffect> PETRIFIED = EFFECTS.register("petrified", () -> new MobEffect(MobEffectCategory.HARMFUL, 0x8E8E93) {});
 
     /** Andar na agua: a superficie da agua sustenta quem tem o efeito; agachar afunda (ver WaterWalk). */

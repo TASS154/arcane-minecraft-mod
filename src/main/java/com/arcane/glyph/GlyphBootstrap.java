@@ -97,7 +97,7 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("freeze"), new FreezeEffectHandler());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("blind"), new PotionEffectHandler(MobEffects.BLINDNESS, 400));
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("wither"), new PotionEffectHandler(MobEffects.WITHER, 300));
-        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("invisible"), new PotionEffectHandler(MobEffects.INVISIBILITY, 2400));
+        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("invisible"), new com.arcane.execution.handlers.LifeEffects.ArcaneInvisibility());
 
         // Fase 3: efeitos baratos
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("rain"), new com.arcane.execution.handlers.LowCostEffects.Rain());

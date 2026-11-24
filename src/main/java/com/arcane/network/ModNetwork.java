@@ -58,6 +58,9 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(com.arcane.network.packet.S2CPreviewPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(com.arcane.network.packet.S2CPreviewPacket::encode).decoder(com.arcane.network.packet.S2CPreviewPacket::decode)
         .consumerMainThread(com.arcane.network.packet.S2CPreviewPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.S2CVeilPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(com.arcane.network.packet.S2CVeilPacket::encode).decoder(com.arcane.network.packet.S2CVeilPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.S2CVeilPacket::handle).add();
     CHANNEL.messageBuilder(S2CBeamPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(S2CBeamPacket::encode).decoder(S2CBeamPacket::decode)
         .consumerMainThread(S2CBeamPacket::handle).add();

@@ -14,17 +14,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Nivel das criaturas contra as magias de controle (Petrificar, Congelar, Sono, Medo, Silencio, Levitar, Maldicao,
- * Selamento). Cada criatura tem um nivel (vida maxima + 2 x armadura) e so e controlada se a magia tiver mana
- * suficiente: a forca da magia (o custo base ampliado por carga, ritual, cristal e precisao) dividida pelo nivel x
- * {@code controlManaPerLevel}.
+ * Nivel contra as magias de controle (Petrificar, Congelar, Sono, Medo, Silencio, Levitar, Maldicao, Selamento),
+ * decisao de Everton: o que conta e a MANA MAXIMA de quem conjura.
  * <ul>
- *   <li>forca &gt;= 100% do necessario: efeito inteiro;</li>
- *   <li>de 50% a 100%: o efeito entra mais fraco (a duracao cai na mesma proporcao);</li>
- *   <li>abaixo de 50%: a criatura resiste (faisca cinza, nada acontece).</li>
+ *   <li>criatura: nivel = vida maxima + 2 x armadura; precisa de {@code controlManaPerLevel} x nivel de mana maxima;</li>
+ *   <li>jogador: o nivel dele e a propria mana maxima (comparam-se as manas maximas dos dois);</li>
+ *   <li>100% ou mais: efeito inteiro; de 50% a 100%: mais fraco (duracao proporcional); abaixo de 50%: resiste;</li>
+ *   <li>chefes (Dragao, Wither, Hidra e tudo marcado como chefe) resistem sempre.</li>
  * </ul>
- * Excecoes: jogadores nao tem nivel (sempre afetados, como nas cenas de referencia); chefes (Dragao, Wither, Hidra e
- * tudo marcado como chefe) resistem sempre ao controle.
+ * Criaturas que conjuram (magos NPC) valem como um mago iniciante (100 de mana maxima) ou pelo proprio nivel.
  */
 public final class CreatureLevels {
   public static final Set<String> CONTROL = Set.of("petrify", "freeze", "sleep", "fear", "silence", "levitate", "curse", "seal_creature");
@@ -53,13 +51,29 @@ public final class CreatureLevels {
     return context.amplify(Math.max(1, context.plan().baseManaCost()), List.of(), "power");
   }
 
-  /** Fracao (0..1) do efeito que a criatura recebe: 1 inteiro, 0 resiste. */
+  /**
+   * Mana maxima de quem conjura. Criaturas que conjuram (magos NPC) nao tem barra de mana: valem como um mago
+   * iniciante (100) ou pelo proprio nivel, o que for maior.
+   */
+  public static double casterMana(ExecutionContext context) {
+    if (context.caster() instanceof Player p) {
+      var mana = com.arcane.grimoire.GrimoireAttachments.getMana(p).orElse(null);
+      if (mana != null) return mana.max();
+    }
+    return Math.max(com.arcane.execution.ManaState.DEFAULT_MAX, required(context.caster()));
+  }
+
+  /** Fracao (0..1) do efeito que o alvo recebe: 1 inteiro, 0 resiste. */
   public static double fraction(ExecutionContext context, LivingEntity e) {
-    if (e instanceof Player) return 1.0;
     if (isBoss(e)) return 0.0;
-    double need = required(e);
+    double need;
+    if (e instanceof Player target) {
+      need = com.arcane.grimoire.GrimoireAttachments.getMana(target).map(m -> (double) m.max()).orElse(0.0);
+    } else {
+      need = required(e);
+    }
     if (need <= 0) return 1.0;
-    double f = spellMana(context) / need;
+    double f = casterMana(context) / need;
     if (f >= 1.0) return 1.0;
     return f >= WEAK_FLOOR ? f : 0.0;
   }

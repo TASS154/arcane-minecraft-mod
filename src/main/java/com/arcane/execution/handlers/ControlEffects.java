@@ -176,7 +176,7 @@ public final class ControlEffects {
     public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
       float amount = (float) Math.min(12.0, p(context, call, "amount", 3.0));
       int corrode = (int) Math.min(60, Math.round(call.parameters().getOrDefault("corrode", 8.0)));
-      var source = context.level().damageSources().indirectMagic(context.caster(), context.caster());
+      var source = com.arcane.execution.Pierce.spell(context.level(), context.caster());
       for (Entity e : targets.entities()) {
         if (!(e instanceof LivingEntity living) || e == context.caster()) continue;
         living.hurt(source, amount);

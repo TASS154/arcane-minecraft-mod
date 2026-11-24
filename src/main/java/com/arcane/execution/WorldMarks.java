@@ -147,6 +147,8 @@ public final class WorldMarks {
     final Map<String, UUID> locks = new HashMap<>();
     final Map<String, UUID> seals = new HashMap<>();
     final List<Area> areas = new ArrayList<>();
+    /** Locais notaveis do mundo (ex.: "ruins"), para a Bussola Arcana. */
+    final List<CompoundTag> sites = new ArrayList<>();
 
     static Store load(CompoundTag tag) {
       Store s = new Store();
@@ -156,11 +158,15 @@ public final class WorldMarks {
         CompoundTag c = (CompoundTag) t;
         s.areas.add(new Area(c.getString("dim"), new Vec3(c.getDouble("x"), c.getDouble("y"), c.getDouble("z")), c.getDouble("r"), c.getString("name"), c.getUUID("o")));
       }
+      for (Tag t : tag.getList("sites", Tag.TAG_COMPOUND)) s.sites.add((CompoundTag) t);
       return s;
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
+      ListTag st = new ListTag();
+      st.addAll(sites);
+      tag.put("sites", st);
       ListTag l = new ListTag(), s = new ListTag(), a = new ListTag();
       locks.forEach((k, o) -> { CompoundTag c = new CompoundTag(); c.putString("k", k); c.putUUID("o", o); l.add(c); });
       seals.forEach((k, o) -> { CompoundTag c = new CompoundTag(); c.putString("k", k); c.putUUID("o", o); s.add(c); });
@@ -234,6 +240,33 @@ public final class WorldMarks {
     while (s.areas.size() >= MAX_AREAS) s.areas.remove(0);
     s.areas.add(new Area(level.dimension().location().toString(), centre, radius, name, owner));
     s.setDirty();
+  }
+
+  /** Registra um local notavel (ate 256 no mundo). */
+  public static void addSite(ServerLevel level, BlockPos pos, String kind) {
+    Store s = store(level.getServer());
+    CompoundTag c = new CompoundTag();
+    c.putString("dim", level.dimension().location().toString());
+    c.putLong("pos", pos.asLong());
+    c.putString("kind", kind);
+    while (s.sites.size() >= 256) s.sites.remove(0);
+    s.sites.add(c);
+    s.setDirty();
+  }
+
+  /** Para os testes: esquece os locais notaveis registrados. */
+  public static void clearSites(ServerLevel level) {
+    store(level.getServer()).sites.clear();
+    store.setDirty();
+  }
+
+  public static List<BlockPos> sites(ServerLevel level, String kind) {
+    String dim = level.dimension().location().toString();
+    List<BlockPos> out = new ArrayList<>();
+    for (CompoundTag c : store(level.getServer()).sites) {
+      if (c.getString("dim").equals(dim) && c.getString("kind").equals(kind)) out.add(BlockPos.of(c.getLong("pos")));
+    }
+    return out;
   }
 
   public static Area areaAt(ServerLevel level, Vec3 pos) {

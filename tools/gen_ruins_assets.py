@@ -76,14 +76,7 @@ def main():
     write(D / "recipes/rune_lamp.json", {"type": "minecraft:crafting_shaped", "pattern": [" B ", "BGB", " B "],
                                          "key": {"B": {"item": "arcane:arcane_bricks"}, "G": {"item": "minecraft:glowstone"}},
                                          "result": {"item": "arcane:rune_lamp", "count": 2}})
-    write(D / "recipes/creature_pen.json", {"type": "minecraft:crafting_shaped", "pattern": [" F ", "LPL", " B "],
-                                            "key": {"F": {"item": "minecraft:feather"}, "L": {"item": "minecraft:lead"},
-                                                    "P": {"item": "arcane:arcane_pen"}, "B": {"item": "minecraft:bone"}},
-                                            "result": {"item": "arcane:creature_pen"}})
-    write(D / "recipes/perfect_compass.json", {"type": "minecraft:crafting_shaped", "pattern": ["DCD", "CMC", "DCD"],
-                                               "key": {"D": {"item": "minecraft:diamond"}, "C": {"item": "arcane:arcane_compass"},
-                                                       "M": {"item": "arcane:mana_crystal"}},
-                                               "result": {"item": "arcane:perfect_compass"}})
+    # Caneta de Criatura e Bussola Perfeita ficam SEM receita (so em baus), decisao de Everton.
     # tags: picareta
     mine = D.parent / "minecraft/tags/blocks/mineable/pickaxe.json"
     try:

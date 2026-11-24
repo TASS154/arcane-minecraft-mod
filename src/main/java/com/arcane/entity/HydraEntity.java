@@ -94,6 +94,18 @@ public class HydraEntity extends Monster {
   private final java.util.List<net.minecraft.world.item.ItemStack> devoured = new java.util.ArrayList<>();
   private static final UUID SPEED_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a03");
   public static final int DEVOURED_SPELL = 8;
+
+  // ------------------------------------------------------------------ cabecas independentes
+  /** Alvo de cada cabeca (id da entidade no cliente, -1 = nenhum): cada cabeca olha e morde o seu. */
+  @SuppressWarnings("unchecked")
+  private static final EntityDataAccessor<Integer>[] HEAD_TARGET = new EntityDataAccessor[9];
+  /** Cabecas mordendo agora (bit i = cabeca i), para a animacao do bote. */
+  private static final EntityDataAccessor<Integer> BITING = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static {
+    for (int i = 0; i < 9; i++) HEAD_TARGET[i] = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  }
+  private final int[] headCooldown = new int[9];
+  private final int[] biteTicks = new int[9];
   /**
    * A vida do Minecraft tem teto de 1024. Acima disso a Hidra fica "mais dura": o dano recebido e dividido por este
    * fator, entao a vida efetiva e vida x dureza (a barra de chefe mostra a fracao, que e a mesma).
@@ -139,6 +151,8 @@ public class HydraEntity extends Monster {
     super.defineSynchedData();
     entityData.define(STAGE, 1);
     entityData.define(POWER, 0);
+    for (var a : HEAD_TARGET) entityData.define(a, -1);
+    entityData.define(BITING, 0);
     entityData.define(SEALS, 0);
     entityData.define(HOME, BlockPos.ZERO);
   }
@@ -171,7 +185,8 @@ public class HydraEntity extends Monster {
   public int heads() { return headsFor(stage()); }
 
   /** Escala do corpo: 1 no estagio 1, 4,25 no 14. */
-  public static float scaleFor(int stage) { return 1.0f + (clampStage(stage) - 1) * 0.25f; }
+  /** Tamanho: 1,8x na recem-nascida ate 7x na ancia (antes 1x a 4,25x: pequena demais, decisao de Everton). */
+  public static float scaleFor(int stage) { return 1.8f + (clampStage(stage) - 1) * 0.4f; }
 
   /** Vida: 80 na recem-nascida, x1,55 a cada estagio (~525 no 5, ~4,6 mil no 10, ~24 mil na anciã). */
   public static double baseHealth(int stage) { return 80.0 * Math.pow(1.55, clampStage(stage) - 1); }
@@ -342,6 +357,57 @@ public class HydraEntity extends Monster {
     return sc;
   }
 
+  /** Id da entidade que a cabeca i esta mirando (-1 = nenhuma). */
+  public int headTarget(int i) { return i < 0 || i >= 9 ? -1 : entityData.get(HEAD_TARGET[i]); }
+
+  public boolean headBiting(int i) { return (entityData.get(BITING) & (1 << i)) != 0; }
+
+  /** Alcance do pescoco: ate onde uma cabeca morde sem o corpo andar. */
+  public double neckReach() { return 2.5 + getBbWidth() * 1.2; }
+
+  /**
+   * Cabecas independentes: a cada segundo, distribui os alvos por perto (jogadores e criaturas que a atacaram ou que
+   * ela caca) entre as cabecas, uma por alvo, revezando quando ha mais cabecas que alvos. Cada cabeca morde o seu alvo
+   * quando ele esta ao alcance do pescoco, com a sua propria espera; o dano de cada mordida e uma fracao do golpe.
+   */
+  private void tickHeads() {
+    if (!(level() instanceof ServerLevel sl)) return;
+    int n = heads();
+    if (tickCount % 20 == 3) {
+      java.util.List<LivingEntity> foes = new java.util.ArrayList<>(enemiesWithin(28 + getBbWidth()));
+      foes.removeIf(e -> e instanceof Player p && (p.isCreative() || p.isSpectator()));
+      foes.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(this)));
+      if (getTarget() != null && getTarget().isAlive()) {
+        foes.remove(getTarget());
+        foes.add(0, getTarget()); // a cabeca do meio fica com o alvo principal
+      }
+      for (int i = 0; i < 9; i++) {
+        int id = -1;
+        if (i < n && !foes.isEmpty()) {
+          // cabeca do meio primeiro, depois as vizinhas alternando lados
+          int order = Math.abs(i - (n - 1) / 2) * 2 - (i < (n - 1) / 2 ? 1 : 0);
+          id = foes.get(Math.max(0, order) % foes.size()).getId();
+        }
+        entityData.set(HEAD_TARGET[i], id);
+      }
+    }
+    int biting = 0;
+    double reach = neckReach();
+    float dmg = (float) (getAttributeValue(Attributes.ATTACK_DAMAGE) * 0.35);
+    for (int i = 0; i < n; i++) {
+      if (biteTicks[i] > 0) { biteTicks[i]--; biting |= 1 << i; }
+      if (headCooldown[i] > 0) { headCooldown[i]--; continue; }
+      var e = sl.getEntity(entityData.get(HEAD_TARGET[i]));
+      if (!(e instanceof LivingEntity t) || !t.isAlive() || t.distanceTo(this) > reach + t.getBbWidth()) continue;
+      headCooldown[i] = 25 + random.nextInt(30);
+      biteTicks[i] = 8;
+      biting |= 1 << i;
+      t.hurt(damageSources().mobAttack(this), dmg);
+      sl.playSound(null, t.blockPosition(), SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.HOSTILE, 1.0f, 0.6f + random.nextFloat() * 0.3f);
+    }
+    entityData.set(BITING, biting);
+  }
+
   // ------------------------------------------------------------------ grimorios devorados
   public int devouredCount() { return devoured.size(); }
 
@@ -423,6 +489,7 @@ public class HydraEntity extends Monster {
       return;
     }
     awakeTicks++;
+    tickHeads();
     tickStrikes();
     tickRampage();
     if (powerTicks > 0) {
@@ -737,6 +804,8 @@ public class HydraEntity extends Monster {
   // ------------------------------------------------------------------ luta, chefe e morte
   @Override
   public boolean hurt(DamageSource source, float amount) {
+    // gigante: nao sufoca dentro dos blocos (nem nas crateras que ela mesma abre) nem se espreme
+    if (source.is(net.minecraft.world.damagesource.DamageTypes.IN_WALL) || source.is(net.minecraft.world.damagesource.DamageTypes.CRAMMING)) return false;
     if (sealed() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
       // o selo absorve: so um brilho e um som de cristal
       if (level() instanceof ServerLevel sl && tickCount % 4 == 0) {

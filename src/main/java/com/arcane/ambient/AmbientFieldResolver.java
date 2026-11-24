@@ -41,7 +41,7 @@ public final class AmbientFieldResolver {
    * as secoes que nao podem conter cristal; assim acha qualquer cristal sem varrer bloco a bloco.
    * So olha chunks ja carregados, para nunca forcar carregamento.
    */
-  static BlockPos findNearestCrystal(ServerLevel level, BlockPos origin, int radius) {
+  public static BlockPos findNearestCrystal(ServerLevel level, BlockPos origin, int radius) {
     BlockPos nearest = null;
     double nearestDist = (double) radius * radius;
     int minCx = SectionPos.blockToSectionCoord(origin.getX() - radius);

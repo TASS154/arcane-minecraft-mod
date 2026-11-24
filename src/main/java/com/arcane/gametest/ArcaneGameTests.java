@@ -1323,10 +1323,30 @@ public class ArcaneGameTests {
   @GameTest(template = "empty")
   public static void everyMageElementCastsAValidSpell(GameTestHelper h) {
     for (MageElement e : MageElement.values()) {
-      var validation = com.arcane.inscription.InscriptionValidator.validate(e.spell());
-      h.assertTrue(validation.valid(), e + ": " + validation.message().getString());
-      com.arcane.inscription.CompiledPlanCache.getOrCompile(e.spell());
+      h.assertTrue(e.spells().size() >= 4, e + ": grimorio com 4 magias ou mais");
+      for (var sp : e.spells()) {
+        var validation = com.arcane.inscription.InscriptionValidator.validate(sp.inscription());
+        h.assertTrue(validation.valid(), e + " / " + sp.inscription().metadata().name() + ": " + validation.message().getString());
+        com.arcane.inscription.CompiledPlanCache.getOrCompile(sp.inscription());
+      }
     }
+    // a "inteligencia": vida baixa defende; o pacifico nunca ataca e cura quem esta ferido; perto demais usa area
+    var rnd = net.minecraft.util.RandomSource.create(3);
+    int[] ready = new int[8];
+    var low = new com.arcane.npc.MageBrain.Situation(0.2f, 8, 1, false, true);
+    h.assertTrue(com.arcane.npc.MageBrain.choose(MageElement.FIRE, com.arcane.npc.MagePersonality.HOSTILE, low, ready, rnd).role() == MageElement.Role.DEFEND,
+        "com pouca vida o mago se defende");
+    var fight = new com.arcane.npc.MageBrain.Situation(1f, 8, 1, false, true);
+    for (int i = 0; i < 20; i++) {
+      var pick = com.arcane.npc.MageBrain.choose(MageElement.FIRE, com.arcane.npc.MagePersonality.HARMLESS, fight, ready, rnd);
+      h.assertTrue(pick == null || pick.role() == MageElement.Role.ESCAPE, "o pacifico nunca ataca");
+    }
+    var hurtAlly = new com.arcane.npc.MageBrain.Situation(1f, 99, 0, true, false);
+    h.assertTrue(com.arcane.npc.MageBrain.choose(MageElement.FROST, com.arcane.npc.MagePersonality.HARMLESS, hurtAlly, ready, rnd).role() == MageElement.Role.SUPPORT,
+        "o pacifico de gelo cura o jogador ferido");
+    var close = new com.arcane.npc.MageBrain.Situation(1f, 2.5, 1, false, true);
+    h.assertTrue(com.arcane.npc.MageBrain.choose(MageElement.FROST, com.arcane.npc.MagePersonality.HOSTILE, close, ready, rnd).role() == MageElement.Role.AREA,
+        "inimigo colado: magia de area");
     h.succeed();
   }
 
@@ -1340,6 +1360,11 @@ public class ArcaneGameTests {
     other.readAdditionalSaveData(tag);
     h.assertTrue(other.variant() == 13, "variante deveria ser 13, foi " + other.variant());
     h.assertTrue(other.element() == MageElement.FROST, "13 % 6 = 1 = gelo, foi " + other.element());
+    mage.setPersonality(com.arcane.npc.MagePersonality.TRICKSTER);
+    CompoundTag tag2 = new CompoundTag();
+    mage.addAdditionalSaveData(tag2);
+    other.readAdditionalSaveData(tag2);
+    h.assertTrue(other.personality() == com.arcane.npc.MagePersonality.TRICKSTER, "a personalidade e salva");
     h.succeed();
   }
 
@@ -3358,7 +3383,48 @@ public class ArcaneGameTests {
     h.assertTrue(!mages.isEmpty(), "o cofre tem um mago guardiao");
     mages.forEach(net.minecraft.world.entity.Entity::discard);
     level.getEntitiesOfClass(net.minecraft.world.entity.decoration.ArmorStand.class, new net.minecraft.world.phys.AABB(centre).inflate(24)).forEach(net.minecraft.world.entity.Entity::discard);
+    h.assertTrue(com.arcane.execution.WorldMarks.sites(level, "ruins").contains(centre), "as ruinas ficam registradas para a Bussola Arcana");
+    com.arcane.execution.WorldMarks.clearSites(level);
     h.succeed();
+  }
+
+  @GameTest(template = "empty", batch = "hydra_heads", timeoutTicks = 60)
+  public static void eachHydraHeadPicksItsOwnTarget(GameTestHelper h) {
+    floor(h);
+    var hydra = h.spawn(com.arcane.registry.ModEntities.HYDRA.get(), new BlockPos(3, 1, 3));
+    hydra.setStage(7);
+    hydra.setSealMask(0);
+    hydra.setNoAi(false);
+    Pig a = pig(h, 0, 0), b = pig(h, 6, 6);
+    a.setInvulnerable(true); // a Hidra morde de verdade: o alvo tem de sobreviver ate a conferencia
+    b.setInvulnerable(true);
+    hydra.setTarget(a);
+    h.runAfterDelay(25, () -> {
+      java.util.Set<Integer> ids = new java.util.HashSet<>();
+      for (int i = 0; i < hydra.heads(); i++) ids.add(hydra.headTarget(i));
+      // (criaturas de testes vizinhos tambem podem virar alvo; o que importa e o alvo principal e a divisao)
+      h.assertTrue(ids.contains(a.getId()) && ids.size() >= 2, "as cabecas se dividem: o alvo principal e mais algum (" + ids + ")");
+      h.assertTrue(hydra.headTarget(hydra.heads()) == -1, "cabecas que nao existem ficam sem alvo");
+      hydra.discard();
+      h.succeed();
+    });
+  }
+
+  @GameTest(template = "ritual_arena", timeoutTicks = 40)
+  public static void manaCompassPrefersGiantRitualsOverCrystals(GameTestHelper h) {
+    arena(h);
+    var level = h.getLevel();
+    BlockPos crystal = altarAbs(h).offset(3, 0, 3);
+    level.setBlock(crystal, com.arcane.registry.ModBlocks.MANA_CRYSTAL.get().defaultBlockState(), 3);
+    com.arcane.execution.WorldMarks.clearSites(level); // Ruinas de outros testes ficariam na frente do cristal
+    var only = com.arcane.item.ManaCompassItem.find(level, altarAbs(h).offset(-5, 0, 0));
+    h.assertTrue(only != null && only.kind().equals("crystal"), "sem ritual, aponta o cristal (" + only + ")");
+    com.arcane.ritual.RitualService.drawCircle(level, altarAbs(h), 16);
+    h.runAfterDelay(30, () -> {
+      var t = com.arcane.item.ManaCompassItem.find(level, altarAbs(h).offset(-5, 0, 0));
+      h.assertTrue(t != null && t.kind().equals("ritual") && t.pos().equals(altarAbs(h)), "com um ritual gigante, aponta para ele (" + t + ")");
+      h.succeed();
+    });
   }
 
   // ------------------------------------------------------------------ grimorio na bancada (posse e estudo)

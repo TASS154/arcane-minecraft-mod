@@ -78,6 +78,22 @@ public class ArcaneCommands {
                   ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.pocket.cleared", owner.getDisplayName(), n), true);
                   return n;
                 }))))
+        .then(Commands.literal("hydra")
+            .requires(src -> src.hasPermission(2))
+            .then(Commands.literal("find").executes(ctx -> {
+              ServerPlayer p = ctx.getSource().getPlayerOrException();
+              var data = com.arcane.world.HydraLairs.get(p.server.overworld());
+              for (var lair : data.lairs()) {
+                String state = lair.defeated ? "derrotada" : lair.stage == 0 ? "ainda nao revelada" : "estagio " + lair.stage;
+                ctx.getSource().sendSuccess(() -> Component.literal("Covil " + (lair.index + 1) + " (" + lair.original() + "): "
+                    + lair.centre.toShortString() + " - " + state + ", " + (int) Math.sqrt(lair.centre.distSqr(p.blockPosition())) + " blocos"), false);
+              }
+              return data.lairs().size();
+            }))
+            .then(Commands.argument("stage", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 14))
+                .executes(ctx -> summonHydra(ctx.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "stage"), false))
+                .then(Commands.literal("sealed")
+                    .executes(ctx -> summonHydra(ctx.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "stage"), true)))))
         .then(Commands.literal("ruins")
             .requires(src -> src.hasPermission(2))
             .executes(ctx -> {
@@ -160,5 +176,25 @@ public class ArcaneCommands {
                   }
                   return 0;
                 }))));
+  }
+
+  /** /arcane hydra <estagio> [sealed]: invoca uma Hidra a alguns blocos na frente do jogador (acordada ou selada). */
+  private static int summonHydra(ServerPlayer p, int stage, boolean sealed) {
+    var level = p.serverLevel();
+    var hydra = com.arcane.registry.ModEntities.HYDRA.get().create(level);
+    if (hydra == null) return 0;
+    hydra.setStage(stage);
+    double dist = 6 + com.arcane.entity.HydraEntity.scaleFor(stage) * 2.5;
+    var at = p.position().add(p.getLookAngle().multiply(1, 0, 1).normalize().scale(dist));
+    hydra.moveTo(at.x, p.getY(), at.z, p.getYRot() + 180f, 0);
+    level.addFreshEntity(hydra);
+    if (sealed) {
+      hydra.homeTo(hydra.blockPosition(), 12);
+      hydra.setSealMask(com.arcane.entity.HydraEntity.sealMaskFor(stage));
+    } else {
+      hydra.setSealMask(0);
+    }
+    p.displayClientMessage(Component.literal("Hidra estagio " + stage + (sealed ? " (selada, sem selos de verdade: use /kill para tirar)" : "") + " invocada"), false);
+    return 1;
   }
 }

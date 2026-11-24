@@ -50,6 +50,17 @@ public class ClientSetup {
     event.enqueueWork(() -> MenuScreens.register(ModMenuTypes.ARCANE_WORKBENCH.get(), ArcaneWorkbenchScreen::new));
     // Cetro: a ponta e a haste escolhem o modelo (ver models/item/scepter.json).
     event.enqueueWork(() -> {
+      net.minecraft.client.renderer.item.ItemProperties.register(com.arcane.registry.ModItems.MANA_COMPASS.get(), new net.minecraft.resources.ResourceLocation("arcane", "angle"),
+          (stack, level, entity, seed) -> {
+            var holder = entity != null ? entity : stack.getEntityRepresentation();
+            if (holder == null) return 0f;
+            var lvl = level != null ? level : holder.level();
+            var target = com.arcane.item.ManaCompassItem.target(stack, lvl);
+            if (target == null) return (float) ((lvl.getGameTime() % 160) / 160.0); // sem alvo: gira devagar
+            double toTarget = Math.atan2(target.getZ() + 0.5 - holder.getZ(), target.getX() + 0.5 - holder.getX()) / (Math.PI * 2);
+            double facing = (holder.getVisualRotationYInDegrees() / 360.0);
+            return (float) net.minecraft.util.Mth.positiveModulo(0.5 - (facing - 0.25) + toTarget - 0.5 + 0.5, 1.0);
+          });
       net.minecraft.client.renderer.item.ItemProperties.register(com.arcane.registry.ModItems.SCEPTER.get(), new net.minecraft.resources.ResourceLocation("arcane", "head"),
           (stack, level, entity, seed) -> com.arcane.item.ScepterItem.head(stack));
       net.minecraft.client.renderer.item.ItemProperties.register(com.arcane.registry.ModItems.SCEPTER.get(), new net.minecraft.resources.ResourceLocation("arcane", "shaft"),

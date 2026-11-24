@@ -120,6 +120,7 @@ public class ArcaneRuins {
     }
     // 4) as portas: abre a parede de cada sala onde o corredor chega
     for (int[][] l : links) corridor(level, at(centre, l[0]), at(centre, l[1]), null);
+    com.arcane.execution.WorldMarks.addSite(level, centre, "ruins");
     return rooms;
   }
 
@@ -241,6 +242,8 @@ public class ArcaneRuins {
         if (guard != null) {
           guard.moveTo(c.getX() + 0.5, c.getY(), c.getZ() + 0.5, rand.nextFloat() * 360f, 0);
           guard.setPersistenceRequired();
+          guard.setVariant(rand.nextInt(com.arcane.npc.MageElement.VARIANTS));
+          guard.setPersonality(com.arcane.npc.MagePersonality.DEFENSIVE);
           level.addFreshEntity(guard);
         }
         // armadilha: runa de tinta invisivel no chao do meio da sala (Ao Chegar Perto -> lentidao e dano)

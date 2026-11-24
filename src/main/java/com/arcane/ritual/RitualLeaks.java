@@ -64,6 +64,15 @@ public final class RitualLeaks {
     return l == null ? -1 : l.radius;
   }
 
+  /** Altares desta dimensao cujo circulo (raio 16+) esta vazando mana agora. */
+  public static java.util.List<BlockPos> leakingAltars(Level level) {
+    java.util.List<BlockPos> out = new java.util.ArrayList<>();
+    for (var e : ALTARS.entrySet()) {
+      if (e.getKey().dim() == level.dimension() && e.getValue().radius >= MIN_RADIUS) out.add(BlockPos.of(e.getKey().pos()));
+    }
+    return out;
+  }
+
   public static boolean registered(Level level, BlockPos pos) { return ALTARS.containsKey(new Key(level.dimension(), pos.asLong())); }
 
   /** Raio do circulo que esta vazando neste altar (0 se nao vaza). Mede na hora. */

@@ -516,6 +516,57 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
 - 126 unitários (incluindo `ElementMapTest`) e 253 do jogo passam.
 - Estavam quebrados desde a rodada anterior: 47 glifos sem ícone e contagens fixas em 160. Corrigido.
 
+## Rodada de 24 nov (tarde): Hidra orgânica com cabeças independentes, magos com personalidade, Bússola Arcana
+
+**Hidra v2**
+- O modelo agora usa muitas caixas que afinam em sequência:
+  - pescoços de 6 gomos que formam um S;
+  - cabeça com sobrancelha saliente, bochechas, narinas, chifres para trás, olhos fundos que brilham e duas fileiras de dentes;
+  - corpo com ombros, quadril, peito, ventre e espinhos;
+  - patas de 3 partes com dedos;
+  - cauda de 6 gomos com lâmina.
+- **Cada cabeça tem o seu alvo.** A cada segundo, o servidor divide as criaturas por perto entre as cabeças; a do meio fica com o alvo principal. Cada uma morde sozinha quando o alvo está ao alcance do pescoço, com espera própria e 35% do dano do golpe.
+- **Animação procedural no cliente:** cada cabeça gira suavemente até o seu alvo, e a curva se espalha pelo pescoço como uma corrente, com atraso por gomo. Há respiração, pequenos trancos de predador, olhadas aleatórias nas cabeças sem alvo e bote individual na mordida. Rugido, sopro, golpe de cauda, conjurar e dormir continuam.
+- Ela não sofre mais dano de parede nem de aperto: as gigantes afundavam nas próprias crateras e ficavam vermelhas de dano.
+- **Maior:** a escala agora vai de 1,8× no estágio 1 até 7× no estágio 14 (antes 1× a 4,25×).
+- **Sem pescoços cruzados:** cada cabeça só mira dentro do seu setor do leque, e os pescoços ficam mais espaçados com 5 ou mais cabeças. **Ainda não conferido no jogo.**
+- **Comandos de teste** (operador):
+  - `/arcane hydra <1-14>`: invoca acordada na sua frente;
+  - `/arcane hydra <1-14> sealed`: invoca dormindo, invulnerável, só para ver o visual; tire com `/kill @e[type=arcane:hydra]`;
+  - `/arcane hydra find`: lista os covis com coordenadas e estado.
+- **Verificado no cliente** (`run/hydra_gifs/hydra_v2_*`), observando sem atacar: as três cabeças do estágio 4 miravam o jogador e os porcos; nos estágios 10 e 14 todas miraram o jogador e morderam (ele perdeu 2,4 e 12,2 de vida com Resistência IV e Regeneração V). No estágio 14 sem Regeneração, a Hidra matou o jogador.
+- Referência de pesquisa: modelos de comunidade mostram que cabeças demais ficam embolhadas e se atravessam; por isso há leque largo e duas fileiras. Nenhum modelo de fora foi copiado.
+
+**Magos NPC (rework)**
+- **Personalidades:**
+  - hostil: caça;
+  - guardião: avisa a 11 blocos e ataca quem entra a 6 da casa;
+  - pacífico: nunca ataca, foge e cura jogadores feridos;
+  - estudioso: ignora, revida e foge, e larga 2 notas;
+  - trapaceiro: truques, pouco dano.
+- Cada uma tem falas próprias e vida diferente. O nome mostra escola e personalidade.
+- **Escolas:** cada uma tem um grimório de 4 ou 5 magias com papéis (ataque, área, defesa, fuga, apoio, truque).
+- **Inteligência (`MageBrain`):**
+  - vida baixa: defesa, depois fuga;
+  - inimigo colado ou grupo: magia de área;
+  - de resto, ataque no alcance, conforme a personalidade.
+- Cada magia tem a sua espera, e o mago gasta mana própria, que regenera.
+- Movimento: mantém a distância preferida, recua, avança e circula de lado. O guardião não se afasta da casa.
+- O guardião do cofre das Ruínas agora é sempre guardião.
+- **Não visto no jogo**, só por teste.
+
+**Bússola Arcana (item novo)**
+- Ponteiro animado que aponta, nesta ordem, para:
+  1. ritual gigante (raio 16 ou mais, até 512 blocos);
+  2. covil de Hidra não derrotada;
+  3. Ruínas Arcanas;
+  4. cristal de mana (até 128 blocos, só em chunks carregados).
+- Botão direito diz o que é, a distância e a direção. Sem alvo, gira devagar.
+- Receita: bússola + 4 fragmentos de ametista + tinta comum.
+- **O ponteiro não foi visto no jogo.**
+
+**Receitas removidas:** a Caneta de Criatura e a Bússola Perfeita voltam a ser só de baú.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

@@ -180,13 +180,15 @@ public final class DevAutoTest {
   }
 
   // ------------------------------------------------------------------ luta contra Hidras de varios estagios
-  private static final int[] STAGES = {1, 4, 7, 10, 14};
-  private static final int ROUND = 160;   // ticks por estagio
+  private static final int[] STAGES = {4, 10, 14};
+  private static final int ROUND = 120;   // ticks por estagio
+  /** false = so observar a Hidra (vitrine); true = o jogador ataca com magias. */
+  private static final boolean CAST_SPELLS = false;
   private static final int START = 80;
   private static int lastPower = -1;
   private static float hpBefore;
 
-  private static double distFor(int stage) { return 10 + HydraEntity.scaleFor(stage) * 4.0; }
+  private static double distFor(int stage) { return 6 + HydraEntity.scaleFor(stage) * 3.2; }
 
   private static void step(Minecraft mc) {
     var p = mc.player;
@@ -198,8 +200,9 @@ public final class DevAutoTest {
       cmd("gamerule doMobSpawning false");
       cmd("gamerule mobGriefing true");
       cmd("kill @e[type=!player]");
-      mc.options.hideGui = false;
-      mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+      mc.options.hideGui = true;
+      mc.options.setCameraType(CameraType.FIRST_PERSON);
+      server(sp -> com.arcane.grimoire.GrimoireLifecycleHandler.toggleFloating(sp)); // o livro e o halo nao tapam a vista
       base = p.position();
       write("base " + base);
       server(sp -> {
@@ -228,6 +231,7 @@ public final class DevAutoTest {
     double dist = distFor(stage);
     if (at == 0) {
       cmd("kill @e[type=arcane:hydra]");
+      cmd("kill @e[type=minecraft:pig]");
       cmd("gamemode survival");
       server(sp -> {
         var l = sp.serverLevel();
@@ -244,7 +248,14 @@ public final class DevAutoTest {
         l.addFreshEntity(h);
         h.setSealMask(0);
         h.setTarget(sp);
-        sp.connection.teleport(base.x, base.y, base.z, 0f, -5f);
+        sp.connection.teleport(base.x + 4, base.y, base.z, 0f, -5f);
+        // tres porcos espalhados: as cabecas dividem os alvos entre o jogador e eles
+        for (int k = -1; k <= 1; k++) {
+          var pig = net.minecraft.world.entity.EntityType.PIG.create(l);
+          pig.moveTo(base.x + k * 5, base.y, base.z + dist * 0.55, 0f, 0f);
+          pig.setNoAi(true);
+          l.addFreshEntity(pig);
+        }
         hpBefore = sp.getHealth();
         lastPower = -1;
         write(String.format("== estagio %d: vida %.0f (efetiva %.0f), dano %.1f, cabecas %d, largura %.1f, devasta=%s, selada=%s",
@@ -256,17 +267,19 @@ public final class DevAutoTest {
     // o jogador encara a Hidra e lanca uma magia a cada 1,5 s
     server(sp -> {
       var hs = sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80));
-      if (hs.isEmpty()) return;
+      if (hs.isEmpty()) { if (at % 40 == 0) write("  t" + at + " nenhuma Hidra perto (jogador vivo=" + sp.isAlive() + " em " + sp.blockPosition() + ")"); return; }
       HydraEntity h = hs.get(0);
       var eye = sp.getEyePosition();
       var to = h.position().add(0, h.getBbHeight() * 0.5, 0).subtract(eye);
       float yaw = (float) (Math.toDegrees(Math.atan2(-to.x, to.z)));
       float pitch = (float) (-Math.toDegrees(Math.atan2(to.y, Math.hypot(to.x, to.z))));
       if (at % 2 == 0) sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), yaw, pitch);
-      if (at % 12 == 10) {
+      if (CAST_SPELLS && at % 12 == 10) {
         var spell = new Inscription(List.of(g("projectile"), g("damage", "amount", 8.0), g("fire")));
         com.arcane.execution.CastingService.tryCast(sp, spell, com.arcane.execution.PrecisionSnapshot.WORKBENCH);
       }
+      if (at % 40 == 0) write(String.format("  t%d vida do jogador %.1f, vivo=%s, alvos das cabecas=%s", at, sp.getHealth(), sp.isAlive(),
+          java.util.stream.IntStream.range(0, h.heads()).map(h::headTarget).boxed().toList()));
       if (h.power() != lastPower) {
         if (h.power() != 0) write(String.format("  t%d estagio %d usou o poder %d", at, stage, h.power()));
         lastPower = h.power();

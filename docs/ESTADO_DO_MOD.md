@@ -663,6 +663,20 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
   saem as magias das cabecas) ficou mais alto e mais a frente.
 - Visto no cliente (estagio 5, de lado e de tres quartos). Testes: unitarios ok, 257 GameTests ok.
 
+## Rodada de 24 nov (noite, 5): corpo mais longo e patas digitigradas
+
+- Corpo de 54 de comprimento (antes 42): peito, torax, cintura e ancas mais longos, 16 espinhos dorsais. Inclinacao do
+  tronco reduzida para -0,22 (o corpo e mais longo, o peito continua erguido). O modelo todo subiu 8 pixels: as patas
+  novas sao mais altas.
+- Para compensar: pescocos com 13 gomos (antes 15) e cauda com 12 (antes 14).
+- Patas digitigradas, como de gato e cachorro: coxa, perna, metatarso (o "joelho invertido", que e o tornozelo) e pata
+  larga com 4 garras e esporao. As de tras: coxa para a frente, perna para tras, metatarso quase vertical, com anca
+  musculosa. As da frente: ombro para tras, antebraco quase vertical, metacarpo inclinado para a frente. Todas abrem
+  0,18 rad para os lados (a pata volta a ficar reta no chao). As rotacoes de repouso ficam no `PartPose`; a passada soma
+  por cima, e a de tras dobra o tornozelo no sentido contrario.
+- `headPos` um pouco mais a frente (corpo mais longo). Visto no cliente (estagio 5, de lado, de perto e de tres quartos).
+  Testes: unitarios ok, 257 GameTests ok.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

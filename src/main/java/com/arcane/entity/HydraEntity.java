@@ -555,7 +555,7 @@ public class HydraEntity extends Monster {
     double sc = scaleFor(stage());
     double yaw = Math.toRadians(yBodyRot);
     Vec3 fwd = new Vec3(-Math.sin(yaw), 0, Math.cos(yaw)), side = new Vec3(Math.cos(yaw), 0, Math.sin(yaw));
-    Vec3 base = position().add(0, sc * 3.6, 0).add(fwd.scale(sc * 2.2)).add(side.scale(spread * sc * 0.9));
+    Vec3 base = position().add(0, sc * 3.6, 0).add(fwd.scale(sc * 2.5)).add(side.scale(spread * sc * 0.9));
     Vec3 dir = toward.subtract(base);
     double len = Math.min(dir.length(), sc * 1.2);
     return dir.lengthSqr() < 1e-4 ? base : base.add(dir.normalize().scale(len));

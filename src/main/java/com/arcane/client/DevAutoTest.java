@@ -221,6 +221,8 @@ public final class DevAutoTest {
       sp.connection.teleport(base.x, cy + 16, base.z - 30, 0f, 4f);
     });
     if (t == 240) server(sp -> { sp.getAbilities().flying = true; sp.onUpdateAbilities(); });
+    if (t == 330) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(150)).forEach(h ->
+        sp.connection.teleport(h.getX() + 4, h.getY() + 5, h.getZ() - 30, 0f, 4f))); // perto, de lado: patas
     if (t == 242) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(120)).forEach(h ->
         sp.connection.teleport(h.getX() - 52, h.getY() + 30, h.getZ() - 46, -48f, 16f))); // tres quartos, de frente
     if (t > 60 && t < 420 && t % 10 == 0) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80)).forEach(h -> { h.setYBodyRot(90f); h.setYRot(90f); }));

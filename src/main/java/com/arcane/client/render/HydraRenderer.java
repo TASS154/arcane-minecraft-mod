@@ -11,7 +11,9 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -32,7 +34,7 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
 
   public HydraRenderer(EntityRendererProvider.Context context) {
     super(context, new HydraModel(context.bakeLayer(LAYER)), 1.2f);
-    addLayer(new Eyes(this));
+    addLayer(new Veins(this));
   }
 
   @Override
@@ -83,23 +85,49 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
     }
   }
 
+  /** Nao tomba de lado ao morrer: ela se desfaz em runas de pe (o servidor cuida das particulas). */
+  @Override
+  protected float getFlipDegrees(HydraEntity entity) { return 0f; }
+
   @Override
   protected void scale(HydraEntity entity, PoseStack pose, float partialTick) {
     float s = HydraEntity.scaleFor(entity.stage());
+    if (entity.deathTime > 0) {
+      float f = Math.min(1f, (entity.deathTime + partialTick) / HydraEntity.DEATH_TICKS);
+      s *= 1f - f * f * 0.85f; // desfaz devagar, depois cada vez mais rapido
+    }
     pose.scale(s, s, s);
     this.shadowRadius = 1.2f * s;
   }
 
-  private static final class Eyes extends EyesLayer<HydraEntity, HydraModel> {
-    private static final RenderType TYPE = RenderType.eyes(EYES);
 
-    Eyes(RenderLayerParent<HydraEntity, HydraModel> parent) { super(parent); }
+  /** Cor de cada glifo original (0..6, ordem de HydraLairs.ORIGINALS): tinge de leve o couro e da a cor das veias. */
+  static final int[] GLYPH_COLORS = {0xFFD25A, 0x7FE8FF, 0xB070FF, 0xFF5A30, 0x9030C0, 0x60E070, 0xB8D8FF};
+  static final int DEFAULT_VEINS = 0x40E8FF;
 
-    @Override
-    public RenderType renderType() { return TYPE; }
+  static int veinColor(HydraEntity e) {
+    if (e.flag(HydraEntity.F_BERSERK)) return 0xFF2A2A;
+    int v = e.variant();
+    return v >= 0 && v < GLYPH_COLORS.length ? GLYPH_COLORS[v] : DEFAULT_VEINS;
   }
 
-  /** Cor do couro por estagio (1 a 14), em tres paradas; aplicada de leve sobre a obsidiana. */
+  /** Veias e olhos que pulsam com a respiracao, acendem antes dos poderes, piscam na fraqueza e ficam vermelhos na furia. */
+  private static final class Veins extends net.minecraft.client.renderer.entity.layers.RenderLayer<HydraEntity, HydraModel> {
+    Veins(RenderLayerParent<HydraEntity, HydraModel> parent) { super(parent); }
+
+    @Override
+    public void render(PoseStack pose, MultiBufferSource buffers, int light, HydraEntity e, float limb, float limbAmount, float partial, float age, float yaw, float pitch) {
+      float pulse = 0.55f + 0.45f * Mth.sin(age * (e.sealed() ? 0.04f : 0.12f));
+      if (e.power() != 0) pulse = 1f;
+      if (e.flag(HydraEntity.F_WEAK)) pulse = (Mth.sin(age * 1.7f) > 0.3f) ? 0.15f : 0.5f;
+      if (e.flag(HydraEntity.F_DYING)) pulse = 1f;
+      int c = veinColor(e);
+      float r = ((c >> 16) & 255) / 255f * pulse, g = ((c >> 8) & 255) / 255f * pulse, b = (c & 255) / 255f * pulse;
+      getParentModel().root().render(pose, buffers.getBuffer(RenderType.eyes(EYES)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, r, g, b, 1f);
+    }
+  }
+
+  /** Cor do couro por estagio (1 a 14); aplicada de leve sobre a obsidiana. */
   static float[] tint(int stage) {
     float t = (Math.max(1, Math.min(14, stage)) - 1) / 13f;
     float[] a = {0.62f, 1.0f, 0.58f}, b = {0.42f, 0.72f, 1.0f}, c = {1.0f, 0.5f, 0.32f};
@@ -108,25 +136,26 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
     return out;
   }
 
+  /** Tipo de cada cabeca: a maioria comum; algumas com chifres grandes, crista ou cegas (placa de osso, mais dentes). */
+  static int headKind(HydraEntity e, int i) {
+    int h = Math.floorMod((int) (e.getUUID().getLeastSignificantBits() >>> 8) + i * 7919, 13);
+    return h < 9 ? 0 : 1 + (h % 3);
+  }
+
   /**
-   * Modelo organico (para o estilo do Minecraft): em vez de poucas caixas grandes, muitas caixas que afinam em
-   * sequencia. Pescocos de 6 gomos, cada um um pouco mais fino e girado em relacao ao anterior, o que da a curva de
-   * serpente; cabeca com sobrancelha saliente, bochechas, narinas, chifres para tras, olhos fundos que brilham e duas
-   * fileiras de dentes; corpo com ombros, placas no peito e escamas no dorso; patas de tres partes com dedos e garras;
-   * cauda de 6 gomos que termina numa lamina.
-   *
-   * <p>Animacao procedural: cada cabeca mira o SEU alvo (vindo do servidor) e o pescoco se dobra ate la como uma
-   * corrente, cada gomo seguindo o anterior com atraso suave; respiracao, pequenos tremores e olhadas aleatorias nas
-   * cabecas sem alvo; bote individual quando a cabeca morde; rugido, sopro, golpe de cauda, conjurar e dormir.
+   * Silhueta de dragao sem asas: corpo alto e largo, peito saliente, patas longas de tres partes com dedos, cauda de
+   * 6 gomos com lamina e pescocos longos de 6 gomos. O dorso muda com o glifo (espinhos, barbatanas ou cristais) e
+   * algumas cabecas sao diferentes (chifres grandes, crista, cega). Animacao procedural (ver setupAnim).
    */
   public static final class HydraModel extends HierarchicalModel<HydraEntity> {
     public static final int NECKS = 9, SEG = 6, TAIL = 6;
     private static final int BONE_U = 224, BONE_V = 0, EYE_U = 224, EYE_V = 96;
-    private final ModelPart root, body, chest;
+    private final ModelPart root, body, chest, spikes, fins, crystals;
     private final ModelPart[] tail = new ModelPart[TAIL];
     private final ModelPart[] thigh = new ModelPart[4], shin = new ModelPart[4], foot = new ModelPart[4];
     private final ModelPart[][] neck = new ModelPart[NECKS][SEG];
-    private final ModelPart[] head = new ModelPart[NECKS], jaw = new ModelPart[NECKS];
+    private final ModelPart[] head = new ModelPart[NECKS], jaw = new ModelPart[NECKS], eyes = new ModelPart[NECKS],
+        bigHorns = new ModelPart[NECKS], crest = new ModelPart[NECKS], blind = new ModelPart[NECKS];
     private float r = 1, g = 1, b = 1;
 
     /** Estado suavizado de cada cabeca (por entidade): yaw e pitch atuais da mira. */
@@ -136,6 +165,9 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
       this.root = root;
       this.body = root.getChild("body");
       this.chest = body.getChild("chest");
+      this.spikes = body.getChild("spikes");
+      this.fins = body.getChild("fins");
+      this.crystals = body.getChild("crystals");
       for (int i = 0; i < 4; i++) {
         thigh[i] = root.getChild("leg" + i);
         shin[i] = thigh[i].getChild("shin");
@@ -150,81 +182,93 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
         for (int k = 1; k < SEG; k++) { n = n.getChild("seg" + k); neck[i][k] = n; }
         head[i] = n.getChild("head");
         jaw[i] = head[i].getChild("jaw");
+        eyes[i] = head[i].getChild("eyes");
+        bigHorns[i] = head[i].getChild("big_horns");
+        crest[i] = head[i].getChild("crest");
+        blind[i] = head[i].getChild("blind");
       }
     }
 
     public static LayerDefinition createLayer() {
       MeshDefinition mesh = new MeshDefinition();
       PartDefinition p = mesh.getRoot();
-      // corpo: tronco, ombros, quadril, escamas do dorso
-      CubeListBuilder bodyCubes = CubeListBuilder.create()
-          .texOffs(0, 0).addBox(-8, -6, -11, 16, 12, 22)
-          .texOffs(0, 34).addBox(-9.5f, -5, -12, 19, 9, 7)      // ombros
-          .texOffs(52, 34).addBox(-8.5f, -4.5f, 6, 17, 9, 6)     // quadril
-          .texOffs(0, 50).addBox(-6, 5.5f, -9, 12, 2, 18);       // ventre
-      for (int k = 0; k < 6; k++) {
-        float z = -9 + k * 3.4f, sz = 2.6f - Math.abs(k - 2.5f) * 0.3f;
-        bodyCubes.texOffs(BONE_U, BONE_V).addBox(-sz / 2, -6 - sz * 1.4f, z, sz, sz * 1.4f, sz * 0.9f);
+      // corpo alto de dragao: tronco, ombros largos, quadril, ventre
+      PartDefinition bd = p.addOrReplaceChild("body", CubeListBuilder.create()
+          .texOffs(0, 0).addBox(-9, -7, -12, 18, 14, 24)
+          .texOffs(0, 38).addBox(-11, -6, -15, 22, 11, 8)
+          .texOffs(60, 38).addBox(-9.5f, -6, 7, 19, 11, 7)
+          .texOffs(0, 57).addBox(-7, 6.5f, -10, 14, 2, 20), PartPose.offset(0, 4, 0));
+      bd.addOrReplaceChild("chest", CubeListBuilder.create().texOffs(104, 38).addBox(-7, -3, -4, 14, 10, 5)
+          .texOffs(104, 54).addBox(-5, 1, -5, 10, 6, 2), PartPose.offset(0, 0, -14));
+      CubeListBuilder sp = CubeListBuilder.create(), fn = CubeListBuilder.create(), cr = CubeListBuilder.create();
+      for (int k = 0; k < 7; k++) {
+        float z = -11 + k * 3.4f, sz = 3.2f - Math.abs(k - 3) * 0.35f;
+        sp.texOffs(BONE_U, BONE_V).addBox(-sz / 2, -7 - sz * 1.6f, z, sz, sz * 1.6f, sz);
+        fn.texOffs(BONE_U, BONE_V + 16).addBox(-0.5f, -7 - sz * 2.2f, z, 1, sz * 2.2f, 3.2f);
+        cr.texOffs(EYE_U, EYE_V).addBox(-sz / 2 + (k % 2) * 1.5f - 0.75f, -7 - sz * 1.9f, z, sz * 0.8f, sz * 1.9f, sz * 0.8f);
       }
-      PartDefinition bd = p.addOrReplaceChild("body", bodyCubes, PartPose.offset(0, 12, 0));
-      bd.addOrReplaceChild("chest", CubeListBuilder.create().texOffs(100, 34).addBox(-6, -3, -3, 12, 8, 4)
-          .texOffs(100, 46).addBox(-4.5f, 0, -4, 9, 5, 2), PartPose.offset(0, 1, -11));
-      // patas: coxa grossa, canela, pe com tres dedos e garras de osso
-      int[][] legPos = {{-8, -7}, {8, -7}, {-8, 7}, {8, 7}};
+      bd.addOrReplaceChild("spikes", sp, PartPose.ZERO);
+      bd.addOrReplaceChild("fins", fn, PartPose.ZERO);
+      bd.addOrReplaceChild("crystals", cr, PartPose.ZERO);
+      // patas longas: coxa, canela, pe com tres dedos e garras
+      int[][] legPos = {{-10, -8}, {10, -8}, {-10, 8}, {10, 8}};
       for (int i = 0; i < 4; i++) {
-        PartDefinition th = p.addOrReplaceChild("leg" + i, CubeListBuilder.create().texOffs(0, 70).addBox(-3.5f, -2, -4, 7, 8, 8),
-            PartPose.offset(legPos[i][0], 14, legPos[i][1]));
-        PartDefinition sh = th.addOrReplaceChild("shin", CubeListBuilder.create().texOffs(32, 70).addBox(-2.5f, 0, -2.5f, 5, 5, 5),
-            PartPose.offset(0, 5.5f, 0.5f));
-        CubeListBuilder ft = CubeListBuilder.create().texOffs(52, 70).addBox(-3, 0, -4, 6, 2, 6);
-        for (int k = -1; k <= 1; k++) ft.texOffs(BONE_U, BONE_V + 8).addBox(k * 2 - 0.5f, 0.5f, -5.5f, 1, 1.5f, 2);
-        sh.addOrReplaceChild("foot", ft, PartPose.offset(0, 4.5f, 0));
+        PartDefinition th = p.addOrReplaceChild("leg" + i, CubeListBuilder.create().texOffs(0, 80).addBox(-4, -2, -4.5f, 8, 11, 9),
+            PartPose.offset(legPos[i][0], 9, legPos[i][1]));
+        PartDefinition sh = th.addOrReplaceChild("shin", CubeListBuilder.create().texOffs(36, 80).addBox(-3, 0, -3, 6, 5, 6),
+            PartPose.offset(0, 8.5f, 0.5f));
+        CubeListBuilder ft = CubeListBuilder.create().texOffs(60, 80).addBox(-3.5f, -1, -5, 7, 2, 7);
+        for (int k = -1; k <= 1; k++) ft.texOffs(BONE_U, BONE_V + 8).addBox(k * 2.3f - 0.5f, -0.5f, -7, 1, 1.5f, 2.5f);
+        sh.addOrReplaceChild("foot", ft, PartPose.offset(0, 5.5f, 0));
       }
-      // cauda: 6 gomos que afinam, espinhos alternados, lamina na ponta
+      // cauda: 6 gomos que afinam, espinhos, lamina na ponta
       PartDefinition parent = p;
-      String name = "tail0";
-      float tw = 9f, tz = 10f;
+      float tw = 10f, tz = 10f;
       for (int k = 0; k < TAIL; k++) {
-        CubeListBuilder seg = CubeListBuilder.create().texOffs(0, 90 + (k % 2) * 18).addBox(-tw / 2, -tw / 2, 0, tw, tw, tz);
-        if (k % 2 == 0) seg.texOffs(BONE_U, BONE_V).addBox(-0.6f, -tw / 2 - 2, tz * 0.3f, 1.2f, 2, 2);
-        if (k == TAIL - 1) seg.texOffs(BONE_U, BONE_V + 16).addBox(-0.5f, -4, tz - 1, 1, 8, 7);
-        parent = parent.addOrReplaceChild(name, seg, k == 0 ? PartPose.offset(0, 10, 10) : PartPose.offset(0, 0, tz - 1.5f * 0.5f - 0.5f));
-        tz = Math.max(5f, tz - 0.8f);
-        tw = Math.max(2.5f, tw * 0.8f);
-        name = "tail" + (k + 1);
+        CubeListBuilder seg = CubeListBuilder.create().texOffs(0, 100 + (k % 2) * 14).addBox(-tw / 2, -tw / 2, 0, tw, tw, tz);
+        seg.texOffs(BONE_U, BONE_V).addBox(-0.6f, -tw / 2 - 2.2f, tz * 0.3f, 1.2f, 2.2f, 2.2f);
+        if (k == TAIL - 1) seg.texOffs(BONE_U, BONE_V + 16).addBox(-0.5f, -5, tz - 1, 1, 10, 8);
+        parent = parent.addOrReplaceChild("tail" + k, seg, k == 0 ? PartPose.offset(0, 2, 12) : PartPose.offset(0, 0, tz - 1.2f));
+        tz = Math.max(5f, tz - 0.9f);
+        tw = Math.max(2.5f, tw * 0.78f);
       }
-      // pescocos: 6 gomos que afinam; cabeca detalhada
+      // pescocos longos e cabecas
       for (int i = 0; i < NECKS; i++) {
-        float w = 5.5f;
+        float w = 6f;
         PartDefinition seg = null;
         for (int k = 0; k < SEG; k++) {
-          float len = 5.2f - k * 0.25f;
-          CubeListBuilder cube = CubeListBuilder.create().texOffs(120, (k % 3) * 14).addBox(-w / 2, -w / 2, -len, w, w, len);
-          if (k % 2 == 1) cube.texOffs(BONE_U, BONE_V).addBox(-0.5f, -w / 2 - 1.4f, -len * 0.7f, 1, 1.6f, 1.6f);
-          String segName = k == 0 ? "neck" + i : "seg" + k;
-          PartPose pose = k == 0 ? PartPose.offset(0, 8, -11) : PartPose.offset(0, 0, -(5.2f - (k - 1) * 0.25f) + 0.4f);
-          seg = k == 0 ? p.addOrReplaceChild(segName, cube, pose) : seg.addOrReplaceChild(segName, cube, pose);
-          w = Math.max(3.2f, w - 0.42f);
+          float len = 6.2f - k * 0.3f;
+          CubeListBuilder cube = CubeListBuilder.create().texOffs(120, (k % 3) * 15).addBox(-w / 2, -w / 2, -len, w, w, len);
+          if (k % 2 == 1) cube.texOffs(BONE_U, BONE_V).addBox(-0.5f, -w / 2 - 1.6f, -len * 0.7f, 1, 1.8f, 1.8f);
+          PartPose pose = k == 0 ? PartPose.offset(0, -2, -15) : PartPose.offset(0, 0, -(6.2f - (k - 1) * 0.3f) + 0.5f);
+          seg = k == 0 ? p.addOrReplaceChild("neck" + i, cube, pose) : seg.addOrReplaceChild("seg" + k, cube, pose);
+          w = Math.max(3.4f, w - 0.45f);
         }
         CubeListBuilder skull = CubeListBuilder.create()
-            .texOffs(160, 0).addBox(-3.5f, -3, -6, 7, 5.5f, 6)            // cranio
-            .texOffs(160, 14).addBox(-4.2f, -3.6f, -5.5f, 8.4f, 1.4f, 3)   // sobrancelha saliente
-            .texOffs(160, 20).addBox(-4, -1, -4.5f, 1.2f, 3, 4)            // bochechas
-            .texOffs(160, 20).addBox(2.8f, -1, -4.5f, 1.2f, 3, 4)
-            .texOffs(186, 0).addBox(-2.5f, -2, -11, 5, 3, 5.5f)            // focinho
-            .texOffs(186, 10).addBox(-2, -2.6f, -11, 4, 0.8f, 3)           // narinas
-            .texOffs(BONE_U, BONE_V + 32).addBox(-3.6f, -4.8f, -1.5f, 1, 1.2f, 5)  // chifres para tras
-            .texOffs(BONE_U, BONE_V + 32).addBox(2.6f, -4.8f, -1.5f, 1, 1.2f, 5)
-            .texOffs(BONE_U, BONE_V + 32).addBox(-3.6f, -5.4f, 3, 1, 1, 2.5f)
-            .texOffs(BONE_U, BONE_V + 32).addBox(2.6f, -5.4f, 3, 1, 1, 2.5f)
-            .texOffs(EYE_U, EYE_V).addBox(-3.55f, -2.4f, -5.2f, 0.6f, 0.8f, 1.6f)  // olhos fundos
-            .texOffs(EYE_U, EYE_V).addBox(2.95f, -2.4f, -5.2f, 0.6f, 0.8f, 1.6f);
-        for (int k = 0; k < 5; k++) skull.texOffs(BONE_U + 8, BONE_V).addBox(-2.2f + k * 1.05f, 0.9f, -10.6f + (k % 2) * 0.4f, 0.6f, 1.3f, 0.6f);
-        PartDefinition hd = seg.addOrReplaceChild("head", skull, PartPose.offset(0, 0, -3.6f));
-        CubeListBuilder jawCubes = CubeListBuilder.create().texOffs(186, 18).addBox(-2.3f, 0, -10, 4.6f, 1.6f, 9.5f)
-            .texOffs(186, 30).addBox(-3, 0.2f, -1.5f, 6, 1.8f, 2.5f);
-        for (int k = 0; k < 5; k++) jawCubes.texOffs(BONE_U + 8, BONE_V).addBox(-2 + k * 1.0f, -1.1f, -9.6f + (k % 2) * 0.4f, 0.6f, 1.2f, 0.6f);
-        hd.addOrReplaceChild("jaw", jawCubes, PartPose.offset(0, 1.6f, 0));
+            .texOffs(160, 0).addBox(-3.8f, -3.2f, -6.5f, 7.6f, 6, 6.5f)
+            .texOffs(160, 14).addBox(-4.5f, -3.9f, -6, 9, 1.5f, 3.2f)
+            .texOffs(160, 20).addBox(-4.3f, -1, -5, 1.3f, 3.2f, 4.5f)
+            .texOffs(160, 20).addBox(3, -1, -5, 1.3f, 3.2f, 4.5f)
+            .texOffs(188, 0).addBox(-2.7f, -2.2f, -12, 5.4f, 3.2f, 6)
+            .texOffs(188, 10).addBox(-2.2f, -2.9f, -12, 4.4f, 0.8f, 3.2f)
+            .texOffs(BONE_U, BONE_V + 32).addBox(-3.8f, -5.2f, -1.5f, 1, 1.3f, 5.5f)
+            .texOffs(BONE_U, BONE_V + 32).addBox(2.8f, -5.2f, -1.5f, 1, 1.3f, 5.5f);
+        for (int k = 0; k < 5; k++) skull.texOffs(BONE_U + 8, BONE_V).addBox(-2.3f + k * 1.1f, 1.0f, -11.6f + (k % 2) * 0.4f, 0.6f, 1.4f, 0.6f);
+        PartDefinition hd = seg.addOrReplaceChild("head", skull, PartPose.offset(0, 0, -4.2f));
+        hd.addOrReplaceChild("eyes", CubeListBuilder.create().texOffs(EYE_U, EYE_V).addBox(-3.85f, -2.6f, -5.6f, 0.6f, 0.9f, 1.8f)
+            .texOffs(EYE_U, EYE_V).addBox(3.25f, -2.6f, -5.6f, 0.6f, 0.9f, 1.8f), PartPose.ZERO);
+        hd.addOrReplaceChild("big_horns", CubeListBuilder.create().texOffs(BONE_U, BONE_V + 32).addBox(-5.5f, -6.5f, -1, 1.6f, 1.6f, 4)
+            .texOffs(BONE_U, BONE_V + 32).addBox(-6.2f, -9, 2, 1.4f, 3.5f, 1.4f)
+            .texOffs(BONE_U, BONE_V + 32).addBox(3.9f, -6.5f, -1, 1.6f, 1.6f, 4)
+            .texOffs(BONE_U, BONE_V + 32).addBox(4.8f, -9, 2, 1.4f, 3.5f, 1.4f), PartPose.ZERO);
+        hd.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(BONE_U, BONE_V + 16).addBox(-0.5f, -7.5f, -6, 1, 4, 9), PartPose.ZERO);
+        CubeListBuilder bl = CubeListBuilder.create().texOffs(BONE_U, BONE_V + 24).addBox(-4.1f, -3.4f, -6.2f, 8.2f, 2.2f, 1.2f);
+        for (int k = 0; k < 4; k++) bl.texOffs(BONE_U + 8, BONE_V).addBox(-2.6f + k * 1.6f, 1.2f, -9.4f, 0.7f, 1.6f, 0.7f);
+        hd.addOrReplaceChild("blind", bl, PartPose.ZERO);
+        CubeListBuilder jawCubes = CubeListBuilder.create().texOffs(188, 18).addBox(-2.5f, 0, -11, 5, 1.8f, 10.5f)
+            .texOffs(188, 32).addBox(-3.2f, 0.2f, -1.5f, 6.4f, 2, 2.5f);
+        for (int k = 0; k < 5; k++) jawCubes.texOffs(BONE_U + 8, BONE_V).addBox(-2.1f + k * 1.05f, -1.2f, -10.6f + (k % 2) * 0.4f, 0.6f, 1.3f, 0.6f);
+        hd.addOrReplaceChild("jaw", jawCubes, PartPose.offset(0, 1.8f, 0));
       }
       return LayerDefinition.create(mesh, 256, 128);
     }
@@ -232,113 +276,156 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
     @Override
     public ModelPart root() { return root; }
 
-    /** Angulo (radianos) suavizado em direcao a {@code to}, com volta de angulo. */
     private static float approach(float from, float to, float k) {
       float d = Mth.wrapDegrees((to - from) * Mth.RAD_TO_DEG) * Mth.DEG_TO_RAD;
       return from + d * k;
     }
 
+    private static float smooth(float t) { t = Mth.clamp(t, 0f, 1f); return t * t * (3 - 2 * t); }
+
     @Override
     public void setupAnim(HydraEntity e, float limbSwing, float limbSwingAmount, float age, float netHeadYaw, float headPitch) {
       root.getAllParts().forEach(ModelPart::resetPose);
       float[] c = tint(e.stage());
-      r = Mth.lerp(0.35f, 1f, c[0]); g = Mth.lerp(0.35f, 1f, c[1]); b = Mth.lerp(0.35f, 1f, c[2]);
+      int v = e.variant();
+      float gr = 1, gg = 1, gb = 1;
+      if (v >= 0 && v < GLYPH_COLORS.length) { gr = ((GLYPH_COLORS[v] >> 16) & 255) / 255f; gg = ((GLYPH_COLORS[v] >> 8) & 255) / 255f; gb = (GLYPH_COLORS[v] & 255) / 255f; }
+      r = Mth.lerp(0.25f, 1f, c[0]) * Mth.lerp(0.3f, 1f, gr);
+      g = Mth.lerp(0.25f, 1f, c[1]) * Mth.lerp(0.3f, 1f, gg);
+      b = Mth.lerp(0.25f, 1f, c[2]) * Mth.lerp(0.3f, 1f, gb);
+      // o dorso muda com o glifo: espinhos (padrao), barbatanas (tempo, retroceder, gravidade) ou cristais (espaco, eclipse)
+      int dorsal = v < 0 ? 0 : (v == 0 || v == 1 || v == 6) ? 1 : (v == 2 || v == 4) ? 2 : 0;
+      spikes.visible = dorsal == 0;
+      fins.visible = dorsal == 1;
+      crystals.visible = dorsal == 2;
       boolean asleep = e.sealed();
+      boolean strain = asleep && e.flag(HydraEntity.F_STRAIN);
+      boolean berserk = e.flag(HydraEntity.F_BERSERK);
       int power = e.power();
-      // respiracao: peito e ombros incham devagar
       float breathe = Mth.sin(age * (asleep ? 0.04f : 0.09f));
       body.yScale = 1f + breathe * 0.025f;
       body.xScale = 1f + breathe * 0.015f;
       chest.z += breathe * 0.3f;
-      // patas: passada diagonal; joelho dobra na volta e o pe se ajusta ao chao
-      float swing = limbSwing * 0.5f;
+      // patas: passada diagonal pesada
+      float swing = limbSwing * (e.stage() >= 8 ? 0.35f : 0.55f);
       for (int i = 0; i < 4; i++) {
         float phase = (i == 0 || i == 3) ? 0f : Mth.PI;
-        float w = Mth.cos(swing + phase) * 0.7f * limbSwingAmount;
+        float w = Mth.cos(swing + phase) * 0.65f * limbSwingAmount;
         float lift = Math.max(0f, Mth.sin(swing + phase)) * limbSwingAmount;
         thigh[i].xRot = w;
         shin[i].xRot = -lift * 0.9f;
         foot[i].xRot = -w + lift * 0.6f;
       }
       body.zRot = Mth.sin(swing) * 0.05f * limbSwingAmount;
-      body.y += Math.abs(Mth.cos(swing)) * limbSwingAmount * 0.6f;
-      // cauda em onda (atraso por gomo); no golpe de cauda varre forte
+      body.y += Math.abs(Mth.cos(swing)) * limbSwingAmount * 0.8f;
       boolean sweep = power == HydraEntity.SWEEP;
       float amp = sweep ? 0.55f : asleep ? 0.05f : 0.16f, speed = sweep ? 0.45f : 0.07f;
       for (int k = 0; k < TAIL; k++) {
         tail[k].yRot = Mth.sin(age * speed - k * 0.7f) * amp * (1f + k * 0.15f);
-        tail[k].xRot = k == 0 ? -0.3f + Mth.sin(age * 0.05f) * 0.04f : 0.06f + Mth.sin(age * 0.06f - k) * 0.02f;
+        tail[k].xRot = k == 0 ? -0.25f + Mth.sin(age * 0.05f) * 0.04f : 0.07f + Mth.sin(age * 0.06f - k) * 0.02f;
       }
       if (sweep) body.yRot = Mth.sin(age * speed) * 0.15f;
 
       int n = e.heads();
       boolean roar = power == HydraEntity.ROAR, breath = power == HydraEntity.BREATH;
-      boolean skyward = power == HydraEntity.STORM || power == HydraEntity.METEOR || power == HydraEntity.CATACLYSM
-          || power == HydraEntity.DEVASTATE || power == HydraEntity.DEVOURED_SPELL;
+      boolean whole = power == HydraEntity.STORM || power == HydraEntity.METEOR || power == HydraEntity.CATACLYSM || power == HydraEntity.DEVASTATE
+          || power == HydraEntity.DEVOURED_SPELL || power == HydraEntity.HEAL || power == HydraEntity.ORIGINAL;
+      boolean awakening = e.flag(HydraEntity.F_AWAKEN);
+      float sinceAwake = age - e.animStart();
       float[][] aim = AIM.computeIfAbsent(e.getId(), id -> new float[NECKS][2]);
       if (AIM.size() > 32) AIM.keySet().removeIf(id -> e.level().getEntity(id) == null);
       var level = e.level();
+      // quantas cabecas mordem o mesmo alvo e a posicao de cada uma no leque em volta dele
+      java.util.Map<Integer, Integer> shareCount = new java.util.HashMap<>(), shareRank = new java.util.HashMap<>();
+      int[] rank = new int[NECKS];
+      for (int i = 0; i < n; i++) {
+        if (!e.headAlive(i)) continue;
+        int t = e.headTarget(i);
+        if (t < 0) continue;
+        rank[i] = shareCount.getOrDefault(t, 0);
+        shareCount.merge(t, 1, Integer::sum);
+      }
+      double scale = HydraEntity.scaleFor(e.stage());
       for (int i = 0; i < NECKS; i++) {
         boolean show = i < n;
         neck[i][0].visible = show;
         if (!show) continue;
-        // posicao de base: leque bem aberto na frente, duas fileiras quando ha muitas cabecas
+        int kind = headKind(e, i);
+        eyes[i].visible = kind != 3;
+        blind[i].visible = kind == 3;
+        bigHorns[i].visible = kind == 1;
+        crest[i].visible = kind == 2;
         float spread = n == 1 ? 0f : (i / (float) (n - 1)) * 2f - 1f;
         float row = n > 4 ? (i % 2) : 0;
-        neck[i][0].x = spread * (n > 4 ? 10.5f : 8.5f);
-        neck[i][0].y = 8f - row * 3f;
-        neck[i][0].z = -11f + row * 3f;
+        neck[i][0].x = spread * (n > 4 ? 11.5f : 9f);
+        neck[i][0].y = -2f - row * 3f;
+        neck[i][0].z = -15f + row * 3f;
         float baseYaw = spread * (n > 3 ? 0.95f : 0.55f);
-        float basePitch = -0.95f - row * 0.3f - (1f - Math.abs(spread)) * 0.15f;
-        if (asleep) {
-          // dormindo: pescocos estirados no chao, so a respiracao
-          neck[i][0].yRot = baseYaw * 0.8f;
-          neck[i][0].xRot = 0.5f;
-          for (int k = 1; k < SEG; k++) { neck[i][k].xRot = 0.08f + Mth.sin(age * 0.04f + i + k) * 0.01f; neck[i][k].yRot = Mth.sin(i * 1.7f + k) * 0.1f; }
-          head[i].xRot = -0.35f;
-          jaw[i].xRot = 0f;
+        float basePitch = -1.05f - row * 0.3f - (1f - Math.abs(spread)) * 0.15f;
+        for (int k = 1; k < SEG; k++) neck[i][k].visible = true;
+        if (!e.headAlive(i)) {
+          // cabeca arrancada: so o toco do pescoco, caido
+          neck[i][0].xRot = 0.7f;
+          neck[i][0].yRot = baseYaw;
+          neck[i][1].visible = false;
           continue;
         }
-        // mira desta cabeca: o alvo vindo do servidor; sem alvo, olhadas lentas e aleatorias
+        if (asleep) {
+          // dormindo: pescocos no chao; perto de alguem, as cabecas tentam se erguer e as correntes seguram
+          float pull = strain ? Math.abs(Mth.sin(age * 0.9f + i)) : 0f;
+          neck[i][0].yRot = baseYaw * 0.8f + (strain ? Mth.sin(age * 2.3f + i) * 0.08f : 0f);
+          neck[i][0].xRot = 0.5f - pull * 0.45f;
+          for (int k = 1; k < SEG; k++) { neck[i][k].xRot = 0.08f + Mth.sin(age * 0.04f + i + k) * 0.01f - pull * 0.05f; neck[i][k].yRot = Mth.sin(i * 1.7f + k) * 0.1f; }
+          head[i].xRot = -0.35f - pull * 0.3f;
+          jaw[i].xRot = strain ? pull * 0.5f : 0f;
+          continue;
+        }
+        // mira desta cabeca: o alvo vindo do servidor, deslocado para o lado conforme a posicao no leque
         float wantYaw = baseYaw + Mth.sin(age * 0.013f + i * 2.3f) * 0.15f;
         float wantPitch = 0f;
         var target = level.getEntity(e.headTarget(i));
         if (target != null) {
+          int k = shareCount.getOrDefault(target.getId(), 1);
           double dx = target.getX() - e.getX(), dz = target.getZ() - e.getZ();
+          double dist = Math.max(1, Math.sqrt(dx * dx + dz * dz));
+          double off = (rank[i] - (k - 1) / 2.0) * Math.max(1.2, scale * 0.7); // em arco em volta da presa
+          double px = target.getX() + (-dz / dist) * off, pz = target.getZ() + (dx / dist) * off;
+          double ddx = px - e.getX(), ddz = pz - e.getZ();
           double dy = target.getEyeY() - (e.getY() + e.getBbHeight() * 0.8);
-          float worldYaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90f;
+          float worldYaw = (float) (Mth.atan2(ddz, ddx) * Mth.RAD_TO_DEG) - 90f;
           float rel = Mth.wrapDegrees(worldYaw - e.yBodyRot) * Mth.DEG_TO_RAD;
-          // cada cabeca so mira dentro do seu setor do leque: os pescocos nao se cruzam nem se atravessam
           float sector = n == 1 ? 1.4f : Math.max(0.3f, 1.1f / (n - 1) * 1.5f);
           wantYaw = Mth.clamp(rel, baseYaw - sector, baseYaw + sector);
-          wantPitch = (float) -Mth.atan2(dy, Math.sqrt(dx * dx + dz * dz));
+          wantPitch = (float) -Mth.atan2(dy, Math.sqrt(ddx * ddx + ddz * ddz));
         }
-        if (roar || skyward) { wantPitch = -0.9f; wantYaw = baseYaw * 0.6f; }
-        aim[i][0] = approach(aim[i][0], wantYaw, 0.08f);
+        boolean sky = (whole && i % 2 == 0) || roar;
+        if (sky) { wantPitch = -0.9f; wantYaw = baseYaw * 0.6f; }
+        if (berserk) { wantYaw += Mth.sin(age * 1.9f + i * 3) * 0.25f; wantPitch += Mth.sin(age * 2.3f + i) * 0.15f; }
+        aim[i][0] = approach(aim[i][0], wantYaw, berserk ? 0.18f : 0.08f);
         aim[i][1] += (wantPitch - aim[i][1]) * 0.08f;
-        // a mira se espalha pelo pescoco: o gomo da base gira mais, os outros seguem com atraso (corrente)
+        // despertar: cada cabeca se ergue na sua vez e ruge para o alvo
+        float rise = awakening ? smooth((sinceAwake - i * 8f) / 14f) : 1f;
         float wave = age * 0.09f + i * 1.3f;
         float bite = e.headBiting(i) ? 1f : 0f;
-        neck[i][0].yRot = aim[i][0] * 0.45f;
+        neck[i][0].yRot = Mth.lerp(rise, baseYaw * 0.8f, aim[i][0] * 0.45f);
         neck[i][0].zRot = -spread * 0.3f;
-        neck[i][0].xRot = basePitch + aim[i][1] * 0.3f + Mth.sin(wave) * 0.06f - bite * -0.5f;
+        neck[i][0].xRot = Mth.lerp(rise, 0.5f, basePitch + aim[i][1] * 0.3f + Mth.sin(wave) * 0.08f + bite * 0.5f);
         for (int k = 1; k < SEG; k++) {
-          float lag = Mth.sin(wave - k * 0.55f);
-          neck[i][k].yRot = aim[i][0] * 0.11f + lag * 0.03f;
-          // o pescoco sobe em S: os primeiros gomos erguem, os ultimos trazem a cabeca para a frente
-          neck[i][k].xRot = (k < 3 ? 0.06f : 0.24f) + aim[i][1] * 0.09f + lag * 0.035f - bite * (k < 3 ? 0.05f : -0.12f);
-          if (breath) neck[i][k].xRot = 0.2f;
+          float lag = Mth.sin(wave - k * 0.6f);
+          neck[i][k].yRot = Mth.lerp(rise, 0f, aim[i][0] * 0.11f + lag * 0.05f);
+          neck[i][k].xRot = Mth.lerp(rise, 0.08f, (k < 3 ? 0.05f : 0.25f) + aim[i][1] * 0.09f + lag * 0.045f - bite * (k < 3 ? 0.05f : -0.12f));
+          if (breath && !sky) neck[i][k].xRot = 0.2f;
         }
-        // tremor de predador: a cabeca da pequenos trancos
         float twitch = Mth.sin(age * 0.7f + i * 5f) > 0.97f ? 0.12f : 0f;
         head[i].xRot = 0.15f + aim[i][1] * 0.25f + twitch;
         head[i].zRot = Mth.sin(age * 0.05f + i) * 0.08f;
         float jawOpen = Math.max(0f, Mth.sin(age * 0.05f + i * 3f)) * 0.1f;
+        if (awakening && rise > 0.2f) jawOpen = 0.9f * (1f - Math.max(0f, (sinceAwake - i * 8f - 30f) / 20f));
         if (roar) { jawOpen = 0.95f; head[i].yRot = Mth.sin(age * 2.2f + i) * 0.12f; }
-        else if (breath) { jawOpen = 0.75f; head[i].xRot = 0.05f + Mth.sin(age * 1.5f + i) * 0.04f; }
-        else if (skyward) jawOpen = 0.55f + Mth.sin(age * 0.8f + i) * 0.1f;
-        if (bite > 0) jawOpen = 0.85f;
-        jaw[i].xRot = jawOpen;
+        else if (breath && !sky) { jawOpen = 0.75f; head[i].xRot = 0.05f + Mth.sin(age * 1.5f + i) * 0.04f; }
+        else if (sky) jawOpen = 0.6f + Mth.sin(age * 0.8f + i) * 0.1f;
+        if (bite > 0) jawOpen = 0.9f;
+        jaw[i].xRot = Math.max(0f, jawOpen);
       }
     }
 

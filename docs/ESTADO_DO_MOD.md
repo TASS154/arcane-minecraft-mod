@@ -567,6 +567,61 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
 
 **Receitas removidas:** a Caneta de Criatura e a Bússola Perfeita voltam a ser só de baú.
 
+## Rodada de 24 nov (noite): Hidra v3, pelas 19 respostas do Everton
+
+**Corpo e visual**
+- **Silhueta de dragão sem asas:** corpo alto e largo, ombros, peito saliente, patas longas de 3 partes com dedos e garras, pescoços longos de 6 gomos e cauda de 6 gomos com lâmina.
+- **Tamanho:** cresce de forma igual a cada estágio, de 1,8× no estágio 1 até 16× no 14 (dezenas de blocos de altura). A caixa de colisão para em 8× para não travar o mundo; o corpo visível continua crescendo e é desenhado até 512 blocos. As magias da Hidra também cresceram (alcance ×1,21 por estágio).
+- **Por glifo original** (o do covil):
+  - cor leve no couro e cor das veias;
+  - dorso: espinhos (Aniquilar, Gênese), barbatanas (Tempo, Retroceder, Gravidade) ou cristais que brilham (Espaço, Eclipse).
+- **Cabeças:** a maioria igual; algumas têm chifres grandes, crista ou são cegas (placa de osso no lugar dos olhos e mais dentes).
+- **Veias e olhos:** pulsam com a respiração, acendem antes dos poderes, piscam quando ela está fraca e ficam vermelhos na fúria.
+
+**Movimento**
+- Pescoços como serpentes.
+- **Leque:** quando várias cabeças caçam o mesmo alvo, cada uma mira um ponto ao lado dele, em arco, e não passam mais pelo mesmo lugar. Cada cabeça só gira dentro do seu setor.
+- **Despertar:** as cabeças se erguem uma a uma e rugem para os alvos, por 3,5 s sem atacar.
+- **Passo:** filhote rápida, anciã lenta e pesada. Do estágio 8 em diante, cada passo esmaga plantas, neve e folhas e aplaina saliências de 1 bloco (só com `mobGriefing`).
+- **Selada:** se alguém chega muito perto, as cabeças tentam se erguer e as correntes seguram, com rangido de corrente.
+
+**Combate**
+- **Fases:** a vida é dividida pelo número de cabeças. A cada limiar, uma cabeça ao acaso cai (fica o toco), e cada cabeça perdida dá +12% de dano e acelera os poderes. A última fica até a morte.
+- **Foco por ameaça:** as cabeças vivas são repartidas entre os alvos em proporção à mana máxima de cada um (criaturas contam 20). A do meio fica com o alvo principal.
+- **Mordida:** 120% do dano do golpe (180% na fúria), praticamente fatal. É a punição por chegar perto.
+- **Magia por cabeça:** cada cabeça tem de 1 a 3 elementos e de 1 a 3 formas, fixos pela identidade da Hidra. De longe, cospe projétil ou raio pela boca (`CastingService.castFrom`).
+- **Magias da Hidra inteira:** meteoro, tempestade, cataclismo, devastação, a nova **Cura** e a **magia original** (a cada 3 min). Nelas, metade das cabeças se ergue para o céu.
+  - Efeitos da original: Tempo prende, Retroceder volta a vida de 20 s atrás, Espaço suga todos, Aniquilar abre uma cratera gigante, Eclipse escurece e definha, Gênese cura a Hidra, Gravidade joga todos para cima.
+- **Fraqueza:** durante as magias grandes, e por 5 s depois da original, ela leva o dobro de dano e não morde.
+- **Fúria** (menos de 25% de vida): mais dano, muito menos precisão (mira tremendo, alvos ao acaso).
+- **Fora do covil:** caça o jogador mais próximo num raio de 160 blocos.
+- Não sofre dano de parede nem de aperto. Para de agir ao morrer.
+
+**Morte**
+- Ela se desfaz em runas, devagar e depois cada vez mais rápido (5,5 s, encolhendo e sem tombar).
+- No fim, o efeito do seu glifo:
+  - Tempo: tudo em volta congela por 10 s;
+  - Retroceder: cada jogador volta a uma foto aleatória da luta (posição, vida, fome e equipamento, guardados a cada 5 s);
+  - Espaço: todos espalhados ao acaso;
+  - Aniquilar: uma última cratera;
+  - Eclipse: buraco negro por 5 s, que puxa tudo, rasga o terreno e some;
+  - Gênese: a região floresce e cura quem está perto;
+  - Gravidade: tudo flutua e desce devagar.
+
+**Verificado no cliente** (`run/hydra_gifs/hydra_v3_*`): despertar, escala (no estágio 14 a câmera pega só as patas, como pilares), veias, espinhos e crista. A morte foi disparada; com a correção que faz a Hidra parar de agir ao morrer, ainda não foi gravada de novo.
+
+**Não visto:**
+- cabeças caindo nas fases;
+- leque em volta de um único alvo;
+- variantes de cabeça;
+- efeito final de cada glifo;
+- black hole.
+
+**Limites conhecidos:**
+- O covil (câmara de raio 14) não cabe uma Hidra do estágio 10 ou mais com o tamanho novo.
+- Os poderes antigos (sopro, rugido) ainda são da Hidra inteira, não por cabeça.
+- "Retroceder" na morte troca o equipamento atual pelo da foto, e pode sumir ou duplicar itens, como pedido.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

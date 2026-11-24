@@ -184,6 +184,7 @@ public class ArcaneCommands {
     var hydra = com.arcane.registry.ModEntities.HYDRA.get().create(level);
     if (hydra == null) return 0;
     hydra.setStage(stage);
+    hydra.setVariant(p.getRandom().nextInt(7));
     double dist = 6 + com.arcane.entity.HydraEntity.scaleFor(stage) * 2.5;
     var at = p.position().add(p.getLookAngle().multiply(1, 0, 1).normalize().scale(dist));
     hydra.moveTo(at.x, p.getY(), at.z, p.getYRot() + 180f, 0);

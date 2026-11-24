@@ -181,7 +181,8 @@ public final class DevAutoTest {
 
   // ------------------------------------------------------------------ luta contra Hidras de varios estagios
   private static final int[] STAGES = {4, 10, 14};
-  private static final int ROUND = 120;   // ticks por estagio
+  private static final int ROUND = 260;   // ticks por estagio: selada, desperta, observa, morre
+  private static final int[] VARIANTS = {4, 1, 5};
   /** false = so observar a Hidra (vitrine); true = o jogador ataca com magias. */
   private static final boolean CAST_SPELLS = false;
   private static final int START = 80;
@@ -246,7 +247,8 @@ public final class DevAutoTest {
         h.setStage(stage);
         h.moveTo(base.x, base.y, base.z + dist, 180f, 0);
         l.addFreshEntity(h);
-        h.setSealMask(0);
+        h.setVariant(VARIANTS[round % VARIANTS.length]);
+        h.setSealMask(HydraEntity.sealMaskFor(stage)); // comeca selada: o despertar aparece na gravacao
         h.setTarget(sp);
         sp.connection.teleport(base.x + 4, base.y, base.z, 0f, -5f);
         // tres porcos espalhados: as cabecas dividem os alvos entre o jogador e eles
@@ -264,6 +266,11 @@ public final class DevAutoTest {
       });
       return;
     }
+    if (at == 20) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(120)).forEach(h -> h.setSealMask(0)));
+    if (at == 140) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(120)).forEach(h -> {
+      write("  t" + at + " morte: variante " + h.variant());
+      h.kill();
+    }));
     // o jogador encara a Hidra e lanca uma magia a cada 1,5 s
     server(sp -> {
       var hs = sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80));

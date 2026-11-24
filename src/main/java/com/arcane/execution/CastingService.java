@@ -181,6 +181,19 @@ public final class CastingService {
         return result;
     }
 
+    /**
+     * Conjura de um ponto e numa direcao dados (ex.: a boca de uma cabeca da Hidra), sem custo de mana: a forma sai de
+     * {@code origin} na direcao {@code look}.
+     */
+    public static ExecutionResult castFrom(LivingEntity caster, Inscription inscription, ServerLevel level,
+                                           net.minecraft.world.phys.Vec3 origin, net.minecraft.world.phys.Vec3 look) {
+        CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
+        ExecutionContext context = new ExecutionContext(level, caster, inscription, plan,
+                AmbientFieldResolver.resolve(level, caster.blockPosition()), PrecisionSnapshot.of(inscription), ExecutionContext.TriggerEvent.cast());
+        context.freeze(origin, look, origin);
+        return SpellPipeline.INSTANCE.execute(context);
+    }
+
     public static ExecutionResult tryCast(LivingEntity caster, Inscription inscription, ServerLevel level) {
         if (com.arcane.ritual.RitualRequirements.of(inscription).needsRitual()) {
             return ExecutionResult.fail("message.arcane.requires_ritual");

@@ -179,17 +179,9 @@ public final class DevAutoTest {
     });
   }
 
-  // ------------------------------------------------------------------ luta contra Hidras de varios estagios
-  private static final int[] STAGES = {4, 10, 14};
-  private static final int ROUND = 260;   // ticks por estagio: selada, desperta, observa, morre
-  private static final int[] VARIANTS = {4, 1, 5};
-  /** false = so observar a Hidra (vitrine); true = o jogador ataca com magias. */
-  private static final boolean CAST_SPELLS = false;
-  private static final int START = 80;
-  private static int lastPower = -1;
-  private static float hpBefore;
-
-  private static double distFor(int stage) { return 6 + HydraEntity.scaleFor(stage) * 3.2; }
+  // ------------------------------------------------------------------ vitrine: gestos ociosos, andar no terreno, masmorra do covil
+  private static java.util.List<BlockPos> rooms = new java.util.ArrayList<>();
+  private static Vec3 walkFrom;
 
   private static void step(Minecraft mc) {
     var p = mc.player;
@@ -199,103 +191,87 @@ public final class DevAutoTest {
       cmd("gamerule doDaylightCycle false");
       cmd("weather clear 100000");
       cmd("gamerule doMobSpawning false");
-      cmd("gamerule mobGriefing true");
+      cmd("gamerule mobGriefing false");
       cmd("kill @e[type=!player]");
       mc.options.hideGui = true;
       mc.options.setCameraType(CameraType.FIRST_PERSON);
-      server(sp -> com.arcane.grimoire.GrimoireLifecycleHandler.toggleFloating(sp)); // o livro e o halo nao tapam a vista
       base = p.position();
+      server(sp -> com.arcane.grimoire.GrimoireLifecycleHandler.toggleFloating(sp));
       write("base " + base);
-      server(sp -> {
-        ServerLevel l = sp.serverLevel();
-        BlockPos o = BlockPos.containing(base);
-        for (int x = -40; x <= 40; x++) for (int z = -20; z <= 70; z++) {
-          l.setBlock(o.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState(), 2);
-          for (int y = 0; y < 40; y++) l.setBlock(o.offset(x, y, z), Blocks.AIR.defaultBlockState(), 2);
-        }
-      });
       return;
     }
-    if (t < START) return;
-    int round = (t - START) / ROUND, at = (t - START) % ROUND;
-    if (round >= STAGES.length) {
-      if (at == 0) {
-        cmd("kill @e[type=arcane:hydra]");
-        cmd("gamemode creative");
-        mc.options.pauseOnLostFocus = oldPause;
-        write("fim do roteiro");
-        armed = false;
-      }
-      return;
+    // 1) gestos ociosos: estagio 6 acordada, sem alvo (jogador em criativo)
+    if (t == 60) server(sp -> {
+      var l = sp.serverLevel();
+      HydraEntity h = ModEntities.HYDRA.get().create(l);
+      h.setStage(6);
+      h.setVariant(2);
+      h.moveTo(base.x, base.y, base.z + 22, 180f, 0);
+      l.addFreshEntity(h);
+      h.setSealMask(0);
+      sp.connection.teleport(base.x - 14, base.y + 3, base.z + 6, -60f, 8f);
+    });
+    if (t > 60 && t < 420) {
+      if (t % 5 == 0) shot(String.format("idle_%03d", t - 60));
+      if (t % 20 == 0) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80))
+          .forEach(h -> write("  t" + t + " gesto=" + h.idleAction() + " poder=" + h.power())));
     }
-    int stage = STAGES[round];
-    double dist = distFor(stage);
-    if (at == 0) {
+    // 2) andar no terreno natural: estagio 9 caminhando por morros longe da area aplainada
+    if (t == 430) {
       cmd("kill @e[type=arcane:hydra]");
-      cmd("kill @e[type=minecraft:pig]");
-      cmd("gamemode survival");
       server(sp -> {
         var l = sp.serverLevel();
-        sp.setHealth(sp.getMaxHealth());
-        sp.removeAllEffects();
-        sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, 20 * 60, 3, false, false));
-        sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION, 20 * 60, 4, false, false));
-        var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(sp);
-        mana.setBaseMax(2000);
-        mana.set(2000);
+        int x = (int) base.x, z = (int) base.z - 120;
+        int y = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        walkFrom = new Vec3(x + 0.5, y, z + 0.5);
         HydraEntity h = ModEntities.HYDRA.get().create(l);
-        h.setStage(stage);
-        h.moveTo(base.x, base.y, base.z + dist, 180f, 0);
+        h.setStage(9);
+        h.setVariant(0);
+        h.moveTo(walkFrom.x, walkFrom.y, walkFrom.z, 0f, 0);
         l.addFreshEntity(h);
-        h.setVariant(VARIANTS[round % VARIANTS.length]);
-        h.setSealMask(HydraEntity.sealMaskFor(stage)); // comeca selada: o despertar aparece na gravacao
-        h.setTarget(sp);
-        sp.connection.teleport(base.x + 4, base.y, base.z, 0f, -5f);
-        // tres porcos espalhados: as cabecas dividem os alvos entre o jogador e eles
-        for (int k = -1; k <= 1; k++) {
-          var pig = net.minecraft.world.entity.EntityType.PIG.create(l);
-          pig.moveTo(base.x + k * 5, base.y, base.z + dist * 0.55, 0f, 0f);
-          pig.setNoAi(true);
-          l.addFreshEntity(pig);
-        }
-        hpBefore = sp.getHealth();
-        lastPower = -1;
-        write(String.format("== estagio %d: vida %.0f (efetiva %.0f), dano %.1f, cabecas %d, largura %.1f, devasta=%s, selada=%s",
-            stage, h.getHealth(), h.effectiveMaxHealth(), h.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE),
-            h.heads(), h.getBbWidth(), HydraEntity.devastates(stage), h.sealed()));
+        h.setSealMask(0);
+        sp.connection.teleport(walkFrom.x + 28, walkFrom.y + 10, walkFrom.z + 10, 110f, 18f);
+        write("andar: comeca em " + walkFrom);
       });
-      return;
     }
-    if (at == 20) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(120)).forEach(h -> h.setSealMask(0)));
-    if (at == 140) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(120)).forEach(h -> {
-      write("  t" + at + " morte: variante " + h.variant());
-      h.kill();
-    }));
-    // o jogador encara a Hidra e lanca uma magia a cada 1,5 s
-    server(sp -> {
-      var hs = sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80));
-      if (hs.isEmpty()) { if (at % 40 == 0) write("  t" + at + " nenhuma Hidra perto (jogador vivo=" + sp.isAlive() + " em " + sp.blockPosition() + ")"); return; }
-      HydraEntity h = hs.get(0);
-      var eye = sp.getEyePosition();
-      var to = h.position().add(0, h.getBbHeight() * 0.5, 0).subtract(eye);
-      float yaw = (float) (Math.toDegrees(Math.atan2(-to.x, to.z)));
-      float pitch = (float) (-Math.toDegrees(Math.atan2(to.y, Math.hypot(to.x, to.z))));
-      if (at % 2 == 0) sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), yaw, pitch);
-      if (CAST_SPELLS && at % 12 == 10) {
-        var spell = new Inscription(List.of(g("projectile"), g("damage", "amount", 8.0), g("fire")));
-        com.arcane.execution.CastingService.tryCast(sp, spell, com.arcane.execution.PrecisionSnapshot.WORKBENCH);
+    if (t > 520 && t < 760) {
+      server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(120)).forEach(h -> {
+        if (t % 40 == 0) {
+          h.getNavigation().moveTo(walkFrom.x + (t % 80 == 0 ? 0 : -6), walkFrom.y, walkFrom.z + 36, 1.0);
+          write(String.format("  t%d hidra em (%.1f, %.1f, %.1f)", t, h.getX(), h.getY(), h.getZ()));
+        }
+        // a camera acompanha de lado
+        if (t % 10 == 0) sp.connection.teleport(h.getX() + 30, h.getY() + 12, h.getZ() - 4, 100f, 18f);
+      }));
+      if (t % 5 == 0) shot(String.format("walk_%03d", t - 520));
+    }
+    // 3) masmorra do covil: constroi um covil num lugar novo e entra nas salas
+    if (t == 770) {
+      cmd("kill @e[type=arcane:hydra]");
+      server(sp -> {
+        var l = sp.serverLevel();
+        BlockPos c = BlockPos.containing(base).offset(0, -30, 260);
+        int surface = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, c.getX(), c.getZ());
+        com.arcane.world.HydraLairs.buildAt(l, c, surface);
+        var map = com.arcane.world.LairDungeon.build(l, c, c.offset(38, 0, 0));
+        rooms = new java.util.ArrayList<>(map.keySet());
+        write("masmorra: " + map);
+      });
+    }
+    if (t >= 790 && t < 1030) {
+      int k = (t - 790) / 40;
+      if ((t - 790) % 40 == 0 && k < rooms.size()) {
+        BlockPos r = rooms.get(k);
+        tp(r.getX() + 0.5 - 3.5, r.getY() + 1, r.getZ() + 0.5 - 3.5, -45f, 20f);
       }
-      if (at % 40 == 0) write(String.format("  t%d vida do jogador %.1f, vivo=%s, alvos das cabecas=%s", at, sp.getHealth(), sp.isAlive(),
-          java.util.stream.IntStream.range(0, h.heads()).map(h::headTarget).boxed().toList()));
-      if (h.power() != lastPower) {
-        if (h.power() != 0) write(String.format("  t%d estagio %d usou o poder %d", at, stage, h.power()));
-        lastPower = h.power();
-      }
-      if (at == ROUND - 2) {
-        write(String.format("  fim do estagio %d: vida da Hidra %.0f/%.0f, jogador levou %.1f (com Resistencia IV e Regeneracao V), viva=%s",
-            stage, h.getHealth(), h.getMaxHealth(), Math.max(0, hpBefore - sp.getHealth()), h.isAlive()));
-      }
-    });
-    if (at % 5 == 0) shot(String.format("hydra_s%02d_%03d", stage, at));
+      if ((t - 790) % 40 == 20 && k < rooms.size()) shot("room_" + k);
+    }
+    if (t == 1040) {
+      cmd("gamemode creative");
+      mc.options.hideGui = false;
+      mc.options.pauseOnLostFocus = oldPause;
+      write("fim do roteiro");
+      armed = false;
+    }
   }
 }

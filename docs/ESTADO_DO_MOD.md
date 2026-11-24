@@ -650,6 +650,19 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
 - O teste do Foco falhou duas vezes seguidas e depois passou sem mudanca de codigo de servidor: depende da ordem dos
   testes. O teste agora imprime o bloco/alvo que a mira encontrou, para achar a causa se voltar.
 
+## Rodada de 24 nov (noite, 4): proporcoes de dragao (patas, torso afunilado, pescoco e cauda longos)
+
+- Patas da frente mais altas (coxa de 17 contra 11 nas de tras) e tronco inclinado (`BODY_TILT = -0.3`): o peito fica
+  erguido e as ancas baixas.
+- Torso afunila de frente para tras em quatro blocos (peito 24 de largura, torax 20, cintura 16, ancas 13), e os
+  espinhos dorsais descem em degraus junto.
+- Pescocos 2,5x mais longos e divididos em 15 gomos (antes 6). Cauda 2,5x mais longa, com 14 gomos (antes 6). A curva de
+  cada parte e dividida entre os gomos (`NK`, `TK`), entao o formato geral e as poses (dormir, morder, rugir, bater a
+  cauda) continuam os mesmos, so mais suaves.
+- Servidor acompanha o pescoco novo: `neckReach` passou de 2 + escala x 2,4 para 2 + escala x 3,4, e `headPos` (de onde
+  saem as magias das cabecas) ficou mais alto e mais a frente.
+- Visto no cliente (estagio 5, de lado e de tres quartos). Testes: unitarios ok, 257 GameTests ok.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

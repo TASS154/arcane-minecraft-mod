@@ -204,7 +204,7 @@ public final class DevAutoTest {
     if (t == 60) server(sp -> {
       var l = sp.serverLevel();
       HydraEntity h = ModEntities.HYDRA.get().create(l);
-      h.setStage(7);
+      h.setStage(5);
       h.setVariant(-1);
       var hm = net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES;
       int hy = l.getHeight(hm, (int) base.x, (int) base.z + 30);
@@ -216,11 +216,14 @@ public final class DevAutoTest {
       h.setYHeadRot(90f);
       h.yBodyRotO = 90f;
       int cy = Math.max(hy, l.getHeight(hm, (int) base.x, (int) base.z - 16));
-      sp.connection.teleport(base.x, cy + 14, base.z - 26, 0f, 14f);
+      sp.getAbilities().flying = true;
+      sp.onUpdateAbilities();
+      sp.connection.teleport(base.x, cy + 16, base.z - 30, 0f, 4f);
     });
-    if (t == 240) cmd("time set 18000");
+    if (t == 240) server(sp -> { sp.getAbilities().flying = true; sp.onUpdateAbilities(); });
+    if (t == 242) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(120)).forEach(h ->
+        sp.connection.teleport(h.getX() - 52, h.getY() + 30, h.getZ() - 46, -48f, 16f))); // tres quartos, de frente
     if (t > 60 && t < 420 && t % 10 == 0) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80)).forEach(h -> { h.setYBodyRot(90f); h.setYRot(90f); }));
-    if (t == 400) { cmd("time set 6000"); }
     if (t > 60 && t < 420) {
       if (t % 5 == 0) shot(String.format("idle_%03d", t - 60));
       if (t % 20 == 0) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80))

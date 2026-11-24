@@ -44,9 +44,23 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
    * Selada: correntes de luz carmesim da Hidra ate cada selo inteiro nos pilares, e aneis de runas apertando o corpo.
    * Desperta a partir do estagio 5: uma aura de brasas girando em volta (sinal de que ela devasta a regiao).
    */
+  /** Altura suavizada de cada Hidra (cliente): o corpo sobe e desce devagar quando ela pisa num degrau grande. */
+  private static final java.util.Map<Integer, double[]> SMOOTH_Y = new java.util.HashMap<>();
+
   @Override
   public void render(HydraEntity e, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
+    double ey = net.minecraft.util.Mth.lerp(partial, e.yo, e.getY());
+    double[] sy = SMOOTH_Y.computeIfAbsent(e.getId(), id -> new double[] {ey, net.minecraft.Util.getMillis()});
+    if (SMOOTH_Y.size() > 32) SMOOTH_Y.keySet().removeIf(id -> e.level().getEntity(id) == null);
+    long now = net.minecraft.Util.getMillis();
+    double dt = Math.min(0.1, (now - sy[1]) / 1000.0);
+    sy[1] = now;
+    if (Math.abs(ey - sy[0]) > 12) sy[0] = ey; // teleporte: nao suaviza
+    sy[0] += (ey - sy[0]) * (1 - Math.exp(-dt / 0.35));
+    pose.pushPose();
+    pose.translate(0, sy[0] - ey, 0);
     super.render(e, yaw, partial, pose, buffers, light);
+    pose.popPose();
     float age = e.tickCount + partial;
     VertexConsumer c = buffers.getBuffer(RenderType.lightning());
     PoseStack.Pose last = pose.last();
@@ -318,6 +332,7 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
       }
       body.zRot = Mth.sin(swing) * 0.05f * limbSwingAmount;
       body.y += Math.abs(Mth.cos(swing)) * limbSwingAmount * 0.8f;
+      feetOnGround(e);
       boolean sweep = power == HydraEntity.SWEEP;
       float amp = sweep ? 0.55f : asleep ? 0.05f : 0.16f, speed = sweep ? 0.45f : 0.07f;
       for (int k = 0; k < TAIL; k++) {
@@ -426,6 +441,92 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
         else if (sky) jawOpen = 0.6f + Mth.sin(age * 0.8f + i) * 0.1f;
         if (bite > 0) jawOpen = 0.9f;
         jaw[i].xRot = Math.max(0f, jawOpen);
+      }
+      idleGesture(e, age, n);
+    }
+
+    /** Pes no chao: cada pata procura o chao embaixo dela; o corpo inclina e as patas esticam ou dobram. */
+    private void feetOnGround(HydraEntity e) {
+      var level = e.level();
+      if (level == null || e.isPassenger()) return;
+      double scale = HydraEntity.scaleFor(e.stage());
+      double yaw = Math.toRadians(e.yBodyRot);
+      double cos = Math.cos(yaw), sin = Math.sin(yaw);
+      float[] off = new float[4];
+      int[][] legPos = {{-10, -8}, {10, -8}, {-10, 8}, {10, 8}};
+      for (int i = 0; i < 4; i++) {
+        // posicao do pe no mundo (modelo: -Z e a frente; o renderer gira 180 - yaw)
+        double lx = -legPos[i][0] * scale / 16.0, lz = -legPos[i][1] * scale / 16.0;
+        double wx = e.getX() + lx * cos - lz * sin, wz = e.getZ() + lx * sin + lz * cos;
+        double ground = groundAt(level, wx, e.getY(), wz, Math.max(2, scale * 1.2));
+        off[i] = (float) Mth.clamp((ground - e.getY()) * 16.0 / scale, -9, 9); // em pixels do modelo
+      }
+      for (int i = 0; i < 4; i++) {
+        thigh[i].y -= off[i];
+        shin[i].xRot += Math.min(0f, off[i]) * 0.04f;
+      }
+      float front = (off[0] + off[1]) / 2f, back = (off[2] + off[3]) / 2f, left = (off[0] + off[2]) / 2f, right = (off[1] + off[3]) / 2f;
+      body.xRot += (float) Math.atan2(front - back, 16) * 0.8f;
+      body.zRot += (float) Math.atan2(right - left, 20) * 0.6f;
+      body.y -= (front + back) / 2f * 0.5f;
+    }
+
+    /** Altura do chao numa coluna (o primeiro bloco solido descendo de cima do corpo). */
+    private static double groundAt(net.minecraft.world.level.Level level, double x, double y, double z, double range) {
+      var p = new net.minecraft.core.BlockPos.MutableBlockPos();
+      int top = (int) Math.floor(y + range), bottom = (int) Math.floor(y - range);
+      for (int yy = top; yy >= bottom; yy--) {
+        p.set(Math.floor(x), yy, Math.floor(z));
+        if (!level.getBlockState(p).getCollisionShape(level, p).isEmpty()) return yy + 1;
+      }
+      return y;
+    }
+
+    /** Gestos ociosos (vindos do servidor): rosnar, rugir, bater a cauda, sacudir, farejar, bocejar e roncar. */
+    private void idleGesture(HydraEntity e, float age, int n) {
+      int a = e.idleAction();
+      if (a == 0) return;
+      float t = (age - e.idleStart()) / HydraEntity.IDLE_TICKS;
+      if (t < 0 || t > 1) return;
+      float env = Mth.sin(t * Mth.PI); // sobe e desce
+      int one = Math.floorMod(e.idleStart() * 31, Math.max(1, n));
+      switch (a) {
+        case HydraEntity.IDLE_GROWL -> {
+          for (int i = 0; i < n; i++) {
+            neck[i][0].xRot += env * 0.15f;
+            jaw[i].xRot = Math.max(jaw[i].xRot, env * 0.25f + Mth.sin(age * 3f + i) * 0.04f * env);
+          }
+        }
+        case HydraEntity.IDLE_ROAR -> {
+          neck[one][0].xRot -= env * 0.45f;
+          head[one].xRot -= env * 0.35f;
+          jaw[one].xRot = Math.max(jaw[one].xRot, env * 0.95f);
+        }
+        case HydraEntity.IDLE_TAIL -> {
+          float lift = t < 0.6f ? smooth(t / 0.6f) : 1f - smooth((t - 0.6f) / 0.15f);
+          tail[0].xRot -= lift * 0.6f;
+          for (int k = 1; k < TAIL; k++) tail[k].xRot -= lift * 0.12f;
+        }
+        case HydraEntity.IDLE_SHAKE -> {
+          for (int i = 0; i < n; i++) head[i].yRot += Mth.sin(age * 2.6f + i) * 0.35f * env;
+        }
+        case HydraEntity.IDLE_SNIFF -> {
+          for (int i = 0; i < n; i++) {
+            neck[i][0].xRot += env * 0.5f;
+            head[i].xRot += env * 0.4f + Mth.sin(age * 4f + i) * 0.03f * env;
+          }
+        }
+        case HydraEntity.IDLE_YAWN -> {
+          head[one].xRot -= env * 0.4f;
+          jaw[one].xRot = Math.max(jaw[one].xRot, env * 1.1f);
+        }
+        case HydraEntity.IDLE_SNORE -> {
+          for (int i = 0; i < n; i++) {
+            neck[i][0].xRot -= env * 0.08f;
+            jaw[i].xRot = Math.max(jaw[i].xRot, env * 0.2f);
+          }
+        }
+        default -> { }
       }
     }
 

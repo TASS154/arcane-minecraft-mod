@@ -623,6 +623,22 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
 - Os poderes antigos (sopro, rugido) ainda são da Hidra inteira, não por cabeça.
 - "Retroceder" na morte troca o equipamento atual pelo da foto, e pode sumir ou duplicar itens, como pedido.
 
+## Rodada de 24 nov (noite, 2): masmorra do covil, andar no terreno, gestos ociosos
+
+- **Masmorra procedural em volta de cada covil** (`LairDungeon`):
+  - 5 a 10 salas ligadas por corredores em L, saindo do pé do poço de entrada, mais um ramo até a câmara;
+  - a planta é sorteada pela posição do covil: o mesmo mundo gera sempre a mesma masmorra;
+  - as salas ficam a mais de 52 blocos do centro, para a cúpula que cresce não engolir nada;
+  - salas: guarita (gerador de esqueleto ou esqueleto wither), tesouro (baús da Hidra, faixa baixa, com armadilhas), salão de armadilhas, santuário (altar com círculo quebrado), salão alagado (baú no fundo, estalactites), fosso de ossos e cofre de cristais;
+  - pelos corredores, runas invisíveis permanentes no chão, que disparam quando alguém chega perto: fogo e dano, lançamento para cima, cegueira e lentidão, dano, empurrão, veneno e lentidão;
+  - coberto por GameTest. **Não visto no jogo.** Como os chunks são carregados na hora de construir, gerar um covil pode dar um engasgo.
+- **Andar no terreno:**
+  - a Hidra sobe degraus de até 70% da sua caixa de colisão;
+  - o corpo desenhado sobe e desce devagar (0,35 s), sem saltar de uma vez;
+  - cada pata procura o chão embaixo dela, sobe ou desce até 9 pixels do modelo, e o corpo inclina para a frente, para trás e para os lados conforme as patas;
+  - **não visto no jogo**; a direção das patas (qual pata é qual no mundo) pode estar espelhada.
+- **Gestos ociosos:** a cada segundo sem poder em curso, há 25% de chance de rosnar, rugir com uma cabeça, bater a cauda no chão (poeira atrás dela), sacudir as cabeças, farejar o chão ou bocejar. Selada, ronca e solta fumaça. São só som, partículas e animação. **Não visto no jogo.**
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

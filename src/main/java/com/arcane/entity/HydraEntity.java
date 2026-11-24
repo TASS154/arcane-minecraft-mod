@@ -116,6 +116,10 @@ public class HydraEntity extends Monster {
   private static final EntityDataAccessor<Integer> ANIM_START = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   /** Glifo original da Hidra (0..6, a ordem de HydraLairs.ORIGINALS); muda a cor, detalhes do modelo e a morte. */
   private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  /** Gesto ocioso atual (rosnar, rugir, bater a cauda...) e quando comecou: so para a animacao e os sons. */
+  private static final EntityDataAccessor<Integer> IDLE = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  private static final EntityDataAccessor<Integer> IDLE_START = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  public static final int IDLE_GROWL = 1, IDLE_ROAR = 2, IDLE_TAIL = 3, IDLE_SHAKE = 4, IDLE_SNIFF = 5, IDLE_YAWN = 6, IDLE_SNORE = 7, IDLE_TICKS = 40;
   public static final int F_BERSERK = 1, F_WEAK = 2, F_AWAKEN = 4, F_DYING = 8, F_STRAIN = 16;
   public static final int HEAL = 9, ORIGINAL = 10, AWAKEN_TICKS = 70, DEATH_TICKS = 110;
   public static final int ORIGINAL_COOLDOWN = 20 * 180;
@@ -176,6 +180,8 @@ public class HydraEntity extends Monster {
     entityData.define(FLAGS, 0);
     entityData.define(ANIM_START, 0);
     entityData.define(VARIANT, -1);
+    entityData.define(IDLE, 0);
+    entityData.define(IDLE_START, 0);
     entityData.define(SEALS, 0);
     entityData.define(HOME, BlockPos.ZERO);
   }
@@ -270,6 +276,7 @@ public class HydraEntity extends Monster {
     entityData.set(ALIVE, (1 << headsFor(s)) - 1);
     setHealth(getMaxHealth());
     refreshDimensions();
+    setMaxUpStep(Math.max(1.0f, hitScaleFor(s) * 0.7f)); // anda por cima de morros e buracos (o corpo e suavizado no cliente)
     updateBossName();
   }
 
@@ -406,6 +413,45 @@ public class HydraEntity extends Monster {
   }
 
   public int animStart() { return entityData.get(ANIM_START); }
+
+  public int idleAction() { return entityData.get(IDLE); }
+
+  public int idleStart() { return entityData.get(IDLE_START); }
+
+  /**
+   * Gestos ociosos para parecer viva: de vez em quando (sem poder em curso), rosna, ruge com uma cabeca, bate a cauda
+   * no chao, sacode as cabecas, fareja o chao ou boceja. Selada, ronca. So som, particulas e animacao.
+   */
+  private void tickIdle(ServerLevel sl, boolean sleeping) {
+    if (idleAction() != 0 && tickCount - idleStart() > IDLE_TICKS) entityData.set(IDLE, 0);
+    if (idleAction() != 0 || tickCount % 20 != 0) return;
+    if (!sleeping && (power() != 0 || flag(F_AWAKEN))) return;
+    if (random.nextInt(sleeping ? 6 : 4) != 0) return;
+    int a = sleeping ? IDLE_SNORE : 1 + random.nextInt(6);
+    entityData.set(IDLE, a);
+    entityData.set(IDLE_START, tickCount);
+    float low = 0.4f + 0.6f / (1 + stage());
+    switch (a) {
+      case IDLE_GROWL -> sl.playSound(null, blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, low * 0.8f);
+      case IDLE_ROAR -> sl.playSound(null, blockPosition(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 3f, low + 0.2f);
+      case IDLE_TAIL -> {
+        double yaw = Math.toRadians(yBodyRot);
+        double back = getBbWidth() * 1.4;
+        double tx = getX() + Math.sin(yaw) * back, tz = getZ() - Math.cos(yaw) * back;
+        sl.playSound(null, BlockPos.containing(tx, getY(), tz), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.5f, 0.6f);
+        sl.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, sl.getBlockState(BlockPos.containing(tx, getY() - 1, tz))),
+            tx, getY() + 0.2, tz, 40, getBbWidth() * 0.3, 0.2, getBbWidth() * 0.3, 0.2);
+      }
+      case IDLE_SHAKE -> sl.playSound(null, blockPosition(), SoundEvents.RAVAGER_STUNNED, SoundSource.HOSTILE, 2f, low);
+      case IDLE_SNIFF -> sl.playSound(null, blockPosition(), SoundEvents.SNIFFER_SNIFFING, SoundSource.HOSTILE, 3f, low * 0.7f);
+      case IDLE_YAWN -> sl.playSound(null, blockPosition(), SoundEvents.RAVAGER_AMBIENT, SoundSource.HOSTILE, 2.5f, low * 0.6f);
+      case IDLE_SNORE -> {
+        sl.playSound(null, blockPosition(), SoundEvents.RAVAGER_AMBIENT, SoundSource.HOSTILE, 1.5f, 0.35f);
+        sl.sendParticles(ParticleTypes.SMOKE, getX(), getY() + getBbHeight() * 0.4, getZ(), 15, getBbWidth() * 0.4, 0.2, getBbWidth() * 0.4, 0.02);
+      }
+      default -> { }
+    }
+  }
 
   public int variant() { return entityData.get(VARIANT); }
 
@@ -629,6 +675,7 @@ public class HydraEntity extends Monster {
       }
       if (strainTicks > 0) strainTicks--;
       setFlag(F_STRAIN, strainTicks > 0);
+      if (level() instanceof ServerLevel sl2) tickIdle(sl2, true);
       return;
     }
     setFlag(F_STRAIN, false);
@@ -650,6 +697,7 @@ public class HydraEntity extends Monster {
     }
     heavySteps();
     huntPlayers();
+    if (level() instanceof ServerLevel sl3) tickIdle(sl3, false);
     if (variant() == 1 && tickCount % 100 == 0) recordSnapshots();
     tickHeads();
     tickStrikes();

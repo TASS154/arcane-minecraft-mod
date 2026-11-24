@@ -388,6 +388,8 @@ public final class HydraLairs extends SavedData {
     }
     set(level, top.offset(2, 4, 2), Blocks.SOUL_LANTERN.defaultBlockState());
     set(level, top.offset(-2, 4, -2), Blocks.SOUL_LANTERN.defaultBlockState());
+    // a masmorra procedural em volta: salas, corredores tortos e armadilhas de runa, sorteados pela posicao do covil
+    LairDungeon.build(level, c, shaft);
   }
 
   /**

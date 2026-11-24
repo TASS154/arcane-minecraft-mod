@@ -3448,6 +3448,22 @@ public class ArcaneGameTests {
     h.succeed();
   }
 
+  @GameTest(template = "empty", batch = "lair_dungeon", timeoutTicks = 200)
+  public static void lairDungeonGeneratesRoomsCorridorsAndTraps(GameTestHelper h) {
+    var level = h.getLevel();
+    BlockPos chamber = h.absolutePos(new BlockPos(2, 0, 2)).offset(4000, 40, 4000); // longe dos outros testes
+    BlockPos entrance = chamber.offset(38, 0, 0);
+    var rooms = com.arcane.world.LairDungeon.build(level, chamber, entrance);
+    var again = com.arcane.world.LairDungeon.build(level, chamber, entrance);
+    h.assertTrue(rooms.size() >= 3 && rooms.size() <= 10, "de 3 a 10 salas (" + rooms.size() + ")");
+    h.assertTrue(rooms.keySet().equals(again.keySet()), "o mesmo covil gera sempre a mesma masmorra");
+    for (BlockPos r : rooms.keySet()) {
+      h.assertTrue(Math.hypot(r.getX() - chamber.getX(), r.getZ() - chamber.getZ()) >= 52, "as salas ficam longe da camara (que cresce)");
+      h.assertTrue(level.getBlockState(r.above()).isAir(), "a sala foi escavada");
+    }
+    h.succeed();
+  }
+
   // ------------------------------------------------------------------ grimorio na bancada (posse e estudo)
 
   @GameTest(template = "empty", batch = "grimoire_desk")

@@ -14,6 +14,13 @@ import net.minecraftforge.registries.RegistryObject;
 public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, ArcaneMod.MODID);
 
+    // Ruinas Arcanas: tijolos de pedra com ametista, a versao entalhada com runa e a lampada runica (luz 15)
+    public static final RegistryObject<Block> ARCANE_BRICKS = BLOCKS.register("arcane_bricks",
+            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.5f, 9.0f).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> CHISELED_ARCANE_BRICKS = BLOCKS.register("chiseled_arcane_bricks",
+            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.5f, 9.0f).requiresCorrectToolForDrops().lightLevel(s -> 4)));
+    public static final RegistryObject<Block> RUNE_LAMP = BLOCKS.register("rune_lamp",
+            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).strength(1.5f).requiresCorrectToolForDrops().lightLevel(s -> 15)));
     public static final RegistryObject<Block> ARCANE_WORKBENCH = BLOCKS.register("arcane_workbench",
             () -> new ArcaneWorkbenchBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(3.0f).noOcclusion()));
     public static final RegistryObject<Block> MANA_CRYSTAL = BLOCKS.register("mana_crystal",

@@ -437,6 +437,83 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
 
 **Build**: `gradle.properties` não fixa mais o caminho do JDK, porque o JDK 17 daquele caminho tinha sumido da máquina. O Gradle usa o toolchain 17 (`~/.gradle/jdks`). O JDK 21 instalado em `JAVA_HOME` está quebrado ("Failed setting boot class path"), então para rodar o Gradle aponte `JAVA_HOME` para um JDK 17 que funcione.
 
+## Rodada de 24 nov (madrugada): Hidra nova, Ruínas Arcanas, receitas e elementos
+
+**Hidra (modelo e animação)**
+- Escamas de obsidiana com veias de runas ciano que brilham no escuro, junto com os olhos.
+- Espinhos no dorso, peito saliente e patas com coxa, canela e 3 garras.
+- Cauda de 4 gomos terminando em lâmina.
+- Pescoços de 3 gomos com espinhos. Cabeças com crânio, focinho, chifres, crista e dentes serrilhados em cima e embaixo.
+- O estágio dá só um tom leve sobre a obsidiana.
+- Textura nova de 256×128 (`tools/gen_hydra_texture.py`).
+- Animações:
+  - andar: o joelho dobra na volta;
+  - respirar: o peito incha;
+  - pescoços em onda do ombro até a cabeça;
+  - mordida: a cabeça do meio dá o bote no golpe corpo a corpo;
+  - rugido: pescoços erguidos, bocas escancaradas, cabeças tremendo;
+  - sopro: pescoços esticados para a frente;
+  - golpe de cauda: varre de lado a lado;
+  - conjurar: cabeças para o céu;
+  - selada: pescoços caídos no chão, respiração lenta.
+
+**Luta contra Hidras de vários estágios (cliente, roteiro automático)**
+- Estágios 1, 4, 7, 10 e 14. O jogador em sobrevivência, com Resistência IV e Regeneração V, lança um projétil de fogo com 8 de dano a cada 1,5 s. São 8 s por estágio.
+- GIFs locais em `run/hydra_gifs/`, fora do git.
+
+| Estágio | Vida | Dano | Cabeças | Perdeu em 8 s | Poderes vistos |
+|---|---|---|---|---|---|
+| 1 | 80 | 4 | 1 | 41 | sopro |
+| 4 | 298 | 8,4 | 3 | 30 | sopro |
+| 7 | 1.024 (efetiva 1.109) | 17,6 | 5 | 17 | sopro |
+| 10 | 1.024 (efetiva 4.131) | 36,9 | 7 | ~1 | devastação, meteoro |
+| 14 | 1.024 (efetiva 23.845) | 99 | 9 | 0 | cauda, meteoro, rugido |
+
+- **O que dá para concluir:**
+  - A curva exponencial aparece bem. A partir do estágio 7, magias médias quase não arranham, e no 14 a devastação incendeia e cratera a região.
+  - Os poderes saem pouco: 1 a 3 a cada 8 s.
+  - Com Resistência IV e Regeneração V o jogador não perdeu vida, então o dano real não foi medido.
+- **Problemas vistos:**
+  - O `/kill` não matou a Hidra do estágio 7: ela continuou viva no estágio seguinte, com duas barras de chefe. A causa não foi investigada.
+  - Hidras pequenas ficam escondidas atrás do jogador na câmera de trás.
+  - Pegando fogo, a Hidra fica vermelha o tempo todo, porque o jogo pinta de vermelho quem toma dano. Isso esconde a obsidiana.
+
+**Ruínas Arcanas (masmorras, `ArcaneRuins`)**
+- De 4 a 8 salas numa grade 3×3, ligadas por corredores com lâmpadas rúnicas.
+- Aparecem embaixo da terra (chance `ruinsChance`, padrão 0,25% por chunk novo) ou com `/arcane ruins`.
+- Salas:
+  - Salão do Ritual: no centro, com o círculo incompleto e runas nas paredes;
+  - Biblioteca;
+  - Laboratório de Alquimia;
+  - Arsenal: suportes de armadura;
+  - Cripta: gerador de zumbi ou esqueleto;
+  - Gruta de Cristal;
+  - Cofre: a sala mais longe do centro, com dois baús, um mago guardião e uma armadilha de runa invisível permanente (Ao Chegar Perto: lentidão e 4 de dano).
+- Cada sala tem a sua tabela de loot em `data/arcane/loot_tables/chests/ruins/`, gerada por `tools/gen_ruins_assets.py`.
+
+**Blocos e receitas novos**
+- Tijolos Arcanos: tijolo de pedra + ametista dá 4.
+- Tijolos Arcanos Entalhados: tijolo + tinta. Brilho fraco.
+- Lâmpada Rúnica: tijolos + pedra luminosa dá 2. Luz 15.
+- Receitas para a Caneta de Criatura (antes só em baús) e para a Bússola Perfeita.
+
+**Elementos visuais**
+- 16 elementos: os 8 antigos mais Terra, Água, Luz, Sombra, Sangue, Tempo, Natureza e Som.
+- Cada um tem cor primária e secundária.
+- O mapa efeito → elemento cobre os 114 efeitos e fica em `data/arcane/elements/effects.json`. O teste `ElementMapTest` falha se faltar algum.
+- Cada elemento tem som de conjuração e de impacto próprios, com 3 variações de tom.
+- A mecânica não mudou: as interações elementais de dano usam `SpellElement.mechanic`, o mapa antigo de 23 efeitos.
+- `SpellElement.secondaryColor`: com dois elementos diferentes na magia, o segundo dá a cor secundária. Ainda não está ligado ao desenho do projétil e das runas.
+- **Falta:**
+  - partícula com movimento próprio para cada elemento (os 8 novos reusam as partículas antigas, com a cor própria no círculo, no projétil e no impacto);
+  - sons próprios em `sounds.json`;
+  - decal de impacto no chão;
+  - a camada de feedback: hit-stop, clarão de tela, rastro do projétil, anel de impacto e opção de reduzir clarões.
+
+**Testes**
+- 126 unitários (incluindo `ElementMapTest`) e 253 do jogo passam.
+- Estavam quebrados desde a rodada anterior: 47 glifos sem ícone e contagens fixas em 160. Corrigido.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

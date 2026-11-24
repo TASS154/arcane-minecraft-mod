@@ -3335,6 +3335,32 @@ public class ArcaneGameTests {
     });
   }
 
+  @GameTest(template = "empty", batch = "ruins")
+  public static void arcaneRuinsBuildThemedRoomsWithLootAndAVault(GameTestHelper h) {
+    var level = h.getLevel();
+    BlockPos top = h.absolutePos(new BlockPos(2, 0, 2));
+    BlockPos centre = top.above(40); // longe da area dos outros testes (aqui o fundo do mundo fica logo abaixo)
+    var rooms = com.arcane.world.ArcaneRuins.build(level, centre, net.minecraft.util.RandomSource.create(42));
+    h.assertTrue(rooms.size() >= 4 && rooms.size() <= 9, "de 4 a 8 salas (" + rooms.size() + ")");
+    h.assertTrue(rooms.get(centre) == com.arcane.world.ArcaneRuins.Room.RITUAL && level.getBlockState(centre).is(com.arcane.registry.ModBlocks.ARCANE_ALTAR.get()),
+        "o centro e o salao do ritual, com altar");
+    h.assertTrue(rooms.containsValue(com.arcane.world.ArcaneRuins.Room.VAULT), "ha um cofre");
+    int chests = 0;
+    for (BlockPos q : BlockPos.betweenClosed(centre.offset(-20, -1, -20), centre.offset(20, 6, 20))) {
+      if (level.getBlockEntity(q) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity be) {
+        var tag = be.saveWithoutMetadata();
+        h.assertTrue(tag.getString("LootTable").startsWith("arcane:chests/ruins/"), "bau com loot das ruinas (" + tag.getString("LootTable") + ")");
+        chests++;
+      }
+    }
+    h.assertTrue(chests >= 3, "varios baus (" + chests + ")");
+    var mages = level.getEntitiesOfClass(com.arcane.entity.NPCMageEntity.class, new net.minecraft.world.phys.AABB(centre).inflate(24));
+    h.assertTrue(!mages.isEmpty(), "o cofre tem um mago guardiao");
+    mages.forEach(net.minecraft.world.entity.Entity::discard);
+    level.getEntitiesOfClass(net.minecraft.world.entity.decoration.ArmorStand.class, new net.minecraft.world.phys.AABB(centre).inflate(24)).forEach(net.minecraft.world.entity.Entity::discard);
+    h.succeed();
+  }
+
   // ------------------------------------------------------------------ grimorio na bancada (posse e estudo)
 
   @GameTest(template = "empty", batch = "grimoire_desk")

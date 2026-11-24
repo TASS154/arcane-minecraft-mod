@@ -37,6 +37,7 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue MAGE_CAST_INTERVAL_TICKS;
   public static final ForgeConfigSpec.IntValue GRIMOIRE_LOSS_DAYS;
   public static final ForgeConfigSpec.DoubleValue SEALED_CHAMBER_CHANCE;
+  public static final ForgeConfigSpec.DoubleValue RUINS_CHANCE;
   public static final ForgeConfigSpec.DoubleValue CRYSTAL_AREA_CAP;
   public static final ForgeConfigSpec.DoubleValue FLIGHT_MANA_PER_TICK;
   public static final ForgeConfigSpec.DoubleValue CRYSTAL_POISON_DAMAGE;
@@ -128,6 +129,7 @@ public class ArcaneConfig {
         .defineInRange("elementInteractionStrength", 1.0, 0.0, 3.0);
     MAGE_CAST_INTERVAL_TICKS = builder.comment("Ticks between NPC mage casts").defineInRange("mageCastIntervalTicks", 80, 10, 1200);
     GRIMOIRE_LOSS_DAYS = builder.comment("Days of reduced mana after losing the grimoire (PROVISIONAL)").defineInRange("grimoireLossDays", 3, 0, 30);
+    RUINS_CHANCE = builder.comment("Chance per newly generated Overworld chunk of underground Arcane Ruins (a 4-8 room dungeon with themed loot; 0 disables)").defineInRange("ruinsChance", 0.0025, 0.0, 1.0);
     SEALED_CHAMBER_CHANCE = builder.comment("Chance per newly generated Overworld chunk of an underground sealed-creature chamber (0 disables)").defineInRange("sealedChamberChance", 0.008, 0.0, 1.0);
     FLIGHT_MANA_PER_TICK = builder.comment("Mana drained every tick while the Float flight lasts, per block/tick of flight speed (0 = free flight) (PROVISIONAL)").defineInRange("flightManaPerTick", 0.25, 0.0, 10.0);
     CRYSTAL_AREA_CAP = builder.comment("Ceiling of the crystal's multiplier on spell radius/area (the zone multiplier goes up to 32). 0 = no ceiling").defineInRange("crystalAreaCap", 32.0, 0.0, 64.0);

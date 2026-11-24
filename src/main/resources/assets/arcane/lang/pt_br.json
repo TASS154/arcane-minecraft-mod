@@ -1066,5 +1066,10 @@
   "glyph.arcane.illusion": "Ilusão",
   "glyph.arcane.illusion.desc": "Efeito: cria 3 clones seus (só visuais, até 15 s) que imitam a sua intenção: andam e correm com você, atacam com outras armas do seu inventário quando você ataca e fingem outras magias quando você conjura. Não ferem nem tocam em nada; um golpe os desfaz. Criaturas que miram você podem escolher um clone.",
   "glyph.arcane.color": "Cor",
-  "glyph.arcane.color.desc": "Modificador: muda a cor do círculo e da espiral de conjuração desta magia (16 cores, no parâmetro). Só aparência."
+  "glyph.arcane.color.desc": "Modificador: muda a cor do círculo e da espiral de conjuração desta magia (16 cores, no parâmetro). Só aparência.",
+  "block.arcane.arcane_bricks": "Tijolos Arcanos",
+  "block.arcane.chiseled_arcane_bricks": "Tijolos Arcanos Entalhados",
+  "block.arcane.rune_lamp": "Lâmpada Rúnica",
+  "message.arcane.ruins.built": "Ruínas Arcanas construídas aqui (%s salas).",
+  "message.arcane.ruins.enter": "Você entrou em Ruínas Arcanas."
 }

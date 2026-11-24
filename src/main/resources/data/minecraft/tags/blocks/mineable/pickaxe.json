@@ -3,6 +3,9 @@
   "values": [
     "arcane:mana_crystal",
     "arcane:arcane_altar",
-    "arcane:hydra_seal"
+    "arcane:hydra_seal",
+    "arcane:arcane_bricks",
+    "arcane:chiseled_arcane_bricks",
+    "arcane:rune_lamp"
   ]
 }

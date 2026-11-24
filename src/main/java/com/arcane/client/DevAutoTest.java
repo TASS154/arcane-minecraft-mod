@@ -179,108 +179,103 @@ public final class DevAutoTest {
     });
   }
 
+  // ------------------------------------------------------------------ luta contra Hidras de varios estagios
+  private static final int[] STAGES = {1, 4, 7, 10, 14};
+  private static final int ROUND = 160;   // ticks por estagio
+  private static final int START = 80;
+  private static int lastPower = -1;
+  private static float hpBefore;
+
+  private static double distFor(int stage) { return 10 + HydraEntity.scaleFor(stage) * 4.0; }
+
   private static void step(Minecraft mc) {
     var p = mc.player;
-    switch (t) {
-      case 40 -> {
-        cmd("gamemode creative");
-        cmd("time set 6000");
-        cmd("gamerule doDaylightCycle false");
-        cmd("weather clear 100000");
-        cmd("gamerule doMobSpawning false");
-        cmd("gamerule mobGriefing true");
-        cmd("kill @e[type=!player]");
-        mc.options.hideGui = true;
-        mc.options.setCameraType(CameraType.FIRST_PERSON);
-        base = p.position();
-        write("base " + base);
-      }
-      // 1) a pena escreve na bancada; o livro fica la ate o dono voltar
-      case 60 -> server(sp -> {
+    if (t == 40) {
+      cmd("gamemode creative");
+      cmd("time set 6000");
+      cmd("gamerule doDaylightCycle false");
+      cmd("weather clear 100000");
+      cmd("gamerule doMobSpawning false");
+      cmd("gamerule mobGriefing true");
+      cmd("kill @e[type=!player]");
+      mc.options.hideGui = false;
+      mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+      base = p.position();
+      write("base " + base);
+      server(sp -> {
         ServerLevel l = sp.serverLevel();
         BlockPos o = BlockPos.containing(base);
-        for (int x = -24; x <= 24; x++) for (int z = -4; z <= 40; z++) {
+        for (int x = -40; x <= 40; x++) for (int z = -20; z <= 70; z++) {
           l.setBlock(o.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState(), 2);
-          for (int y = 0; y < 8; y++) l.setBlock(o.offset(x, y, z), Blocks.AIR.defaultBlockState(), 2);
+          for (int y = 0; y < 40; y++) l.setBlock(o.offset(x, y, z), Blocks.AIR.defaultBlockState(), 2);
         }
-        BlockPos bench = o.offset(0, 0, 3);
-        l.setBlock(bench, com.arcane.registry.ModBlocks.ARCANE_WORKBENCH.get().defaultBlockState(), 3);
-        com.arcane.grimoire.GrimoireLifecycleHandler.spawnGrimoire(sp);
-        com.arcane.grimoire.GrimoireDesk.startWriting(sp, bench, 6);
-        write("escrevendo: bloqueio=" + com.arcane.grimoire.GrimoireDesk.blockedReason(sp));
       });
-      case 62 -> tp(base.x + 0.5, base.y, base.z + 1.2, 0f, 35f);
-      case 80 -> shot("desk_writing_1");
-      case 95 -> shot("desk_writing_2");
-      case 140 -> tp(base.x + 0.5, base.y, base.z + 14, 180f, 10f);
-      case 160 -> { shot("desk_left_behind"); server(sp -> write("longe: bloqueio=" + com.arcane.grimoire.GrimoireDesk.blockedReason(sp))); }
-      case 165 -> tp(base.x + 0.5, base.y, base.z + 1.0, 0f, 20f);
-      case 175 -> server(sp -> write("perto de novo: bloqueio=" + com.arcane.grimoire.GrimoireDesk.blockedReason(sp)));
-      // 2) invisibilidade: parado quase some; andando, a distorcao aparece
-      case 180 -> server(sp -> {
-        var l = sp.serverLevel();
-        var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(l);
-        z.moveTo(base.x + 0.5, base.y, base.z + 6, 180f, 0);
-        z.setNoAi(true);
-        z.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(net.minecraft.world.item.Items.IRON_CHESTPLATE));
-        z.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(net.minecraft.world.item.Items.IRON_SWORD));
-        z.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.INVISIBILITY, 2000, 0, false, false, true));
-        z.setPersistenceRequired();
-        l.addFreshEntity(z);
-        var visible = net.minecraft.world.entity.EntityType.ZOMBIE.create(l);
-        visible.moveTo(base.x + 3.5, base.y, base.z + 6, 180f, 0);
-        visible.setNoAi(true);
-        visible.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(net.minecraft.world.item.Items.IRON_CHESTPLATE));
-        l.addFreshEntity(visible);
-      });
-      case 182 -> tp(base.x + 1.5, base.y, base.z + 1.5, 0f, 5f);
-      case 200 -> shot("invisible_still");
-      case 230 -> shot("invisible_moving");
-      // 3) Ilusao: 3 clones com a skin do jogador
-      case 250 -> {
-        cmd("kill @e[type=minecraft:zombie]");
-        server(sp -> {
-          sp.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD));
-          sp.getInventory().add(new ItemStack(net.minecraft.world.item.Items.IRON_AXE));
-          sp.getInventory().add(new ItemStack(net.minecraft.world.item.Items.BOW));
-          var r = com.arcane.execution.CastingService.tryCast(sp, new Inscription(List.of(g("self"), g("illusion", "duration", 600))),
-              com.arcane.execution.PrecisionSnapshot.WORKBENCH);
-          write("ilusao: " + r.success() + " " + r.message() + " clones=" + sp.serverLevel().getEntitiesOfClass(com.arcane.entity.IllusionEntity.class, sp.getBoundingBox().inflate(8)).size());
-        });
-        mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
-      }
-      case 275 -> shot("illusion_front");
-      case 277 -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-      case 290 -> shot("illusion_back");
-      case 292 -> mc.options.setCameraType(CameraType.FIRST_PERSON);
-      // 4) mana vazando de um circulo de raio 16
-      case 300 -> server(sp -> {
-        var l = sp.serverLevel();
-        BlockPos altar = BlockPos.containing(base).offset(0, 0, 22);
-        l.setBlock(altar, com.arcane.registry.ModBlocks.ARCANE_ALTAR.get().defaultBlockState(), 3);
-        com.arcane.ritual.RitualService.drawPerfectCircle(l, altar, 16);
-        write("circulo: raio que vaza=" + com.arcane.ritual.RitualLeaks.leakingRadius(l, altar) + " registrado=" + com.arcane.ritual.RitualLeaks.registered(l, altar));
-      });
-      case 302 -> tp(base.x + 0.5, base.y + 6, base.z - 2, 0f, 15f);
-      case 360 -> shot("ritual_leak");
-      case 380 -> {
+      return;
+    }
+    if (t < START) return;
+    int round = (t - START) / ROUND, at = (t - START) % ROUND;
+    if (round >= STAGES.length) {
+      if (at == 0) {
+        cmd("kill @e[type=arcane:hydra]");
         cmd("gamemode creative");
-        mc.options.hideGui = false;
         mc.options.pauseOnLostFocus = oldPause;
         write("fim do roteiro");
         armed = false;
       }
-      default -> {
-      }
+      return;
     }
-    // a criatura invisivel anda de um lado para o outro (distorcao em movimento)
-    if (t >= 205 && t < 232) {
-      int now = t;
+    int stage = STAGES[round];
+    double dist = distFor(stage);
+    if (at == 0) {
+      cmd("kill @e[type=arcane:hydra]");
+      cmd("gamemode survival");
       server(sp -> {
-        for (var z : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, sp.getBoundingBox().inflate(12))) {
-          if (z.isInvisible()) z.teleportTo(base.x + 0.5 + Math.sin(now * 0.35) * 1.5, base.y, base.z + 6);
-        }
+        var l = sp.serverLevel();
+        sp.setHealth(sp.getMaxHealth());
+        sp.removeAllEffects();
+        sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, 20 * 60, 3, false, false));
+        sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION, 20 * 60, 4, false, false));
+        var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(sp);
+        mana.setBaseMax(2000);
+        mana.set(2000);
+        HydraEntity h = ModEntities.HYDRA.get().create(l);
+        h.setStage(stage);
+        h.moveTo(base.x, base.y, base.z + dist, 180f, 0);
+        l.addFreshEntity(h);
+        h.setSealMask(0);
+        h.setTarget(sp);
+        sp.connection.teleport(base.x, base.y, base.z, 0f, -5f);
+        hpBefore = sp.getHealth();
+        lastPower = -1;
+        write(String.format("== estagio %d: vida %.0f (efetiva %.0f), dano %.1f, cabecas %d, largura %.1f, devasta=%s, selada=%s",
+            stage, h.getHealth(), h.effectiveMaxHealth(), h.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE),
+            h.heads(), h.getBbWidth(), HydraEntity.devastates(stage), h.sealed()));
       });
+      return;
     }
+    // o jogador encara a Hidra e lanca uma magia a cada 1,5 s
+    server(sp -> {
+      var hs = sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80));
+      if (hs.isEmpty()) return;
+      HydraEntity h = hs.get(0);
+      var eye = sp.getEyePosition();
+      var to = h.position().add(0, h.getBbHeight() * 0.5, 0).subtract(eye);
+      float yaw = (float) (Math.toDegrees(Math.atan2(-to.x, to.z)));
+      float pitch = (float) (-Math.toDegrees(Math.atan2(to.y, Math.hypot(to.x, to.z))));
+      if (at % 2 == 0) sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), yaw, pitch);
+      if (at % 30 == 10) {
+        var spell = new Inscription(List.of(g("projectile"), g("damage", "amount", 8.0), g("fire")));
+        com.arcane.execution.CastingService.tryCast(sp, spell, com.arcane.execution.PrecisionSnapshot.WORKBENCH);
+      }
+      if (h.power() != lastPower) {
+        if (h.power() != 0) write(String.format("  t%d estagio %d usou o poder %d", at, stage, h.power()));
+        lastPower = h.power();
+      }
+      if (at == ROUND - 2) {
+        write(String.format("  fim do estagio %d: vida da Hidra %.0f/%.0f, jogador levou %.1f (com Resistencia IV e Regeneracao V), viva=%s",
+            stage, h.getHealth(), h.getMaxHealth(), Math.max(0, hpBefore - sp.getHealth()), h.isAlive()));
+      }
+    });
+    if (at % 5 == 0) shot(String.format("hydra_s%02d_%03d", stage, at));
   }
 }

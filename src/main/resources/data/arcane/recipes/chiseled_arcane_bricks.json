@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "arcane:arcane_bricks"
+    },
+    {
+      "item": "arcane:common_ink"
+    }
+  ],
+  "result": {
+    "item": "arcane:chiseled_arcane_bricks"
+  }
+}

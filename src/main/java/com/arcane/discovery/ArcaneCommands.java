@@ -78,6 +78,16 @@ public class ArcaneCommands {
                   ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.pocket.cleared", owner.getDisplayName(), n), true);
                   return n;
                 }))))
+        .then(Commands.literal("ruins")
+            .requires(src -> src.hasPermission(2))
+            .executes(ctx -> {
+              ServerPlayer p = ctx.getSource().getPlayerOrException();
+              var centre = p.blockPosition().below(12);
+              var rooms = com.arcane.world.ArcaneRuins.build(p.serverLevel(), centre, p.getRandom());
+              p.teleportTo(centre.getX() + 0.5, centre.getY() + 1.0, centre.getZ() + 2.5);
+              ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("message.arcane.ruins.built", rooms.size()), true);
+              return rooms.size();
+            }))
         .then(Commands.literal("chamber")
             .requires(src -> src.hasPermission(2))
             .executes(ctx -> {

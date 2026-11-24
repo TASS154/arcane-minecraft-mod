@@ -1066,5 +1066,10 @@
   "glyph.arcane.illusion": "Illusion",
   "glyph.arcane.illusion.desc": "Effect: creates 3 clones of you (visual only, up to 15 s) that copy your intent: they walk and run with you, attack with other weapons from your inventory when you attack and fake other spells when you cast. They hurt and touch nothing; one hit dispels them. Creatures aiming at you may pick a clone.",
   "glyph.arcane.color": "Color",
-  "glyph.arcane.color.desc": "Modifier: changes the color of this spell's casting circle and spiral (16 colors, in the parameter). Looks only."
+  "glyph.arcane.color.desc": "Modifier: changes the color of this spell's casting circle and spiral (16 colors, in the parameter). Looks only.",
+  "block.arcane.arcane_bricks": "Arcane Bricks",
+  "block.arcane.chiseled_arcane_bricks": "Chiseled Arcane Bricks",
+  "block.arcane.rune_lamp": "Rune Lamp",
+  "message.arcane.ruins.built": "Arcane Ruins built here (%s rooms).",
+  "message.arcane.ruins.enter": "You entered Arcane Ruins."
 }

@@ -46,6 +46,9 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.MIXED_INVISIBLE_INK.get());
                 output.accept(ModItems.SOLVENT_POWDER.get());
                 output.accept(ModItems.SEALED_CREATURE.get());
+                output.accept(ModItems.ARCANE_BRICKS.get());
+                output.accept(ModItems.CHISELED_ARCANE_BRICKS.get());
+                output.accept(ModItems.RUNE_LAMP.get());
                 output.accept(ModItems.GRIMOIRE.get());
                 output.accept(ModItems.ARCANE_PAGE.get());
                 output.accept(ModItems.GLYPH_NOTE.get());

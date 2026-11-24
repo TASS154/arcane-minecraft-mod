@@ -20,6 +20,9 @@ import net.minecraftforge.registries.RegistryObject;
 public final class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, ArcaneMod.MODID);
 
+    public static final RegistryObject<Item> ARCANE_BRICKS = ITEMS.register("arcane_bricks", () -> new BlockItem(ModBlocks.ARCANE_BRICKS.get(), new Item.Properties()));
+    public static final RegistryObject<Item> CHISELED_ARCANE_BRICKS = ITEMS.register("chiseled_arcane_bricks", () -> new BlockItem(ModBlocks.CHISELED_ARCANE_BRICKS.get(), new Item.Properties()));
+    public static final RegistryObject<Item> RUNE_LAMP = ITEMS.register("rune_lamp", () -> new BlockItem(ModBlocks.RUNE_LAMP.get(), new Item.Properties()));
     public static final RegistryObject<Item> ARCANE_WORKBENCH = ITEMS.register("arcane_workbench",
             () -> new BlockItem(ModBlocks.ARCANE_WORKBENCH.get(), new Item.Properties()));
     public static final RegistryObject<Item> MANA_CRYSTAL = ITEMS.register("mana_crystal",

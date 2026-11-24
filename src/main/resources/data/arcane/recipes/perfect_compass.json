@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DCD",
+    "CMC",
+    "DCD"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "C": {
+      "item": "arcane:arcane_compass"
+    },
+    "M": {
+      "item": "arcane:mana_crystal"
+    }
+  },
+  "result": {
+    "item": "arcane:perfect_compass"
+  }
+}

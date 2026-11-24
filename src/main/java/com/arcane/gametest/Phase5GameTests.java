@@ -576,7 +576,13 @@ public class Phase5GameTests {
     float hp = pig.getHealth();
     float m0 = mana.current();
     var ok = castSpell(h, p, spell);
-    h.assertTrue(ok.success(), "com criatura na mira a magia funciona: " + ok.message());
+    if (!ok.success()) {
+      var clip = h.getLevel().clip(new net.minecraft.world.level.ClipContext(p.getEyePosition(), p.getEyePosition().add(p.getLookAngle().scale(12)),
+          net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, p));
+      h.fail("com criatura na mira a magia funciona: " + ok.message() + " olho=" + p.getEyePosition() + " look=" + p.getLookAngle()
+          + " clip=" + clip.getType() + "@" + clip.getBlockPos() + " " + h.getLevel().getBlockState(clip.getBlockPos()) + " alvo=" + pig.position()
+          + " vivo=" + pig.isAlive() + " pick=" + pig.isPickable() + " bb=" + pig.getBoundingBox());
+    }
     h.assertTrue(pig.getHealth() < hp, "o Foco entregou a criatura ao efeito");
     h.assertTrue(mana.current() < m0, "gastou mana ao funcionar");
     pig.discard();

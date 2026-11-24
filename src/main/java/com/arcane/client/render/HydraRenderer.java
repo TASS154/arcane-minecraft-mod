@@ -208,15 +208,15 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
       PartDefinition p = mesh.getRoot();
       // corpo alto de dragao: tronco, ombros largos, quadril, ventre
       PartDefinition bd = p.addOrReplaceChild("body", CubeListBuilder.create()
-          .texOffs(0, 0).addBox(-9, -7, -12, 18, 14, 24)
-          .texOffs(0, 38).addBox(-11, -6, -15, 22, 11, 8)
-          .texOffs(60, 38).addBox(-9.5f, -6, 7, 19, 11, 7)
-          .texOffs(0, 57).addBox(-7, 6.5f, -10, 14, 2, 20), PartPose.offset(0, 4, 0));
+          .texOffs(0, 0).addBox(-9, -7, -18, 18, 14, 36)            // tronco longo
+          .texOffs(108, 0).addBox(-11, -6, -21, 22, 11, 8)          // ombros
+          .texOffs(108, 20).addBox(-9.5f, -6, 13, 19, 11, 8)        // quadril
+          .texOffs(0, 52).addBox(-7, 6.5f, -16, 14, 2, 32), PartPose.offset(0, 4, 0)); // ventre
       bd.addOrReplaceChild("chest", CubeListBuilder.create().texOffs(104, 38).addBox(-7, -3, -4, 14, 10, 5)
-          .texOffs(104, 54).addBox(-5, 1, -5, 10, 6, 2), PartPose.offset(0, 0, -14));
+          .texOffs(104, 54).addBox(-5, 1, -5, 10, 6, 2), PartPose.offset(0, 0, -20));
       CubeListBuilder sp = CubeListBuilder.create(), fn = CubeListBuilder.create(), cr = CubeListBuilder.create();
-      for (int k = 0; k < 7; k++) {
-        float z = -11 + k * 3.4f, sz = 3.2f - Math.abs(k - 3) * 0.35f;
+      for (int k = 0; k < 11; k++) {
+        float z = -17 + k * 3.4f, sz = 3.2f - Math.abs(k - 5) * 0.25f;
         sp.texOffs(BONE_U, BONE_V).addBox(-sz / 2, -7 - sz * 1.6f, z, sz, sz * 1.6f, sz);
         fn.texOffs(BONE_U, BONE_V + 16).addBox(-0.5f, -7 - sz * 2.2f, z, 1, sz * 2.2f, 3.2f);
         cr.texOffs(EYE_U, EYE_V).addBox(-sz / 2 + (k % 2) * 1.5f - 0.75f, -7 - sz * 1.9f, z, sz * 0.8f, sz * 1.9f, sz * 0.8f);
@@ -225,7 +225,7 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
       bd.addOrReplaceChild("fins", fn, PartPose.ZERO);
       bd.addOrReplaceChild("crystals", cr, PartPose.ZERO);
       // patas longas: coxa, canela, pe com tres dedos e garras
-      int[][] legPos = {{-10, -8}, {10, -8}, {-10, 8}, {10, 8}};
+      int[][] legPos = {{-10, -13}, {10, -13}, {-10, 13}, {10, 13}};
       for (int i = 0; i < 4; i++) {
         PartDefinition th = p.addOrReplaceChild("leg" + i, CubeListBuilder.create().texOffs(0, 80).addBox(-4, -2, -4.5f, 8, 11, 9),
             PartPose.offset(legPos[i][0], 9, legPos[i][1]));
@@ -242,7 +242,7 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
         CubeListBuilder seg = CubeListBuilder.create().texOffs(0, 100 + (k % 2) * 14).addBox(-tw / 2, -tw / 2, 0, tw, tw, tz);
         seg.texOffs(BONE_U, BONE_V).addBox(-0.6f, -tw / 2 - 2.2f, tz * 0.3f, 1.2f, 2.2f, 2.2f);
         if (k == TAIL - 1) seg.texOffs(BONE_U, BONE_V + 16).addBox(-0.5f, -5, tz - 1, 1, 10, 8);
-        parent = parent.addOrReplaceChild("tail" + k, seg, k == 0 ? PartPose.offset(0, 2, 12) : PartPose.offset(0, 0, tz - 1.2f));
+        parent = parent.addOrReplaceChild("tail" + k, seg, k == 0 ? PartPose.offset(0, 2, 19) : PartPose.offset(0, 0, tz - 1.2f));
         tz = Math.max(5f, tz - 0.9f);
         tw = Math.max(2.5f, tw * 0.78f);
       }
@@ -254,7 +254,7 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
           float len = 6.2f - k * 0.3f;
           CubeListBuilder cube = CubeListBuilder.create().texOffs(120, (k % 3) * 15).addBox(-w / 2, -w / 2, -len, w, w, len);
           if (k % 2 == 1) cube.texOffs(BONE_U, BONE_V).addBox(-0.5f, -w / 2 - 1.6f, -len * 0.7f, 1, 1.8f, 1.8f);
-          PartPose pose = k == 0 ? PartPose.offset(0, -2, -15) : PartPose.offset(0, 0, -(6.2f - (k - 1) * 0.3f) + 0.5f);
+          PartPose pose = k == 0 ? PartPose.offset(0, -2, -21) : PartPose.offset(0, 0, -(6.2f - (k - 1) * 0.3f) + 0.5f);
           seg = k == 0 ? p.addOrReplaceChild("neck" + i, cube, pose) : seg.addOrReplaceChild("seg" + k, cube, pose);
           w = Math.max(3.4f, w - 0.45f);
         }
@@ -374,7 +374,7 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
         float row = n > 4 ? (i % 2) : 0;
         neck[i][0].x = spread * (n > 4 ? 11.5f : 9f);
         neck[i][0].y = -2f - row * 3f;
-        neck[i][0].z = -15f + row * 3f;
+        neck[i][0].z = -21f + row * 3f;
         float baseYaw = spread * (n > 3 ? 0.95f : 0.55f);
         float basePitch = -1.05f - row * 0.3f - (1f - Math.abs(spread)) * 0.15f;
         for (int k = 1; k < SEG; k++) neck[i][k].visible = true;
@@ -453,7 +453,7 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
       double yaw = Math.toRadians(e.yBodyRot);
       double cos = Math.cos(yaw), sin = Math.sin(yaw);
       float[] off = new float[4];
-      int[][] legPos = {{-10, -8}, {10, -8}, {-10, 8}, {10, 8}};
+      int[][] legPos = {{-10, -13}, {10, -13}, {-10, 13}, {10, 13}};
       for (int i = 0; i < 4; i++) {
         // posicao do pe no mundo (modelo: -Z e a frente; o renderer gira 180 - yaw)
         double lx = -legPos[i][0] * scale / 16.0, lz = -legPos[i][1] * scale / 16.0;
@@ -466,7 +466,7 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
         shin[i].xRot += Math.min(0f, off[i]) * 0.04f;
       }
       float front = (off[0] + off[1]) / 2f, back = (off[2] + off[3]) / 2f, left = (off[0] + off[2]) / 2f, right = (off[1] + off[3]) / 2f;
-      body.xRot += (float) Math.atan2(front - back, 16) * 0.8f;
+      body.xRot += (float) Math.atan2(front - back, 26) * 0.8f;
       body.zRot += (float) Math.atan2(right - left, 20) * 0.6f;
       body.y -= (front + back) / 2f * 0.5f;
     }

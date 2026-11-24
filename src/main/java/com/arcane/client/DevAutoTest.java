@@ -204,19 +204,30 @@ public final class DevAutoTest {
     if (t == 60) server(sp -> {
       var l = sp.serverLevel();
       HydraEntity h = ModEntities.HYDRA.get().create(l);
-      h.setStage(6);
-      h.setVariant(2);
-      h.moveTo(base.x, base.y, base.z + 22, 180f, 0);
+      h.setStage(7);
+      h.setVariant(-1);
+      var hm = net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES;
+      int hy = l.getHeight(hm, (int) base.x, (int) base.z + 30);
+      h.moveTo(base.x, hy, base.z + 30, 90f, 0); // de lado para a camera: o comprimento aparece
       l.addFreshEntity(h);
       h.setSealMask(0);
-      sp.connection.teleport(base.x - 14, base.y + 3, base.z + 6, -60f, 8f);
+      h.setNoAi(true);
+      h.setYBodyRot(90f);
+      h.setYHeadRot(90f);
+      h.yBodyRotO = 90f;
+      int cy = Math.max(hy, l.getHeight(hm, (int) base.x, (int) base.z - 16));
+      sp.connection.teleport(base.x, cy + 14, base.z - 26, 0f, 14f);
     });
+    if (t == 240) cmd("time set 18000");
+    if (t > 60 && t < 420 && t % 10 == 0) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80)).forEach(h -> { h.setYBodyRot(90f); h.setYRot(90f); }));
+    if (t == 400) { cmd("time set 6000"); }
     if (t > 60 && t < 420) {
       if (t % 5 == 0) shot(String.format("idle_%03d", t - 60));
       if (t % 20 == 0) server(sp -> sp.serverLevel().getEntitiesOfClass(HydraEntity.class, sp.getBoundingBox().inflate(80))
           .forEach(h -> write("  t" + t + " gesto=" + h.idleAction() + " poder=" + h.power())));
     }
     // 2) andar no terreno natural: estagio 9 caminhando por morros longe da area aplainada
+    if (t == 425) { write("fim do roteiro"); mc.options.hideGui = false; mc.options.pauseOnLostFocus = oldPause; armed = false; return; }
     if (t == 430) {
       cmd("kill @e[type=arcane:hydra]");
       server(sp -> {

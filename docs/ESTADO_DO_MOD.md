@@ -639,6 +639,17 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
   - **não visto no jogo**; a direção das patas (qual pata é qual no mundo) pode estar espelhada.
 - **Gestos ociosos:** a cada segundo sem poder em curso, há 25% de chance de rosnar, rugir com uma cabeça, bater a cauda no chão (poeira atrás dela), sacudir as cabeças, farejar o chão ou bocejar. Selada, ronca e solta fumaça. São só som, partículas e animação. **Não visto no jogo.**
 
+## Rodada de 24 nov (noite, 3): Hidra mais comprida, textura e veias novas
+
+- Corpo 50% mais longo (tronco de 36 em vez de 24, com ombros, quadril e ventre). Pernas em z +-13, cauda nasce em z 19,
+  pescocos em z -21, 11 espinhos dorsais. A inclinacao do corpo usa a distancia nova entre as patas.
+- `tools/gen_hydra_texture.py` reescrito: escamas em losango com sombra e reflexo, tom variando em manchas, e veias em
+  forma de rachadura que se ramificam pela textura toda (cerca de 6.500 pixels brilhando, antes eram 70 tracos curtos),
+  com pequenos glifos ao longo. A camada emissiva pulsa na cor do glifo da Hidra (vermelha em furia).
+- Visto no cliente de lado, de dia e de noite (`run/screenshots/autotest_idle_*`).
+- O teste do Foco falhou duas vezes seguidas e depois passou sem mudanca de codigo de servidor: depende da ordem dos
+  testes. O teste agora imprime o bloco/alvo que a mira encontrou, para achar a causa se voltar.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

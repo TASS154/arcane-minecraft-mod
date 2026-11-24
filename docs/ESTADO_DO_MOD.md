@@ -618,7 +618,8 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
 - black hole.
 
 **Limites conhecidos:**
-- O covil (câmara de raio 14) não cabe uma Hidra do estágio 10 ou mais com o tamanho novo.
+- **Resolvido em seguida:** o covil agora cresce com a Hidra. Ao revelar, a cúpula se expande do raio 14 (estágio 1) até ~43 (estágio 14), achatada se a superfície estiver perto. Os pilares dos selos se afastam e sobem, e a porta vai para a nova parede.
+- **Tesouro da Hidra:** 2 + estágio baús em anel no chão, com loot `chests/hydra/low|mid|high` (6 a 16 itens por baú: diamantes, netherite, livros encantados de alto nível, totens, maçãs encantadas, páginas e tintas permanentes, glifos raros, élitros e estrela do Nether na faixa alta), e blocos de ouro nas mais fortes. Coberto por GameTest; **a expansão não foi vista no jogo**.
 - Os poderes antigos (sopro, rugido) ainda são da Hidra inteira, não por cabeça.
 - "Retroceder" na morte troca o equipamento atual pelo da foto, e pode sumir ou duplicar itens, como pedido.
 

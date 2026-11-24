@@ -250,9 +250,14 @@ public class HydraEntity extends Monster {
   }
 
   /** Deslocamento do alto do pilar {@code i} (onde fica o selo) em relacao ao centro da camara. */
-  public static BlockPos pillarTop(int i) {
+  public static BlockPos pillarTop(int i) { return pillarTop(i, 1); }
+
+  /** Topo do pilar i numa camara do estagio dado: a camara cresce com a Hidra, e os pilares se afastam e sobem junto. */
+  public static BlockPos pillarTop(int i, int stage) {
+    int r = com.arcane.world.HydraLairs.chamberRadius(stage);
+    int radius = (int) Math.round(r * 0.78), height = PILLAR_TOP + (int) Math.round((r - com.arcane.world.HydraLairs.CHAMBER_R) * 0.4);
     double a = i * Math.PI * 2 / PILLARS;
-    return new BlockPos((int) Math.round(Math.cos(a) * PILLAR_RADIUS), PILLAR_TOP, (int) Math.round(Math.sin(a) * PILLAR_RADIUS));
+    return new BlockPos((int) Math.round(Math.cos(a) * radius), height, (int) Math.round(Math.sin(a) * radius));
   }
 
   public void setStage(int stage) {
@@ -1105,7 +1110,7 @@ public class HydraEntity extends Monster {
     originalCooldown = tag.getInt("HydraOriginalCd");
     devoured.clear();
     for (var t : tag.getList("HydraDevoured", net.minecraft.nbt.Tag.TAG_COMPOUND)) devoured.add(net.minecraft.world.item.ItemStack.of((CompoundTag) t));
-    if (inLair) restrictTo(home(), com.arcane.world.HydraLairs.CHAMBER_R - 2);
+    if (inLair) restrictTo(home(), com.arcane.world.HydraLairs.chamberRadius(stage()) - 2);
     updateBossName();
   }
 

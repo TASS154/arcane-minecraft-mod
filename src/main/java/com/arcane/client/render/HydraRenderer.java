@@ -56,7 +56,7 @@ public class HydraRenderer extends MobRenderer<HydraEntity, HydraRenderer.HydraM
       net.minecraft.world.phys.Vec3 me = e.getPosition(partial);
       for (int i = 0; i < HydraEntity.PILLARS; i++) {
         if ((e.sealMask() & (1 << i)) == 0) continue;
-        var top = e.home().offset(HydraEntity.pillarTop(i));
+        var top = e.home().offset(HydraEntity.pillarTop(i, e.stage()));
         net.minecraft.world.phys.Vec3 seal = net.minecraft.world.phys.Vec3.atCenterOf(top).subtract(me);
         // corrente: elos alternados, com uma leve curva para baixo
         int links = 18;

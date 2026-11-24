@@ -48,6 +48,12 @@ public final class HydraLairs extends SavedData {
   public static final int COUNT = 7;
   /** Raio interno da camara (a cupula). A parede fica em CHAMBER_R e CHAMBER_R + 1. */
   public static final int CHAMBER_R = 14;
+
+  /** Raio da camara para a Hidra do estagio dado: cresce com ela (14 no estagio 1, ~43 na ancia). */
+  public static int chamberRadius(int stage) {
+    int s = Math.max(1, Math.min(HydraEntity.MAX_STAGE, stage));
+    return CHAMBER_R + (int) Math.round((s - 1) * 2.2);
+  }
   /** Glifo original guardado por cada covil (pela ordem dos covis). */
   public static final String[] ORIGINALS = {"time_stop", "rewind", "space_collapse", "annihilate", "eclipse", "genesis", "gravity_inversion"};
   private static final String NAME = "arcane_hydra_lairs";
@@ -159,22 +165,24 @@ public final class HydraLairs extends SavedData {
     lair.stage = nextStage(used, n, level.random);
     lair.revealOrder = n + 1;
     setDirty();
+    // a camara se expande para caber a Hidra deste estagio e recebe o tesouro dela
+    expandChamber(level, lair.centre, lair.stage);
     HydraEntity hydra = ModEntities.HYDRA.get().create(level);
     if (hydra == null) return;
     BlockPos at = lair.centre;
     hydra.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
     hydra.setStage(lair.stage);
     hydra.setLairIndex(lair.index);
-    hydra.homeTo(lair.centre, CHAMBER_R - 2);
+    hydra.homeTo(lair.centre, chamberRadius(lair.stage) - 2);
     hydra.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.STRUCTURE, null, null);
     hydra.setStage(lair.stage);
     // o ritual: um selo no alto de cada pilar escolhido; a Hidra dorme ate o ultimo quebrar
     int mask = HydraEntity.sealMaskFor(lair.stage);
     for (int i = 0; i < HydraEntity.PILLARS; i++) {
-      BlockPos top = lair.centre.offset(HydraEntity.pillarTop(i));
+      BlockPos top = lair.centre.offset(HydraEntity.pillarTop(i, lair.stage));
       if ((mask & (1 << i)) != 0) level.setBlock(top, com.arcane.registry.ModBlocks.HYDRA_SEAL.get().defaultBlockState(), 3);
     }
-    hydra.setSealMask(sealMaskAt(level, lair.centre));
+    hydra.setSealMask(sealMaskAt(level, lair.centre, lair.stage));
     level.addFreshEntity(hydra);
     level.playSound(null, at, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 6.0f, 1.8f - lair.stage * 0.09f);
     for (ServerPlayer p : level.players()) {
@@ -186,20 +194,23 @@ public final class HydraLairs extends SavedData {
   }
 
   /** Quais pilares da camara ainda tem selo (um bit por pilar). */
-  public static int sealMaskAt(ServerLevel level, BlockPos centre) {
+  public static int sealMaskAt(ServerLevel level, BlockPos centre) { return sealMaskAt(level, centre, 1); }
+
+  public static int sealMaskAt(ServerLevel level, BlockPos centre, int stage) {
     int mask = 0;
     var seal = com.arcane.registry.ModBlocks.HYDRA_SEAL.get();
-    for (int i = 0; i < HydraEntity.PILLARS; i++) if (level.getBlockState(centre.offset(HydraEntity.pillarTop(i))).is(seal)) mask |= 1 << i;
+    for (int i = 0; i < HydraEntity.PILLARS; i++) if (level.getBlockState(centre.offset(HydraEntity.pillarTop(i, stage))).is(seal)) mask |= 1 << i;
     return mask;
   }
 
   /** Um selo foi quebrado: atualiza a Hidra da camara (zerar a desperta). */
   public static void onSealBroken(ServerLevel level, BlockPos pos) {
-    for (HydraEntity h : level.getEntitiesOfClass(HydraEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(CHAMBER_R * 2.5))) {
+    for (HydraEntity h : level.getEntitiesOfClass(HydraEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(chamberRadius(HydraEntity.MAX_STAGE) * 2.5))) {
       if (!h.sealed()) continue;
       BlockPos home = h.home();
-      if (home.distSqr(pos) > (CHAMBER_R + 2) * (CHAMBER_R + 2)) continue;
-      int mask = sealMaskAt(level, home);
+      int cr = chamberRadius(h.stage());
+      if (home.distSqr(pos) > (cr + 8) * (cr + 8)) continue;
+      int mask = sealMaskAt(level, home, h.stage());
       com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.ORIGINAL, Vec3.atCenterOf(pos),
           h.position().add(0, h.getBbHeight() * 0.5, 0), 1f, 0xFF3040, com.arcane.network.packet.S2CShapeFxPacket.FX_SEAL_BREAK, 24);
       level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.BLOCKS, 3f, 0.5f);
@@ -219,7 +230,7 @@ public final class HydraLairs extends SavedData {
   static boolean seesChamber(ServerPlayer p, Lair lair) {
     Vec3 c = Vec3.atCenterOf(lair.centre).add(0, 3, 0);
     double d = p.position().distanceTo(c);
-    if (d <= CHAMBER_R + 2.5) return true;
+    if (d <= chamberRadius(lair.stage) + 2.5) return true;
     if (p.isSpectator() && d <= 64) {
       Vec3 look = p.getLookAngle();
       return c.subtract(p.getEyePosition()).normalize().dot(look) > 0.8;
@@ -377,5 +388,59 @@ public final class HydraLairs extends SavedData {
     }
     set(level, top.offset(2, 4, 2), Blocks.SOUL_LANTERN.defaultBlockState());
     set(level, top.offset(-2, 4, -2), Blocks.SOUL_LANTERN.defaultBlockState());
+  }
+
+  /**
+   * A camara cresce para a Hidra revelada: a cupula (achatada se a superficie estiver perto) se abre ate o raio do
+   * estagio, os pilares dos selos sobem e se afastam, a porta de grades vai para a nova parede e o tesouro da Hidra
+   * (2 + estagio baus, com loot pela faixa do estagio) fica em anel no chao, entre montes de ouro nas mais fortes.
+   */
+  public static void expandChamber(ServerLevel level, BlockPos c, int stage) {
+    int R = chamberRadius(stage);
+    int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, c.getX(), c.getZ());
+    int hR = Math.max(CHAMBER_R, Math.min(R, surface - c.getY() - 6));
+    BlockState wall = Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState(), accent = Blocks.CRYING_OBSIDIAN.defaultBlockState();
+    BlockState floor = Blocks.DEEPSLATE_TILES.defaultBlockState(), air = Blocks.CAVE_AIR.defaultBlockState();
+    if (R > CHAMBER_R) {
+      for (int dx = -R - 1; dx <= R + 1; dx++) for (int dz = -R - 1; dz <= R + 1; dz++) {
+        double flat = Math.sqrt(dx * dx + dz * dz);
+        if (flat > R + 1.5) continue;
+        for (int dy = -1; dy <= hR + 1; dy++) {
+          double d = Math.sqrt((dx * dx + dz * dz) / (double) (R * R) + (dy * dy) / (double) (hR * hR));
+          BlockPos p = c.offset(dx, dy, dz);
+          if (dy == -1) { if (flat <= R + 1) set(level, p, (dx + dz) % 4 == 0 ? accent : floor); }
+          else if (d <= 1.0 - 0.5 / R) set(level, p, air);
+          else if (d <= 1.0 + 1.0 / R && level.getBlockState(p).isAir() == false) set(level, p, (Math.abs(dx) + dy * 3 + Math.abs(dz)) % 11 == 0 ? accent : wall);
+        }
+      }
+      for (int k = 0; k < HydraEntity.PILLARS; k++) {
+        BlockPos top = HydraEntity.pillarTop(k, stage);
+        for (int y = 0; y < top.getY(); y++) set(level, c.offset(top.getX(), y, top.getZ()), Blocks.POLISHED_BLACKSTONE.defaultBlockState());
+        set(level, c.offset(top), Blocks.SOUL_LANTERN.defaultBlockState());
+      }
+      for (int z = -1; z <= 1; z++) for (int y = 0; y <= 3; y++) set(level, c.offset(R, y, z), Blocks.IRON_BARS.defaultBlockState());
+      // o corredor antigo ate a nova parede continua aberto
+      for (int x = CHAMBER_R; x < R; x++) for (int z = -1; z <= 1; z++) for (int y = 0; y <= 3; y++) {
+        if (Math.sqrt(x * x + z * z) > R - 1) set(level, c.offset(x, y, z), air);
+      }
+      level.playSound(null, c, SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 8f, 0.5f);
+      level.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION, c.getX() + 0.5, c.getY() + 3, c.getZ() + 0.5, 20, R * 0.4, 3, R * 0.4, 0);
+    }
+    // tesouro: baus em anel no chao, entre os pilares e o centro
+    String tier = stage >= 10 ? "high" : stage >= 5 ? "mid" : "low";
+    int chests = 2 + stage;
+    double ring = R * 0.55;
+    for (int k = 0; k < chests; k++) {
+      double a = (k + 0.5) * Math.PI * 2 / chests;
+      BlockPos p = c.offset((int) Math.round(Math.cos(a) * ring), 0, (int) Math.round(Math.sin(a) * ring));
+      set(level, p, Blocks.CHEST.defaultBlockState());
+      if (level.getBlockEntity(p) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity be) {
+        be.setLootTable(new ResourceLocation("arcane", "chests/hydra/" + tier), level.random.nextLong());
+      }
+      if (stage >= 5) {
+        BlockPos side = c.offset((int) Math.round(Math.cos(a) * (ring + 1.5)), 0, (int) Math.round(Math.sin(a) * (ring + 1.5)));
+        set(level, side, stage >= 10 && k % 3 == 0 ? Blocks.GOLD_BLOCK.defaultBlockState() : Blocks.RAW_GOLD_BLOCK.defaultBlockState());
+      }
+    }
   }
 }

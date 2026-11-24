@@ -3427,6 +3427,27 @@ public class ArcaneGameTests {
     });
   }
 
+  @GameTest(template = "empty", batch = "lair_growth")
+  public static void lairGrowsWithTheHydraAndHoldsAHoard(GameTestHelper h) {
+    h.assertTrue(com.arcane.world.HydraLairs.chamberRadius(1) == 14 && com.arcane.world.HydraLairs.chamberRadius(14) > 40,
+        "a camara vai de 14 a mais de 40 de raio (" + com.arcane.world.HydraLairs.chamberRadius(14) + ")");
+    h.assertTrue(com.arcane.entity.HydraEntity.pillarTop(0, 1).equals(com.arcane.entity.HydraEntity.pillarTop(0)), "estagio 1 = pilares de sempre");
+    var big = com.arcane.entity.HydraEntity.pillarTop(0, 14);
+    h.assertTrue(big.getX() > 30 && big.getY() > 15, "na ancia os pilares se afastam e sobem (" + big + ")");
+    var level = h.getLevel();
+    BlockPos c = h.absolutePos(new BlockPos(2, 0, 2)).above(60);
+    com.arcane.world.HydraLairs.expandChamber(level, c, 1);
+    int chests = 0;
+    for (BlockPos q : BlockPos.betweenClosed(c.offset(-10, 0, -10), c.offset(10, 0, 10))) {
+      if (level.getBlockEntity(q) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity be) {
+        h.assertTrue(be.saveWithoutMetadata().getString("LootTable").equals("arcane:chests/hydra/low"), "tesouro da faixa baixa");
+        chests++;
+      }
+    }
+    h.assertTrue(chests == 3, "estagio 1: 3 baus (" + chests + ")");
+    h.succeed();
+  }
+
   // ------------------------------------------------------------------ grimorio na bancada (posse e estudo)
 
   @GameTest(template = "empty", batch = "grimoire_desk")

@@ -508,7 +508,9 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
   - partícula com movimento próprio para cada elemento (os 8 novos reusam as partículas antigas, com a cor própria no círculo, no projétil e no impacto);
   - sons próprios em `sounds.json`;
   - decal de impacto no chão;
-  - a camada de feedback: hit-stop, clarão de tela, rastro do projétil, anel de impacto e opção de reduzir clarões.
+  - da camada de feedback: hit-stop, clarão de tela em explosões grandes, anel de impacto pelo custo e som com tom pelo tamanho da magia.
+
+**Rastro do projétil**: fita aditiva que afina e esmaece da cabeça para a cauda. O miolo tem a cor do elemento e a borda, a secundária. Com "reduzir clarões" fica mais curta e fraca. Compilado e rodado no cliente sem erro, mas nas capturas o jogador e o chat tapavam o projétil, então **não foi visto**.
 
 **Testes**
 - 126 unitários (incluindo `ElementMapTest`) e 253 do jogo passam.

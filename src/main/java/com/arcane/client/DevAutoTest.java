@@ -263,7 +263,7 @@ public final class DevAutoTest {
       float yaw = (float) (Math.toDegrees(Math.atan2(-to.x, to.z)));
       float pitch = (float) (-Math.toDegrees(Math.atan2(to.y, Math.hypot(to.x, to.z))));
       if (at % 2 == 0) sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), yaw, pitch);
-      if (at % 30 == 10) {
+      if (at % 12 == 10) {
         var spell = new Inscription(List.of(g("projectile"), g("damage", "amount", 8.0), g("fire")));
         com.arcane.execution.CastingService.tryCast(sp, spell, com.arcane.execution.PrecisionSnapshot.WORKBENCH);
       }

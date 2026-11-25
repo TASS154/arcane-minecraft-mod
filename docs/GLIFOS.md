@@ -280,7 +280,7 @@ Disparam algo armazenado.
 
 | Glifo | Id | Mana | Nível | Especialidade | Parâmetros | O que faz |
 |-------|----|------|-------|---------------|------------|-----------|
-| **Ativar** | `arcane:activate` | 1 | 3 | Vazio | — | Ativador: dispara um ritual armazenado (rituais ainda não estão disponíveis). |
+| **Ativar** | `arcane:activate` | 1 | 3 | Vazio | — | Ativador: dispara os rituais que você armazenou em altares a até 48 blocos (o círculo é conferido na hora). |
 
 ## Limites de segurança
 

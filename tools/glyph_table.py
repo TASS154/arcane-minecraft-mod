@@ -296,8 +296,8 @@ glyph("in_water", "condition", 0,
 
 # ------------------------------------------------------------------ ATIVADOR
 glyph("activate", "activator", 1,
-      ("Ativar", "Ativador: dispara um ritual armazenado (rituais ainda não estão disponíveis)."),
-      ("Activate", "Activator: triggers a stored ritual (rituals are not available yet)."),
+      ("Ativar", "Ativador: dispara os rituais que você armazenou em altares a até 48 blocos (o círculo é conferido na hora)."),
+      ("Activate", "Activator: triggers the rituals you stored in altars up to 48 blocks away (the circle is checked on the spot)."),
       ["...##...", ".#.##.#.", "#..##..#", "#..##..#", "#......#", "#......#", ".#....#.", "..####.."])
 
 # ================================================================== DESIGN v2 (chat de design): novos glifos

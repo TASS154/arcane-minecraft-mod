@@ -2,7 +2,9 @@
 
 Modular glyph-based magic system for Minecraft 1.20.1 (NeoForge/Forge).
 
-**Documentação completa do sistema:** [docs/DOCUMENTACAO_COMPLETA.md](docs/DOCUMENTACAO_COMPLETA.md) — filosofia, glifos, grimórios, rituais, cristais, progressão e o que está no MVP.
+**Estado atual do mod:** [docs/STATUS.md](docs/STATUS.md): o que existe, o que não foi visto em jogo e testes instáveis. Histórico das rodadas em [docs/CHANGELOG_DEV.md](docs/CHANGELOG_DEV.md).
+
+**Documento antigo (jul/2026, obsoleto, só referência):** [docs/arquivo/DOCUMENTACAO_COMPLETA.md](docs/arquivo/DOCUMENTACAO_COMPLETA.md).
 
 **Guia completo em português:** [docs/COMO_INSTALAR_E_USAR.md](docs/COMO_INSTALAR_E_USAR.md) — instalação, bancada arcana, primeiros passos no jogo.
 
@@ -14,13 +16,13 @@ Modular glyph-based magic system for Minecraft 1.20.1 (NeoForge/Forge).
 
 ## Requirements
 
-- JDK 17+
-- Set `JAVA_HOME` to JDK 17
+- JDK 17 (the Gradle toolchain is 17; Gradle downloads it if missing)
 
 ## Build
 
 ```bash
 ./gradlew build
+./gradlew test runGameTestServer   # JUnit + GameTests
 ./gradlew runClient
 ```
 

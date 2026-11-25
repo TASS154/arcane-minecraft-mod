@@ -1,3 +1,7 @@
+> **ARQUIVADO (25 nov 2026). Não use como fonte.** Este documento é de jul/2026 e está obsoleto: número de glifos,
+> regras e sistemas mudaram. Fontes atuais: `docs/STATUS.md`, `docs/GLIFOS.md` (gerado), `docs/PERGUNTAS.md` e
+> `docs/DESIGN_CHAT.md`.
+
 # Arcane — Documentação Completa do Sistema
 
 Documentação de design e funcionamento do mod **Arcane** (Minecraft 1.20.1, Forge/NeoForge).  

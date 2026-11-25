@@ -1,6 +1,8 @@
-# Arcane: estado atual, roteiro de testes e status das funcionalidades
+# Arcane: log de desenvolvimento (histórico)
 
-Atualizado em 23 nov 2026. Este topo é um resumo; o detalhe de cada rodada está nas seções do fim, e a lista do que falta está em "O que ainda falta no projeto".
+> Este arquivo era `docs/ESTADO_DO_MOD.md` e virou o log histórico em 25 nov 2026. **O estado atual está em
+> `docs/STATUS.md`.** As seções do topo (1 a 5) são de rodadas antigas e têm números desatualizados (por exemplo
+> "81 glifos"; hoje são 207). Rodadas novas entram no fim.
 
 ---
 
@@ -676,6 +678,23 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
   por cima, e a de tras dobra o tornozelo no sentido contrario.
 - `headPos` um pouco mais a frente (corpo mais longo). Visto no cliente (estagio 5, de lado, de perto e de tres quartos).
   Testes: unitarios ok, 257 GameTests ok.
+
+## Rodada de 25 nov: crash do voo invisível, Foco instável e Fase A (higiene)
+
+- **Crash "Pose stack not empty"** (24 nov, depois de 2 h de jogo): o desenho da Invisibilidade cancela o desenho normal e
+  redesenha o jogador por dentro. Com Flutuar ativo, `FloatFlightClient` empurrava a pose nos dois `RenderPlayerEvent.Pre` e
+  desfazia só uma (o `Set` por jogador perdia a segunda). Agora uma pilha guarda o que cada Pre fez; só o desenho de fora
+  inclina o corpo. NÃO visto em jogo (ver PENDENTE_HUMANO.md).
+- **Foco instável, causa raiz:** `ProjectileUtil.getEntityHitResult` usa `level.getEntities`, que só vê seções de entidade
+  acessíveis. O teste conjurava no mesmo tick do spawn, numa estrutura recém-montada longe da origem; conforme a ordem dos
+  testes a seção ainda não estava acessível. `whenSearchable` espera a criatura aparecer na busca. O teste da parede tinha
+  o mesmo defeito e passava sem testar nada. Em jogo os chunks em volta do jogador já estão carregados.
+- **Fase A:** `CLAUDE.md`, `docs/STATUS.md`, este log (era `ESTADO_DO_MOD.md`), `docs/arquivo/DOCUMENTACAO_COMPLETA.md`,
+  `docs/PENDENTE_HUMANO.md`. Ativar: a descrição dizia "rituais ainda não estão disponíveis"; agora diz o que o código faz.
+- **CI:** falhava em todas as execuções com `./gradlew: Permission denied` (arquivo sem bit de execução no git). Corrigido o
+  bit e o workflow passa a usar JDK 17 (antes 21; funcionava porque o foojay baixa o toolchain 17). O CI roda `build`, que
+  inclui JUnit mas não os GameTests.
+- Testes: 257/257 GameTests e JUnit.
 
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 

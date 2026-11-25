@@ -35,7 +35,13 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = ArcaneMod.MODID, value = Dist.CLIENT)
 public final class FloatFlightClient {
   private static final double PIVOT = 1.5;
-  private static final Set<UUID> PUSHED = new HashSet<>();
+  /**
+   * Um item por RenderPlayerEvent.Pre ainda sem Post: se aquele Pre empurrou a pose. Os desenhos podem se aninhar (o veu
+   * de invisibilidade cancela o desenho normal e redesenha o jogador por dentro); so o de fora inclina o corpo, e cada
+   * Post desfaz exatamente o que o seu Pre fez. Antes um Set por jogador perdia um pop e fechava o jogo
+   * ("Pose stack not empty") ao voar invisivel.
+   */
+  private static final java.util.ArrayDeque<Boolean> PUSHED = new java.util.ArrayDeque<>();
   private static boolean wasFloating;
   /** Nivel de alta velocidade do jogador local (0 = normal). */
   private static int boost;
@@ -187,8 +193,14 @@ public final class FloatFlightClient {
   @SubscribeEvent
   public static void onRenderPre(RenderPlayerEvent.Pre event) {
     Player player = event.getEntity();
+    if (PUSHED.size() > 16) PUSHED.clear(); // algum Pre cancelado por outro mod ficou sem Post: nao deixa crescer
     if (!player.hasEffect(ModEffects.FLOAT_FLIGHT.get())) {
       MOTION.remove(player.getUUID());
+      PUSHED.push(false);
+      return;
+    }
+    if (PUSHED.contains(true)) { // desenho aninhado: a inclinacao do desenho de fora ja vale aqui
+      PUSHED.push(false);
       return;
     }
     double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
@@ -224,11 +236,12 @@ public final class FloatFlightClient {
     pose.mulPose(Axis.ZP.rotationDegrees(m[1]));
     pose.mulPose(Axis.YP.rotationDegrees(yaw));
     pose.translate(0.0, -PIVOT, 0.0);
-    PUSHED.add(player.getUUID());
+    PUSHED.push(true);
   }
 
   @SubscribeEvent
   public static void onRenderPost(RenderPlayerEvent.Post event) {
-    if (PUSHED.remove(event.getEntity().getUUID())) event.getPoseStack().popPose();
+    Boolean pushed = PUSHED.poll();
+    if (pushed != null && pushed) event.getPoseStack().popPose();
   }
 }

@@ -1,6 +1,6 @@
 # Fase 5: documento de desenho (sistemas novos)
 
-Estado: **implementado** (aprovado por Everton): Bolso Arcano, Restaurar e Coro, nesta ordem. Ver "Fase 5" em `docs/ESTADO_DO_MOD.md` para o que foi testado e o que não foi. Diferenças em relação ao desenho: o Restaurar recoloca tudo de uma vez (sem lotes de 32 por tick) e não guarda o autor; a cota do Coro é cobrada só no disparo. Os três sistemas são independentes entre si e podem ser aprovados, adiados ou cortados separadamente.
+Estado: **implementado** (aprovado por Everton): Bolso Arcano, Restaurar e Coro, nesta ordem. Ver "Fase 5" em `docs/CHANGELOG_DEV.md` para o que foi testado e o que não foi. Diferenças em relação ao desenho: o Restaurar recoloca tudo de uma vez (sem lotes de 32 por tick) e não guarda o autor; a cota do Coro é cobrada só no disparo. Os três sistemas são independentes entre si e podem ser aprovados, adiados ou cortados separadamente.
 
 Custo em "unidades": P ≈ 0,5 dia, M ≈ 1 dia, G ≈ 2 a 3 dias de trabalho, contando código, GameTests, docs e ajustes (estimativa minha, sem margem para surpresas de cliente).
 
@@ -102,7 +102,7 @@ GameTests: guardar e abrir, sobreviver a salvar/recarregar e ao clone de morte, 
 2. **Restaurar** (M): escopo fechado nos pontos de escrita.
 3. **Coro** (M a G): o único que depende de dois clientes para a verificação em jogo.
 
-Total estimado: 3 a 5 dias de trabalho. Cada um fecha com commit próprio, docs regeradas e honestidade no `ESTADO_DO_MOD.md`.
+Total estimado: 3 a 5 dias de trabalho. Cada um fecha com commit próprio, docs regeradas e honestidade no `CHANGELOG_DEV.md`.
 
 ## Perguntas
 

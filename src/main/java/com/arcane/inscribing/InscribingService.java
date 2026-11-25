@@ -22,7 +22,7 @@ import java.util.WeakHashMap;
 
 /**
  * Inscricoes escritas no mundo com a Pena Arcana.
- * Gatilhos do MVP (DOCUMENTACAO_COMPLETA, "Aplicacao em Objetos"):
+ * Gatilhos do MVP (docs/arquivo/DOCUMENTACAO_COMPLETA, "Aplicacao em Objetos"):
  *   on_open  - bau: dispara quando alguem abre (InscribingHandler);
  *   on_touch - qualquer outro bloco: dispara quando uma criatura pisa nele.
  */

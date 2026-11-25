@@ -573,6 +573,7 @@ public class Phase5GameTests {
     mana.set(80f);
     var pig = h.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(3, 1, 4));
     var spell = new Inscription(List.of(g("focus", "range", 12.0), g("damage", "amount", 2.0)));
+    whenSearchable(h, pig, 40, () -> {
     float hp = pig.getHealth();
     float m0 = mana.current();
     var ok = castSpell(h, p, spell);
@@ -591,6 +592,20 @@ public class Phase5GameTests {
     h.assertTrue(!fail.success() && fail.message().equals("message.arcane.focus.no_target"), "sem criatura: falha (" + fail.message() + ")");
     h.assertTrue(mana.current() == m1, "e nao gasta mana (" + mana.current() + " de " + m1 + ")");
     h.succeed();
+    });
+  }
+
+  /**
+   * Causa do Foco instavel: a busca de entidades (level.getEntities, usada pelo ProjectileUtil) so olha secoes de
+   * entidade ja acessiveis. O GameTest monta a estrutura longe (x de centenas) e a secao recem-carregada pode levar alguns
+   * ticks para ficar acessivel, conforme a ordem dos testes; no mesmo tick do spawn a criatura nao existe para a busca.
+   * Em jogo os chunks em volta do jogador ja estao carregados. Espera a criatura aparecer na busca (no maximo maxTicks).
+   */
+  private static void whenSearchable(GameTestHelper h, net.minecraft.world.entity.Entity e, int maxTicks, Runnable body) {
+    boolean seen = h.getLevel().getEntities((net.minecraft.world.entity.Entity) null, e.getBoundingBox()).contains(e);
+    if (seen) body.run();
+    else if (maxTicks <= 0) h.fail("a criatura nunca apareceu na busca de entidades");
+    else h.runAfterDelay(1, () -> whenSearchable(h, e, maxTicks - 1, body));
   }
 
   @GameTest(template = "empty", batch = "phase7_focus_2")
@@ -604,12 +619,14 @@ public class Phase5GameTests {
     h.setBlock(new BlockPos(3, 3, 3), Blocks.STONE);
     var pig = h.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(3, 1, 5));
     var spell = new Inscription(List.of(g("focus", "range", 12.0), g("damage", "amount", 2.0)));
-    float hp = pig.getHealth();
-    float m0 = mana.current();
-    var r = castSpell(h, p, spell);
-    h.assertTrue(!r.success(), "criatura atras de parede nao e alvo");
-    h.assertTrue(pig.getHealth() == hp && mana.current() == m0, "nada acontece e nada e cobrado");
-    h.succeed();
+    whenSearchable(h, pig, 40, () -> { // sem isso o teste passava sem a criatura existir para a busca
+      float hp = pig.getHealth();
+      float m0 = mana.current();
+      var r = castSpell(h, p, spell);
+      h.assertTrue(!r.success(), "criatura atras de parede nao e alvo");
+      h.assertTrue(pig.getHealth() == hp && mana.current() == m0, "nada acontece e nada e cobrado");
+      h.succeed();
+    });
   }
 
   // ------------------------------------------------------------------ Desempenho do Restaurar

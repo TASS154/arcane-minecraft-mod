@@ -295,7 +295,7 @@ public class ArcaneGameTests {
   public static void flightIsChanneledPaysManaEveryTickAndLandsSafely(GameTestHelper h) {
     floor(h);
     var player = casterWith(h);
-    h.getLevel().addNewPlayer(player);
+    TestPlayers.add(h, player);
     h.onEachTick(player::doTick); // o servidor ticka o jogador pela conexao (doTick): efeitos e custo por tick
     var spell = addSpell(player, com.arcane.grimoire.SpellPrefs.CastMode.TOGGLE, g("self"), g("float", "speed", 1.0, "duration", 40.0));
     com.arcane.execution.CastChannels.press(player, spell.id());
@@ -869,7 +869,7 @@ public class ArcaneGameTests {
   public static void drainManaMovesManaBetweenPlayers(GameTestHelper h) {
     floor(h);
     var victim = casterWith(h);
-    h.getLevel().addNewPlayer(victim);
+    TestPlayers.add(h, victim);
     var mana = com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(victim);
     float before = mana.current();
     Pig thief = pig(h, 1, 1);
@@ -3062,7 +3062,7 @@ public class ArcaneGameTests {
     arena(h);
     var player = learn(casterWith(h), "self", "heal");
     player.moveTo(h.absoluteVec(new net.minecraft.world.phys.Vec3(ALTAR.getX() + 2.5, 1, ALTAR.getZ() + 0.5)));
-    h.getLevel().addNewPlayer(player);
+    TestPlayers.add(h, player);
     com.arcane.ritual.RitualService.drawPerfectCircle(h.getLevel(), altarAbs(h), 4);
     player.getInventory().setItem(0, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 3));
     player.getInventory().setItem(1, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_BLOCK, 2));
@@ -3303,7 +3303,7 @@ public class ArcaneGameTests {
   public static void illusionMakesThreeHarmlessClonesThatConfuseMobs(GameTestHelper h) {
     floor(h);
     var player = learn(casterWith(h), "self", "illusion");
-    h.getLevel().addNewPlayer(player);
+    TestPlayers.add(h, player);
     var r = CastingService.tryCast(player, new Inscription(List.of(g("self"), g("illusion"))), com.arcane.execution.PrecisionSnapshot.WORKBENCH);
     var clones = h.getLevel().getEntitiesOfClass(com.arcane.entity.IllusionEntity.class, player.getBoundingBox().inflate(8));
     h.assertTrue(r.success() && clones.size() == 3, "3 clones (" + clones.size() + ", " + r.message() + ")");
@@ -3459,7 +3459,14 @@ public class ArcaneGameTests {
     h.assertTrue(rooms.keySet().equals(again.keySet()), "o mesmo covil gera sempre a mesma masmorra");
     for (BlockPos r : rooms.keySet()) {
       h.assertTrue(Math.hypot(r.getX() - chamber.getX(), r.getZ() - chamber.getZ()) >= 52, "as salas ficam longe da camara (que cresce)");
-      h.assertTrue(level.getBlockState(r.above()).isAir(), "a sala foi escavada");
+      // escavada = a maior parte do miolo e ar ou liquido (o centro pode ter altar, cristais, ossos ou agua)
+      int open = 0, total = 0;
+      for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) for (int dy = 1; dy <= 3; dy++) {
+        var st = level.getBlockState(r.offset(dx, dy, dz));
+        total++;
+        if (st.isAir() || !st.getFluidState().isEmpty()) open++;
+      }
+      h.assertTrue(open >= total * 0.6, "a sala " + rooms.get(r) + " foi escavada (" + open + " de " + total + " abertos)");
     }
     h.succeed();
   }
@@ -3470,7 +3477,7 @@ public class ArcaneGameTests {
   public static void writingLeavesTheBookOnTheDeskUntilTheOwnerComesBack(GameTestHelper h) {
     floor(h);
     var player = learn(casterWith(h), "self", "heal");
-    h.getLevel().addNewPlayer(player);
+    TestPlayers.add(h, player);
     BlockPos desk = h.absolutePos(new BlockPos(1, 1, 1));
     com.arcane.grimoire.GrimoireDesk.startWriting(player, desk, 3);
     var st = com.arcane.grimoire.GrimoireAttachments.get(player).orElseThrow();
@@ -3493,8 +3500,8 @@ public class ArcaneGameTests {
     floor(h);
     var owner = learn(casterWith(h), "self", "heal");
     var thief = casterWith(h);
-    h.getLevel().addNewPlayer(owner);
-    h.getLevel().addNewPlayer(thief);
+    TestPlayers.add(h, owner);
+    TestPlayers.add(h, thief);
     var spell = addSpell(owner, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("self"), g("heal", "amount", 10.0));
     owner.setHealth(2f);
     var r = com.arcane.execution.CastingService.tryCast(owner, spell, com.arcane.execution.PrecisionSnapshot.WORKBENCH);
@@ -3524,8 +3531,8 @@ public class ArcaneGameTests {
     floor(h);
     var owner = learn(casterWith(h), "self", "heal", "fire");
     var thief = casterWith(h);
-    h.getLevel().addNewPlayer(owner);
-    h.getLevel().addNewPlayer(thief);
+    TestPlayers.add(h, owner);
+    TestPlayers.add(h, thief);
     addSpell(owner, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("self"), g("heal"));
     addSpell(owner, com.arcane.grimoire.SpellPrefs.CastMode.TAP, g("self"), g("fire"));
     var tag = new net.minecraft.nbt.CompoundTag();
@@ -3635,7 +3642,7 @@ public class ArcaneGameTests {
     arena(h);
     var player = learn(casterWith(h), "summon_wolves");
     player.moveTo(h.absoluteVec(new net.minecraft.world.phys.Vec3(ALTAR.getX() + 2.5, 1, ALTAR.getZ() + 0.5)));
-    h.getLevel().addNewPlayer(player);
+    TestPlayers.add(h, player);
     com.arcane.ritual.RitualService.drawPerfectCircle(h.getLevel(), altarAbs(h), 4);
     var entry = new com.arcane.network.packet.C2SSaveInscriptionPacket.Entry("arcane:summon_wolves", Map.of("count", 2.0));
     // sem ossos: a oferenda falta e o ritual nao acontece

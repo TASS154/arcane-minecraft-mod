@@ -52,5 +52,8 @@ public final class JournalLog<E> {
 
   public int size() { return entries.size(); }
 
+  /** Todas as entradas, da mais antiga para a mais nova (para salvar). */
+  public List<Stamped<E>> oldestFirst() { return new ArrayList<>(entries); }
+
   public void clear() { entries.clear(); }
 }

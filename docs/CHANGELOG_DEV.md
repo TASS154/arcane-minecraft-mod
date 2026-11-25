@@ -741,6 +741,27 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
   a partir de outra base; `LairDungeonPlanTest` varre 4.000 covis: pior caso 5 salas (o mínimo sorteado).
 - Testes: 261/261 obrigatórios; 2 opcionais (Inverter) falham de propósito.
 
+## Rodada de 25 nov: Fase D (robustez de servidor)
+
+- **Carga medida** (`LoadGameTests`, números em `docs/CARGA.md`): cratera de raio 64 trava o servidor 5,7 s e a de 128,
+  13,5 s, no cálculo da lista de blocos (um tick só); a remoção já respeita o orçamento. O diário do Restaurar enche
+  (4.096) e não desfaz crateras grandes. Limites propostos, nada aplicado.
+- **Diário do Restaurar salvo** com o mundo (`JournalData`, SavedData por dimensão, com teto) e com o autor da destruição.
+- **Orçamento de reentrância** (`SpellReentry` em `SpellPipeline.executeSegment`): profundidade 8 e 512 trechos por tick
+  (config). O laço do desenho em criatura que eu suspeitava não existe (já há `ItemDrawings.DEPTH`); o orçamento cobre
+  laços entre sistemas.
+- **`ProtectionProvider`** (API, padrão sem efeito) consultado em `Targeting.mayAlterWorld`/`mayBreakBlocks`.
+- **Testes instáveis, causa raiz:** o GameTest limpa as entidades da área antes de cada lote, menos jogadores, e os lotes
+  reaproveitam as posições. Os jogadores falsos de testes antigos ficavam parados onde os seguintes rodavam (o desenho
+  "Ao Chegar Perto" disparava neles em vez do porco). `TestPlayers.add` tira cada jogador quando o teste dele termina
+  (os 11 pontos que criavam jogadores). Pilar do alto e Parar o Tempo não falharam nas rodadas de hoje; a mesma causa é
+  provável, mas não provei.
+- **`/kill` na Hidra de estágio 7:** ela morre na hora; a morte em runas dura 110 ticks e a barra de chefe ficava até o
+  fim. O roteiro de 24 nov invocou a seguinte antes disso (duas barras). A barra agora some na morte. GameTest novo.
+- **Masmorra:** o teste "a sala foi escavada" olhava um bloco só no centro (o salão alagado tem água, o santuário tem
+  altar); agora exige 60% do miolo aberto.
+- Testes: 266/266 obrigatórios; 2 opcionais (Inverter) falham de propósito.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

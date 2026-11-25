@@ -1087,6 +1087,9 @@ public class HydraEntity extends Monster {
   public void die(DamageSource source) {
     super.die(source);
     setFlag(F_DYING, true);
+    // a barra de chefe some na hora da morte (antes ficava os 5,5 s da morte em runas: com outra Hidra por perto, duas barras)
+    bossBar.setProgress(0f);
+    bossBar.removeAllPlayers();
     // os grimorios devorados voltam inteiros (e protegidos, como quando o dono morre)
     if (level() instanceof ServerLevel sl0) {
       for (var book : devoured) {
@@ -1104,7 +1107,7 @@ public class HydraEntity extends Monster {
   @Override
   public void startSeenByPlayer(ServerPlayer player) {
     super.startSeenByPlayer(player);
-    bossBar.addPlayer(player);
+    if (!isDeadOrDying()) bossBar.addPlayer(player); // morrendo: sem barra
   }
 
   @Override

@@ -68,7 +68,7 @@ public final class SpellImmunity {
         blocks.addAll(RoundCrater.blocks(crater, event.getExplosion().getPosition(), round));
       } else {
         // Sem loot: a fila remove os blocos aos poucos (crateras enormes nao travam o servidor).
-        CraterQueue.submit(crater, RoundCrater.blockLongs(crater, event.getExplosion().getPosition(), round), event.getExplosion().getPosition());
+        CraterQueue.submit(crater, RoundCrater.blockLongs(crater, event.getExplosion().getPosition(), round), event.getExplosion().getPosition(), caster.getUUID());
       }
     }
     // Explosoes de magia que destroem blocos: por padrao nao soltam item e entram no diario do Restaurar.
@@ -79,7 +79,7 @@ public final class SpellImmunity {
         var before = level.getBlockState(pos);
         if (before.isAir()) continue;
         level.removeBlock(pos, false);
-        com.arcane.restore.BlockJournal.record(level, pos, before);
+        com.arcane.restore.BlockJournal.record(level, pos, before, caster.getUUID());
       }
       event.getAffectedBlocks().clear();
     }

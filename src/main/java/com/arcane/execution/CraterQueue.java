@@ -40,6 +40,8 @@ public final class CraterQueue {
     final LongArrayList[] shells;
     float front;
     int shell, cursor, left;
+    /** Quem causou a cratera (vai para o diario do Restaurar); null = sem dono. */
+    java.util.UUID author;
 
     Crater(Vec3 centre, LongArrayList[] shells, int total) {
       this.centre = centre;
@@ -65,6 +67,11 @@ public final class CraterQueue {
 
   /** Entrega a cratera; a onda sai de {@code centre}. A primeira casca ja sai neste tick. */
   public static void submit(ServerLevel level, LongArrayList blocks, Vec3 centre) {
+    submit(level, blocks, centre, null);
+  }
+
+  /** Como {@link #submit(ServerLevel, LongArrayList, Vec3)}, guardando quem causou a cratera. */
+  public static void submit(ServerLevel level, LongArrayList blocks, Vec3 centre, java.util.UUID author) {
     if (blocks.isEmpty()) return;
     double far = 0;
     for (int i = 0; i < blocks.size(); i++) far = Math.max(far, Vec3.atCenterOf(BlockPos.of(blocks.getLong(i))).distanceToSqr(centre));
@@ -86,6 +93,7 @@ public final class CraterQueue {
     if (total == 0) return;
     Crater c = new Crater(centre, shells, total);
     c.front = 1.5f;
+    c.author = author;
     PENDING.computeIfAbsent(level, l -> new ArrayList<>()).add(c);
     if (far >= 3) {
       // a onda de choque visivel acompanha a frente
@@ -127,7 +135,7 @@ public final class CraterQueue {
         BlockState before = level.getBlockState(pos);
         if (before.isAir()) continue;
         level.removeBlock(pos, false);
-        BlockJournal.record(level, pos, before);
+        BlockJournal.record(level, pos, before, c.author);
         budget--;
         // poeira do bloco e um estouro, em poucos blocos da frente (leve para a rede)
         if ((c.cursor & 15) == 0 && fx < 6) {
@@ -145,6 +153,11 @@ public final class CraterQueue {
   public static void onTick(TickEvent.ServerTickEvent event) {
     if (event.phase != TickEvent.Phase.END || PENDING.isEmpty()) return;
     for (ServerLevel level : new ArrayList<>(PENDING.keySet())) process(level, ArcaneConfig.CRATER_BLOCKS_PER_TICK.get(), true);
+  }
+
+  /** Descarta as crateras pendentes da dimensao (testes de carga). */
+  public static void clear(ServerLevel level) {
+    PENDING.remove(level);
   }
 
   @SubscribeEvent

@@ -119,12 +119,23 @@ public final class Targeting {
 
   /** Efeitos que alteram o mundo: ligado na config; jogadores sempre, criaturas so com mobGriefing ligado. */
   public static boolean mayAlterWorld(ExecutionContext ctx) {
+    return mayAlterWorld(ctx, ctx.caster().blockPosition());
+  }
+
+  /** Como {@link #mayAlterWorld(ExecutionContext)}, perguntando aos provedores de protecao sobre {@code pos}. */
+  public static boolean mayAlterWorld(ExecutionContext ctx, net.minecraft.core.BlockPos pos) {
     if (!com.arcane.config.ArcaneConfig.WORLD_ALTERING_SPELLS.get()) return false;
-    return ctx.caster() instanceof Player || ctx.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+    if (!(ctx.caster() instanceof Player || ctx.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING))) return false;
+    return com.arcane.api.ProtectionProvider.allowedByAll(ctx.level(), ctx.caster(), pos, com.arcane.api.ProtectionProvider.Kind.ALTER);
   }
 
   /** Efeitos que DESTROEM blocos: alem de {@link #mayAlterWorld}, respeitam a config blockBreakingSpells. */
   public static boolean mayBreakBlocks(ExecutionContext ctx) {
-    return mayAlterWorld(ctx) && com.arcane.config.ArcaneConfig.BLOCK_BREAKING_SPELLS.get();
+    return mayBreakBlocks(ctx, ctx.caster().blockPosition());
+  }
+
+  public static boolean mayBreakBlocks(ExecutionContext ctx, net.minecraft.core.BlockPos pos) {
+    return mayAlterWorld(ctx, pos) && com.arcane.config.ArcaneConfig.BLOCK_BREAKING_SPELLS.get()
+        && com.arcane.api.ProtectionProvider.allowedByAll(ctx.level(), ctx.caster(), pos, com.arcane.api.ProtectionProvider.Kind.BREAK);
   }
 }

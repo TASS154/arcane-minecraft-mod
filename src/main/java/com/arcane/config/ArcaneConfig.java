@@ -59,6 +59,8 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue RESTORE_MAX_BLOCKS;
   public static final ForgeConfigSpec.IntValue RESTORE_JOURNAL_CAP;
   public static final ForgeConfigSpec.DoubleValue FX_QUALITY;
+  public static final ForgeConfigSpec.IntValue SPELL_MAX_DEPTH;
+  public static final ForgeConfigSpec.IntValue SPELL_MAX_EXECUTIONS_PER_TICK;
   public static final ForgeConfigSpec.IntValue FX_MAX_PARTICLES_PER_CAST;
   public static final ForgeConfigSpec.IntValue RESTORE_BLOCKS_PER_TICK;
   public static final ForgeConfigSpec.DoubleValue CHARGE_MAX_SCALE;
@@ -170,6 +172,10 @@ public class ArcaneConfig {
         .defineInRange("fxQuality", 1.0, 0.25, 2.0);
     FX_MAX_PARTICLES_PER_CAST = builder.comment("Ceiling of element effect particles one source (caster) may send per tick, whatever the radius. Visual only")
         .defineInRange("fxMaxParticlesPerCast", 400, 16, 4096);
+    SPELL_MAX_DEPTH = builder.comment("How many spells may fire from inside another spell in a chain (armor, drawn creatures, On Hurt, Chorus, zones). Deeper ones are dropped")
+        .defineInRange("spellMaxDepth", 8, 2, 64);
+    SPELL_MAX_EXECUTIONS_PER_TICK = builder.comment("Spell segments the whole server may run per tick; the rest of that tick is dropped (protects against feedback loops)")
+        .defineInRange("spellMaxExecutionsPerTick", 512, 32, 100000);
     SPEC = builder.build();
   }
 }

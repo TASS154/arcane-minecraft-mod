@@ -51,17 +51,17 @@ mas ainda não confirmou cada item.
 |---|---|
 | Foco entrega a criatura na mira | **Causa achada (25 nov):** a busca de entidades só vê seções já acessíveis; o teste conjurava no mesmo tick do spawn. Agora espera a criatura aparecer na busca. |
 | Foco não vê através de parede | Mesmo defeito, mas passava sem testar nada (falso positivo). Corrigido junto. |
-| Desenho por proximidade | Instável; causa não investigada (Fase D). |
-| Golpe de cauda da Hidra | Instável; a mensagem mostra vida, distância e dano (Fase D). |
+| Desenho por proximidade | **Causa achada (25 nov):** jogadores falsos de testes antigos ficavam na área (o GameTest não limpa jogadores). `TestPlayers`. |
+| Golpe de cauda da Hidra | Provavelmente a mesma causa (mira o jogador remanescente); não falhou mais. |
 | Masmorra do covil com 1 sala | **Corrigido (25 nov):** salas sem lugar eram puladas; `LairDungeonPlanTest`. |
-| Pilar olhando de muito alto, Parar o Tempo | Falharam ao acaso em rodadas antigas (Fase D). |
-| `/kill` não matou a Hidra do estágio 7 | Visto em 24 nov; causa não investigada (Fase D). |
+| Pilar olhando de muito alto, Parar o Tempo | Não falharam nas rodadas de 25 nov; causa provável a mesma, não provada. |
+| `/kill` não matou a Hidra do estágio 7 | **Explicado (25 nov):** morre na hora; a barra ficava nos 5,5 s da morte em runas. Barra some na morte. |
 | Crash "Pose stack not empty" | **Corrigido (25 nov):** voar com Flutuar estando invisível pelo glifo empurrava a pose duas vezes e desfazia uma. |
-| Servidor "Can't keep up" | Visto na sessão de 24 nov (até 28 s de atraso uma vez). Causa não medida (Fase D). |
+| Servidor "Can't keep up" | **Medido (25 nov):** cratera de raio 64/128 trava 5,7/13,5 s no cálculo da lista (só sem os tetos). Ver `docs/CARGA.md`. |
 
 ## Limitações registradas
 
-- Resíduos e cicatrizes ficam só em memória; o diário do Restaurar também (não guarda o autor da destruição).
+- O diário do Restaurar é salvo com o mundo e guarda o autor (25 nov), mas o teto de 4.096 não cobre crateras grandes.
 - Roubar o grimório da bancada só funciona com o dono online.
 - `ArmedSpells` ainda não passa pelo barramento `SpellEvents`.
 - "Propriedades de bloco" das canetas de bloco: design não definido.
@@ -80,6 +80,10 @@ A higiene; B auditoria de glifos e aliases; C visual dos elementos; D robustez d
 F balanço por simulação; G proposta de tags de estado. Andamento por fase no fim deste arquivo.
 
 ## Andamento das fases
+
+- **D (robustez), 25 nov: feita.** Carga medida e limites propostos em `docs/CARGA.md`; diário do Restaurar salvo com
+  autor; orçamento de reentrância; API `ProtectionProvider`; causa dos testes instáveis (jogadores de testes antigos) e
+  do `/kill` na Hidra. 266/266.
 
 - **C (visual dos elementos), 25 nov: feita.** Elementos em json, fachada `Fx`, sprites e sons novos, composição,
   reações, orçamento linear no raio. Visto só pelo roteiro (`docs/img/folha_elementos.jpg`); NÃO visto nem ouvido por

@@ -72,3 +72,7 @@
 - **Custo pelo valor antes do modificador:** o efeito é cobrado pelo valor escrito; o modificador soma um custo fixo. Só a área é recobrada pelo valor final. Recobrar tudo pelo valor final? (Isso faz Enfraquecer baratear, como a descrição dele promete; hoje ele encarece.)
 - **Inverter ignora o conhecimento do glifo oposto** (Dano + Inverter cura sem conhecer Cura; Fogo vira Congelar, tier 1 → 3). Proposta: a validação exige conhecer o oposto.
 - **Par de Inverter de Congelar:** hoje Fogo; a descrição de Aquecer diz "o inverso de Congelar". Qual deve ser?
+
+## Carga do servidor (25 nov 2026), detalhes em `docs/CARGA.md`
+- **Cratera sem teto trava o servidor** 5,7 s (raio 64) e 13,5 s (raio 128) num tick, no cálculo da lista. Posso calcular aos poucos (mesmo resultado no mundo)? Quer teto de 64 também no "Sem limites"?
+- **Restaurar e crateras grandes:** o diário guarda 4.096 blocos; subir o teto padrão (32.768, ~3 MB salvos) ou aceitar que crateras grandes não voltam inteiras?

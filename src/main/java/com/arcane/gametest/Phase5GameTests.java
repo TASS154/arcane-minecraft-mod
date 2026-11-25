@@ -55,7 +55,7 @@ public class Phase5GameTests {
     var grimoire = com.arcane.grimoire.GrimoireAttachments.get(p).orElseThrow(() -> new RuntimeException("sem grimorio"));
     for (String id : glyphs) grimoire.learnGlyph(new ResourceLocation("arcane", id), com.arcane.grimoire.GlyphKnowledge.MASTERED);
     com.arcane.grimoire.GrimoireAttachments.getManaOrCreate(p).set(500f);
-    h.getLevel().addNewPlayer(p);
+    TestPlayers.add(h, p);
     return p;
   }
 

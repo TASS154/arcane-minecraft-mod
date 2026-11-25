@@ -7,6 +7,8 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
 
 - [ ] **Voar invisível (crash corrigido em 25 nov):** dê-se Flutuar e Invisibilidade do glifo, voe em terceira pessoa (F5)
   por 1 minuto. Antes fechava o jogo com "Pose stack not empty". Confira também se o corpo ainda inclina ao voar.
+- [ ] **Barra de chefe da Hidra some na morte (25 nov, NÃO visto):** `/arcane hydra 7`, depois `/kill @e[type=arcane:hydra]`:
+  a barra deve sumir na hora e a Hidra se desfazer em runas por ~5 s.
 - [ ] **Desempenho do servidor:** na sessão de 24 nov o log mostrou "Can't keep up" várias vezes (uma de 28 s). Anote o que
   estava acontecendo quando o jogo engasgar (Hidra grande? cratera? covil sendo gerado?).
 - [ ] **Hidra nova andando:** `/arcane hydra 6`, em sobrevivência, deixe-a perseguir você em morro. Passada natural? As

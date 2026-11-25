@@ -68,6 +68,15 @@ public final class SpellPipeline {
     }
 
     public void executeSegment(ExecutionContext context, ExecutionSegment segment) {
+        if (!SpellReentry.enter(context.level())) return; // orcamento de reentrancia (laços de realimentacao)
+        try {
+            executeSegmentInner(context, segment);
+        } finally {
+            SpellReentry.exit();
+        }
+    }
+
+    private void executeSegmentInner(ExecutionContext context, ExecutionSegment segment) {
         if (!passesCondition(context, segment)) {
             return;
         }

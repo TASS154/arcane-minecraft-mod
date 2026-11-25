@@ -20,15 +20,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Diario dos blocos que magias destruiram ou transformaram ha pouco (so em memoria, por dimensao), usado pelo glifo Restaurar.
+ * Diario dos blocos que magias destruiram ou transformaram ha pouco (por dimensao, salvo com o mundo em {@link JournalData}),
+ * usado pelo glifo Restaurar. Cada entrada guarda tambem quem destruiu (null quando a causa nao tem dono, como a cratera).
  * Cada entrada guarda o estado de antes e o estado em que a magia deixou a posicao: so se restaura se a posicao ainda estiver
  * nesse estado, para nunca sobrescrever uma construcao feita depois. Escavar nao entra.
  */
 @Mod.EventBusSubscriber(modid = ArcaneMod.MODID)
 public final class BlockJournal {
-  public record Entry(BlockPos pos, BlockState before, BlockState after) {}
+  public record Entry(BlockPos pos, BlockState before, BlockState after, java.util.UUID author) {
+    public Entry(BlockPos pos, BlockState before, BlockState after) { this(pos, before, after, null); }
+  }
 
-  private static final Map<ResourceKey<Level>, JournalLog<Entry>> LOGS = new HashMap<>();
   /** Blocos ja escolhidos por um Restaurar, esperando a vez de voltar (alguns por tick, do mais novo para o mais antigo). */
   private static final Map<ResourceKey<Level>, java.util.ArrayDeque<Entry>> PENDING = new HashMap<>();
 
@@ -48,17 +50,23 @@ public final class BlockJournal {
   private static long window() { return ArcaneConfig.RESTORE_WINDOW_SECONDS.get() * 20L; }
 
   private static JournalLog<Entry> log(ServerLevel level) {
-    return LOGS.computeIfAbsent(level.dimension(), k -> new JournalLog<>());
+    return JournalData.of(level).log;
   }
 
   /** Registra uma alteracao ja feita: {@code before} e o estado de antes; o de depois e o que esta no mundo agora. */
   public static void record(ServerLevel level, BlockPos pos, BlockState before) {
+    record(level, pos, before, null);
+  }
+
+  /** Como {@link #record(ServerLevel, BlockPos, BlockState)}, guardando quem destruiu. */
+  public static void record(ServerLevel level, BlockPos pos, BlockState before, java.util.UUID author) {
     if (!ArcaneConfig.RESTORE_ENABLED.get() || before.isAir()) return;
     var key = ForgeRegistries.BLOCKS.getKey(before.getBlock());
     if (key != null && key.getNamespace().equals(ArcaneMod.MODID)) return; // nunca os blocos do proprio mod (barreiras, tracos, sinais)
     BlockState after = level.getBlockState(pos);
     if (after == before) return;
-    log(level).add(new Entry(pos.immutable(), before, after), level.getGameTime(), ArcaneConfig.RESTORE_JOURNAL_CAP.get(), window());
+    log(level).add(new Entry(pos.immutable(), before, after, author), level.getGameTime(), ArcaneConfig.RESTORE_JOURNAL_CAP.get(), window());
+    JournalData.of(level).setDirty();
   }
 
   /**
@@ -69,14 +77,21 @@ public final class BlockJournal {
     if (dropsLoot()) return level.destroyBlock(pos, true, breaker);
     BlockState before = level.getBlockState(pos);
     boolean ok = level.destroyBlock(pos, false, breaker);
-    if (ok) record(level, pos, before);
+    if (ok) record(level, pos, before, breaker == null ? null : breaker.getUUID());
     return ok;
   }
 
   /** Estado do diario da dimensao (para testes e depuracao). */
   public static int size(ServerLevel level) { return log(level).size(); }
 
-  public static void clear(ServerLevel level) { log(level).clear(); PENDING.remove(level.dimension()); }
+  public static void clear(ServerLevel level) { log(level).clear(); JournalData.of(level).setDirty(); PENDING.remove(level.dimension()); }
+
+  /** Entradas validas, da mais nova para a mais antiga (testes e a analise de quem destruiu). */
+  public static List<Entry> entries(ServerLevel level) {
+    List<Entry> out = new ArrayList<>();
+    for (var s : log(level).live(level.getGameTime(), window())) out.add(s.value());
+    return out;
+  }
 
   /**
    * Recompõe, da mais nova para a mais antiga (assim pilhas de mudancas na mesma posicao se desfazem na ordem certa), ate
@@ -97,6 +112,7 @@ public final class BlockJournal {
       used.add(s);
     }
     log.removeAll(used);
+    if (!used.isEmpty()) JournalData.of(level).setDirty();
     var queue = PENDING.computeIfAbsent(level.dimension(), k -> new java.util.ArrayDeque<>());
     for (JournalLog.Stamped<Entry> s : used) queue.add(s.value());
     return used.size();
@@ -158,5 +174,5 @@ public final class BlockJournal {
   }
 
   @SubscribeEvent
-  public static void stopped(ServerStoppedEvent event) { LOGS.clear(); PENDING.clear(); }
+  public static void stopped(ServerStoppedEvent event) { PENDING.clear(); }
 }

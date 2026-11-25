@@ -696,6 +696,18 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
   inclui JUnit mas não os GameTests.
 - Testes: 257/257 GameTests e JUnit.
 
+## Rodada de 25 nov: Fase B (auditoria de glifos)
+
+- `docs/AUDITORIA_GLIFOS.md`: Pena = Planar (mesmo handler); Atraso = Após Segundos (compilam igual); Ferido e Vida do
+  Alvo têm papéis diferentes; Fogo age em blocos especiais (a descrição dizia que não) e sobrepõe Incendiar em pontos;
+  Dano e Corte diferem na fonte de dano; o parâmetro `speed` do Projétil é grátis e Velocidade do Projétil cobra 1;
+  modificadores passam do teto da bancada e são cobrados pelo valor antes de multiplicar. Nada aplicado.
+- **Inverter:** furo confirmado. A validação só olha os glifos escritos; o oposto entra na execução. Tier não é checado
+  em lugar nenhum do Java. GameTests opcionais em `GlyphAuditGameTests` documentam o furo.
+- **Aliases:** `GlyphAliases` + `GlyphInstance.CODEC` + conhecimento do grimório + nota de glifo + estudo + comando.
+  `GlyphAliasesTest` (5 casos). Mapa aprovado vazio.
+- Testes: 259/259 obrigatórios; 2 opcionais falham de propósito.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

@@ -24,7 +24,7 @@ public class GlyphNoteItem extends Item {
   public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
     ItemStack stack = player.getItemInHand(hand);
     if (!level.isClientSide && stack.hasTag() && stack.getTag().contains("glyph")) {
-      ResourceLocation glyph = new ResourceLocation(stack.getTag().getString("glyph"));
+      ResourceLocation glyph = com.arcane.glyph.GlyphAliases.resolve(new ResourceLocation(stack.getTag().getString("glyph")));
       DiscoveryService.learnFromLoot(player, glyph);
       stack.shrink(1);
       return InteractionResultHolder.success(stack);

@@ -80,6 +80,10 @@ F balanço por simulação; G proposta de tags de estado. Andamento por fase no 
 
 ## Andamento das fases
 
+- **B (auditoria de glifos), 25 nov: B1 a B3 feitas; B4 aguarda aprovação.** Relatório em `docs/AUDITORIA_GLIFOS.md`
+  (marque `[x]`). Inverter ignora o conhecimento do glifo oposto (GameTests opcionais `GlyphAuditGameTests` falham de
+  propósito até a correção ser aprovada). Aliases de glifo prontos (`GlyphAliases`, `GlyphAliasesTest`). 259/259.
+
 - **A (higiene), 25 nov: feita.** CLAUDE.md, este STATUS, log movido para CHANGELOG_DEV, documento antigo arquivado,
   descrição do Ativar corrigida, CI consertado (o `gradlew` estava sem permissão de execução: as 19 últimas execuções
   falharam com "Permission denied" antes de compilar). Crash do voo invisível e Foco instável corrigidos. 257/257.

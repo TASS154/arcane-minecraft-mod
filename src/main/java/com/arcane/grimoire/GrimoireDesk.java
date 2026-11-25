@@ -327,7 +327,7 @@ public final class GrimoireDesk {
     s.book = held.copyWithCount(1);
     s.studier = user.getUUID();
     CompoundTag saved = s.book.getOrCreateTag().getCompound(STUDY_TAG).getCompound(user.getUUID().toString());
-    s.glyph = saved.contains("glyph") ? new ResourceLocation(saved.getString("glyph")) : unknown.get(0);
+    s.glyph = saved.contains("glyph") ? com.arcane.glyph.GlyphAliases.resolve(new ResourceLocation(saved.getString("glyph"))) : unknown.get(0);
     s.ticks = saved.getLong("ticks");
     if (!unknown.contains(s.glyph)) { s.glyph = unknown.get(0); s.ticks = 0; }
     held.shrink(1);
@@ -445,7 +445,7 @@ public final class GrimoireDesk {
         Study s = new Study();
         s.book = ItemStack.of(c.getCompound("book"));
         s.studier = c.getUUID("studier");
-        s.glyph = c.contains("glyph") ? new ResourceLocation(c.getString("glyph")) : null;
+        s.glyph = c.contains("glyph") ? com.arcane.glyph.GlyphAliases.resolve(new ResourceLocation(c.getString("glyph"))) : null;
         s.ticks = c.getLong("ticks");
         ResourceKey<Level> dim = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, new ResourceLocation(c.getString("dim")));
         STUDIES.put(new Key(dim, c.getLong("pos")), s);

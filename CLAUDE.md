@@ -21,6 +21,8 @@ Não use `docs/arquivo/DOCUMENTACAO_COMPLETA.md` como fonte: está obsoleto (jul
   grimórios e inscrições salvos continuarem válidos.
 - Todo código novo vem com GameTest (`src/main/java/com/arcane/gametest/`) ou JUnit (`src/test/java/`).
 - Se um teste instável falhar, investigue a causa raiz; não só rode de novo.
+- GameTest `required = false` documenta uma regra ainda não cumprida (falha sem derrubar a suite; ex.: `GlyphAuditGameTests`).
+  Quando a correção for aprovada e feita, torne-o obrigatório.
 - O que for visual, sonoro ou de UX e não tiver sido visto ou ouvido por um humano: escreva "NÃO visto em jogo" e liste em
   `docs/PENDENTE_HUMANO.md`.
 - Nunca aceite EULA, nunca apague `run/world` nem saves, não adicione dependências sem perguntar.

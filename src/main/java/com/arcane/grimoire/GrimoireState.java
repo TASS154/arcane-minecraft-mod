@@ -172,7 +172,10 @@ public class GrimoireState {
         if (tag.contains("knowledge", Tag.TAG_COMPOUND)) {
             CompoundTag knowledgeTag = tag.getCompound("knowledge");
             for (String key : knowledgeTag.getAllKeys()) {
-                knowledge.put(new ResourceLocation(key), GlyphKnowledge.fromLevel(knowledgeTag.getInt(key)));
+                // id antigo (glifo renomeado ou fundido): vale para o atual, ficando com o maior nivel entre os dois
+                ResourceLocation id = com.arcane.glyph.GlyphAliases.resolve(new ResourceLocation(key));
+                GlyphKnowledge level = GlyphKnowledge.fromLevel(knowledgeTag.getInt(key));
+                knowledge.merge(id, level, (a, b) -> a.ordinal() >= b.ordinal() ? a : b);
             }
         }
         spellbook.clear();

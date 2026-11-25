@@ -66,3 +66,9 @@
 - **Restaurar:** os mesmos blocos nunca voltam duas vezes; o autor da destruição não é guardado; sem recarga (o custo em mana limita). Se virar "pincel", reavaliar uma recarga curta.
 - **Explosões sem loot:** vale para Explosão Destrutiva e Cadeia, Cortar e Dano em blocos frágeis. Congelar e Fogo (gelo/neve) nunca soltaram item.
 - **Raridade:** Bolso, Restaurar e Coro ficaram no tier 3 (raro). Confirmar se o Bolso e o Coro devem ser mais raros ou mais comuns.
+
+## Auditoria de glifos (25 nov 2026), detalhes em `docs/AUDITORIA_GLIFOS.md`
+- **Modificadores passam do teto da bancada:** Potência, Duração, Área, Alcance e Sobrecarga multiplicam sem limite (Dano 20 com 2 Potências = 45; com Sobrecarga, 90). Devem respeitar o teto? Proposta: limitar ao máximo do parâmetro × 2.
+- **Custo pelo valor antes do modificador:** o efeito é cobrado pelo valor escrito; o modificador soma um custo fixo. Só a área é recobrada pelo valor final. Recobrar tudo pelo valor final? (Isso faz Enfraquecer baratear, como a descrição dele promete; hoje ele encarece.)
+- **Inverter ignora o conhecimento do glifo oposto** (Dano + Inverter cura sem conhecer Cura; Fogo vira Congelar, tier 1 → 3). Proposta: a validação exige conhecer o oposto.
+- **Par de Inverter de Congelar:** hoje Fogo; a descrição de Aquecer diz "o inverso de Congelar". Qual deve ser?

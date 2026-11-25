@@ -169,7 +169,7 @@ public class ArcaneCommands {
                 .requires(src -> src.hasPermission(2))
                 .executes(ctx -> {
                   if (ctx.getSource().getEntity() instanceof ServerPlayer player) {
-                    ResourceLocation glyph = new ResourceLocation(StringArgumentType.getString(ctx, "glyph"));
+                    ResourceLocation glyph = com.arcane.glyph.GlyphAliases.resolve(new ResourceLocation(StringArgumentType.getString(ctx, "glyph")));
                     DiscoveryService.learnMastered(player, glyph);
                     ctx.getSource().sendSuccess(() -> Component.literal("Learned " + glyph), true);
                     return 1;

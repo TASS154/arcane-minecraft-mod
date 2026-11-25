@@ -81,6 +81,9 @@ F balanço por simulação; G proposta de tags de estado. Andamento por fase no 
 
 ## Andamento das fases
 
+- **G (proposta), 25 nov: feita.** `docs/PROPOSTA_TAGS_DE_ESTADO.md` (tags de estado e reações num sistema só, com
+  migração em 5 passos). Nada implementado.
+
 - **D (robustez), 25 nov: feita.** Carga medida e limites propostos em `docs/CARGA.md`; diário do Restaurar salvo com
   autor; orçamento de reentrância; API `ProtectionProvider`; causa dos testes instáveis (jogadores de testes antigos) e
   do `/kill` na Hidra. 266/266.

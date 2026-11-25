@@ -1,7 +1,18 @@
 # Pendente de olho, ouvido ou mão humana
 
-Tudo que o código e os testes não conseguem confirmar. Ordem: prioridade (o que mais arrisca a experiência primeiro).
+Tudo que o código e os testes não conseguem confirmar (atualizado em 25 nov, depois das Fases A a G). Ordem: prioridade (o que mais arrisca a experiência primeiro).
 Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao lado. Comandos exigem cheats.
+
+## P0: decisões que só você pode tomar (travam trabalho)
+
+- [ ] **Auditoria de glifos:** marque `[x]` nas propostas de `docs/AUDITORIA_GLIFOS.md` (Pena/Planar, Atraso/Após
+  Segundos, Fogo/Incendiar, Velocidade do Projétil, Inverter). Sem isso a Fase B4 (aplicar cortes com alias) fica parada.
+- [ ] **Furo do Inverter:** aprovar a correção (exigir conhecer o glifo oposto). Hoje Dano + Inverter cura sem conhecer Cura.
+- [ ] **Carga do servidor** (`docs/CARGA.md`): calcular a cratera aos poucos? Teto de raio 64 no "Sem limites"? Teto do
+  diário do Restaurar?
+- [ ] **Balanço** (`docs/BALANCO_AUTO.md`, `docs/PERGUNTAS.md`): Explosão rende 10 a 13x a mediana de dano por mana;
+  modificadores passam do teto da bancada; Enfraquecer encarece em vez de baratear.
+- [ ] **Proposta de tags de estado** (`docs/PROPOSTA_TAGS_DE_ESTADO.md`): implementar? Com ou sem reações novas?
 
 ## P1: pode quebrar a sessão ou a sensação central
 

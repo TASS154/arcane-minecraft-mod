@@ -39,7 +39,7 @@ Tudo abaixo está no repositório. As artes e sons são **provisórios de qualid
 - O projétil some depois de 10 s se não acertar nada (antes ficava no mundo para sempre).
 - **Zona do Cristal de Mana**: a busca pulava de 8 em 8 blocos e quase nunca achava o cristal. Agora varre seção por seção (pulando pela paleta as que não têm cristal) até 32 blocos, o raio da maior zona.
 - **Pena Arcana**: o código de escrita existia, mas nada o chamava. Agora a pena grava a magia ativa (gatilho "ao abrir" em baús e "ao pisar" nos demais blocos), apaga agachada e ao quebrar o bloco, e mostra faíscas nas inscrições visíveis.
-- GameTests em `gametest/ArcaneGameTests.java` (cristal em qualquer posição, armadilha por toque, apagar). Eles acharam um crash que acontecia ao quebrar qualquer bloco, já corrigido.
+- GameTests em `gametest/GameTests por área (`gametest/*GameTests.java`)` (cristal em qualquer posição, armadilha por toque, apagar). Eles acharam um crash que acontecia ao quebrar qualquer bloco, já corrigido.
 
 ### Decisões que tomei e precisam da sua aprovação
 

@@ -762,6 +762,16 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
   altar); agora exige 60% do miolo aberto.
 - Testes: 266/266 obrigatórios; 2 opcionais (Inverter) falham de propósito.
 
+## Rodada de 25 nov: Fases G e F
+
+- **G:** `docs/PROPOSTA_TAGS_DE_ESTADO.md`: Wetness, MindStates, Phase4State e as reações do JSON num registro de tags de
+  estado em dados, com API única, sincronização e migração em 5 passos. Não implementado.
+- **F:** `BalanceSimulationGameTests` gera 120 inscrições válidas (semente fixa), conjura contra 3 aldeões de 1000 de vida
+  e mede mana, dano em 5 e 30 ticks, tempo e trechos descartados. Só roda com `build/gametest-run/arcane_balance.flag`.
+  Duas armadilhas do próprio teste corrigidas: o jogador de teste morria com as próprias explosões (perdia o grimório e
+  todo o resto falhava) e `mana.set` era cortado no máximo (~100). A simulação limpa os registros globais no fim (os
+  aldeões dela viravam para-raios do teste do Condutor). Resultado em `docs/BALANCO_AUTO.md`.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

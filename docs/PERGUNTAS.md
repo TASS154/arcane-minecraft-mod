@@ -76,3 +76,7 @@
 ## Carga do servidor (25 nov 2026), detalhes em `docs/CARGA.md`
 - **Cratera sem teto trava o servidor** 5,7 s (raio 64) e 13,5 s (raio 128) num tick, no cálculo da lista. Posso calcular aos poucos (mesmo resultado no mundo)? Quer teto de 64 também no "Sem limites"?
 - **Restaurar e crateras grandes:** o diário guarda 4.096 blocos; subir o teto padrão (32.768, ~3 MB salvos) ou aceitar que crateras grandes não voltam inteiras?
+
+## Balanço automático (25 nov 2026), detalhes em `docs/BALANCO_AUTO.md`
+- **Explosão:** 10 a 13 de dano por mana em área (mediana ~0,8). O custo deve crescer com o raio, ou o dano dela cair?
+- **Enfraquecer** não afeta a Explosão (que não tem `amount`). Incluir `radius` (ou o dano da explosão) no que ele divide?

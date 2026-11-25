@@ -30,6 +30,8 @@ Não use `docs/arquivo/DOCUMENTACAO_COMPLETA.md` como fonte: está obsoleto (jul
 - Nunca aceite EULA, nunca apague `run/world` nem saves, não adicione dependências sem perguntar.
 - Um commit por fase ou rodada, mensagem em português no estilo do repo (frase descritiva, sem prefixo). Atualize
   `docs/STATUS.md` ao fim de cada fase.
+- Visual, som ou modelo: siga a skill `arcane-presence` (`.claude/skills/arcane-presence/SKILL.md`): 3 fases, sem
+  partícula/som vanilla como identidade, evidência por folha de contato.
 - Partícula ou som de elemento: use a fachada `com.arcane.fx.Fx` (e `data/arcane/elements/<id>.json`), nunca
   `ParticleTypes`/`SoundEvents` direto nos caminhos quentes (`VanillaFxUsageTest` confere).
 - Valores provisórios ficam em config (`ArcaneConfig`) ou em constantes nomeadas, nunca espalhados.

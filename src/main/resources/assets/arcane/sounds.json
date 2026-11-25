@@ -88,5 +88,277 @@
     "sounds": [
       "arcane:golem_hum"
     ]
+  },
+  "element.arcane.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/arcane_cast_1",
+      "arcane:element/arcane_cast_2",
+      "arcane:element/arcane_cast_3"
+    ]
+  },
+  "element.arcane.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/arcane_impact_1",
+      "arcane:element/arcane_impact_2",
+      "arcane:element/arcane_impact_3"
+    ]
+  },
+  "element.fire.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/fire_cast_1",
+      "arcane:element/fire_cast_2",
+      "arcane:element/fire_cast_3"
+    ]
+  },
+  "element.fire.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/fire_impact_1",
+      "arcane:element/fire_impact_2",
+      "arcane:element/fire_impact_3"
+    ]
+  },
+  "element.frost.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/frost_cast_1",
+      "arcane:element/frost_cast_2",
+      "arcane:element/frost_cast_3"
+    ]
+  },
+  "element.frost.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/frost_impact_1",
+      "arcane:element/frost_impact_2",
+      "arcane:element/frost_impact_3"
+    ]
+  },
+  "element.storm.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/storm_cast_1",
+      "arcane:element/storm_cast_2",
+      "arcane:element/storm_cast_3"
+    ]
+  },
+  "element.storm.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/storm_impact_1",
+      "arcane:element/storm_impact_2",
+      "arcane:element/storm_impact_3"
+    ]
+  },
+  "element.venom.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/venom_cast_1",
+      "arcane:element/venom_cast_2",
+      "arcane:element/venom_cast_3"
+    ]
+  },
+  "element.venom.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/venom_impact_1",
+      "arcane:element/venom_impact_2",
+      "arcane:element/venom_impact_3"
+    ]
+  },
+  "element.force.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/force_cast_1",
+      "arcane:element/force_cast_2",
+      "arcane:element/force_cast_3"
+    ]
+  },
+  "element.force.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/force_impact_1",
+      "arcane:element/force_impact_2",
+      "arcane:element/force_impact_3"
+    ]
+  },
+  "element.void.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/void_cast_1",
+      "arcane:element/void_cast_2",
+      "arcane:element/void_cast_3"
+    ]
+  },
+  "element.void.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/void_impact_1",
+      "arcane:element/void_impact_2",
+      "arcane:element/void_impact_3"
+    ]
+  },
+  "element.life.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/life_cast_1",
+      "arcane:element/life_cast_2",
+      "arcane:element/life_cast_3"
+    ]
+  },
+  "element.life.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/life_impact_1",
+      "arcane:element/life_impact_2",
+      "arcane:element/life_impact_3"
+    ]
+  },
+  "element.earth.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/earth_cast_1",
+      "arcane:element/earth_cast_2",
+      "arcane:element/earth_cast_3"
+    ]
+  },
+  "element.earth.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/earth_impact_1",
+      "arcane:element/earth_impact_2",
+      "arcane:element/earth_impact_3"
+    ]
+  },
+  "element.water.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/water_cast_1",
+      "arcane:element/water_cast_2",
+      "arcane:element/water_cast_3"
+    ]
+  },
+  "element.water.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/water_impact_1",
+      "arcane:element/water_impact_2",
+      "arcane:element/water_impact_3"
+    ]
+  },
+  "element.light.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/light_cast_1",
+      "arcane:element/light_cast_2",
+      "arcane:element/light_cast_3"
+    ]
+  },
+  "element.light.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/light_impact_1",
+      "arcane:element/light_impact_2",
+      "arcane:element/light_impact_3"
+    ]
+  },
+  "element.shadow.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/shadow_cast_1",
+      "arcane:element/shadow_cast_2",
+      "arcane:element/shadow_cast_3"
+    ]
+  },
+  "element.shadow.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/shadow_impact_1",
+      "arcane:element/shadow_impact_2",
+      "arcane:element/shadow_impact_3"
+    ]
+  },
+  "element.blood.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/blood_cast_1",
+      "arcane:element/blood_cast_2",
+      "arcane:element/blood_cast_3"
+    ]
+  },
+  "element.blood.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/blood_impact_1",
+      "arcane:element/blood_impact_2",
+      "arcane:element/blood_impact_3"
+    ]
+  },
+  "element.time.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/time_cast_1",
+      "arcane:element/time_cast_2",
+      "arcane:element/time_cast_3"
+    ]
+  },
+  "element.time.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/time_impact_1",
+      "arcane:element/time_impact_2",
+      "arcane:element/time_impact_3"
+    ]
+  },
+  "element.nature.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/nature_cast_1",
+      "arcane:element/nature_cast_2",
+      "arcane:element/nature_cast_3"
+    ]
+  },
+  "element.nature.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/nature_impact_1",
+      "arcane:element/nature_impact_2",
+      "arcane:element/nature_impact_3"
+    ]
+  },
+  "element.sound.cast": {
+    "subtitle": "subtitles.arcane.element.cast",
+    "sounds": [
+      "arcane:element/sound_cast_1",
+      "arcane:element/sound_cast_2",
+      "arcane:element/sound_cast_3"
+    ]
+  },
+  "element.sound.impact": {
+    "subtitle": "subtitles.arcane.element.impact",
+    "sounds": [
+      "arcane:element/sound_impact_1",
+      "arcane:element/sound_impact_2",
+      "arcane:element/sound_impact_3"
+    ]
+  },
+  "reaction.steam": {
+    "subtitle": "subtitles.arcane.reaction.steam",
+    "sounds": [
+      "arcane:element/reaction_steam_1",
+      "arcane:element/reaction_steam_2",
+      "arcane:element/reaction_steam_3"
+    ]
+  },
+  "reaction.shatter": {
+    "subtitle": "subtitles.arcane.reaction.shatter",
+    "sounds": [
+      "arcane:element/reaction_shatter_1",
+      "arcane:element/reaction_shatter_2",
+      "arcane:element/reaction_shatter_3"
+    ]
   }
 }

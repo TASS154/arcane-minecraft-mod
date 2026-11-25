@@ -58,6 +58,8 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec.IntValue RESTORE_WINDOW_SECONDS;
   public static final ForgeConfigSpec.IntValue RESTORE_MAX_BLOCKS;
   public static final ForgeConfigSpec.IntValue RESTORE_JOURNAL_CAP;
+  public static final ForgeConfigSpec.DoubleValue FX_QUALITY;
+  public static final ForgeConfigSpec.IntValue FX_MAX_PARTICLES_PER_CAST;
   public static final ForgeConfigSpec.IntValue RESTORE_BLOCKS_PER_TICK;
   public static final ForgeConfigSpec.DoubleValue CHARGE_MAX_SCALE;
   public static final ForgeConfigSpec.DoubleValue HOLD_DRAIN_PER_SECOND;
@@ -164,6 +166,10 @@ public class ArcaneConfig {
     CHORUS_RADIUS = builder.comment("Radius (blocks) of the chorus circle around the first caster (PROVISIONAL)").defineInRange("chorusRadius", 8.0, 2.0, 32.0);
     CHORUS_WINDOW_TICKS = builder.comment("Ticks the others have to cast after the first caster opens the chorus (PROVISIONAL)").defineInRange("chorusWindowTicks", 60, 10, 400);
     CHORUS_MAX_PARTICIPANTS = builder.comment("Max players counted in one chorus").defineInRange("chorusMaxParticipants", 5, 2, 16);
+    FX_QUALITY = builder.comment("Element effect particles: multiplier on every burst the server sends (0.25 = sparse, 1 = normal, 2 = dense). Visual only")
+        .defineInRange("fxQuality", 1.0, 0.25, 2.0);
+    FX_MAX_PARTICLES_PER_CAST = builder.comment("Ceiling of element effect particles one source (caster) may send per tick, whatever the radius. Visual only")
+        .defineInRange("fxMaxParticlesPerCast", 400, 16, 4096);
     SPEC = builder.build();
   }
 }

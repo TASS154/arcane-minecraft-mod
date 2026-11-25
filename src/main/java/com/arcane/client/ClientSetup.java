@@ -120,6 +120,8 @@ public class ClientSetup {
     event.registerSpriteSet(ModParticles.ARCANE_BOLT_STRIKE.get(), sp -> new ArcaneSparkParticle.Provider(sp, ArcaneSparkParticle.Profile.STRIKE));
     event.registerSpriteSet(ModParticles.ARCANE_SHOCK.get(), sp -> new ArcaneSparkParticle.Provider(sp, ArcaneSparkParticle.Profile.SHOCK));
     event.registerSpriteSet(ModParticles.ARCANE_LIFE.get(), s -> new ArcaneSparkParticle.Provider(s, ArcaneSparkParticle.Profile.LIFE));
+    ModParticles.FX.forEach((family, type) ->
+        event.registerSpriteSet(type.get(), s -> new com.arcane.client.particle.ElementFxParticle.Provider(s, family)));
   }
 
   @SubscribeEvent

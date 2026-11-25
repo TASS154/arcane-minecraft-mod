@@ -1,0 +1,24 @@
+{
+  "color": "#B0102A",
+  "secondary": "#4A0010",
+  "sprite": "blood",
+  "additive": false,
+  "light": 6,
+  "motion": {
+    "gravity": 0.045,
+    "friction": 0.94,
+    "life": [
+      18,
+      30
+    ],
+    "size": 0.112,
+    "jitter": 0.03,
+    "spiral": 0.0,
+    "flicker": 0.0
+  },
+  "decal": "stain",
+  "sounds": {
+    "cast": "arcane:element.blood.cast",
+    "impact": "arcane:element.blood.impact"
+  }
+}

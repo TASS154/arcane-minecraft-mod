@@ -578,8 +578,264 @@ def logo():
     print("   src/main/resources/arcane_logo.png")
 
 
+# ================================================================== particulas de elemento (Fx), em tons de cinza
+# Familias novas: suaves aditivas, riscos e fumaca com ruido, e uma por elemento novo (terra, agua, luz, sombra, sangue,
+# tempo, natureza, som). Sao brancas/cinzas: a cor do elemento e multiplicada no jogo. Desenhadas 4x maiores e reduzidas
+# (bordas suaves). Decais: marcas de 32 px deitadas no bloco atingido.
+OLD_FAMILIES = {"spark": "arcane_spark", "ember": "ember", "frost": "frost", "bolt": "bolt", "venom": "venom",
+                "force": "force", "void": "void", "life": "life"}
+SS = 4  # supersampling
+
+
+def _canvas(size):
+    return Image.new("L", (size * SS, size * SS), 0)
+
+
+def _finish(mask, size, alpha_curve=1.0):
+    """Mascara em escala de cinza -> RGBA claro com alfa (reduzida com filtro)."""
+    small = mask.resize((size, size), Image.LANCZOS)
+    out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    px = out.load()
+    for y in range(size):
+        for x in range(size):
+            a = small.getpixel((x, y)) / 255.0
+            if a <= 0.01:
+                continue
+            a = a ** alpha_curve
+            v = int(170 + 85 * a)  # nucleo mais claro que a borda
+            px[x, y] = (v, v, v, int(255 * a))
+    return out
+
+
+def _noise(size, seed, octaves=3):
+    rnd = random.Random(seed)
+    base = [[rnd.random() for _ in range(size + 1)] for _ in range(size + 1)]
+
+    def sample(x, y, cell):
+        gx, gy = x / cell, y / cell
+        x0, y0 = int(gx), int(gy)
+        fx, fy = gx - x0, gy - y0
+
+        def g(i, j):
+            return base[(y0 + j) % size][(x0 + i) % size]
+        top = g(0, 0) * (1 - fx) + g(1, 0) * fx
+        bot = g(0, 1) * (1 - fx) + g(1, 1) * fx
+        return top * (1 - fy) + bot * fy
+
+    out = [[0.0] * size for _ in range(size)]
+    for y in range(size):
+        for x in range(size):
+            v, amp, cell, tot = 0.0, 1.0, size / 2, 0.0
+            for _ in range(octaves):
+                v += sample(x, y, max(1.0, cell)) * amp
+                tot += amp
+                amp *= 0.5
+                cell /= 2
+            out[y][x] = v / tot
+    return out
+
+
+def fx_soft(step, size=16):
+    m = _canvas(size)
+    d = ImageDraw.Draw(m)
+    c = size * SS / 2
+    r = c * (0.95 - step * 0.15)
+    for i in range(24, 0, -1):  # gradiente radial
+        rr = r * i / 24
+        d.ellipse((c - rr, c - rr, c + rr, c + rr), fill=int(255 * (1 - i / 24) ** 1.6))
+    return _finish(m, size)
+
+
+def fx_streak(step, size=16):
+    m = _canvas(size)
+    d = ImageDraw.Draw(m)
+    c = size * SS / 2
+    length = c * (0.95 - step * 0.2)
+    for i in range(12, 0, -1):
+        w = c * 0.22 * i / 12
+        d.ellipse((c - w, c - length * i / 12 - w, c + w, c + length * i / 12 + w), fill=int(255 * (1 - i / 12) ** 1.3))
+    return _finish(m, size)
+
+
+def fx_smoke(step, size=32, seed=7):
+    n = _noise(size, seed + step * 13)
+    out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    c = (size - 1) / 2
+    for y in range(size):
+        for x in range(size):
+            r = math.hypot(x - c, y - c) / (size / 2)
+            nv = n[y][x]
+            fall = max(0.0, 1.0 - r * (1.0 + step * 0.12) - (0.5 - nv) * 0.9)
+            v = min(1.0, fall * 1.6) * (0.35 + 1.1 * max(0.0, nv - 0.25)) * (1.0 - step * 0.18)
+            a = max(0, min(255, int(255 * v)))
+            if a > 3:
+                out.putpixel((x, y), (215, 215, 215, a))
+    return out
+
+
+def fx_shape(kind, step, size=16, seed=0):
+    """Familias dos elementos novos, 4 quadros (0 a 3) que encolhem e se desfazem."""
+    m = _canvas(size)
+    d = ImageDraw.Draw(m)
+    S = size * SS
+    c = S / 2
+    k = 1.0 - step * 0.17
+    rnd = random.Random(seed * 31 + step)
+    if kind == "earth":  # lasca de pedra angulosa
+        pts = []
+        for i in range(5):
+            a = i / 5 * math.tau + rnd.uniform(-0.45, 0.45) + step * 0.7
+            rr = c * 0.85 * k * rnd.uniform(0.45, 1.0)
+            pts.append((c + math.cos(a) * rr, c + math.sin(a) * rr))
+        d.polygon(pts, fill=150)
+        d.polygon([pts[0], pts[1], pts[2], (c, c)], fill=225)
+    elif kind == "water":  # gota com brilho
+        r = c * 0.55 * k
+        d.ellipse((c - r, c - r * 0.6, c + r, c + r * 1.4), fill=170)
+        d.polygon([(c - r * 0.7, c), (c + r * 0.7, c), (c, c - r * 1.6)], fill=170)
+        d.ellipse((c - r * 0.45, c - r * 0.2, c - r * 0.05, c + r * 0.25), fill=255)
+    elif kind == "light":  # brilho de 4 pontas
+        for ang, ln in ((0, 0.95), (math.pi / 2, 0.95), (math.pi / 4, 0.5), (3 * math.pi / 4, 0.5)):
+            dx, dy = math.cos(ang) * c * ln * k, math.sin(ang) * c * ln * k
+            d.line([(c - dx, c - dy), (c + dx, c + dy)], fill=230, width=int(SS * 1.5))
+        r = c * 0.25 * k
+        d.ellipse((c - r, c - r, c + r, c + r), fill=255)
+    elif kind == "shadow":  # fiapo de fumaca escura
+        for i in range(5):
+            a = rnd.uniform(0, math.tau)
+            rr = c * rnd.uniform(0.15, 0.45) * k
+            ox, oy = math.cos(a) * c * 0.35, math.sin(a) * c * 0.35
+            d.ellipse((c + ox - rr, c + oy - rr, c + ox + rr, c + oy + rr), fill=int(150 + 60 * rnd.random()))
+    elif kind == "blood":  # gota redonda com cauda
+        r = c * 0.45 * k
+        d.ellipse((c - r, c - r + r * 0.6, c + r, c + r + r * 0.6), fill=220)
+        d.polygon([(c - r * 0.5, c + r * 0.4), (c + r * 0.5, c + r * 0.4), (c + r * 0.1, c - r * 1.4)], fill=220)
+    elif kind == "time":  # anel com marcas de relogio e um ponteiro que gira
+        r = c * 0.78 * k
+        d.ellipse((c - r, c - r, c + r, c + r), outline=230, width=int(SS * 1.2))
+        for i in range(12):
+            a = i / 12 * math.tau
+            r1, r2 = r * (0.62 if i % 3 == 0 else 0.78), r * 0.92
+            d.line([(c + math.cos(a) * r1, c + math.sin(a) * r1), (c + math.cos(a) * r2, c + math.sin(a) * r2)], fill=230, width=SS)
+        a = step * 0.9
+        d.line([(c, c), (c + math.cos(a) * r * 0.7, c + math.sin(a) * r * 0.7)], fill=255, width=int(SS * 1.4))
+    elif kind == "nature":  # folha girando
+        r = c * 0.8 * k
+        ang = step * 0.6
+        pts = [(i / 23, math.sin(i / 23 * math.pi) * r * 0.45) for i in range(24)]
+        poly = [(c + (t - 0.5) * 2 * r, c - w) for t, w in pts] + [(c + (t - 0.5) * 2 * r, c + w) for t, w in reversed(pts)]
+        rot = [(c + (x - c) * math.cos(ang) - (y - c) * math.sin(ang), c + (x - c) * math.sin(ang) + (y - c) * math.cos(ang)) for x, y in poly]
+        d.polygon(rot, fill=200)
+        d.line([rot[0], rot[23]], fill=255, width=SS)
+    elif kind == "sound":  # arcos concentricos
+        for i in range(3):
+            r = c * (0.35 + 0.25 * i) * (0.8 + step * 0.12)
+            d.arc((c - r, c - r, c + r, c + r), -50, 50, fill=int(255 - 50 * i), width=int(SS * 1.3))
+            d.arc((c - r, c - r, c + r, c + r), 130, 230, fill=int(255 - 50 * i), width=int(SS * 1.3))
+    return _finish(m, size)
+
+
+def fx_decal(kind, size=32, seed=3):
+    m = _canvas(size)
+    d = ImageDraw.Draw(m)
+    S = size * SS
+    c = S / 2
+    rnd = random.Random(seed + sum(ord(ch) for ch in kind))
+    if kind == "rune":
+        r = c * 0.85
+        d.ellipse((c - r, c - r, c + r, c + r), outline=230, width=int(SS * 1.2))
+        r2 = c * 0.62
+        d.ellipse((c - r2, c - r2, c + r2, c + r2), outline=170, width=SS)
+        for i in range(6):
+            a = i / 6 * math.tau
+            p1 = (c + math.cos(a) * r2, c + math.sin(a) * r2)
+            p2 = (c + math.cos(a + math.tau / 3) * r2, c + math.sin(a + math.tau / 3) * r2)
+            d.line([p1, p2], fill=200, width=SS)
+    elif kind in ("scorch", "stain", "splash", "scar"):
+        n = _noise(size, rnd.randint(0, 999))
+        for y in range(size):
+            for x in range(size):
+                r = math.hypot(x - size / 2 + 0.5, y - size / 2 + 0.5) / (size / 2)
+                edge = 0.75 + 0.35 * n[y][x]
+                if kind == "scar":
+                    v = max(0.0, 1.0 - abs(r - 0.6) * 5) * (0.6 + 0.6 * n[y][x])
+                elif kind == "splash":  # poca central de borda ondulada (as gotas em volta vem depois)
+                    ang = math.atan2(y - size / 2 + 0.5, x - size / 2 + 0.5)
+                    rim = 0.42 + 0.08 * math.sin(ang * 7) + 0.06 * (n[y][x] - 0.5)
+                    v = 1.0 if r < rim else 0.0
+                elif kind == "stain":  # respingo: miolo com raios irregulares para fora
+                    ang = math.atan2(y - size / 2 + 0.5, x - size / 2 + 0.5)
+                    spikes = 0.38 + 0.32 * max(0.0, math.sin(ang * 9 + 1.3)) ** 3 + 0.1 * (n[y][x] - 0.5)
+                    v = 1.0 if r < spikes else 0.0
+                else:  # chamuscado: mancha escura com buracos e borda roida
+                    v = max(0.0, (edge - r * 1.05) * 3.0) * (0.35 + 1.3 * max(0.0, n[y][x] - 0.28))
+                d.rectangle((x * SS, y * SS, x * SS + SS - 1, y * SS + SS - 1), fill=max(0, min(255, int(230 * min(1.0, v)))))
+    if kind == "splash":  # gotas soltas em volta da poca
+        for i in range(9):
+            a = rnd.uniform(0, math.tau)
+            dist = c * rnd.uniform(0.62, 0.9)
+            rr = c * rnd.uniform(0.04, 0.09)
+            px, py = c + math.cos(a) * dist, c + math.sin(a) * dist
+            d.ellipse((px - rr, py - rr, px + rr, py + rr), fill=230)
+    if kind == "rime":
+        for i in range(6):
+            a = i / 6 * math.tau + 0.2
+            ex, ey = c + math.cos(a) * c * 0.9, c + math.sin(a) * c * 0.9
+            d.line([(c, c), (ex, ey)], fill=230, width=int(SS * 1.2))
+            for j in (0.4, 0.65):
+                bx, by = c + math.cos(a) * c * 0.9 * j, c + math.sin(a) * c * 0.9 * j
+                for sgn in (-1, 1):
+                    b = a + sgn * 0.7
+                    d.line([(bx, by), (bx + math.cos(b) * c * 0.22, by + math.sin(b) * c * 0.22)], fill=200, width=SS)
+    elif kind == "crack":
+        for i in range(7):
+            a = rnd.uniform(0, math.tau)
+            x, y = c, c
+            for _ in range(5):
+                a += rnd.uniform(-0.6, 0.6)
+                nx, ny = x + math.cos(a) * c * 0.2, y + math.sin(a) * c * 0.2
+                d.line([(x, y), (nx, ny)], fill=220, width=int(SS * 1.1))
+                x, y = nx, ny
+    elif kind == "bloom":
+        for i in range(8):
+            a = i / 8 * math.tau
+            px, py = c + math.cos(a) * c * 0.5, c + math.sin(a) * c * 0.5
+            r = c * 0.2
+            d.ellipse((px - r, py - r, px + r, py + r), fill=200)
+        r = c * 0.18
+        d.ellipse((c - r, c - r, c + r, c + r), fill=255)
+    return _finish(m, size, alpha_curve=0.9)
+
+
+NEW_FAMILIES = ["earth", "water", "light", "shadow", "blood", "time", "nature", "sound"]
+DECALS = ["rune", "scorch", "rime", "crack", "splash", "stain", "scar", "bloom"]
+
+
+def element_fx_assets():
+    """Sprites e particles/fx_*.json das particulas de elemento (ver com.arcane.fx.FxFamilies)."""
+    for fam, old in OLD_FAMILIES.items():  # reaproveitam os sprites antigos (ja coloridos)
+        write_json(f"particles/fx_{fam}.json", {"textures": [f"arcane:{old}_{i}" for i in range(4)]})
+    gens = {"soft": fx_soft, "streak": fx_streak, "smoke": fx_smoke}
+    for fam, fn in gens.items():
+        frames = []
+        for i in range(4):
+            save(fn(i), f"particle/fx_{fam}_{i}.png")
+            frames.append(f"arcane:fx_{fam}_{i}")
+        write_json(f"particles/fx_{fam}.json", {"textures": frames})
+    for n, fam in enumerate(NEW_FAMILIES):
+        frames = []
+        for i in range(4):
+            save(fx_shape(fam, i, seed=n), f"particle/fx_{fam}_{i}.png")
+            frames.append(f"arcane:fx_{fam}_{i}")
+        write_json(f"particles/fx_{fam}.json", {"textures": frames})
+    for dec in DECALS:
+        save(fx_decal(dec), f"particle/fx_decal_{dec}.png")
+        write_json(f"particles/fx_decal_{dec}.json", {"textures": [f"arcane:fx_decal_{dec}"]})
+
+
 def generate():
     names = particle_assets()
+    element_fx_assets()
     grimoire_assets()
     workbench_assets()
     crystal_animated()
@@ -592,4 +848,8 @@ def generate():
 
 
 if __name__ == "__main__":
-    generate()
+    import sys as _sys
+    if "--element-fx" in _sys.argv:  # so as particulas de elemento, sem regerar o resto da arte
+        element_fx_assets()
+    else:
+        generate()

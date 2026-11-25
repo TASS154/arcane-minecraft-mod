@@ -1,0 +1,24 @@
+{
+  "color": "#A0784A",
+  "secondary": "#5C4632",
+  "sprite": "earth",
+  "additive": false,
+  "light": 6,
+  "motion": {
+    "gravity": 0.04,
+    "friction": 0.95,
+    "life": [
+      18,
+      30
+    ],
+    "size": 0.143,
+    "jitter": 0.05,
+    "spiral": 0.0,
+    "flicker": 0.0
+  },
+  "decal": "crack",
+  "sounds": {
+    "cast": "arcane:element.earth.cast",
+    "impact": "arcane:element.earth.impact"
+  }
+}

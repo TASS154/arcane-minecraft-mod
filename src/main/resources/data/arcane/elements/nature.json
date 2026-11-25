@@ -1,0 +1,24 @@
+{
+  "color": "#5CC850",
+  "secondary": "#C8E878",
+  "sprite": "nature",
+  "additive": false,
+  "light": 8,
+  "motion": {
+    "gravity": 0.006,
+    "friction": 0.96,
+    "life": [
+      30,
+      50
+    ],
+    "size": 0.149,
+    "jitter": 0.02,
+    "spiral": 0.06,
+    "flicker": 0.0
+  },
+  "decal": "bloom",
+  "sounds": {
+    "cast": "arcane:element.nature.cast",
+    "impact": "arcane:element.nature.impact"
+  }
+}

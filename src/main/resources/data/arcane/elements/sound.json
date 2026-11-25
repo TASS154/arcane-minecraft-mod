@@ -1,0 +1,24 @@
+{
+  "color": "#9EE8D8",
+  "secondary": "#FFFFFF",
+  "sprite": "sound",
+  "additive": true,
+  "light": 15,
+  "motion": {
+    "gravity": 0.0,
+    "friction": 0.8,
+    "life": [
+      8,
+      14
+    ],
+    "size": 0.18,
+    "jitter": 0.04,
+    "spiral": 0.0,
+    "flicker": 0.0
+  },
+  "decal": "rune",
+  "sounds": {
+    "cast": "arcane:element.sound.cast",
+    "impact": "arcane:element.sound.impact"
+  }
+}

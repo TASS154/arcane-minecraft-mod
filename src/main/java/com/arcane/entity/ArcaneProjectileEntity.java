@@ -26,6 +26,8 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
   private Inscription inscription = Inscription.testProjectileDamageFire();
   private static final EntityDataAccessor<Integer> ELEMENT =
       SynchedEntityData.defineId(ArcaneProjectileEntity.class, EntityDataSerializers.INT);
+  private static final EntityDataAccessor<Integer> TRAIL =
+      SynchedEntityData.defineId(ArcaneProjectileEntity.class, EntityDataSerializers.INT);
   private CompiledExecutionPlan plan;
   private PrecisionSnapshot precision = PrecisionSnapshot.WORKBENCH;
   private EnvironmentalSnapshot environment = EnvironmentalSnapshot.NEUTRAL;
@@ -40,11 +42,17 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
   public void setInscription(Inscription inscription) { this.inscription = inscription; }
   public void setPlan(CompiledExecutionPlan plan) {
     this.plan = plan;
-    if (plan != null) this.entityData.set(ELEMENT, SpellElement.of(plan).ordinal());
+    if (plan != null) {
+      this.entityData.set(ELEMENT, SpellElement.of(plan).ordinal());
+      this.entityData.set(TRAIL, SpellElement.trailOf(plan).ordinal());
+    }
   }
 
   /** Elemento visual (cor e particulas); sincronizado para o cliente. */
   public SpellElement element() { return SpellElement.byOrdinal(this.entityData.get(ELEMENT)); }
+
+  /** Elemento do rastro e do impacto (o segundo da magia; sem ele, o mesmo do corpo). */
+  public SpellElement trailElement() { return SpellElement.byOrdinal(this.entityData.get(TRAIL)); }
   public void setPrecision(PrecisionSnapshot precision) { this.precision = precision; }
   public void setEnvironment(EnvironmentalSnapshot environment) { this.environment = environment; }
 
@@ -58,6 +66,7 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
   @Override
   protected void defineSynchedData() {
     this.entityData.define(ELEMENT, 0);
+    this.entityData.define(TRAIL, 0);
   }
 
   /** O projetil de magia voa em linha reta: a gravidade nao o puxa para baixo. */
@@ -68,10 +77,15 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
   public void tick() {
     super.tick();
     if (level().isClientSide) {
+      // corpo (elemento 1) em volta do orbe e rastro (elemento 2) ficando para tras
+      var body = com.arcane.fx.Fx.options(element(), com.arcane.fx.Fx.Role.BODY, 1f, -1);
+      var trail = com.arcane.fx.Fx.options(trailElement(), com.arcane.fx.Fx.Role.TRAIL, 1f, -1);
+      var back = getDeltaMovement().scale(-0.5);
+      level().addParticle(body, getX() + (random.nextDouble() - 0.5) * 0.2, getY() + (random.nextDouble() - 0.5) * 0.2,
+          getZ() + (random.nextDouble() - 0.5) * 0.2, 0.0, 0.0, 0.0);
       for (int i = 0; i < 2; i++) {
-        level().addParticle(element().particle(),
-            getX() + (random.nextDouble() - 0.5) * 0.2, getY() + (random.nextDouble() - 0.5) * 0.2,
-            getZ() + (random.nextDouble() - 0.5) * 0.2, 0.0, 0.0, 0.0);
+        double t = random.nextDouble();
+        level().addParticle(trail, getX() + back.x * t, getY() + back.y * t, getZ() + back.z * t, 0.0, 0.0, 0.0);
       }
     } else if (tickCount > 200) {
       discard();
@@ -108,11 +122,10 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
       var server = (net.minecraft.server.level.ServerLevel) level();
       server.playSound(null, getX(), getY(), getZ(), com.arcane.registry.ModSounds.SPELL_HIT.get(),
           net.minecraft.sounds.SoundSource.PLAYERS, 0.9f, 1.0f);
-      server.sendParticles(element().particle(), getX(), getY(), getZ(),
-          26, 0.3, 0.3, 0.3, 0.1);
       com.arcane.network.ModNetwork.sendShape(server, com.arcane.network.packet.S2CShapeFxPacket.IMPACT, position(),
-          getDeltaMovement().scale(-1).normalize(), 1.0f, element().color(), element().ordinal(), 12);
-      com.arcane.execution.ElementSounds.playImpact(server, position(), element());
+          getDeltaMovement().scale(-1).normalize(), 1.0f, trailElement().color(), trailElement().ordinal(), 12);
+      net.minecraft.core.Direction face = result instanceof net.minecraft.world.phys.BlockHitResult bh ? bh.getDirection() : null;
+      com.arcane.fx.Fx.impact(server, caster, face != null ? result.getLocation() : position(), face, element(), trailElement(), 1f); // decal no ponto exato
       com.arcane.execution.WorldScars.leave(context, position());
       if (element() == SpellElement.STORM) {
         server.sendParticles(com.arcane.registry.ModParticles.ARCANE_BOLT_STRIKE.get(), getX(), getY() + 1.6, getZ(), 1, 0.0, 0.0, 0.0, 0.0);

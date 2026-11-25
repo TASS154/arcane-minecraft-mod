@@ -242,9 +242,10 @@ public class ShapeFxRenderer {
       case S2CShapeFxPacket.IMPACT -> {
         float rr = (0.25f + 0.9f * ease(life)) * f.size;
         octahedron(c, pose, f.pos, rr, r, g, b, (int) (200 * fade));
-        octahedron(c, pose, f.pos, rr * 0.5f, 255, 255, 255, (int) (230 * fade));
-        // estilhacos radiais
-        int shards = f.element == SpellElement.FIRE || f.element == SpellElement.LIFE ? 6 : 10;
+        octahedron(c, pose, f.pos, rr * 0.5f, 255, 255, 255, (int) (150 * fade)); // nucleo mais fraco: reduzir claroes
+        // estilhacos radiais na cor do elemento clareada (antes brancos e opacos: dominavam a cena e escondiam o impacto)
+        int shards = f.element == SpellElement.FIRE || f.element == SpellElement.LIFE ? 4 : 6;
+        int sr = (r + 255) / 2, sg = (g + 255) / 2, sb = (b + 255) / 2;
         for (int i = 0; i < shards; i++) {
           float y = 1f - (i + 0.5f) * 2f / shards;
           float rad = (float) Math.sqrt(Math.max(0f, 1f - y * y));
@@ -254,7 +255,7 @@ public class ShapeFxRenderer {
           Vec3 u = Math.abs(d.y) > 0.95 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
           Vec3 pu = d.cross(u).normalize(), pv = d.cross(pu).normalize();
           float w = (f.element == SpellElement.STORM ? 0.03f : 0.05f) * fade + 0.005f;
-          BeamRenderer.box(c, pose, f.pos.add(d.scale(start)), f.pos.add(d.scale(end)), pu, pv, w, 255, 255, 255, (int) (220 * fade));
+          BeamRenderer.box(c, pose, f.pos.add(d.scale(start)), f.pos.add(d.scale(end)), pu, pv, w, sr, sg, sb, (int) (140 * fade));
         }
         ring(c, pose, f.pos, rr * 1.2f, 0.05f * fade + 0.01f, 0f, TAU, 24, r, g, b, (int) (200 * fade));
       }

@@ -213,8 +213,10 @@ public final class LowCostEffects {
       var source = com.arcane.execution.Pierce.spell(context.level(), context.caster());
       for (Vec3 center : centers) {
         context.level().playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5f, 1.4f);
-        context.level().sendParticles(ParticleTypes.EXPLOSION, center.x, center.y + 0.5, center.z, 1, 0, 0, 0, 0);
-        context.level().sendParticles(ParticleTypes.CLOUD, center.x, center.y + 0.3, center.z, 16, radius * 0.3, 0.1, radius * 0.3, 0.12);
+        // poeira e lascas da terra num anel do tamanho do estrondo (antes: explosao e nuvem do jogo base, que tapavam a cena)
+        com.arcane.fx.Fx.ring(context.level(), context.caster(), center, radius, com.arcane.execution.SpellElement.EARTH, com.arcane.fx.Fx.Role.IMPACT, 3.0);
+        com.arcane.fx.Fx.burst(context.level(), context.caster(), center.add(0, 0.3, 0), com.arcane.execution.SpellElement.EARTH,
+            com.arcane.fx.Fx.Role.REACTION, 10, radius * 0.3, 0.04, 1.2f, 0x8A7A66);
       }
       Set<Entity> seen = new LinkedHashSet<>();
       for (Vec3 center : centers) {

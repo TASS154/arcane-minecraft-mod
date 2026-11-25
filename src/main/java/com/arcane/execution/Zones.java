@@ -224,8 +224,9 @@ public final class Zones {
       var rnd = level.random;
       for (int i = 0; i < n; i++) {
         var pos = zone.shell.get(rnd.nextInt(zone.shell.size()));
-        if (kind == 1) level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0.1, 0.1, 0.1, 0.01);
-        else level.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0.4, 0.4, 0.4, 0.3);
+        Vec3 at = Vec3.atCenterOf(pos);
+        if (kind == 1) com.arcane.fx.Fx.burst(level, null, at, element, com.arcane.fx.Fx.Role.TRAIL, 1, 0.1, 0.01);
+        else com.arcane.fx.Fx.burst(level, null, at, element, com.arcane.fx.Fx.Role.IMPACT, 4, 0.4, 0.3);
       }
       if (kind == 2) com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.IMPACT, zone.position.add(0, 1, 0), Vec3.ZERO, (float) radius, element.color(), element.ordinal(), 16);
     }
@@ -238,11 +239,9 @@ public final class Zones {
     var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get();
     domainFx(zone, 2);
     level.playSound(null, zone.position.x, zone.position.y, zone.position.z, com.arcane.registry.ModSounds.DOMAIN_BREAK.get(), net.minecraft.sounds.SoundSource.PLAYERS, 1.3f, 1.0f);
+    com.arcane.fx.Fx.shellSparks(level, zone.context.caster(), zone.shell, SpellElement.of(zone.context.plan()));
     for (var pos : zone.shell) {
-      if (level.getBlockState(pos).is(barrier)) {
-        level.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.02);
-        level.removeBlock(pos, false);
-      }
+      if (level.getBlockState(pos).is(barrier)) level.removeBlock(pos, false);
     }
   }
 

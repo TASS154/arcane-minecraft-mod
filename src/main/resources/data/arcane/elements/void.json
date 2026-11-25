@@ -1,0 +1,24 @@
+{
+  "color": "#9B5AE6",
+  "secondary": "#1A0A2E",
+  "sprite": "void",
+  "additive": false,
+  "light": 10,
+  "motion": {
+    "gravity": 0.015,
+    "friction": 0.92,
+    "life": [
+      18,
+      32
+    ],
+    "size": 0.12,
+    "jitter": 0.02,
+    "spiral": -0.12,
+    "flicker": 0.0
+  },
+  "decal": "scar",
+  "sounds": {
+    "cast": "arcane:element.void.cast",
+    "impact": "arcane:element.void.impact"
+  }
+}

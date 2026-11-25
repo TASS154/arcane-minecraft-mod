@@ -1,0 +1,24 @@
+{
+  "color": "#FFEB5A",
+  "secondary": "#7FC8FF",
+  "sprite": "bolt",
+  "additive": true,
+  "light": 15,
+  "motion": {
+    "gravity": 0,
+    "friction": 0.8,
+    "life": [
+      5,
+      9
+    ],
+    "size": 0.16,
+    "jitter": 0.05,
+    "spiral": 0.0,
+    "flicker": 0.5
+  },
+  "decal": "scorch",
+  "sounds": {
+    "cast": "arcane:element.storm.cast",
+    "impact": "arcane:element.storm.impact"
+  }
+}

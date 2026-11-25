@@ -28,6 +28,19 @@ public final class ModSounds {
   public static final RegistryObject<SoundEvent> GOLEM_SLAM = register("golem_slam");
   public static final RegistryObject<SoundEvent> GOLEM_HUM = register("golem_hum");
 
+  /** Sons por elemento (conjuracao e impacto, 3 variacoes cada) e das reacoes; gerados por tools/gen_sounds.py --elements. */
+  public static final java.util.Map<String, RegistryObject<SoundEvent>> ELEMENT = new java.util.LinkedHashMap<>();
+
+  static {
+    for (com.arcane.execution.SpellElement e : com.arcane.execution.SpellElement.values()) {
+      String id = e.name().toLowerCase(java.util.Locale.ROOT);
+      ELEMENT.put("element." + id + ".cast", register("element." + id + ".cast"));
+      ELEMENT.put("element." + id + ".impact", register("element." + id + ".impact"));
+    }
+    ELEMENT.put("reaction.steam", register("reaction.steam"));
+    ELEMENT.put("reaction.shatter", register("reaction.shatter"));
+  }
+
   private ModSounds() {}
 
   private static RegistryObject<SoundEvent> register(String name) {

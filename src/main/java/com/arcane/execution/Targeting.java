@@ -73,7 +73,7 @@ public final class Targeting {
       SpellElement element = SpellElement.of(ctx.plan());
       com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.IMPACT, hitPoint,
           look.scale(-1), 0.9f, element.color(), element.ordinal(), 12);
-      ElementSounds.playImpact(level, hitPoint, element);
+      com.arcane.fx.Fx.impact(level, caster, hitPoint, null, element, SpellElement.trailOf(ctx.plan()), 1f);
       WorldScars.leave(ctx, hitPoint);
       com.arcane.network.ModNetwork.sendBeam(level, beamStart, hitPoint, element.color(), element.ordinal(), 14);
     }

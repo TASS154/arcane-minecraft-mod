@@ -28,6 +28,8 @@ Não use `docs/arquivo/DOCUMENTACAO_COMPLETA.md` como fonte: está obsoleto (jul
 - Nunca aceite EULA, nunca apague `run/world` nem saves, não adicione dependências sem perguntar.
 - Um commit por fase ou rodada, mensagem em português no estilo do repo (frase descritiva, sem prefixo). Atualize
   `docs/STATUS.md` ao fim de cada fase.
+- Partícula ou som de elemento: use a fachada `com.arcane.fx.Fx` (e `data/arcane/elements/<id>.json`), nunca
+  `ParticleTypes`/`SoundEvents` direto nos caminhos quentes (`VanillaFxUsageTest` confere).
 - Valores provisórios ficam em config (`ArcaneConfig`) ou em constantes nomeadas, nunca espalhados.
 
 ## Build e testes
@@ -58,5 +60,7 @@ $env:JAVA_HOME = "$env:USERPROFILE\.gradle\jdks\eclipse_adoptium-17-amd64-window
   - `gen_textures.py`, `gen_art_vfx.py`, `gen_art_anim.py`, `gen_art_ritual.py`, `gen_item_models.py`,
     `gen_hydra_texture.py`, `gen_mage_skins.py`, `gen_seal_texture.py`, `gen_summon_models.py`, `gen_scepter_models.py`,
     `gen_ruins_assets.py`: arte.
-  - `gen_sounds.py`: sons sintetizados. `gen_data.py`: receitas e dados. `gen_test_structure.py`: estruturas dos testes.
+  - `gen_sounds.py`: sons sintetizados (`--elements` só os de elemento). `gen_art_vfx.py --element-fx`: sprites de elemento.
+  - `dev/contact_sheet.py`: folha de contato elemento × forma (escreva `elementos` em `run/arcane_autotest.flag`).
+  - `gen_data.py`: receitas e dados. `gen_test_structure.py`: estruturas dos testes.
 - Depois de mudar `glyph_table.py`: `python tools/gen_glyphs.py` e `python tools/gen_glyph_docs.py`.

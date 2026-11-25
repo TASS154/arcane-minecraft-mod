@@ -51,19 +51,43 @@ public final class LairDungeon {
    */
   public static Map<BlockPos, Room> build(ServerLevel level, BlockPos chamber, BlockPos entrance) {
     // dois sorteios: a planta (posicoes e tipos) so depende do covil; a decoracao usa outro, para a planta ser sempre a mesma
-    RandomSource r = RandomSource.create(chamber.asLong() * 0x9E3779B97F4A7C15L ^ 0x4C41495244L);
     RandomSource deco = RandomSource.create(chamber.asLong() ^ 0x5DEECE66DL);
-    int rooms = 5 + r.nextInt(6);
-    List<BlockPos> placed = new ArrayList<>();
     Map<BlockPos, Room> types = new java.util.LinkedHashMap<>();
+    for (Step step : plan(chamber, entrance)) {
+      corridor(level, step.from(), step.at(), step.bend(), deco);
+      room(level, step.at(), step.type(), deco);
+      types.put(step.at(), step.type());
+    }
+    // ramo ate a camara: um corredor que desce da entrada ate a parede da cupula (a camara abre por ele tambem)
+    corridor(level, entrance, chamber.offset(HydraLairs.CHAMBER_R + 1, 0, 0), true, deco);
+    return types;
+  }
+
+  /** Uma sala da planta: de onde sai o corredor, onde fica a sala, o tipo e o lado da dobra do corredor. */
+  public record Step(BlockPos from, BlockPos at, Room type, boolean bend) {}
+
+  /** Salas sorteadas (5 a 10) e tentativas por sala antes de desistir de um rumo. */
+  static final int MIN_ROOMS = 5, MAX_ROOMS = 10, TRIES_PER_ROOM = 20, ATTEMPTS_PER_ROOM = 8;
+
+  /**
+   * A planta da masmorra, sem tocar no mundo (so depende da posicao do covil). Cada sala sai de uma sala ja posta (ou da
+   * entrada), num rumo sorteado, a 14-22 blocos, a mais de 52 blocos da camara e sem dividir a celula de 12x12 com outra.
+   *
+   * <p>Antes, uma sala que nao achava lugar em 20 tentativas era simplesmente pulada; perto da entrada (a 38 blocos da
+   * camara) a maioria dos rumos cai dentro do raio proibido, e alguns covis saiam com 1 sala so. Agora a sala pulada e
+   * sorteada de novo a partir de outra base, ate {@code ATTEMPTS_PER_ROOM} vezes por sala.
+   */
+  public static List<Step> plan(BlockPos chamber, BlockPos entrance) {
+    RandomSource r = RandomSource.create(chamber.asLong() * 0x9E3779B97F4A7C15L ^ 0x4C41495244L);
+    int rooms = MIN_ROOMS + r.nextInt(MAX_ROOMS - MIN_ROOMS + 1);
+    List<Step> steps = new ArrayList<>();
+    List<BlockPos> placed = new ArrayList<>();
     Set<Long> used = new HashSet<>();
-    BlockPos from = entrance;
     Room[] pool = Room.values();
-    for (int i = 0; i < rooms; i++) {
-      // a proxima sala: a partir de uma sala ja posta (ou da entrada), num rumo sorteado, a 14-22 blocos, longe da camara
-      BlockPos base = placed.isEmpty() || r.nextInt(3) == 0 ? from : placed.get(r.nextInt(placed.size()));
+    for (int attempt = 0; placed.size() < rooms && attempt < rooms * ATTEMPTS_PER_ROOM; attempt++) {
+      BlockPos base = placed.isEmpty() || r.nextInt(3) == 0 ? entrance : placed.get(r.nextInt(placed.size()));
       BlockPos next = null;
-      for (int tries = 0; tries < 20 && next == null; tries++) {
+      for (int tries = 0; tries < TRIES_PER_ROOM && next == null; tries++) {
         Direction d = Direction.Plane.HORIZONTAL.getRandomDirection(r);
         int dist = 14 + r.nextInt(9);
         BlockPos cand = base.relative(d, dist).offset(r.nextInt(7) - 3, 0, r.nextInt(7) - 3);
@@ -74,16 +98,12 @@ public final class LairDungeon {
         next = cand;
       }
       if (next == null) continue;
+      int i = placed.size();
       Room type = i == 0 ? Room.GUARD : i == rooms - 1 ? Room.TREASURY : pool[r.nextInt(pool.length)];
-      boolean bend = r.nextBoolean();
-      corridor(level, base, next, bend, deco);
-      room(level, next, type, deco);
+      steps.add(new Step(base, next, type, r.nextBoolean()));
       placed.add(next);
-      types.put(next, type);
     }
-    // ramo ate a camara: um corredor que desce da entrada ate a parede da cupula (a camara abre por ele tambem)
-    corridor(level, entrance, chamber.offset(HydraLairs.CHAMBER_R + 1, 0, 0), true, deco);
-    return types;
+    return steps;
   }
 
   /** Corredor de 3x4 em L com uma dobra no meio; armadilhas de runa sorteadas no chao. */

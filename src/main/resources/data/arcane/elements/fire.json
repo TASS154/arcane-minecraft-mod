@@ -1,0 +1,24 @@
+{
+  "color": "#FF8C28",
+  "secondary": "#FFD24A",
+  "sprite": "ember",
+  "additive": false,
+  "light": 15,
+  "motion": {
+    "gravity": -0.012,
+    "friction": 0.92,
+    "life": [
+      16,
+      30
+    ],
+    "size": 0.1,
+    "jitter": 0.025,
+    "spiral": 0.0,
+    "flicker": 0.25
+  },
+  "decal": "scorch",
+  "sounds": {
+    "cast": "arcane:element.fire.cast",
+    "impact": "arcane:element.fire.impact"
+  }
+}

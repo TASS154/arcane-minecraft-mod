@@ -244,48 +244,19 @@ public final class CastingService {
         return element.color();
     }
 
+    /**
+     * Conjuracao: circulo de runas (pacote de forma), som do mod, espiral e faiscas do elemento ({@link com.arcane.fx.Fx}).
+     * O glifo Cor troca a cor do circulo e das particulas.
+     */
     private static void castFx(ServerLevel level, LivingEntity caster, SpellElement element, Inscription inscription) {
         int color = spellColor(inscription, element);
-        if (color != element.color()) {
-            castFxColored(level, caster, element, color);
-            return;
-        }
-        castFx(level, caster, element);
-    }
-
-    /** Como castFx, mas com a cor escolhida pelo glifo Cor no circulo e na espiral. */
-    private static void castFxColored(ServerLevel level, LivingEntity caster, SpellElement element, int color) {
-        level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
-                com.arcane.registry.ModSounds.SPELL_CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 0.9f + caster.getRandom().nextFloat() * 0.2f);
-        ElementSounds.playCast(level, caster.position(), element);
-        ModNetwork.sendShape(level, S2CShapeFxPacket.CAST, caster.position(), net.minecraft.world.phys.Vec3.ZERO, 1.5f, color, element.ordinal(), 16);
-        var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(((color >> 16) & 255) / 255f, ((color >> 8) & 255) / 255f, (color & 255) / 255f), 1.2f);
-        double h = caster.getBbHeight();
-        for (int i = 0; i < 24; i++) {
-            double f = i / 24.0, a = f * Math.PI * 4 + caster.getYRot() * Math.PI / 180.0;
-            double r = 0.75 - 0.35 * f;
-            level.sendParticles(dust, caster.getX() + Math.cos(a) * r, caster.getY() + f * (h + 0.4), caster.getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
-        }
-    }
-
-    private static void castFx(ServerLevel level, LivingEntity caster, SpellElement element) {
+        int override = color == element.color() ? -1 : color;
         level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
                 com.arcane.registry.ModSounds.SPELL_CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS,
                 0.8f, 0.9f + caster.getRandom().nextFloat() * 0.2f);
-        ElementSounds.playCast(level, caster.position(), element);
-        ModNetwork.sendShape(level, S2CShapeFxPacket.CAST, caster.position(), net.minecraft.world.phys.Vec3.ZERO, 1.5f, element.color(), element.ordinal(), 16);
-        level.sendParticles(element.particle(),
-                caster.getX(), caster.getY() + caster.getBbHeight() * 0.6, caster.getZ(),
-                12, 0.4, 0.4, 0.4, 0.02);
-        // Espiral que sobe dos pes ate acima da cabeca, na cor do elemento, e um clarao na mao que conjura.
-        double h = caster.getBbHeight();
-        for (int i = 0; i < 18; i++) {
-            double f = i / 18.0, a = f * Math.PI * 4 + caster.getYRot() * Math.PI / 180.0;
-            double r = 0.75 - 0.35 * f;
-            level.sendParticles(element.particle(), caster.getX() + Math.cos(a) * r, caster.getY() + f * (h + 0.4), caster.getZ() + Math.sin(a) * r,
-                    1, 0, 0, 0, 0);
-        }
+        ModNetwork.sendShape(level, S2CShapeFxPacket.CAST, caster.position(), net.minecraft.world.phys.Vec3.ZERO, 1.5f, color, element.ordinal(), 16);
+        com.arcane.fx.Fx.cast(level, caster, element, 1f, override);
         var hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.7)).add(0, -0.3, 0);
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, hand.x, hand.y, hand.z, 6, 0.1, 0.1, 0.1, 0.06);
+        com.arcane.fx.Fx.burst(level, caster, hand, element, com.arcane.fx.Fx.Role.IMPACT, 6, 0.1, 0.06, 0.7f, override);
     }
 }

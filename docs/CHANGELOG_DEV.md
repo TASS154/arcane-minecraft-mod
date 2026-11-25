@@ -708,6 +708,39 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
   `GlyphAliasesTest` (5 casos). Mapa aprovado vazio.
 - Testes: 259/259 obrigatórios; 2 opcionais falham de propósito.
 
+## Rodada de 25 nov: Fase C (visual e som dos elementos)
+
+- **Elementos em dados:** `data/arcane/elements/<id>.json` (16) com cor, família de sprites, brilho somado, luz,
+  movimento (gravidade, atrito, vida, tamanho, espalhamento, espiral, tremeluzir), decal de impacto e sons.
+  `ElementVisuals` lê; campo ausente = comportamento antigo (`ElementVisualsTest`). `ElementMapTest` continua passando.
+- **Partículas:** um tipo por família (`fx_<família>`, `fx_decal_<nome>`) com opções (elemento, papel, escala, cor,
+  face). `ElementFxParticle`: papéis corpo, rastro, impacto, decal (deitado no bloco, some em ~5 s) e reação; render
+  aditivo para luz, tempestade, tempo e som (alfa 0,7: sem clarão). `SpellElement.particle()` agora devolve isso, então
+  formas, feixe, zonas e invocações mudaram junto.
+- **Composição:** elemento 1 = corpo; elemento 2 (o segundo diferente) = rastro e impacto (`SpellElement.trailOf`;
+  projétil sincroniza os dois). Reações com visual e som próprios: vapor, estilhaço (Fogo em congelado), chiado.
+- **Sprites** (`tools/gen_art_vfx.py --element-fx`): suave, risco e fumaça com ruído; terra, água, luz, sombra, sangue,
+  tempo, natureza e som com família própria; 8 decais. Desenhados 4x e reduzidos.
+- **Fachada `Fx`:** conjuração, impacto, anel, faíscas de casca, decal, reação e som. Trocados os caminhos quentes
+  (conjuração, projétil, raio, áreas, rastro elétrico, zonas, interações, Estrondo). `ElementSounds` removida.
+  `VanillaFxUsageTest` falha se um caminho quente usar partícula ou som do jogo base e grava o resto em
+  `build/reports/vanilla_fx.txt` (242 usos em 37 arquivos, quase todos efeitos utilitários e a Hidra).
+- **Sons** (`tools/gen_sounds.py --elements`): 16 elementos × conjuração e impacto × 3 variações + vapor e estilhaço,
+  em 3 camadas (ataque, corpo, cauda), camadas normalizadas e saturação leve; sementes deterministas (crc32). Potência
+  maior: mais alto e mais grave. NÃO ouvidos por humano.
+- **Orçamento:** `fxQuality` (0,25 a 2) e `fxMaxParticlesPerCast` (400) na config do servidor; áreas usam
+  `Fx.areaCount` (linear no raio). Medido (`FxGameTests`): anel de raio 16/64/128 = 32/128/256 partículas; casca de
+  esfera de raio 128 (205.888 blocos) = 388 faíscas em 0,42 ms (antes, 2 por bloco).
+- **Folha de contato:** `elementos` em `run/arcane_autotest.flag` + `tools/dev/contact_sheet.py`. Três rodadas vistas
+  (por mim, não por humano): a 1ª mostrou câmera longe, resíduos sujando fotos e a explosão do Estrondo tapando tudo; a
+  2ª, partículas pequenas, decal flutuando (o projétil chama `onHit` antes de tocar a parede: agora usa o ponto exato) e
+  a estrela branca do impacto dominando a cena (agora na cor do elemento, com menos estilhaços e núcleo mais fraco).
+  Resultado em `docs/img/folha_elementos.jpg` e `docs/img/folha_pares.jpg`.
+- **Masmorra do covil (achado nesta fase):** o GameTest da masmorra falhou com 1 sala porque a posição do teste mudou
+  com os testes novos. Causa: sala sem lugar em 20 tentativas era pulada. Agora `LairDungeon.plan` (pura) tenta de novo
+  a partir de outra base; `LairDungeonPlanTest` varre 4.000 covis: pior caso 5 salas (o mínimo sorteado).
+- Testes: 261/261 obrigatórios; 2 opcionais (Inverter) falham de propósito.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

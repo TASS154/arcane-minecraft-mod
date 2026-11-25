@@ -137,6 +137,10 @@ public final class DevAutoTest {
       if (Files.exists(flag)) {
         armed = true;
         t = 0;
+        try {
+          contactSheet = Files.readString(flag).toLowerCase(java.util.Locale.ROOT).contains("elementos");
+        } catch (IOException ignored) {
+        }
         log = mc.gameDirectory.toPath().resolve("arcane_autotest.log");
         try {
           Files.deleteIfExists(flag);
@@ -151,8 +155,19 @@ public final class DevAutoTest {
     if (!armed || mc.player == null) return;
     if (mc.screen != null && !(mc.screen instanceof com.arcane.client.screen.RadialScreen) && !(mc.screen instanceof com.arcane.client.screen.ScepterScreen)) mc.setScreen(null);
     t++;
+    if (contactSheet) {
+      if (!DevContactSheet.step(mc, t, DevAutoTest::write, DevAutoTest::server, DevAutoTest::cmd)) {
+        mc.options.hideGui = false;
+        mc.options.pauseOnLostFocus = oldPause;
+        armed = false;
+      }
+      return;
+    }
     step(mc);
   }
+
+  /** O arquivo-gatilho pediu a folha de contato de elementos (ver {@link DevContactSheet}). */
+  private static boolean contactSheet;
 
   /** Manda direto o visual de um glifo original (o efeito de jogo e coberto pelos GameTests). */
   private static void fx(int kind, Vec3 at, Vec3 dir, float radius, int ticks) {

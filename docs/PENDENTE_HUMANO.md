@@ -33,10 +33,25 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
 - [ ] Mortes da Hidra por glifo (runas, buraco negro do Eclipse, retroceder); covil e masmorra gerados em jogo normal.
 - [ ] Hidra pegando fogo fica vermelha o tempo todo (o jogo pinta quem toma dano): decidir se incomoda.
 
+## P3b: visual novo dos elementos (Fase C, 25 nov), NÃO visto em jogo por humano
+
+Visto só nas fotos do roteiro automático (folha de contato em `run/screenshots/contact_sheet.png`; para refazer, escreva
+`elementos` em `run/arcane_autotest.flag` e abra o cliente). Confira em jogo, de dia e de noite:
+- [ ] Cada um dos 16 elementos tem cara própria (terra cai em lascas, água em gotas, luz pisca, sombra gira, sangue pinga,
+  tempo gira como relógio, natureza solta folhas, som solta arcos).
+- [ ] Composição: magia com dois elementos (Projétil + Fogo + Congelar) mostra o corpo do 1º e o rastro e o impacto do 2º.
+- [ ] Marcas no bloco atingido (chamuscado, geada, rachadura, poça, mancha, cicatriz, flores, runa) somem em ~5 s.
+- [ ] Reações: vapor (Fogo em alvo molhado), estilhaço (Fogo em alvo congelado), chiado (gelo apagando fogo).
+- [ ] Brilho somado (luz, tempestade, tempo, som) não ofusca: "reduzir clarões".
+- [ ] Qualidade: `fxQuality` (0,25 a 2) e `fxMaxParticlesPerCast` na config do servidor mudam a quantidade.
+
 ## P4: sons
 
 - [ ] Todos os sons são sintetizados por `tools/gen_sounds.py`. Ouça conjuração e impacto de cada elemento e diga quais
   ficaram ruins.
+- [ ] **Sons novos por elemento (25 nov, NÃO ouvidos por humano):** 16 elementos × conjuração e impacto × 3 variações, e
+  vapor e estilhaço. Cada um em 3 camadas (ataque, corpo, cauda); a potência deixa mais alto e mais grave. Os de terra e
+  sangue saíram os mais altos (graves); diga se incomodam. Substituíram os sons do jogo base que cada elemento usava.
 
 ## P5: sensação e multijogador
 

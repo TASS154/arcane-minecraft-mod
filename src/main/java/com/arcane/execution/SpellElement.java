@@ -13,8 +13,8 @@ import java.util.function.Supplier;
  * efeito precisa constar; o teste ElementMapTest confere). Nao muda a mecanica: as interacoes elementais de dano usam
  * {@link #mechanic}, o mapa antigo de 23 efeitos.
  *
- * <p>Os 8 elementos novos ainda reaproveitam as particulas dos antigos (com a cor propria no circulo, no projetil e
- * no impacto); particulas com movimento proprio, sons em sounds.json e decais de impacto ficam para depois.
+ * <p>Cores, sprite, movimento, luz, decal e sons de cada elemento vem de {@code data/arcane/elements/<id>.json}
+ * ({@link ElementVisuals}); as cores do enum sao so o padrao.
  */
 public enum SpellElement {
   ARCANE(() -> ModParticles.ARCANE_SPARK, 0xE6FAFF, 0x9FD8FF),
@@ -43,13 +43,29 @@ public enum SpellElement {
     this.secondary = secondary;
   }
 
-  public SimpleParticleType particle() { return particle.get().get(); }
+  /**
+   * Particula do elemento (corpo): a familia de sprites, o movimento e a luz do json ({@link com.arcane.fx.Fx}). Antes era
+   * um tipo simples por elemento; a particula antiga continua em {@link #legacyParticle()} (cristais, escrita).
+   */
+  public net.minecraft.core.particles.ParticleOptions particle() {
+    return com.arcane.fx.Fx.options(this, com.arcane.fx.Fx.Role.BODY, 1f, -1);
+  }
 
-  /** Cor primaria (0xRRGGBB): projetil, circulo, impacto. */
-  public int color() { return color; }
+  public SimpleParticleType legacyParticle() { return particle.get().get(); }
+
+  /** Cor primaria (0xRRGGBB): projetil, circulo, impacto. Vem de data/arcane/elements/&lt;id&gt;.json. */
+  public int color() { return ElementVisuals.of(this).color(); }
 
   /** Cor secundaria do proprio elemento (bordas), usada quando a magia nao tem um segundo elemento. */
-  public int secondary() { return secondary; }
+  public int secondary() { return ElementVisuals.of(this).secondary(); }
+
+  /** Aparencia completa (sprite, movimento, luz, decal, sons). */
+  public ElementVisuals.Visual visual() { return ElementVisuals.of(this); }
+
+  /** Cores embutidas: o padrao quando o json nao diz nada. */
+  int defaultColor() { return color; }
+
+  int defaultSecondary() { return secondary; }
 
   public static SpellElement byOrdinal(int ordinal) {
     SpellElement[] all = values();
@@ -89,6 +105,23 @@ public enum SpellElement {
       }
     }
     return ARCANE;
+  }
+
+  /**
+   * Elemento do rastro e do impacto: o segundo elemento diferente da magia; sem ele, o proprio primeiro
+   * ({@link com.arcane.fx.Fx}: o elemento 1 e o corpo, o 2 e o rastro e o impacto).
+   */
+  public static SpellElement trailOf(CompiledExecutionPlan plan) {
+    SpellElement first = null;
+    for (CompiledExecutionPlan.ExecutionSegment segment : plan.segments()) {
+      for (CompiledExecutionPlan.EffectCallCompiled effect : segment.effects()) {
+        SpellElement e = ofGlyph(effect.glyphId().getPath());
+        if (e == ARCANE) continue;
+        if (first == null) first = e;
+        else if (e != first) return e;
+      }
+    }
+    return first == null ? ARCANE : first;
   }
 
   /**

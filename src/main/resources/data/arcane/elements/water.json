@@ -1,0 +1,24 @@
+{
+  "color": "#3C8CFF",
+  "secondary": "#B8E4FF",
+  "sprite": "water",
+  "additive": false,
+  "light": 8,
+  "motion": {
+    "gravity": 0.035,
+    "friction": 0.96,
+    "life": [
+      16,
+      28
+    ],
+    "size": 0.121,
+    "jitter": 0.03,
+    "spiral": 0.0,
+    "flicker": 0.0
+  },
+  "decal": "splash",
+  "sounds": {
+    "cast": "arcane:element.water.cast",
+    "impact": "arcane:element.water.impact"
+  }
+}

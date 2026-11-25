@@ -3455,7 +3455,7 @@ public class ArcaneGameTests {
     BlockPos entrance = chamber.offset(38, 0, 0);
     var rooms = com.arcane.world.LairDungeon.build(level, chamber, entrance);
     var again = com.arcane.world.LairDungeon.build(level, chamber, entrance);
-    h.assertTrue(rooms.size() >= 3 && rooms.size() <= 10, "de 3 a 10 salas (" + rooms.size() + ")");
+    h.assertTrue(rooms.size() >= 5 && rooms.size() <= 10, "de 5 a 10 salas (" + rooms.size() + ")");
     h.assertTrue(rooms.keySet().equals(again.keySet()), "o mesmo covil gera sempre a mesma masmorra");
     for (BlockPos r : rooms.keySet()) {
       h.assertTrue(Math.hypot(r.getX() - chamber.getX(), r.getZ() - chamber.getZ()) >= 52, "as salas ficam longe da camara (que cresce)");

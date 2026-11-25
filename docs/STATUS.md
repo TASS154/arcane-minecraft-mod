@@ -53,6 +53,7 @@ mas ainda não confirmou cada item.
 | Foco não vê através de parede | Mesmo defeito, mas passava sem testar nada (falso positivo). Corrigido junto. |
 | Desenho por proximidade | Instável; causa não investigada (Fase D). |
 | Golpe de cauda da Hidra | Instável; a mensagem mostra vida, distância e dano (Fase D). |
+| Masmorra do covil com 1 sala | **Corrigido (25 nov):** salas sem lugar eram puladas; `LairDungeonPlanTest`. |
 | Pilar olhando de muito alto, Parar o Tempo | Falharam ao acaso em rodadas antigas (Fase D). |
 | `/kill` não matou a Hidra do estágio 7 | Visto em 24 nov; causa não investigada (Fase D). |
 | Crash "Pose stack not empty" | **Corrigido (25 nov):** voar com Flutuar estando invisível pelo glifo empurrava a pose duas vezes e desfazia uma. |
@@ -79,6 +80,10 @@ A higiene; B auditoria de glifos e aliases; C visual dos elementos; D robustez d
 F balanço por simulação; G proposta de tags de estado. Andamento por fase no fim deste arquivo.
 
 ## Andamento das fases
+
+- **C (visual dos elementos), 25 nov: feita.** Elementos em json, fachada `Fx`, sprites e sons novos, composição,
+  reações, orçamento linear no raio. Visto só pelo roteiro (`docs/img/folha_elementos.jpg`); NÃO visto nem ouvido por
+  humano. 261/261.
 
 - **B (auditoria de glifos), 25 nov: B1 a B3 feitas; B4 aguarda aprovação.** Relatório em `docs/AUDITORIA_GLIFOS.md`
   (marque `[x]`). Inverter ignora o conhecimento do glifo oposto (GameTests opcionais `GlyphAuditGameTests` falham de

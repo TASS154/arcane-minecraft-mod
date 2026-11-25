@@ -1,0 +1,24 @@
+{
+  "color": "#78EB46",
+  "secondary": "#2E7D32",
+  "sprite": "venom",
+  "additive": false,
+  "light": 12,
+  "motion": {
+    "gravity": 0.03,
+    "friction": 0.9,
+    "life": [
+      14,
+      24
+    ],
+    "size": 0.09,
+    "jitter": 0.015,
+    "spiral": 0.0,
+    "flicker": 0.0
+  },
+  "decal": "stain",
+  "sounds": {
+    "cast": "arcane:element.venom.cast",
+    "impact": "arcane:element.venom.impact"
+  }
+}

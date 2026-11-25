@@ -34,10 +34,13 @@ public final class ElementInteractions {
         // Fogo em alvo molhado: vira vapor, apaga o fogo e seca a criatura.
         target.clearFire();
         Wetness.dry(target);
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, target.getX(), target.getY() + 1.0, target.getZ(), 10, 0.3, 0.4, 0.3, 0.04);
+        com.arcane.fx.Fx.reaction(level, null, target.position().add(0, 1.0, 0), com.arcane.fx.Fx.Reaction.STEAM);
       } else if (rule.after().equals("extinguish") && target.isOnFire()) {
         target.clearFire();
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, target.getX(), target.getY() + 1.0, target.getZ(), 6, 0.2, 0.3, 0.2, 0.02);
+        com.arcane.fx.Fx.reaction(level, null, target.position().add(0, 1.0, 0), com.arcane.fx.Fx.Reaction.HISS);
+      } else if (rule.when().contains("frozen") && element == SpellElement.FIRE) {
+        // Fogo em alvo congelado (a regra so soma dano): o gelo estilhaca. So visual.
+        com.arcane.fx.Fx.reaction(level, null, target.position().add(0, 1.0, 0), com.arcane.fx.Fx.Reaction.SHATTER);
       }
     }
   }

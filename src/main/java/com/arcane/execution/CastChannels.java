@@ -131,11 +131,9 @@ public final class CastChannels {
   private static void releaseShell(ServerPlayer player, Active a) {
     if (a.shell.isEmpty() || !(player.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
     var barrier = com.arcane.registry.ModBlocks.ARCANE_BARRIER.get();
+    com.arcane.fx.Fx.shellSparks(level, player, new java.util.ArrayList<>(a.shell), com.arcane.execution.SpellElement.ARCANE);
     for (var pos : a.shell) {
-      if (level.getBlockState(pos).is(barrier)) {
-        level.sendParticles(com.arcane.registry.ModParticles.ARCANE_SPARK.get(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.02);
-        level.removeBlock(pos, false);
-      }
+      if (level.getBlockState(pos).is(barrier)) level.removeBlock(pos, false);
     }
     a.shell.clear();
   }

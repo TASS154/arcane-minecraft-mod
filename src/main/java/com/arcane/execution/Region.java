@@ -257,11 +257,11 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
       // Magia mantida: o desenho fica de pe (o cliente reaproveita o mesmo efeito em vez de recomecar a animacao).
       com.arcane.network.ModNetwork.sendShape(ctx.level(), type, center, dir, (float) radius, element.color(), element.ordinal(),
           S2CShapeFxPacket.SUSTAIN + CastChannels.HOLD_INTERVAL_TICKS + 6);
-      if (!CastChannels.holdPulse()) ElementSounds.playImpact(ctx.level(), center, element);
+      if (!CastChannels.holdPulse()) com.arcane.fx.Fx.sound(ctx.level(), center, element, com.arcane.fx.Fx.SoundRole.IMPACT, (float) Math.max(1.0, Math.sqrt(radius / 4.0)));
       return;
     }
     com.arcane.network.ModNetwork.sendShape(ctx.level(), type, center, dir, (float) radius, element.color(), element.ordinal(),
         type == S2CShapeFxPacket.WAVE ? 14 : type == S2CShapeFxPacket.PILLAR ? 18 : 16);
-    ElementSounds.playImpact(ctx.level(), center, element);
+    com.arcane.fx.Fx.sound(ctx.level(), center, element, com.arcane.fx.Fx.SoundRole.IMPACT, (float) Math.max(1.0, Math.sqrt(radius / 4.0)));
   }
 }

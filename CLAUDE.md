@@ -19,7 +19,9 @@ Não use `docs/arquivo/DOCUMENTACAO_COMPLETA.md` como fonte: está obsoleto (jul
 - **Não duplicar glifo:** antes de criar um glifo, procure em `tools/glyph_table.py` e `docs/GLIFOS.md` um que já faça o mesmo
   (ou que vire o mesmo com um parâmetro ou `kind`). Ids antigos renomeados ou fundidos entram no mapa de aliases, para
   grimórios e inscrições salvos continuarem válidos.
-- Todo código novo vem com GameTest (`src/main/java/com/arcane/gametest/`) ou JUnit (`src/test/java/`).
+- Todo código novo vem com GameTest (`src/main/java/com/arcane/gametest/`, uma classe por área, utilitários em
+  `GameTestSupport`) ou JUnit (`src/test/java/`). Teste que mexe em estado global (condutor, zonas) ganha lote próprio.
+- Jogador falso em GameTest: crie com `TestPlayers.add(h, player)` (sai do mundo quando o teste acaba).
 - Se um teste instável falhar, investigue a causa raiz; não só rode de novo.
 - GameTest `required = false` documenta uma regra ainda não cumprida (falha sem derrubar a suite; ex.: `GlyphAuditGameTests`).
   Quando a correção for aprovada e feita, torne-o obrigatório.

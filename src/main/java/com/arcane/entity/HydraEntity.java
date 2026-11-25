@@ -66,15 +66,15 @@ import java.util.UUID;
  */
 public class HydraEntity extends Monster {
   public static final int MAX_STAGE = 14;
-  private static final EntityDataAccessor<Integer> STAGE = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> STAGE = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   /** Poder sendo usado agora (0 = nenhum), para o modelo abrir as bocas / erguer as cabecas. */
-  private static final EntityDataAccessor<Integer> POWER = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> POWER = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   /** Selos ainda inteiros: um bit por pilar da camara (0 = desperta). */
-  private static final EntityDataAccessor<Integer> SEALS = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> SEALS = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   /** Centro da camara (para desenhar as correntes ate os selos). */
-  private static final EntityDataAccessor<BlockPos> HOME = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.BLOCK_POS);
-  private static final UUID HEALTH_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a01");
-  private static final UUID DAMAGE_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a02");
+  static final EntityDataAccessor<BlockPos> HOME = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.BLOCK_POS);
+  static final UUID HEALTH_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a01");
+  static final UUID DAMAGE_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a02");
 
   public static final int BREATH = 1, SWEEP = 2, ROAR = 3, STORM = 4, METEOR = 5, CATACLYSM = 6, DEVASTATE = 7;
   /** A partir deste estagio a Hidra destroi o terreno. */
@@ -85,22 +85,22 @@ public class HydraEntity extends Monster {
   public static final int STRIKE_WARNING = 30;
 
   private final ServerBossEvent bossBar = new ServerBossEvent(Component.translatable("entity.arcane.hydra"), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.NOTCHED_10);
-  private final Set<UUID> fighters = new HashSet<>();
+  final Set<UUID> fighters = new HashSet<>();
   private int lairIndex = -1;
-  private int powerCooldown = 60;
-  private int powerTicks;
+  int powerCooldown = 60;
+  int powerTicks;
   private double playerFactor = 1.0;
   /** Grimorios que a Hidra devorou (itens inteiros, devolvidos ao morrer); as magias deles viram poderes dela. */
-  private final java.util.List<net.minecraft.world.item.ItemStack> devoured = new java.util.ArrayList<>();
-  private static final UUID SPEED_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a03");
+  final java.util.List<net.minecraft.world.item.ItemStack> devoured = new java.util.ArrayList<>();
+  static final UUID SPEED_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a03");
   public static final int DEVOURED_SPELL = 8;
 
   // ------------------------------------------------------------------ cabecas independentes
   /** Alvo de cada cabeca (id da entidade no cliente, -1 = nenhum): cada cabeca olha e morde o seu. */
   @SuppressWarnings("unchecked")
-  private static final EntityDataAccessor<Integer>[] HEAD_TARGET = new EntityDataAccessor[9];
+  static final EntityDataAccessor<Integer>[] HEAD_TARGET = new EntityDataAccessor[9];
   /** Cabecas mordendo agora (bit i = cabeca i), para a animacao do bote. */
-  private static final EntityDataAccessor<Integer> BITING = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> BITING = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   static {
     for (int i = 0; i < 9; i++) HEAD_TARGET[i] = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   }
@@ -109,37 +109,37 @@ public class HydraEntity extends Monster {
   private final int[] spellCooldown = new int[9];
 
   /** Cabecas vivas (bit i): cada limiar de vida arranca uma cabeca ao acaso (fases da luta). */
-  private static final EntityDataAccessor<Integer> ALIVE = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> ALIVE = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   /** Estados para a animacao: furia, fraqueza, despertando, morrendo, debatendo-se (selada). */
-  private static final EntityDataAccessor<Integer> FLAGS = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> FLAGS = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   /** Tick em que comecou a animacao longa atual (despertar). */
-  private static final EntityDataAccessor<Integer> ANIM_START = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> ANIM_START = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   /** Glifo original da Hidra (0..6, a ordem de HydraLairs.ORIGINALS); muda a cor, detalhes do modelo e a morte. */
-  private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   /** Gesto ocioso atual (rosnar, rugir, bater a cauda...) e quando comecou: so para a animacao e os sons. */
-  private static final EntityDataAccessor<Integer> IDLE = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
-  private static final EntityDataAccessor<Integer> IDLE_START = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> IDLE = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
+  static final EntityDataAccessor<Integer> IDLE_START = SynchedEntityData.defineId(HydraEntity.class, EntityDataSerializers.INT);
   public static final int IDLE_GROWL = 1, IDLE_ROAR = 2, IDLE_TAIL = 3, IDLE_SHAKE = 4, IDLE_SNIFF = 5, IDLE_YAWN = 6, IDLE_SNORE = 7, IDLE_TICKS = 40;
   public static final int F_BERSERK = 1, F_WEAK = 2, F_AWAKEN = 4, F_DYING = 8, F_STRAIN = 16;
   public static final int HEAL = 9, ORIGINAL = 10, AWAKEN_TICKS = 70, DEATH_TICKS = 110;
   public static final int ORIGINAL_COOLDOWN = 20 * 180;
-  private static final UUID ENRAGE_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a04");
-  private int weakTicks, originalCooldown = 600, strainTicks;
-  private final java.util.ArrayDeque<Float> healthHistory = new java.util.ArrayDeque<>();
+  static final UUID ENRAGE_ID = UUID.fromString("6b1c33a1-6f0a-4c39-9c51-1f2d8d4e6a04");
+  int weakTicks, originalCooldown = 600, strainTicks;
+  final java.util.ArrayDeque<Float> healthHistory = new java.util.ArrayDeque<>();
   /** Fotos dos jogadores durante a luta (so a Hidra do Retroceder usa): posicao, vida, fome e equipamento. */
-  private record Snapshot(Vec3 pos, float health, int food, java.util.List<net.minecraft.world.item.ItemStack> gear) {}
-  private final java.util.Map<UUID, java.util.List<Snapshot>> snapshots = new java.util.HashMap<>();
+  record Snapshot(Vec3 pos, float health, int food, java.util.List<net.minecraft.world.item.ItemStack> gear) {}
+  final java.util.Map<UUID, java.util.List<Snapshot>> snapshots = new java.util.HashMap<>();
   /**
    * A vida do Minecraft tem teto de 1024. Acima disso a Hidra fica "mais dura": o dano recebido e dividido por este
    * fator, entao a vida efetiva e vida x dureza (a barra de chefe mostra a fracao, que e a mesma).
    */
-  private double toughness = 1.0;
+  double toughness = 1.0;
   /** Dentro do covil (presa ao raio da camara) ou ja solta na superficie. */
   private boolean inLair;
   private int awakeTicks, idleTicks, breakoutTicks = -1, rampageCooldown = 100;
 
   /** Golpe de devastacao anunciado (circulo vermelho no chao) esperando a hora de cair. */
-  private static final class Strike {
+  static final class Strike {
     final Vec3 at;
     final float radius;
     int ticks;
@@ -151,7 +151,16 @@ public class HydraEntity extends Monster {
     }
   }
 
-  private final List<Strike> strikes = new ArrayList<>();
+  final List<Strike> strikes = new ArrayList<>();
+
+  /** Usa um poder agora (testes e comandos): ver {@link HydraPowers#use}. */
+  public void use(int choice, LivingEntity target) { HydraPowers.use(this, choice, target); }
+
+  /** Sorteio da entidade, para as classes de poderes, fases e morte (random e protegido no Entity). */
+  net.minecraft.util.RandomSource rng() { return random; }
+
+  /** Dados sincronizados (entityData e protegido no Entity). */
+  net.minecraft.network.syncher.SynchedEntityData data() { return entityData; }
 
   public HydraEntity(EntityType<? extends Monster> type, Level level) {
     super(type, level);
@@ -335,7 +344,7 @@ public class HydraEntity extends Monster {
             .withStyle(ChatFormatting.RED), false);
       }
     }
-    use(ROAR, null);
+    HydraPowers.use(this, ROAR, null);
   }
 
   // ------------------------------------------------------------------ jogadores
@@ -365,7 +374,7 @@ public class HydraEntity extends Monster {
     setHealth(frac * getMaxHealth());
   }
 
-  private static void setModifier(AttributeInstance attr, UUID id, double amount) {
+  static void setModifier(AttributeInstance attr, UUID id, double amount) {
     if (attr == null) return;
     attr.removeModifier(id);
     if (amount > 0) attr.addTransientModifier(new AttributeModifier(id, "arcane hydra players", amount, AttributeModifier.Operation.MULTIPLY_BASE));
@@ -407,7 +416,7 @@ public class HydraEntity extends Monster {
 
   public boolean flag(int f) { return (entityData.get(FLAGS) & f) != 0; }
 
-  private void setFlag(int f, boolean on) {
+  void setFlag(int f, boolean on) {
     int v = entityData.get(FLAGS);
     entityData.set(FLAGS, on ? v | f : v & ~f);
   }
@@ -486,7 +495,7 @@ public class HydraEntity extends Monster {
     boolean berserk = flag(F_BERSERK);
     if (tickCount % 20 == 3) {
       // foco por ameaca: cada alvo ganha cabecas em proporcao a sua mana maxima (criaturas contam 20)
-      java.util.List<LivingEntity> foes = new java.util.ArrayList<>(enemiesWithin(28 + scaleFor(stage()) * 3));
+      java.util.List<LivingEntity> foes = new java.util.ArrayList<>(HydraPowers.enemiesWithin(this, 28 + scaleFor(stage()) * 3));
       foes.removeIf(e -> e instanceof Player p && (p.isCreative() || p.isSpectator()));
       foes.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(this)));
       if (getTarget() != null && getTarget().isAlive()) { foes.remove(getTarget()); foes.add(0, getTarget()); }
@@ -633,7 +642,7 @@ public class HydraEntity extends Monster {
   }
 
   /** Lanca uma das magias devoradas no alvo (com o seu proprio poder de criatura). */
-  private void castDevoured(LivingEntity target) {
+  void castDevoured(LivingEntity target) {
     var spells = devouredSpells();
     if (spells.isEmpty() || !(level() instanceof ServerLevel sl)) return;
     var spell = spells.get(random.nextInt(spells.size()));
@@ -644,7 +653,7 @@ public class HydraEntity extends Monster {
   }
 
   /** Vida alvo: o que cabe no atributo (ate 1024) vira vida; o resto vira dureza. */
-  private void applyHealth(double wanted) {
+  void applyHealth(double wanted) {
     double cap = 1024.0;
     getAttribute(Attributes.MAX_HEALTH).setBaseValue(Math.min(cap, wanted));
     toughness = Math.max(1.0, wanted / cap);
@@ -704,7 +713,7 @@ public class HydraEntity extends Monster {
     tickRampage();
     if (powerTicks > 0) {
       powerTicks--;
-      if (power() == BREATH) breathTick();
+      if (power() == BREATH) HydraPowers.breathTick(this);
       if (powerTicks == 0) entityData.set(POWER, 0);
       return;
     }
@@ -731,165 +740,22 @@ public class HydraEntity extends Monster {
     else if (s >= 4 && roll < 66) choice = ROAR;
     else if (s >= 3 && d < sweepRadius(s) + 1) choice = SWEEP;
     else choice = BREATH;
-    use(choice, target);
+    HydraPowers.use(this, choice, target);
     // magias da Hidra inteira (metade das cabecas para o ceu): ela fica fraca enquanto conjura
     if (choice == METEOR || choice == STORM || choice == CATACLYSM || choice == DEVASTATE || choice == HEAL) markWeak(powerTicks + 20);
   }
 
-  private void markWeak(int ticks) {
+  void markWeak(int ticks) {
     weakTicks = Math.max(weakTicks, ticks);
     setFlag(F_WEAK, true);
   }
 
-  private static double sweepRadius(int s) { return Math.min(20.0, 4.0 * Math.pow(reach(s), 0.8)); }
+  static double sweepRadius(int s) { return Math.min(20.0, 4.0 * Math.pow(reach(s), 0.8)); }
 
   // ------------------------------------------------------------------ poderes
-  /** Usa um poder. {@code target} pode ser nulo (o rugido de quando desperta). */
-  public void use(int choice, LivingEntity target) {
-    if (!(level() instanceof ServerLevel sl)) return;
-    entityData.set(POWER, choice);
-    int s = stage();
-    double reach = reach(s);
-    double dmg = getAttributeValue(Attributes.ATTACK_DAMAGE);
-    switch (choice) {
-      case BREATH -> {
-        powerTicks = 30;
-        sl.playSound(null, blockPosition(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 2.0f, 1.6f - s * 0.06f);
-      }
-      case SWEEP -> {
-        powerTicks = 10;
-        double r = sweepRadius(s);
-        for (LivingEntity e : enemiesWithin(r)) {
-          e.hurt(damageSources().mobAttack(this), (float) (dmg * 0.9));
-          Vec3 push = e.position().subtract(position()).normalize().scale(1.2 + reach * 0.3);
-          e.push(push.x, 0.5 + reach * 0.1, push.z);
-          e.hurtMarked = true;
-        }
-        sl.sendParticles(ParticleTypes.SWEEP_ATTACK, getX(), getY() + 0.5, getZ(), 12, r * 0.4, 0.2, r * 0.4, 0);
-        sl.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.3, getZ(), 6, r * 0.3, 0.1, r * 0.3, 0);
-        sl.playSound(null, blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.5f, 0.6f);
-      }
-      case ROAR -> {
-        powerTicks = 30;
-        double r = Math.min(64, 20 * Math.sqrt(reach));
-        for (LivingEntity e : enemiesWithin(r)) {
-          e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 1 + s / 6), this);
-          e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 120, s / 5), this);
-          e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 80, 0), this);
-        }
-        sl.sendParticles(ParticleTypes.SONIC_BOOM, getX(), getEyeY(), getZ(), 1, 0, 0, 0, 0);
-        ModNetwork.sendShape(sl, S2CShapeFxPacket.ORIGINAL, position(), Vec3.ZERO, (float) r, 0xB040FF, S2CShapeFxPacket.FX_ROAR, 24);
-        sl.playSound(null, blockPosition(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 4.0f, 0.5f);
-      }
-      case STORM -> {
-        powerTicks = 20;
-        int bolts = 1 + (int) (reach * 1.2);
-        List<LivingEntity> foes = enemiesWithin(40 * Math.sqrt(reach));
-        for (int i = 0; i < bolts; i++) {
-          Vec3 at = !foes.isEmpty() && random.nextInt(3) > 0 ? foes.get(random.nextInt(foes.size())).position()
-              : position().add(random.nextGaussian() * 10 * reach, 0, random.nextGaussian() * 10 * reach);
-          var bolt = EntityType.LIGHTNING_BOLT.create(sl);
-          if (bolt == null) continue;
-          bolt.moveTo(at.x, at.y, at.z);
-          bolt.setVisualOnly(false);
-          sl.addFreshEntity(bolt);
-        }
-      }
-      case METEOR -> {
-        powerTicks = 20;
-        int rocks = 2 + (int) reach;
-        int power = griefing(sl) ? 1 + (s - 1) / 4 : 0;
-        Vec3 aim = target != null ? target.position() : position();
-        for (int i = 0; i < rocks; i++) {
-          Vec3 at = aim.add(random.nextGaussian() * 6 * Math.sqrt(reach), 0, random.nextGaussian() * 6 * Math.sqrt(reach));
-          LargeFireball ball = new LargeFireball(sl, this, 0, -1.6, 0, power);
-          ball.setPos(at.x, at.y + 22 + random.nextInt(8), at.z);
-          sl.addFreshEntity(ball);
-        }
-        sl.playSound(null, blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 3.0f, 0.4f);
-      }
-      case HEAL -> {
-        powerTicks = 30;
-        heal(getMaxHealth() * 0.08f);
-        sl.sendParticles(ParticleTypes.HEART, getX(), getY() + getBbHeight(), getZ(), 20, getBbWidth() * 0.4, 1, getBbWidth() * 0.4, 0);
-        sl.playSound(null, blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 4f, 0.5f);
-      }
-      case ORIGINAL -> castOriginal(sl, target);
-      case DEVASTATE -> {
-        // aviso: um circulo vermelho em volta de cada alvo; 1,5 s depois o chao explode e some
-        powerTicks = 16;
-        Vec3 aim = target != null ? target.position() : position();
-        int n = cratersPerStrike(s);
-        float r = devastationRadius(s);
-        for (int i = 0; i < n; i++) {
-          Vec3 at = i == 0 ? aim : aim.add(random.nextGaussian() * r * 1.4, 0, random.nextGaussian() * r * 1.4);
-          announceStrike(sl, at, r, STRIKE_WARNING + i * 6);
-        }
-        sl.playSound(null, blockPosition(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.HOSTILE, 4.0f, 0.5f);
-      }
-      case CATACLYSM -> {
-        // O fim do mundo em miniatura: onda de choque enorme, cura com o dano causado e um anel de fogo.
-        powerTicks = 40;
-        double r = Math.min(48, 20 * Math.sqrt(reach));
-        float healed = 0;
-        for (LivingEntity e : enemiesWithin(r)) {
-          float before = e.getHealth();
-          e.hurt(damageSources().indirectMagic(this, this), (float) (dmg * 1.6));
-          healed += Math.max(0, before - e.getHealth());
-          Vec3 push = e.position().subtract(position()).normalize().scale(2.5);
-          e.push(push.x, 1.2, push.z);
-          e.hurtMarked = true;
-          e.setSecondsOnFire(8);
-        }
-        heal(healed * 0.5f);
-        for (int i = 0; i < 72; i++) {
-          double a = Math.PI * 2 * i / 72;
-          sl.sendParticles(ParticleTypes.FLAME, getX() + Math.cos(a) * 10, getY() + 0.3, getZ() + Math.sin(a) * 10, 2, 0.2, 0.1, 0.2, 0.05);
-          sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX() + Math.cos(a) * 18, getY() + 0.3, getZ() + Math.sin(a) * 18, 1, 0.2, 0.1, 0.2, 0.05);
-        }
-        ModNetwork.sendShape(sl, S2CShapeFxPacket.ORIGINAL, position(), Vec3.ZERO, (float) r, 0xFF5020, S2CShapeFxPacket.FX_DEVASTATE, 40);
-        sl.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY() + 1, getZ(), 3, 3, 1, 3, 0);
-        sl.playSound(null, blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 4.0f, 0.6f);
-      }
-      default -> entityData.set(POWER, 0);
-    }
-  }
 
-  /** Sopro: um cone de fogo (estagio 8+ vira sopro do dragao, que tambem seca) de cada cabeca na direcao do olhar. */
-  private void breathTick() {
-    if (!(level() instanceof ServerLevel sl)) return;
-    int s = stage();
-    LivingEntity target = getTarget();
-    if (target != null) getLookControl().setLookAt(target, 30f, 30f);
-    Vec3 look = target != null ? target.getEyePosition().subtract(getEyePosition()).normalize() : getLookAngle();
-    double range = Math.min(32, 6 * Math.pow(reach(s), 0.7) + s * 0.4);
-    Vec3 mouth = getEyePosition().add(look.scale(getBbWidth() * 0.6));
-    var particle = s >= 8 ? ParticleTypes.DRAGON_BREATH : ParticleTypes.FLAME;
-    for (int i = 0; i < 4 + heads(); i++) {
-      double f = 0.6 + random.nextDouble() * 0.6;
-      Vec3 v = look.add(random.nextGaussian() * 0.12, random.nextGaussian() * 0.12, random.nextGaussian() * 0.12).scale(f);
-      sl.sendParticles(particle, mouth.x, mouth.y, mouth.z, 0, v.x, v.y, v.z, 1.0);
-    }
-    if (powerTicks % 5 != 0) return;
-    double dmg = getAttributeValue(Attributes.ATTACK_DAMAGE) * 0.35 * Math.max(1, heads() / 2.0);
-    for (LivingEntity e : enemiesWithin(range)) {
-      Vec3 to = e.getEyePosition().subtract(mouth);
-      if (to.length() > range || to.normalize().dot(look) < 0.82) continue;
-      e.hurt(damageSources().indirectMagic(this, this), (float) dmg);
-      e.setSecondsOnFire(4);
-      if (s >= 8) e.addEffect(new MobEffectInstance(MobEffects.WITHER, 60, s >= 12 ? 1 : 0), this);
-    }
-  }
 
-  private List<LivingEntity> enemiesWithin(double r) {
-    return enemiesNear(position(), r);
-  }
 
-  private List<LivingEntity> enemiesNear(Vec3 c, double r) {
-    return level().getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(r),
-        e -> e != this && e.isAlive() && !(e instanceof HydraEntity) && !(e instanceof Player p && (p.isCreative() || p.isSpectator()))
-            && e.distanceToSqr(c) <= r * r);
-  }
 
   // ------------------------------------------------------------------ devastacao
   /** A Hidra pode destruir o terreno? (config + regra mobGriefing). */
@@ -897,7 +763,7 @@ public class HydraEntity extends Monster {
     return ArcaneConfig.HYDRA_DEVASTATION.get() && sl.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
   }
 
-  private void announceStrike(ServerLevel sl, Vec3 at, float radius, int ticks) {
+  void announceStrike(ServerLevel sl, Vec3 at, float radius, int ticks) {
     // o golpe cai no chao: desce ate o primeiro bloco solido (ate 24 abaixo)
     BlockPos p = BlockPos.containing(at);
     for (int i = 0; i < 24 && sl.isEmptyBlock(p.below()) && p.getY() > sl.getMinBuildHeight(); i++) p = p.below();
@@ -925,7 +791,7 @@ public class HydraEntity extends Monster {
    */
   public void devastate(ServerLevel sl, Vec3 at, float radius) {
     double dmg = getAttributeValue(Attributes.ATTACK_DAMAGE) * 1.2;
-    for (LivingEntity e : enemiesNear(at, radius * 1.3)) {
+    for (LivingEntity e : HydraPowers.enemiesNear(this, at, radius * 1.3)) {
       e.hurt(damageSources().explosion(this, this), (float) dmg);
       Vec3 push = e.position().subtract(at).normalize().scale(1.5);
       e.push(push.x, 1.0, push.z);
@@ -1044,39 +910,10 @@ public class HydraEntity extends Monster {
     if (flag(F_DYING)) return false;
     if (flag(F_WEAK)) amount *= 2f; // momento de fraqueza: depois de uma magia grande ou da magia original
     boolean hurt = super.hurt(source, (float) (com.arcane.execution.Pierce.is(source) ? amount : amount / toughness));
-    if (hurt && !level().isClientSide && isAlive()) checkPhases();
+    if (hurt && !level().isClientSide && isAlive()) HydraPhases.checkPhases(this);
     return hurt;
   }
 
-  /**
-   * Fases: a vida e dividida em tantas partes quantas cabecas; cada vez que cruza um limiar, uma cabeca AO ACASO cai
-   * (a ultima fica ate a morte). Cada cabeca perdida deixa a Hidra mais forte e rapida. Abaixo de 25%: furia.
-   */
-  private void checkPhases() {
-    if (!(level() instanceof ServerLevel sl)) return;
-    int n = heads();
-    float frac = getHealth() / getMaxHealth();
-    int shouldHave = Math.max(1, (int) Math.ceil(frac * n));
-    while (aliveHeads() > shouldHave) {
-      java.util.List<Integer> alive = new java.util.ArrayList<>();
-      for (int i = 0; i < n; i++) if (headAlive(i)) alive.add(i);
-      int lost = alive.get(random.nextInt(alive.size()));
-      entityData.set(ALIVE, entityData.get(ALIVE) & ~(1 << lost));
-      Vec3 at = headPos(lost, position().add(0, getBbHeight(), 0));
-      sl.sendParticles(ParticleTypes.ENCHANT, at.x, at.y, at.z, 120, 1.5, 1.5, 1.5, 1.2);
-      sl.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0, 0, 0, 0);
-      sl.playSound(null, BlockPos.containing(at), SoundEvents.WITHER_BREAK_BLOCK, SoundSource.HOSTILE, 4f, 0.5f);
-      sl.playSound(null, blockPosition(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 6f, 0.4f);
-      int gone = n - aliveHeads();
-      setModifier(getAttribute(Attributes.ATTACK_DAMAGE), ENRAGE_ID, 0.12 * gone);
-      powerCooldown = Math.min(powerCooldown, 20);
-    }
-    boolean berserk = frac < 0.25f;
-    if (berserk != flag(F_BERSERK)) {
-      setFlag(F_BERSERK, berserk);
-      if (berserk) sl.playSound(null, blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 5f, 0.6f);
-    }
-  }
 
   @Override
   public boolean isPushable() { return !sealed() && super.isPushable(); }
@@ -1173,48 +1010,6 @@ public class HydraEntity extends Monster {
   }
 
   // ------------------------------------------------------------------ magia original, passos, caca, morte
-  /**
-   * A magia original da Hidra (o glifo que ela guarda), a cada 3 minutos: metade das cabecas ergue e a magia cai na
-   * regiao. Depois dela, 5 s de fraqueza (dano dobrado, sem mordidas).
-   */
-  private void castOriginal(ServerLevel sl, LivingEntity target) {
-    powerTicks = 40;
-    originalCooldown = ORIGINAL_COOLDOWN;
-    markWeak(40 + 100);
-    double r = 32 + scaleFor(stage()) * 2;
-    var players = sl.getEntitiesOfClass(Player.class, getBoundingBox().inflate(r), p -> !p.isCreative() && !p.isSpectator());
-    ModNetwork.sendShape(sl, S2CShapeFxPacket.ORIGINAL, position(), Vec3.ZERO, (float) r, 0xFFFFFF, Math.max(0, variant()), 80);
-    switch (variant()) {
-      case 0 -> players.forEach(p -> { // Parar o Tempo: todos quase parados
-        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 100, 6));
-        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DIG_SLOWDOWN, 100, 3));
-      });
-      case 1 -> { // Retroceder: a Hidra volta a vida que tinha ha 20 s
-        Float past = healthHistory.peekFirst();
-        if (past != null && past > getHealth()) setHealth(past);
-      }
-      case 2 -> players.forEach(p -> { // Colapso do Espaco: todos sugados para perto dela
-        Vec3 to = position().add(p.position().subtract(position()).normalize().scale(getBbWidth() + 3));
-        p.teleportTo(to.x, to.y, to.z);
-        p.hurt(damageSources().magic(), 6f);
-      });
-      case 3 -> { // Aniquilar: cratera gigante no alvo
-        if (target != null) devastate(sl, target.position(), devastationRadius(stage()) * 1.5f + 6);
-      }
-      case 4 -> players.forEach(p -> { // Eclipse: escuridao e definhar
-        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DARKNESS, 200, 0));
-        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WITHER, 200, 1));
-      });
-      case 5 -> { // Genese: a Hidra se regenera
-        heal(getMaxHealth() * 0.2f);
-        addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION, 200, 1));
-      }
-      case 6 -> players.forEach(p -> // Inversao da Gravidade: todos jogados para cima
-          p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.LEVITATION, 60, 3)));
-      default -> { }
-    }
-    sl.playSound(null, blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 6f, 0.4f);
-  }
 
   /** Passos pesados (estagio 8+): andando, esmaga plantas, neve e folhas e aplaina saliencias de 1 bloco sob os pes. */
   private void heavySteps() {
@@ -1264,7 +1059,7 @@ public class HydraEntity extends Monster {
       sl.sendParticles(ParticleTypes.ENCHANT, getX(), getY() + getBbHeight() * 0.6, getZ(), n, getBbWidth() * 0.5, getBbHeight() * 0.5, getBbWidth() * 0.5, 0.6 + f * 2);
       sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + getBbHeight() * 0.6, getZ(), n / 3, getBbWidth() * 0.4, getBbHeight() * 0.4, getBbWidth() * 0.4, 0.05 + f * 0.3);
       if (deathTime % Math.max(2, 20 - deathTime / 6) == 0) sl.playSound(null, blockPosition(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.HOSTILE, 3f, 0.5f + f);
-      if (deathTime == DEATH_TICKS - 10) deathEffect(sl);
+      if (deathTime == DEATH_TICKS - 10) HydraDeath.deathEffect(this, sl);
     }
     if (deathTime >= DEATH_TICKS && !level().isClientSide() && !isRemoved()) {
       level().broadcastEntityEvent(this, (byte) 60);
@@ -1272,76 +1067,5 @@ public class HydraEntity extends Monster {
     }
   }
 
-  /** O efeito final de cada glifo original. */
-  private void deathEffect(ServerLevel sl) {
-    Vec3 c = position().add(0, getBbHeight() * 0.5, 0);
-    double r = 24 + scaleFor(stage()) * 3;
-    var around = sl.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(r), e -> e != this && e.isAlive());
-    ModNetwork.sendShape(sl, S2CShapeFxPacket.ORIGINAL, c, Vec3.ZERO, (float) r, 0xFFFFFF, Math.max(0, variant()), 100);
-    switch (variant()) {
-      case 0 -> around.forEach(e -> { // tempo parado: tudo em volta congela por 10 s
-        e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 200, 9));
-        e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.JUMP, 200, 250));
-      });
-      case 1 -> { // retroceder: cada jogador volta a um momento qualquer da luta (posicao, vida, fome, equipamento)
-        for (var e : snapshots.entrySet()) {
-          Player p = sl.getPlayerByUUID(e.getKey());
-          if (p == null || e.getValue().isEmpty()) continue;
-          Snapshot snap = e.getValue().get(random.nextInt(e.getValue().size()));
-          p.teleportTo(snap.pos().x, snap.pos().y, snap.pos().z);
-          p.setHealth(Math.max(1f, snap.health()));
-          p.getFoodData().setFoodLevel(snap.food());
-          var slots = net.minecraft.world.entity.EquipmentSlot.values();
-          for (int k = 0; k < slots.length; k++) p.setItemSlot(slots[k], snap.gear().get(k).copy());
-          sl.sendParticles(ParticleTypes.REVERSE_PORTAL, p.getX(), p.getY() + 1, p.getZ(), 60, 0.4, 0.8, 0.4, 0.1);
-        }
-      }
-      case 2 -> around.forEach(e -> { // colapso do espaco: todos espalhados ao acaso
-        double a = random.nextDouble() * Math.PI * 2, d = 8 + random.nextDouble() * 24;
-        e.teleportTo(e.getX() + Math.cos(a) * d, e.getY() + 2, e.getZ() + Math.sin(a) * d);
-      });
-      case 3 -> devastate(sl, position(), (float) Math.min(48, 8 + scaleFor(stage()) * 2)); // aniquilar: a cratera final
-      case 4 -> blackHole(sl, c); // eclipse: buraco negro
-      case 5 -> { // genese: a regiao floresce e cura quem esta perto
-        around.forEach(e -> { if (e instanceof Player) e.setHealth(e.getMaxHealth()); });
-        BlockPos o = blockPosition();
-        for (int k = 0; k < 400; k++) {
-          BlockPos q = o.offset(random.nextInt(41) - 20, random.nextInt(9) - 4, random.nextInt(41) - 20);
-          if (sl.getBlockState(q).is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK) && sl.getBlockState(q.above()).isAir()) {
-            net.minecraft.world.item.BoneMealItem.growCrop(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE_MEAL), sl, q);
-          }
-        }
-      }
-      case 6 -> around.forEach(e -> { // inversao: tudo flutua e depois desce devagar
-        e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.LEVITATION, 100, 2));
-        e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 300, 0));
-      });
-      default -> { }
-    }
-    sl.sendParticles(ParticleTypes.FLASH, c.x, c.y, c.z, 3, 1, 1, 1, 0);
-    sl.playSound(null, blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 8f, 0.4f);
-  }
 
-  /** Eclipse: um buraco negro puxa tudo em volta e rasga o terreno por 5 s; depois se consome e some. */
-  private void blackHole(ServerLevel sl, Vec3 c) {
-    boolean grief = griefing(sl);
-    com.arcane.execution.Timed.start(sl, 100, now -> {
-      for (var e : sl.getEntitiesOfClass(net.minecraft.world.entity.Entity.class, new net.minecraft.world.phys.AABB(c, c).inflate(40), x -> !(x instanceof HydraEntity))) {
-        Vec3 pull = c.subtract(e.position());
-        double d = Math.max(1, pull.length());
-        e.setDeltaMovement(e.getDeltaMovement().add(pull.normalize().scale(Math.min(0.6, 6 / d))));
-        e.hurtMarked = true;
-        if (d < 3 && e instanceof LivingEntity l) l.hurt(sl.damageSources().magic(), 4f);
-      }
-      sl.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x, c.y, c.z, 80, 6, 6, 6, 0.4);
-      sl.sendParticles(ParticleTypes.SQUID_INK, c.x, c.y, c.z, 30, 1.5, 1.5, 1.5, 0.02);
-      if (grief && now % 20 == 0) {
-        float rr = 4 + (now % 100) / 10f;
-        devastate(sl, c, Math.min(14f, rr));
-      }
-    }, () -> {
-      sl.sendParticles(ParticleTypes.FLASH, c.x, c.y, c.z, 1, 0, 0, 0, 0);
-      sl.playSound(null, BlockPos.containing(c), SoundEvents.END_PORTAL_SPAWN, SoundSource.HOSTILE, 5f, 0.6f);
-    });
-  }
 }

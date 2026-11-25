@@ -772,6 +772,18 @@ Um bug achado nesse roteiro foi corrigido: o vazamento nunca media o círculo. N
   todo o resto falhava) e `mana.set` era cortado no máximo (~100). A simulação limpa os registros globais no fim (os
   aldeões dela viravam para-raios do teste do Condutor). Resultado em `docs/BALANCO_AUTO.md`.
 
+## Rodada de 25 nov: Fase E (manutenção)
+
+- `ArcaneGameTests.java` (4.321 linhas) dividido por área, sem mudar teste nenhum (os mesmos 226 nomes, conferidos por
+  diff): `GlyphPhaseGameTests`, `CoreSpellGameTests`, `GrimoireWorldGameTests`, `DesignV2GameTests`,
+  `ShapesAndWorldGameTests`, `AcceptedGlyphsGameTests`, `GrimoireDeskGameTests`, `EngineGameTests`; utilitários em
+  `GameTestSupport`, que todas estendem.
+- `HydraEntity` (1.347 → ~1.070 linhas): poderes em `HydraPowers`, fases em `HydraPhases`, morte em `HydraDeath`
+  (métodos estáticos que recebem a Hidra). Sem mudança de comportamento; `use()` continua público na entidade.
+- A divisão mudou a ordem dentro do lote `isolated_thunder` e revelou uma falha latente: o teste do Condutor (global)
+  roubava o raio do teste do Trovão quando rodavam juntos. O Condutor ganhou lote próprio.
+- Testes: 267/267 obrigatórios.
+
 ## O que ainda falta no projeto (lista consolidada, 2026-11-23)
 
 Testar com teclado/mouse real (o roteiro automatico nao aperta teclas fisicas):

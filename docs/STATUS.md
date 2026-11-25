@@ -81,6 +81,9 @@ F balanço por simulação; G proposta de tags de estado. Andamento por fase no 
 
 ## Andamento das fases
 
+- **E (manutenção), 25 nov: feita.** GameTests divididos por área (`GameTestSupport` + 8 classes); poderes, fases e
+  morte da Hidra em `HydraPowers`, `HydraPhases`, `HydraDeath`. 267/267.
+
 - **F (balanço por simulação), 25 nov: feita.** `BalanceSimulationGameTests` (roda só com flag); relatório em
   `docs/BALANCO_AUTO.md`: Explosão é o grande outlier; nenhum laço. Nada alterado. 267/267.
 

@@ -43,6 +43,11 @@ public final class ModEntities {
             () -> EntityType.Builder.<com.arcane.entity.HydraEntity>of(com.arcane.entity.HydraEntity::new, MobCategory.MONSTER)
                     .sized(1.6f, 1.6f).clientTrackingRange(16).fireImmune().build("hydra"));
 
+    /** Boneco de Treino Arcano (Fase H): mede dano, nunca morre. */
+    public static final RegistryObject<EntityType<com.arcane.entity.ArcaneDummyEntity>> TRAINING_DUMMY = ENTITIES.register("training_dummy",
+            () -> EntityType.Builder.<com.arcane.entity.ArcaneDummyEntity>of(com.arcane.entity.ArcaneDummyEntity::new, MobCategory.MISC)
+                    .sized(0.6f, 1.95f).clientTrackingRange(10).build("training_dummy"));
+
     private ModEntities() {}
 
     public static void register(IEventBus bus) {

@@ -122,6 +122,7 @@ public final class CastingService {
             return new ExecutionResult(false, "message.arcane.counterspell.countered", manaCost);
         }
 
+        com.arcane.training.DamageMeter.noteCast(player.getUUID(), manaCost);
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
             GrimoireAttachments.get(player).ifPresent(g -> g.prefs().touch(inscription.id(), player.level().getGameTime()));

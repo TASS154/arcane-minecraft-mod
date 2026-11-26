@@ -58,6 +58,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.GLYPH_PROJECTOR.get());
                 output.accept(ModItems.SYMMETRY_MIRROR.get());
                 output.accept(ModItems.NPC_MAGE_SPAWN_EGG.get());
+                output.accept(ModItems.TRAINING_DUMMY.get());
             }).build());
 
     private ModCreativeTabs() {}

@@ -74,6 +74,7 @@ public class BalanceSimulationGameTests {
     for (int[] at : new int[][] {{3, 3}, {2, 4}, {4, 5}}) {
       Villager v = h.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(at[0], 1, at[1]));
       v.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000);
+      com.arcane.training.DamageMeter.track(v); // a mesma medicao do Boneco de Treino (Fase H)
       dummies.add(v);
     }
     Random rnd = new Random(SEED);
@@ -118,6 +119,7 @@ public class BalanceSimulationGameTests {
       write(results);
       // limpa o que a simulacao deixou no mundo e nos registros globais (condutores, satelites, zonas, residuos):
       // o teste do condutor pegava um aldeao daqui como para-raios
+      dummies.forEach(com.arcane.training.DamageMeter::untrack);
       dummies.forEach(net.minecraft.world.entity.Entity::discard);
       com.arcane.execution.Phase4Service.clearAll();
       com.arcane.execution.Zones.clearAll();
@@ -131,6 +133,7 @@ public class BalanceSimulationGameTests {
       v.clearFire();
       v.setTicksFrozen(0);
       v.setHealth(v.getMaxHealth());
+      com.arcane.training.DamageMeter.track(v).clear();
       v.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
     }
     var start = new BlockPos[] {new BlockPos(3, 1, 3), new BlockPos(2, 1, 4), new BlockPos(4, 1, 5)};
@@ -165,7 +168,8 @@ public class BalanceSimulationGameTests {
 
   private static float damage(List<Villager> dummies) {
     float d = 0;
-    for (Villager v : dummies) d += v.isAlive() ? v.getMaxHealth() - v.getHealth() : v.getMaxHealth();
+    // DamageMeter (o mesmo do Boneco): dano depois da armadura, inclusive o que passa da vida restante
+    for (Villager v : dummies) d += com.arcane.training.DamageMeter.track(v).total();
     return d;
   }
 

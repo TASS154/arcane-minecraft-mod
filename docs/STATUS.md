@@ -8,7 +8,7 @@ lista de glifos, em `docs/GLIFOS.md` (gerada). O que precisa de olho, ouvido ou 
 
 - **207 glifos** (fonte: `tools/glyph_table.py`): 11 formas, 16 filtros, 30 condições, 114 efeitos, 35 modificadores e
   1 ativador. Tiers 1 a 4, mais 7 glifos originais de tier 5 (só ao derrotar uma Hidra).
-- Testes: JUnit (`src/test/java`) e cerca de 257 GameTests (`src/main/java/com/arcane/gametest`).
+- Testes: JUnit (`src/test/java`) e cerca de 272 GameTests (`src/main/java/com/arcane/gametest`).
   Comando: `.\gradlew.bat test runGameTestServer --offline` com JDK 17.
 - Até 10 glifos por magia; custo cresce com fator 1,3 a partir do 4º glifo.
 
@@ -80,6 +80,13 @@ A higiene; B auditoria de glifos e aliases; C visual dos elementos; D robustez d
 F balanço por simulação; G proposta de tags de estado. Andamento por fase no fim deste arquivo.
 
 ## Andamento das fases
+
+Adendo de 25 nov (prompt 2): fases H a N, nesta ordem. Números novos: `docs/PERGUNTAS.md`, "Números provisórios".
+
+- **H (Boneco de Treino Arcano), 25 nov: feita.** Entidade `training_dummy` (nunca morre, volta ao máximo após 5 s sem
+  dano), letreiro em corações (barra, último golpe, média por segundo, tags de estado, mana da última conjuração),
+  armadura e perfil de afinidade por clique, `/arcane dummy report` em HP exato. `DamageMeter` é o mesmo medidor da
+  simulação de balanço. NÃO visto em jogo. 272/272.
 
 - **E (manutenção), 25 nov: feita.** GameTests divididos por área (`GameTestSupport` + 8 classes); poderes, fases e
   morte da Hidra em `HydraPowers`, `HydraPhases`, `HydraDeath`. 267/267.

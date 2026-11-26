@@ -35,12 +35,15 @@ public final class ElementInteractions {
         target.clearFire();
         Wetness.dry(target);
         com.arcane.fx.Fx.reaction(level, null, target.position().add(0, 1.0, 0), com.arcane.fx.Fx.Reaction.STEAM);
+        com.arcane.training.DamageMeterEvents.reaction(target, "steam");
       } else if (rule.after().equals("extinguish") && target.isOnFire()) {
         target.clearFire();
         com.arcane.fx.Fx.reaction(level, null, target.position().add(0, 1.0, 0), com.arcane.fx.Fx.Reaction.HISS);
+        com.arcane.training.DamageMeterEvents.reaction(target, "hiss");
       } else if (rule.when().contains("frozen") && element == SpellElement.FIRE) {
         // Fogo em alvo congelado (a regra so soma dano): o gelo estilhaca. So visual.
         com.arcane.fx.Fx.reaction(level, null, target.position().add(0, 1.0, 0), com.arcane.fx.Fx.Reaction.SHATTER);
+        com.arcane.training.DamageMeterEvents.reaction(target, "shatter");
       }
     }
   }

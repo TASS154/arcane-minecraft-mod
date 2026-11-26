@@ -14,6 +14,15 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
   modificadores passam do teto da bancada; Enfraquecer encarece em vez de baratear.
 - [ ] **Proposta de tags de estado** (`docs/PROPOSTA_TAGS_DE_ESTADO.md`): implementar? Com ou sem reações novas?
 
+## P1b: adendo de 25 nov (Fases H a N), NÃO visto nem ouvido em jogo
+
+- [ ] **Boneco de Treino (H):** pegue o "Boneco de Treino Arcano" na aba criativa (ou fardo de feno + 4 gravetos),
+  coloque-o e conjure nele. O letreiro sobre a cabeça é legível de dia e de noite? Barra de 10 corações, "Último:" com
+  ❤ e ½, "Média: X ❤/s", tags (Molhado, Queimando...), "Mana: N". Clique de mão vazia troca a armadura (ferro, diamante,
+  netherita); agachado + clique troca o perfil; agachado + soco recolhe. `/arcane dummy report` bate com o que você viu?
+- [ ] **Decidir:** receita do Boneco (placeholder), vida de 40 HP, aparência dos corações (❤ colorido; ½ para o meio;
+  "♥×N" acima de 10). Usei o caractere ❤ e não os sprites do jogo (mais simples no letreiro 3D).
+
 ## P1: pode quebrar a sessão ou a sensação central
 
 - [ ] **Voar invisível (crash corrigido em 25 nov):** dê-se Flutuar e Invisibilidade do glifo, voe em terceira pessoa (F5)

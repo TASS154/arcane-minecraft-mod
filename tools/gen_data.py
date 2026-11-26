@@ -126,6 +126,8 @@ def main():
            {"O": "minecraft:obsidian", "A": "minecraft:amethyst_block", "S": "minecraft:stone_bricks", "G": "minecraft:gold_ingot"})
     shaped("arcane_compass", [" G ", "GCG", " A "],
            {"G": "minecraft:gold_ingot", "C": "minecraft:compass", "A": "minecraft:amethyst_shard"})
+    # Boneco de Treino (Fase H): receita barata e simples, PROVISORIA (docs/PERGUNTAS.md).
+    shaped("training_dummy", [" H ", "SSS", " S "], {"H": "minecraft:hay_block", "S": "minecraft:stick"})
     shapeless("arcane_chalk", ["minecraft:bone_meal", "minecraft:amethyst_shard", "arcane:common_ink"], 8)
     shapeless("grimoire", ["minecraft:book", "minecraft:amethyst_shard", "arcane:common_ink"])
     shapeless("blood_ink", ["arcane:common_ink", "minecraft:redstone", "minecraft:rotten_flesh"])

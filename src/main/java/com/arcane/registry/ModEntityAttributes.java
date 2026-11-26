@@ -15,5 +15,6 @@ public class ModEntityAttributes {
     event.put(ModEntities.ILLUSION.get(), com.arcane.entity.IllusionEntity.createAttributes().build());
     event.put(ModEntities.SPECTRAL_WOLF.get(), net.minecraft.world.entity.animal.Wolf.createAttributes().build());
     event.put(ModEntities.ARCANE_GOLEM.get(), net.minecraft.world.entity.animal.IronGolem.createAttributes().build());
+    event.put(ModEntities.TRAINING_DUMMY.get(), com.arcane.entity.ArcaneDummyEntity.createAttributes().build());
   }
 }

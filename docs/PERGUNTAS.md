@@ -80,3 +80,14 @@
 ## Balanço automático (25 nov 2026), detalhes em `docs/BALANCO_AUTO.md`
 - **Explosão:** 10 a 13 de dano por mana em área (mediana ~0,8). O custo deve crescer com o raio, ou o dano dela cair?
 - **Enfraquecer** não afeta a Explosão (que não tem `amount`). Incluir `radius` (ou o dano da explosão) no que ele divide?
+
+## Números provisórios (adendo de 25 nov: Fases H a N)
+
+Todo número novo de balanceamento entra aqui, com o lugar onde mora (config ou JSON), o motivo e como medir no Boneco
+de Treino (`/arcane dummy report` dá os valores exatos em HP). Nenhum número já existente foi mudado.
+
+| Fase | Número | Valor | Onde | Motivo | Como medir no Boneco |
+|---|---|---|---|---|---|
+| H | Vida do Boneco | 40 HP (20 corações) | `ArcaneDummyEntity.MAX_HEALTH` | Barra legível de 10 corações (cada um = 4 HP); o Boneco nunca morre, então a vida só define a escala da barra | Bata até a barra esvaziar: ela para em 1 HP e o relatório soma o dano inteiro |
+| H | Volta ao máximo | 5 s sem dano | `ArcaneDummyEntity.RESET_TICKS` (pedido do adendo) | Fecha a "sessão" de medida | Pare de bater; em 5 s a barra enche e a sessão fecha |
+| H | Receita do Boneco | fardo de feno + 4 gravetos (" H ", "SSS", " S ") | `tools/gen_data.py` | Barata e simples, placeholder | (decisão de design) |

@@ -72,6 +72,8 @@ public final class ModItems {
             () -> new ArcaneCompassItem(new Item.Properties()));
     public static final RegistryObject<Item> PERFECT_COMPASS = ITEMS.register("perfect_compass",
             () -> new com.arcane.item.PerfectCompassItem(new Item.Properties()));
+    public static final RegistryObject<Item> TRAINING_DUMMY = ITEMS.register("training_dummy",
+            () -> new com.arcane.item.TrainingDummyItem(new Item.Properties().stacksTo(16)));
     public static final RegistryObject<Item> NPC_MAGE_SPAWN_EGG = ITEMS.register("npc_mage_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.NPC_MAGE, 0x2D1946, 0x5ADCF0, new Item.Properties()));
 

@@ -54,6 +54,17 @@ public class ArcaneCommands {
                   ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.guest.list", set.size(), String.join(", ", names)), false);
                   return set.size();
                 })))
+        .then(Commands.literal("dummy")
+            .then(Commands.literal("report").executes(ctx -> {
+              var src = ctx.getSource();
+              var dummy = com.arcane.training.DummyReport.nearest(src.getLevel(), src.getPosition(), 16);
+              if (dummy == null) {
+                src.sendFailure(Component.translatable("message.arcane.dummy.none"));
+                return 0;
+              }
+              for (Component line : com.arcane.training.DummyReport.lines(dummy)) src.sendSuccess(() -> line, false);
+              return Math.round(dummy.meter() == null ? 0 : dummy.meter().total());
+            })))
         .then(Commands.literal("pocket")
             .requires(src -> src.hasPermission(2))
             .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())

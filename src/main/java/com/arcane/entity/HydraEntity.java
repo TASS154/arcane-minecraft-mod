@@ -894,11 +894,15 @@ public class HydraEntity extends Monster {
   }
 
   // ------------------------------------------------------------------ luta, chefe e morte
+  /** Casca (o selo; so o /kill atravessa) e janela de fraqueza (x2), pelo portao generico (Fase N, mesmo comportamento). */
+  static final PhaseGate<HydraEntity> GATE = new PhaseGate<>(HydraEntity::sealed,
+      s -> s.is(DamageTypeTags.BYPASSES_INVULNERABILITY), h -> h.flag(F_WEAK), 2f);
+
   @Override
   public boolean hurt(DamageSource source, float amount) {
     // gigante: nao sufoca dentro dos blocos (nem nas crateras que ela mesma abre) nem se espreme
     if (source.is(net.minecraft.world.damagesource.DamageTypes.IN_WALL) || source.is(net.minecraft.world.damagesource.DamageTypes.CRAMMING)) return false;
-    if (sealed() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+    if (GATE.blocks(this, source)) {
       // o selo absorve: so um brilho e um som de cristal
       if (level() instanceof ServerLevel sl && tickCount % 4 == 0) {
         sl.sendParticles(ParticleTypes.ENCHANTED_HIT, getX(), getY() + getBbHeight() * 0.5, getZ(), 12, getBbWidth() * 0.4, getBbHeight() * 0.3, getBbWidth() * 0.4, 0.2);
@@ -908,7 +912,7 @@ public class HydraEntity extends Monster {
     }
     if (source.getEntity() instanceof ServerPlayer p) fighters.add(p.getUUID());
     if (flag(F_DYING)) return false;
-    if (flag(F_WEAK)) amount *= 2f; // momento de fraqueza: depois de uma magia grande ou da magia original
+    amount = GATE.scale(this, amount); // momento de fraqueza (x2): depois de uma magia grande ou da magia original
     boolean hurt = super.hurt(source, (float) (com.arcane.execution.Pierce.is(source) ? amount : amount / toughness));
     if (hurt && !level().isClientSide && isAlive()) HydraPhases.checkPhases(this);
     return hurt;

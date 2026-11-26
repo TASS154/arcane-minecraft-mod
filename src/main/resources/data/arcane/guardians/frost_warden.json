@@ -1,0 +1,18 @@
+{
+  "_comment": "Guardiao de Ruina (Fase N). So nas Ruinas Arcanas (Salao do Ritual, chance spawn_chance), vida fixa (sem escala por jogador). A casca de gelo absorve todo dano; so racha com uma reacao de breaks_on causada nele por uma conjuracao (requires_state e a dica: Molhar primeiro, Fogo depois = Vapor). Rachada: window_seconds de dano x window_multiplier, depois volta. Recompensa modesta; glyph_max_tier vai no maximo a 4 (glifo original nunca). Numeros PROVISORIOS (docs/PERGUNTAS.md).",
+  "health": 60,
+  "attack": 5,
+  "spawn_chance": 0.5,
+  "shell": {
+    "requires_state": "wet",
+    "breaks_on": ["steam"],
+    "window_seconds": 8,
+    "window_multiplier": 1.5
+  },
+  "reward": {
+    "ink": { "item": "arcane:common_ink", "min": 2, "max": 4 },
+    "material": { "item": "minecraft:blue_ice", "min": 1, "max": 3 },
+    "glyph_chance": 0.3,
+    "glyph_max_tier": 3
+  }
+}

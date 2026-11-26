@@ -80,6 +80,7 @@ public class ClientSetup {
     event.registerEntityRenderer(ModEntities.ILLUSION.get(), com.arcane.client.render.IllusionRenderer::new);
     event.registerEntityRenderer(ModEntities.SPECTRAL_WOLF.get(), com.arcane.client.render.SummonRenderers.Wolf::new);
     event.registerEntityRenderer(ModEntities.TRAINING_DUMMY.get(), com.arcane.client.render.ArcaneDummyRenderer::new);
+    event.registerEntityRenderer(ModEntities.RUIN_GUARDIAN.get(), com.arcane.client.render.RuinGuardianRenderer::new);
     event.registerEntityRenderer(ModEntities.ARCANE_GOLEM.get(), com.arcane.client.render.SummonRenderers.Golem::new);
   }
 

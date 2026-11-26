@@ -63,6 +63,7 @@ public final class CastScope {
     if (f == null) return;
     if (!f.seen.add(id + "@" + (target == null ? "-" : target.getUUID()))) return;
     f.reactions.merge(id, 1, Integer::sum);
+    if (target instanceof com.arcane.entity.RuinGuardianEntity guardian) guardian.onReaction(id); // Fase N: a casca racha
     if (f.context.caster() instanceof ServerPlayer player) ReactionJournal.discover(level, player, id, nameKey, f.context.inscription());
   }
 

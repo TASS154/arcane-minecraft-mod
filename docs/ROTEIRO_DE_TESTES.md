@@ -437,6 +437,21 @@ Montagem: `Foco, Atrair` (ou `Foco, Dano`). Precisa conhecer o glifo `focus`: `/
 - [ ] **Regras do mundo:** `/arcane rules` abre a tela; cada botão muda e persiste (confira o .toml); o teto do ritual tem "sem limite"; um jogador sem permissão vê tudo desativado.
 - [ ] **Item único:** oferecer cabeça/ovo de dragão num ritual grande passa de 1500%; com a regra desligada, não.
 
+## 13. Adendo H a N (25 e 26 nov), nada disto foi visto/ouvido em jogo
+
+- [ ] **13.1 Boneco de Treino:** coloque, conjure, leia o letreiro; troque armadura e perfil; `/arcane dummy report`.
+- [ ] **13.2 Modificadores de Projétil:** Projétil + Perseguir (Boneco fora da linha), Ricochete (parede), Fragmentar
+  (cacos), Arco (por cima de um muro). Na bancada, Raio + Perseguir avisa em dourado.
+- [ ] **13.3 Nuvem de Vapor:** três Bonecos molhados + Aura + Fogo. Nuvem, véu na tela dentro dela, chiado, some em ~15 s.
+- [ ] **13.4 Diário:** aba Descobertas do Grimório ("???" e "X de Y"); aviso discreto na primeira vez.
+- [ ] **13.5 Voz da magia:** a mesma magia sempre com a mesma melodia; a pena da bancada soa a cada glifo; opções.
+- [ ] **13.6 Maestria e assinatura:** glifos só Identificados (tremido, lavado) e depois Dominados (nítido, anel e
+  acorde); opções "Minha assinatura" e "Assinatura dos outros".
+- [ ] **13.7 Guardião de Ruína:** ache uma Ruína Arcana (ou `/arcane ruins`, ou `/arcane guardian` com op). Bata nele:
+  nada passa (brilho gelado). Molhe-o (Molhar, ou Raio + Molhar) e acerte Fogo: a casca racha (estilhaço), a textura perde
+  o gelo e por 8 s o dano entra ×1,5; depois o gelo volta. Gelo não fere; fogo fere ×1,25. Morto, solta 2 a 4 tintas
+  comuns, 1 a 3 gelo azul e às vezes uma nota de glifo comum (nunca original). A luta é justa sem escalar com o grupo?
+
 ---
 
 ## Como reportar uma falha

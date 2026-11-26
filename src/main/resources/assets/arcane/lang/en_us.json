@@ -1175,5 +1175,8 @@
   "subtitles.arcane.voice": "Spell sings",
   "gui.arcane.options.signature_own": "My signature: %s",
   "gui.arcane.options.signature_others": "Others' signatures: %s",
-  "gui.arcane.options.signature.tip": "A touch of colour and a motif (ring, spiral or dots) from your style. Looks only."
+  "gui.arcane.options.signature.tip": "A touch of colour and a motif (ring, spiral or dots) from your style. Looks only.",
+  "entity.arcane.ruin_guardian": "Ruin Guardian",
+  "affinity.arcane.ruin_guardian": "Ruin Guardian",
+  "message.arcane.guardian.spawned": "Ruin Guardian summoned (test). Hint: the ice shell only cracks with Fire on a Wet target."
 }

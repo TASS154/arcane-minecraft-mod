@@ -16,6 +16,21 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
 
 ## P1b: adendo de 25 nov (Fases H a N), NÃO visto nem ouvido em jogo
 
+**Resumo do adendo (H a N, entregue em 26 nov).** Tudo passou nos testes automáticos; nada foi visto nem ouvido em jogo.
+
+- **Olhos:** letreiro do Boneco; rastros dos modificadores de Projétil; Nuvem de Vapor e o véu na tela; aba Descobertas;
+  folha de contato da maestria (`maestria` em `run/arcane_autotest.flag`, depois `tools/dev/contact_sheet.py`);
+  Guardião de Ruína (texturas de pedra e de gelo, estilhaço ao rachar).
+- **Ouvidos:** os 6 WAVs de `python tools/preview_voice.py` (em `tools/out/`); as 7 amostras de `sounds/voice/`;
+  o chiado da nuvem (`sounds/element/reaction_vapor_1..3.ogg`); retorno de afinidade (agudo na fraqueza, abafado na
+  resistência).
+- **Decisões:** tabela de afinidades (`data/arcane/affinities/`); números provisórios de H a N (`docs/PERGUNTAS.md`,
+  "Números provisórios"); receita do Boneco; aparência dos corações (❤ e ½); os dois itens de `docs/DECISIONS.md`
+  (de onde vem o estilo da assinatura; afinidades da Hidra, proposta em `docs/PROPOSTA_HIDRA_AFINIDADES.md`).
+- **Testes instáveis:** `threewettargetsburnedraiseacloudandenterthejournal` (K) falhou 2 vezes antes de esperar a
+  conjuração e passou em todas depois; `areadialtradesareafordamageinverselyandchargegrowsarea` (antigo) falhou uma vez
+  na rodada da N e passou na seguinte. Se voltarem a falhar, me avise com o log.
+
 - [ ] **Boneco de Treino (H):** pegue o "Boneco de Treino Arcano" na aba criativa (ou fardo de feno + 4 gravetos),
   coloque-o e conjure nele. O letreiro sobre a cabeça é legível de dia e de noite? Barra de 10 corações, "Último:" com
   ❤ e ½, "Média: X ❤/s", tags (Molhado, Queimando...), "Mana: N". Clique de mão vazia troca a armadura (ferro, diamante,
@@ -38,6 +53,8 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
   `tools/dev/contact_sheet.py`: 18 fotos (maestria 0, 0,5 e 1 × 2 assinaturas × fogo, gelo e tempestade). A maestria
   baixa parece "mal feita" sem parecer bug? A assinatura fica discreta (o elemento domina)? **Decidir** o item 1 de
   `docs/DECISIONS.md` (de onde vem o estilo).
+- [ ] **Guardião de Ruína (N):** `/arcane guardian` (op) ou uma Ruína Arcana. Ver `docs/ROTEIRO_DE_TESTES.md`, item 13.7.
+  A dica (molhar, depois fogo) se descobre sozinha ou precisa de texto no mundo?
 - [ ] **Decidir:** receita do Boneco (placeholder), vida de 40 HP, aparência dos corações (❤ colorido; ½ para o meio;
   "♥×N" acima de 10). Usei o caractere ❤ e não os sprites do jogo (mais simples no letreiro 3D).
 

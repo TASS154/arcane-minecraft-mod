@@ -54,6 +54,19 @@ public class ArcaneCommands {
                   ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.guest.list", set.size(), String.join(", ", names)), false);
                   return set.size();
                 })))
+        .then(Commands.literal("guardian")
+            .requires(src -> src.hasPermission(2))
+            .executes(ctx -> {
+              var src = ctx.getSource();
+              var g = com.arcane.registry.ModEntities.RUIN_GUARDIAN.get().create(src.getLevel());
+              if (g == null) return 0;
+              var at = src.getPosition();
+              g.moveTo(at.x, at.y, at.z, 0f, 0f);
+              g.setup(com.arcane.entity.RuinGuardians.first(), net.minecraft.core.BlockPos.containing(at));
+              src.getLevel().addFreshEntity(g);
+              src.sendSuccess(() -> Component.translatable("message.arcane.guardian.spawned"), false);
+              return 1;
+            }))
         .then(Commands.literal("voice")
             .then(Commands.literal("debug").executes(ctx -> {
               ServerPlayer player = ctx.getSource().getPlayerOrException();

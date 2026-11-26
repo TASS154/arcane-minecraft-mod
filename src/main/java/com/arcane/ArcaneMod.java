@@ -84,6 +84,7 @@ public class ArcaneMod {
         event.addListener(GlyphRegistry.reloadListener());
         event.addListener(com.arcane.execution.InteractionRules.reloadListener());
         event.addListener(com.arcane.affinity.Affinities.reloadListener());
+        event.addListener(com.arcane.entity.RuinGuardians.reloadListener());
     }
 
     @SubscribeEvent

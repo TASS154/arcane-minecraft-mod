@@ -69,6 +69,26 @@ public class ArcaneRuins {
     }));
   }
 
+  /**
+   * Guardiao de Ruina (Fase N) no Salao do Ritual, com a chance do JSON. A chance sai da posicao (nao do sorteio das
+   * ruinas, para nao mudar o resto da geracao).
+   */
+  static boolean spawnGuardian(ServerLevel level, BlockPos c) {
+    var def = com.arcane.entity.RuinGuardians.first();
+    if (!guardianRolls(c, def.spawnChance())) return false;
+    var g = com.arcane.registry.ModEntities.RUIN_GUARDIAN.get().create(level);
+    if (g == null) return false;
+    g.moveTo(c.getX() + 0.5, c.getY() + 1, c.getZ() - 2.5, 0f, 0f);
+    g.setup(def, c);
+    return level.addFreshEntity(g);
+  }
+
+  /** A chance do guardiao, fixa pela posicao do Salao. */
+  public static boolean guardianRolls(BlockPos c, double chance) {
+    long h = c.asLong() * 0x9E3779B97F4A7C15L;
+    return ((h >>> 11) % 1000) / 1000.0 < chance;
+  }
+
   /** Constroi as ruinas com o piso da sala central em {@code centre}. Devolve o mapa sala -> centro (para testes). */
   public static Map<BlockPos, Room> build(ServerLevel level, BlockPos centre, RandomSource rand) {
     // 1) escolhe as salas: arvore aleatoria a partir do centro da grade
@@ -187,6 +207,7 @@ public class ArcaneRuins {
           set(level, w, ModBlocks.CHISELED_ARCANE_BRICKS.get().defaultBlockState());
         }
         chest(level, c.offset(0, 0, HALF - 1), "ritual", Direction.NORTH, rand);
+        spawnGuardian(level, c);
       }
       case LIBRARY -> {
         for (int dx = -HALF + 1; dx <= HALF - 1; dx++) for (int dy = 0; dy < 3; dy++) {

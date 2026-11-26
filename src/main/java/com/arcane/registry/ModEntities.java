@@ -44,6 +44,10 @@ public final class ModEntities {
                     .sized(1.6f, 1.6f).clientTrackingRange(16).fireImmune().build("hydra"));
 
     /** Boneco de Treino Arcano (Fase H): mede dano, nunca morre. */
+    /** Guardiao de Ruina (Fase N): mini-chefe das Ruinas Arcanas. */
+    public static final RegistryObject<EntityType<com.arcane.entity.RuinGuardianEntity>> RUIN_GUARDIAN = ENTITIES.register("ruin_guardian",
+            () -> EntityType.Builder.<com.arcane.entity.RuinGuardianEntity>of(com.arcane.entity.RuinGuardianEntity::new, MobCategory.MONSTER)
+                    .sized(0.7f, 2.1f).clientTrackingRange(10).build("ruin_guardian"));
     public static final RegistryObject<EntityType<com.arcane.entity.ArcaneDummyEntity>> TRAINING_DUMMY = ENTITIES.register("training_dummy",
             () -> EntityType.Builder.<com.arcane.entity.ArcaneDummyEntity>of(com.arcane.entity.ArcaneDummyEntity::new, MobCategory.MISC)
                     .sized(0.6f, 1.95f).clientTrackingRange(10).build("training_dummy"));

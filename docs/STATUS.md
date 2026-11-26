@@ -1,6 +1,6 @@
 # Arcane: status atual
 
-Atualizado em 25 nov 2026. Fonte curta do estado do mod. O histórico de cada rodada está em `docs/CHANGELOG_DEV.md`; a
+Atualizado em 26 nov 2026. Fonte curta do estado do mod. O histórico de cada rodada está em `docs/CHANGELOG_DEV.md`; a
 lista de glifos, em `docs/GLIFOS.md` (gerada). O que precisa de olho, ouvido ou mão humana está em
 `docs/PENDENTE_HUMANO.md`.
 
@@ -8,7 +8,7 @@ lista de glifos, em `docs/GLIFOS.md` (gerada). O que precisa de olho, ouvido ou 
 
 - **211 glifos** (fonte: `tools/glyph_table.py`): 11 formas, 16 filtros, 30 condições, 114 efeitos, 39 modificadores e
   1 ativador. Tiers 1 a 4, mais 7 glifos originais de tier 5 (só ao derrotar uma Hidra).
-- Testes: JUnit (`src/test/java`) e cerca de 272 GameTests (`src/main/java/com/arcane/gametest`).
+- Testes: JUnit (`src/test/java`) e 296 GameTests obrigatórios (`src/main/java/com/arcane/gametest`).
   Comando: `.\gradlew.bat test runGameTestServer --offline` com JDK 17.
 - Até 10 glifos por magia; custo cresce com fator 1,3 a partir do 4º glifo.
 
@@ -118,6 +118,13 @@ Adendo de 25 nov (prompt 2): fases H a N, nesta ordem. Números novos: `docs/PER
   espiral ou pontos em até 20% das partículas, paleta de daltonismo própria, desligada pelo Cor, opções para a sua e a
   dos outros. Vão no campo compacto do pacote de efeito. Teste de regressão: maestria 0 e 1 dão o mesmo dano e a mesma
   mana. Folha de contato: palavra `maestria` em `run/arcane_autotest.flag` (18 fotos). NÃO visto. 291/291.
+- **N (Guardião de Ruína e Hidra), 26 nov: feita.** `HydraEntity` sem comportamento novo: o selo e o momento de
+  fraqueza (×2) passaram pelo `PhaseGate` genérico (casca que só cai por estado ou reação + janela de vulnerabilidade),
+  com a suíte verde. Proposta das afinidades da Hidra em `docs/PROPOSTA_HIDRA_AFINIDADES.md` (esperando aprovação,
+  `docs/DECISIONS.md` item 2). Protótipo do **Guardião de Ruína** (`ruin_guardian`): só no Salão do Ritual das Ruínas
+  Arcanas (50%), 60 HP fixos, casca de gelo que absorve tudo e só racha com Vapor (Molhar, depois Fogo), janela de 8 s
+  com dano ×1,5, afinidade de gelo, recompensa modesta sem glifo original, tudo em `data/arcane/guardians/` e
+  `affinities/ruin_guardian.json`. `/arcane guardian` (op) invoca um para teste. NÃO visto em jogo. 296/296.
 
 - **E (manutenção), 25 nov: feita.** GameTests divididos por área (`GameTestSupport` + 8 classes); poderes, fases e
   morte da Hidra em `HydraPowers`, `HydraPhases`, `HydraDeath`. 267/267.

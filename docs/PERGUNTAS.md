@@ -117,6 +117,11 @@ de Treino (`/arcane dummy report` dá os valores exatos em HP). Nenhum número j
 | M | Maestria: tremida, falhas, cor | tremida até 0,18 bloco; falhas até 35% (nenhuma acima de 0,8); saturação 70% a 100%; desafinação até 3% | `fx/CastStyle` | Só aparência: maestria 1 é o visual de antes | Conjure com glifos Identificados e depois Dominados (só olhar) |
 | M | Acabamento e acorde | a partir de maestria 0,85 | `CastStyle.polished` | Prêmio visual para quem domina a magia | (só olhar e ouvir) |
 | M | Assinatura | no máximo 20% das partículas; matiz deslocado até 8% | `CastStyle.SIGNATURE_SHARE`, `MAX_HUE_SHIFT` | O elemento continua dominante | (só olhar) |
+| N | Guardião: vida e ataque | 60 HP (30 corações), 5 de ataque, sem escala | `guardians/frost_warden.json` | Mini-chefe de ruína, não chefe de mundo | `/arcane guardian` e conte os golpes na janela |
+| N | Guardião: janela | 8 s de dano ×1,5 depois do Vapor; depois a casca volta | idem | Recompensa quem preparou o alvo | Cronometre do estilhaço até o gelo voltar |
+| N | Guardião: afinidade | gelo imune, fogo ×1,25, água ×0,5 | `affinities/ruin_guardian.json` | Lê como "criatura de gelo" | Perfil no Boneco não existe: meça no próprio guardião |
+| N | Guardião: aparece | 50% dos Salões do Ritual (fixo pela posição) | `spawn_chance` no JSON | Nem toda ruína tem guarda | (exploração) |
+| N | Guardião: recompensa | 2 a 4 tintas comuns, 1 a 3 gelo azul, 30% de nota de glifo até tier 3 | `reward` no JSON | Modesta; glifo original nunca | (loot) |
 
 ### Modificadores de Projétil (Fase J): dúvidas
 - **Tier e família:** Perseguir, Ricochete e Arco no tier 2 (família força), Fragmentar no tier 3 (força e terra). Entram

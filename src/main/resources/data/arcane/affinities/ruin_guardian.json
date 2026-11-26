@@ -1,0 +1,5 @@
+{
+  "entities": ["arcane:ruin_guardian"],
+  "immune": ["frost"],
+  "multipliers": { "fire": 1.25, "water": 0.5 }
+}

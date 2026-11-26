@@ -1175,5 +1175,8 @@
   "subtitles.arcane.voice": "Magia canta",
   "gui.arcane.options.signature_own": "Minha assinatura: %s",
   "gui.arcane.options.signature_others": "Assinatura dos outros: %s",
-  "gui.arcane.options.signature.tip": "Um toque de cor e um motivo (anel, espiral ou pontos) que vêm do seu estilo. Só aparência."
+  "gui.arcane.options.signature.tip": "Um toque de cor e um motivo (anel, espiral ou pontos) que vêm do seu estilo. Só aparência.",
+  "entity.arcane.ruin_guardian": "Guardião de Ruína",
+  "affinity.arcane.ruin_guardian": "Guardião de Ruína",
+  "message.arcane.guardian.spawned": "Guardião de Ruína invocado (teste). Dica: a casca de gelo só racha com Fogo num alvo Molhado."
 }

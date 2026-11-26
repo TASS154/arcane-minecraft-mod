@@ -61,6 +61,18 @@ public final class SpellPreview {
     }
 
     List<Component> warnings = new ArrayList<>();
+    // Fase J: modificadores de Projetil fora da forma Projetil nao fazem nada; na forma, o orcamento pode cortar
+    if (ProjectileMods.present(params)) {
+      if (!"projectile".equals(form)) {
+        warnings.add(Component.translatable("gui.arcane.preview.warn.projectile_mods_ignored", name(plan.delivery().formId())).withStyle(ChatFormatting.GOLD));
+      } else {
+        var asked = ProjectileMods.of(params);
+        var got = ProjectileMods.budgeted(asked, ProjectileMods.limits().maxTriggers());
+        if (!got.equals(asked)) {
+          lines.add(Component.translatable("gui.arcane.preview.projectile_mods_degraded", got.ricochet(), got.fragment()).withStyle(ChatFormatting.GRAY));
+        }
+      }
+    }
     boolean zone = params.getOrDefault("zone_seconds", 0.0) > 0.0;
     if (zone && form.startsWith("summon_")) {
       warnings.add(Component.translatable("gui.arcane.preview.warn.zone_summon").withStyle(ChatFormatting.GOLD));

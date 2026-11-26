@@ -6,7 +6,7 @@ lista de glifos, em `docs/GLIFOS.md` (gerada). O que precisa de olho, ouvido ou 
 
 ## Números
 
-- **207 glifos** (fonte: `tools/glyph_table.py`): 11 formas, 16 filtros, 30 condições, 114 efeitos, 35 modificadores e
+- **211 glifos** (fonte: `tools/glyph_table.py`): 11 formas, 16 filtros, 30 condições, 114 efeitos, 39 modificadores e
   1 ativador. Tiers 1 a 4, mais 7 glifos originais de tier 5 (só ao derrotar uma Hidra).
 - Testes: JUnit (`src/test/java`) e cerca de 272 GameTests (`src/main/java/com/arcane/gametest`).
   Comando: `.\gradlew.bat test runGameTestServer --offline` com JDK 17.
@@ -91,6 +91,12 @@ Adendo de 25 nov (prompt 2): fases H a N, nesta ordem. Números novos: `docs/PER
   datapack sobrescreve por id, JSON inválido só gera aviso. O dano dentro de um efeito usa o elemento de gameplay dele
   (`effects.json`), uma vez por golpe, com teto `affinityMaxTotal` junto das reações. Retorno: anel maior e tom agudo na
   fraqueza, tom abafado na resistência (NÃO visto nem ouvido). Hidra sem perfil (inalterada). 276/276.
+- **J (modificadores de Projétil), 25–26 nov: feita.** Glifos novos `homing` (Perseguir), `ricochet` (Ricochete),
+  `fragment` (Fragmentar) e `arc` (Arco), pela `glyph_table.py`, com loot no padrão de tier. Só valem na forma Projétil
+  (a prévia avisa nas outras). Perseguir curva com teto por tick, no cone à frente, e respeita o filtro do trecho; sem
+  filtro, nunca você, aliados ou bichos. Ricochete conta cada quique como um acerto e perde força. Fragmentar parte
+  em cacos fracos que nunca fragmentam. Arco cai no ponto mirado e Perseguir só curva na descida. Os quatro juntos
+  degradam até caber em `projectileMaxTriggers` (8), sem erro. Rastros próprios (espiral, faísca, cacos) NÃO vistos. 283/283.
 
 - **E (manutenção), 25 nov: feita.** GameTests divididos por área (`GameTestSupport` + 8 classes); poderes, fases e
   morte da Hidra em `HydraPowers`, `HydraPhases`, `HydraDeath`. 267/267.

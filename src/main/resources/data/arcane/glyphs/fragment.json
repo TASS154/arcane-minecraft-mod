@@ -1,0 +1,32 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:fragment"
+  },
+  "parameters": {
+    "count": {
+      "type": "int",
+      "default": 3.0,
+      "min": 2.0,
+      "max": 6.0
+    }
+  },
+  "modifier_scope": {
+    "target": "delivery",
+    "kind": "form",
+    "mutate": {
+      "fragment": {
+        "op": "put",
+        "value": 3.0,
+        "param": "count"
+      }
+    }
+  },
+  "cost": {
+    "mana": 3
+  },
+  "tier": 3,
+  "families": [
+    "earth"
+  ]
+}

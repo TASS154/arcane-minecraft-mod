@@ -1,0 +1,32 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:homing"
+  },
+  "parameters": {
+    "turn": {
+      "type": "int",
+      "default": 2.0,
+      "min": 1.0,
+      "max": 3.0
+    }
+  },
+  "modifier_scope": {
+    "target": "delivery",
+    "kind": "form",
+    "mutate": {
+      "homing": {
+        "op": "put",
+        "value": 2.0,
+        "param": "turn"
+      }
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 2,
+  "families": [
+    "force"
+  ]
+}

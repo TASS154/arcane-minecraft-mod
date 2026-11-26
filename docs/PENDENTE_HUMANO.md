@@ -22,6 +22,9 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
   netherita); agachado + clique troca o perfil; agachado + soco recolhe. `/arcane dummy report` bate com o que você viu?
 - [ ] **Afinidades (I):** no Boneco, perfil "Criaturas de fogo" e magia de gelo com dano: anel de impacto maior e som
   mais agudo? Com fogo: som abafado e nenhum dano? Sem texto no chat. **Decidir** a tabela (`data/arcane/affinities/`).
+- [ ] **Modificadores de Projétil (J):** Projétil + Perseguir no Boneco fora da linha: a espiral em volta do orbe mostra a
+  curva? Ricochete numa parede: faísca a cada quique, som mais agudo, golpe mais fraco no relatório? Fragmentar: cacos
+  visíveis e pequenos? Arco: o orbe passa por cima de um muro e cai no Boneco? Na bancada, Raio + Perseguir dá aviso dourado.
 - [ ] **Decidir:** receita do Boneco (placeholder), vida de 40 HP, aparência dos corações (❤ colorido; ½ para o meio;
   "♥×N" acima de 10). Usei o caractere ❤ e não os sprites do jogo (mais simples no letreiro 3D).
 

@@ -1,0 +1,32 @@
+{
+  "category": "modifier",
+  "behavior": {
+    "handler": "arcane:ricochet"
+  },
+  "parameters": {
+    "bounces": {
+      "type": "int",
+      "default": 2.0,
+      "min": 1.0,
+      "max": 4.0
+    }
+  },
+  "modifier_scope": {
+    "target": "delivery",
+    "kind": "form",
+    "mutate": {
+      "ricochet": {
+        "op": "put",
+        "value": 2.0,
+        "param": "bounces"
+      }
+    }
+  },
+  "cost": {
+    "mana": 2
+  },
+  "tier": 2,
+  "families": [
+    "force"
+  ]
+}

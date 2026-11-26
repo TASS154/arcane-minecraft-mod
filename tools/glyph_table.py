@@ -262,6 +262,30 @@ glyph("swift", "modifier", 1,
       ("Swift", "Modifier: the projectile flies 50% faster."),
       ["#.#.#...", "##.##...", "###.###.", "####.###", "###.###.", "##.##...", "#.#.#...", "........"],
       scope={"target": "delivery", "kind": "form", "mutate": {"speed": {"op": "multiply", "value": 1.5}}})
+glyph("homing", "modifier", 2,
+      ("Perseguir", "Modificador de Projétil: o orbe curva até a criatura mais próxima no cone à frente (força da curva 1 a 3). Respeita o filtro; sem filtro, nunca persegue você, aliados ou bichos. Em outras formas, não faz nada."),
+      ("Homing", "Projectile modifier: the orb curves toward the nearest creature in the cone ahead (turn strength 1 to 3). Respects the filter; without one, it never chases you, allies or pets. On other forms, it does nothing."),
+      ["....##..", "...#..#.", "..#....#", ".#......", "#.......", "#....#..", ".#..###.", "..##.#.."],
+      params={"turn": (2.0, 1.0, 3.0, "int")},
+      scope={"target": "delivery", "kind": "form", "mutate": {"homing": {"op": "put", "value": 2.0, "param": "turn"}}})
+glyph("ricochet", "modifier", 2,
+      ("Ricochete", "Modificador de Projétil: o orbe quica nos blocos até 1 a 4 vezes, perdendo força a cada quique. Cada quique conta como um acerto (Ao Bater dispara uma vez por quique). Em outras formas, não faz nada."),
+      ("Ricochet", "Projectile modifier: the orb bounces off blocks up to 1 to 4 times, losing power at each bounce. Each bounce counts as a hit (On Impact fires once per bounce). On other forms, it does nothing."),
+      ["#.......", ".#......", "..#...#.", "...#.#..", "....#...", "........", "########", "........"],
+      params={"bounces": (2.0, 1.0, 4.0, "int")},
+      scope={"target": "delivery", "kind": "form", "mutate": {"ricochet": {"op": "put", "value": 2.0, "param": "bounces"}}})
+glyph("fragment", "modifier", 3,
+      ("Fragmentar", "Modificador de Projétil: ao acertar, o orbe se parte em 2 a 6 cacos menores, que somam pouco mais que um orbe. Caco não se parte de novo. Em outras formas, não faz nada."),
+      ("Fragment", "Projectile modifier: on hit, the orb splits into 2 to 6 smaller shards, which add up to a little more than one orb. A shard never splits again. On other forms, it does nothing."),
+      ["#..#..#.", ".#.#.#..", "..###...", "###.###.", "..###...", ".#.#.#..", "#..#..#.", "........"],
+      params={"count": (3.0, 2.0, 6.0, "int")},
+      scope={"target": "delivery", "kind": "form", "mutate": {"fragment": {"op": "put", "value": 3.0, "param": "count"}}})
+glyph("arc", "modifier", 2,
+      ("Arco", "Modificador de Projétil: o orbe sobe e cai no ponto mirado, passando por cima da cobertura (altura do arco no parâmetro). Com Perseguir, só curva na descida. Em outras formas, não faz nada."),
+      ("Arc", "Projectile modifier: the orb rises and falls on the aimed point, passing over cover (arc height in the parameter). With Homing, it only curves on the way down. On other forms, it does nothing."),
+      ["........", "..####..", ".#....#.", "#......#", "#......#", "#......#", "........", "##....##"],
+      params={"height": (4.0, 1.0, 12.0, "float")},
+      scope={"target": "delivery", "kind": "form", "mutate": {"arc": {"op": "put", "value": 4.0, "param": "height"}}})
 
 # ------------------------------------------------------------------ CONDICOES
 glyph("on_hit_entity", "condition", 0,
@@ -1067,7 +1091,7 @@ TIERS = {
         "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group",
         "taunt", "wet", "read_item", "sense", "emit_signal", "light", "feather"],
     2: ["focus", "slow", "poison", "speed", "players", "animals", "undead", "nearest", "wounded", "allies", "delay", "lengthen",
-        "weaken", "swift", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
+        "weaken", "swift", "homing", "ricochet", "arc", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
         "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave",
         "rain", "charge", "glide", "fear", "rumble", "darkness", "lifesteal", "life_transfer", "invert", "on_jump",
         "target_health", "region", "holding", "raining",
@@ -1076,7 +1100,7 @@ TIERS = {
     3: ["levitate", "aura", "pillar", "barrier", "explode", "blink", "freeze", "wither", "repeat", "low_health", "on_hurt",
         "activate", "vow_blood", "on_death", "vow_oath", "shape_sphere", "shape_column", "zone", "on_zone_end", "on_zone_enter", "on_zone_exit", "on_barrier_break", "outsiders", "chain", "sleep", "on_kill", "on_fall",
         "satellites", "link", "trail", "recall", "imbue", "acid", "electrify", "contagion", "dispel", "reflect", "silence", "swap",
-        "curse", "overcharge", "after_hits", "pocket", "restore", "chorus", "domain", "persistence"],
+        "curse", "overcharge", "after_hits", "fragment", "pocket", "restore", "chorus", "domain", "persistence"],
     4: ["pierce", "thunder", "gravity", "invisible", "blast", "float", "telekinesis", "phase", "petrify", "reanimate"],
 }
 FAMILIES = {
@@ -1085,11 +1109,11 @@ FAMILIES = {
     "storm": ["thunder", "ray", "pillar", "rain", "rumble", "raining", "wet", "electrify", "on_signal", "emit_signal"],
     "blood": ["pierce", "damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill", "acid", "curse", "reanimate", "contagion", "overcharge", "after_hits"],
     "life": ["grow", "breathe", "chorus", "heal", "shield", "speed", "allies", "players", "animals"],
-    "force": ["feather", "hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat"],
+    "force": ["feather", "hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat", "homing", "ricochet", "arc"],
     "knowledge": ["light", "night_eye", "pocket", "mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "persistence", "on_near", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "on_barrier_break", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
     "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert", "phase", "recall", "swap", "link", "silence", "drain_mana", "decoy", "stealth", "false_trace", "bind"],
-    "earth": ["restore", "summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "origin_aim", "origin_self", "touch", "projectile", "self"],
+    "earth": ["restore", "summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "fragment", "origin_aim", "origin_self", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():
     for _gid in _ids:

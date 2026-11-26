@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **207 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **211 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -195,7 +195,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Melodia** | `arcane:melody` | 1 | 1 | Vida | `duration` 64 (32–400) | Efeito: uma melodia curta de harpa toca no alvo. |
 | **Ilusão** | `arcane:illusion` | 7 | 4 | Vazio | `duration` 300 (60–1200), `count` 3 (1–5) | Efeito: cria 3 clones seus (só visuais, até 15 s) que imitam a sua intenção: andam e correm com você, atacam com outras armas do seu inventário quando você ataca e fingem outras magias quando você conjura. Não ferem nem tocam em nada; um golpe os desfaz. Criaturas que miram você podem escolher um clone. |
 
-## Modificadores (35)
+## Modificadores (39)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -207,6 +207,10 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Potência** | `arcane:power` | 2 | 1 | Força | — | Modificador: +50% de força no efeito anterior (dano, cura, empurrão, nível). |
 | **Duração** | `arcane:lengthen` | 1 | 2 | Conhecimento | — | Modificador: dobra o tempo do efeito anterior (fogo, lentidão, veneno...). |
 | **Velocidade do Projétil** | `arcane:swift` | 1 | 2 | Terra | — | Modificador: o projétil voa 50% mais rápido. |
+| **Perseguir** | `arcane:homing` | 2 | 2 | Força | `turn` 2 (1–3) | Modificador de Projétil: o orbe curva até a criatura mais próxima no cone à frente (força da curva 1 a 3). Respeita o filtro; sem filtro, nunca persegue você, aliados ou bichos. Em outras formas, não faz nada. |
+| **Ricochete** | `arcane:ricochet` | 2 | 2 | Força | `bounces` 2 (1–4) | Modificador de Projétil: o orbe quica nos blocos até 1 a 4 vezes, perdendo força a cada quique. Cada quique conta como um acerto (Ao Bater dispara uma vez por quique). Em outras formas, não faz nada. |
+| **Fragmentar** | `arcane:fragment` | 3 | 3 | Terra | `count` 3 (2–6) | Modificador de Projétil: ao acertar, o orbe se parte em 2 a 6 cacos menores, que somam pouco mais que um orbe. Caco não se parte de novo. Em outras formas, não faz nada. |
+| **Arco** | `arcane:arc` | 2 | 2 | Força | `height` 4 (1–12) | Modificador de Projétil: o orbe sobe e cai no ponto mirado, passando por cima da cobertura (altura do arco no parâmetro). Com Perseguir, só curva na descida. Em outras formas, não faz nada. |
 | **Grupo** | `arcane:group` | 0 | 1 | Conhecimento | — | Modificador: abre um grupo. Um modificador depois de Fim do Grupo afeta todos os efeitos do grupo. |
 | **Fim do Grupo** | `arcane:end_group` | 0 | 1 | Conhecimento | — | Modificador: fecha o grupo aberto por Grupo. |
 | **Enfraquecer** | `arcane:weaken` | 1 | 2 | Conhecimento | — | Modificador: metade da força do efeito anterior (dano, cura, empurrão, nível). Barateia a magia. |

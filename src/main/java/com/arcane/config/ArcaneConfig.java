@@ -6,6 +6,14 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec SPEC;
   public static final ForgeConfigSpec.BooleanValue AFFINITIES_ENABLED;
   public static final ForgeConfigSpec.DoubleValue AFFINITY_MAX_TOTAL;
+  public static final ForgeConfigSpec.IntValue PROJECTILE_MAX_TRIGGERS;
+  public static final ForgeConfigSpec.DoubleValue HOMING_DEGREES_PER_LEVEL;
+  public static final ForgeConfigSpec.DoubleValue HOMING_CONE_DEGREES;
+  public static final ForgeConfigSpec.DoubleValue HOMING_RANGE;
+  public static final ForgeConfigSpec.DoubleValue RICOCHET_POWER_LOSS;
+  public static final ForgeConfigSpec.DoubleValue FRAGMENT_TOTAL_POWER;
+  public static final ForgeConfigSpec.DoubleValue FRAGMENT_MAX_EACH;
+  public static final ForgeConfigSpec.IntValue FRAGMENTS_PER_WORLD;
   public static final ForgeConfigSpec.DoubleValue MAX_AMBIENT_POTENCY;
   public static final ForgeConfigSpec.IntValue MAX_RITUAL_SIZE;
   public static final ForgeConfigSpec.IntValue MAX_GLYPHS;
@@ -182,6 +190,22 @@ public class ArcaneConfig {
         .define("affinitiesEnabled", true);
     AFFINITY_MAX_TOTAL = builder.comment("Ceiling of affinity x element reaction bonus on one hit (2 = at most double damage from both together). Only limits bonuses (PROVISIONAL)")
         .defineInRange("affinityMaxTotal", 2.0, 1.0, 10.0);
+    PROJECTILE_MAX_TRIGGERS = builder.comment("Projectile modifiers: most hits (final hit + bounces + fragments) one projectile may trigger; extra fragments, then bounces, are dropped (PROVISIONAL)")
+        .defineInRange("projectileMaxTriggers", 8, 1, 32);
+    HOMING_DEGREES_PER_LEVEL = builder.comment("Homing: degrees the projectile may turn per tick, per level of the glyph (PROVISIONAL)")
+        .defineInRange("homingDegreesPerLevel", 3.0, 0.5, 30.0);
+    HOMING_CONE_DEGREES = builder.comment("Homing: half-angle of the cone ahead where targets are searched (PROVISIONAL)")
+        .defineInRange("homingConeDegrees", 35.0, 5.0, 90.0);
+    HOMING_RANGE = builder.comment("Homing: how far (blocks) targets are searched (PROVISIONAL)")
+        .defineInRange("homingRange", 16.0, 2.0, 64.0);
+    RICOCHET_POWER_LOSS = builder.comment("Ricochet: fraction of power lost at each bounce (PROVISIONAL)")
+        .defineInRange("ricochetPowerLoss", 0.25, 0.0, 0.9);
+    FRAGMENT_TOTAL_POWER = builder.comment("Fragment: total power of all fragments together, as a fraction of the original (PROVISIONAL)")
+        .defineInRange("fragmentTotalPower", 1.2, 0.1, 4.0);
+    FRAGMENT_MAX_EACH = builder.comment("Fragment: most power one fragment may have, as a fraction of the original (PROVISIONAL)")
+        .defineInRange("fragmentMaxEach", 0.5, 0.05, 1.0);
+    FRAGMENTS_PER_WORLD = builder.comment("Fragment: most fragments alive at once in one world; new ones beyond it are not spawned (PROVISIONAL)")
+        .defineInRange("fragmentsPerWorld", 64, 0, 1024);
     SPEC = builder.build();
   }
 }

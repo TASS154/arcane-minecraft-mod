@@ -98,6 +98,21 @@ de Treino (`/arcane dummy report` dá os valores exatos em HP). Nenhum número j
 | I | Artrópodes | veneno ×0,75; fogo ×1,25 | `affinities/arthropods.json` | Aranhas, traça, abelha | Idem |
 | I | Criaturas do End | vazio ×0,5; água ×1,5 | `affinities/end_creatures.json` | Enderman, shulker | Idem |
 | H | Receita do Boneco | fardo de feno + 4 gravetos (" H ", "SSS", " S ") | `tools/gen_data.py` | Barata e simples, placeholder | (decisão de design) |
+| J | Teto de disparos por projétil | 8 (acerto final + quiques + cacos) | config `projectileMaxTriggers` | Os quatro modificadores no máximo dariam 11; corta cacos primeiro, depois quiques | Projétil + os quatro no máximo + Dano: o relatório conta no máximo 8 golpes |
+| J | Curva do Perseguir | 3° por tick por nível (1 a 3) | config `homingDegreesPerLevel` | Nível 3 fecha uma curva de 90° em 10 ticks: persegue, mas ainda dá para desviar | Boneco a 2 blocos fora da linha a 5 de distância: nível 1 erra, 3 acerta |
+| J | Cone do Perseguir | 35° (meio ângulo), 16 blocos | config `homingConeDegrees`, `homingRange` | Só o que está à frente; não vira para trás | Boneco fora do cone: o orbe segue reto |
+| J | Perda por quique | 25% do poder | config `ricochetPowerLoss` | 4 quiques somam 1 + 0,75 + 0,56 + 0,42 + 0,32 = 3,05 golpes de poder; quique fraco | Boneco atrás de uma parede, Ricochete 1: o golpe do quique marca 75% do direto |
+| J | Poder dos cacos | soma até 1,2 do orbe; cada um no máximo 0,5 | config `fragmentTotalPower`, `fragmentMaxEach` | Fragmentar espalha, não multiplica: 20% a mais só se todos acertarem | Cinco Bonecos em leque: a soma do relatório fica abaixo de 1,2 do golpe direto |
+| J | Cacos vivos por mundo | 64 | config `fragmentsPerWorld` | Proteção contra lag; o excesso não nasce | (desempenho) |
+| J | Arco | gravidade 0,05 bloco/tick²; altura 1 a 12 (padrão 4); mira até 48 blocos | `ProjectileMods.ARC_GRAVITY`, glifo `arc` | O orbe cai no ponto mirado; a velocidade do glifo Projétil não vale no Arco | Mire num Boneco atrás de um muro de 3 blocos com altura 4 |
+| J | Custo de mana dos glifos | Perseguir 2, Ricochete 2, Fragmentar 3, Arco 2 | `tools/glyph_table.py` | No padrão de Velocidade (1) e Potência (2) | Mana da última conjuração no letreiro do Boneco |
+
+### Modificadores de Projétil (Fase J): dúvidas
+- **Tier e família:** Perseguir, Ricochete e Arco no tier 2 (família força), Fragmentar no tier 3 (força e terra). Entram
+  no loot das estruturas pelo padrão de tier do `gen_data.py`. Confirmar.
+- **Cacos:** saem do ponto de acerto em leque, voam 1,5 s e não acertam a criatura que o orbe atingiu. Não herdam
+  Perseguir, Ricochete nem Arco.
+- **Ricochete em criatura:** não quica; o acerto em criatura é o final (e aí Fragmentar parte).
 
 ### Afinidades (Fase I): dúvidas
 - **Elemento do efeito:** usei o de `effects.json` (por glifo), como pede o adendo. Isso faz Dano e Explosão contarem

@@ -1,3 +1,8 @@
+> ## CONGELAMENTO DE EDIÇÃO (pedido de Everton, 26 nov)
+> **Nenhuma edição no jogo Arcane até sábado (28/11). Liberada apenas domingo (29/11).** Até lá vale só design e
+> arquitetura. Nada abaixo foi aplicado ao código. Nenhuma sessão deve editar este projeto antes de domingo, mesmo
+> que Everton autorize depois. As sessões `prompt-2` e `prompt-3` estão ociosas e não devem ser reativadas para editar.
+
 # Perguntas e respostas de Everton (26 nov 2026)
 
 Rodada de decisões depois dos 3 prompts de 25 e 26 nov. Cada item tem a pergunta (como foi feita) e a resposta de Everton.
@@ -175,3 +180,170 @@ tecla B; inscrição por pisar de graça; a Pena escreve em qualquer bloco; comp
 
 **40. Hidra pegando fogo fica vermelha o tempo todo.** Incomoda?
 > **Resposta:** para mim, não.
+
+---
+
+## Rodada 2 (26 nov, tarde): respostas de Everton
+
+Legenda: **Aprovado** = pode ir para implementação (domingo). **Dúvida** = falta uma resposta antes. **Explicado** = pedido de explicação, já respondido aqui.
+
+### 1. Corte: aprovado B, com escala pela vida restante
+Corte = **B** (dano 3, +5% por ponto de armadura, custo 3), alvo único, sem área e sem cadeia. Acréscimo de Everton: o dano **escala com a vida restante do alvo**. **Aprovado.** O número da escala fica provisório na implementação.
+
+### 2. Forma Chuva: aprovado (recomendação)
+Aprovada a forma Chuva com raio 5, 6 s e 1 pulso/s. O teto parcial conta pelo **centro do topo**. Dentro de casa, a nuvem **desce até o teto**. **Aprovado.**
+
+### 3. Hidra: aprovado opção C, com portão do Guardião
+- **Afinidade por cabeça viva** (opção C). Aprovado.
+- **Portão:** só dá para enfrentar a Hidra depois de vencer o **primeiro Guardião de Ruína**.
+- **Onda ao matar o Guardião:** uma onda de choque sai dele, com o texto "O arcano do mundo foi desbalanceado".
+- **Selos:** antes indestrutíveis; depois dessa onda, **podem ser destruídos**.
+
+Isso muda o comportamento da Hidra (que antes não podia ser ferida nos selos). Está aprovado por Everton, então entra em `DECISIONS.md` como decisão aprovada, a aplicar no domingo.
+
+### 4. Estilo de magia (explicado e aprovado em princípio)
+
+**O que é.** Cada jogador acumula afinidade com cada elemento conforme **usa** magias desse elemento. O estilo é formado pelos elementos em que ele está mais forte. Não é uma barra, nem uma tela, nem uma conquista: o jogador não é avisado de nada. O efeito aparece só no que ele conjura.
+
+**Regras aprovadas (respostas às 5 perguntas de `ESTILO_UNICO_DESENHO.md`):**
+- **Afinidade por uso** (Q1): sobe ao conjurar magias daquele elemento.
+- **Não cai nunca** (Q2): se chegou a 100, fica 100. O jogador não é penalizado por testar coisas novas.
+- **Só o efeito muda** quando outro elemento passa do atual. A afinidade em si nunca cai.
+- **Parâmetros separados**, e **cada elemento vai a 100 sozinho** (Q3): não há limite total.
+- **Sinergia própria para cada combinação** de dois elementos (Q4). Com 16 elementos são 120 pares, e cada um precisa de um efeito diferente.
+- **Vale para magos NPC** (Q5), que recebem o estilo fixo quando nascem (no spawn).
+- **Implícito:** nenhuma mensagem, barra ou aviso. Para evitar farm, a evolução é silenciosa.
+- **Visual:** o grimório do jogador **brilha levemente** com as cores dos dois elementos dominantes, como em Black Clover.
+
+**Dúvida 4a (grande, vai para `DECISIONS.md`):** escrever à mão os 120 efeitos de sinergia, ou criar uma **regra geradora** (família de efeito × par de elementos) com tabela escrita só para exceções? Recomendo a regra geradora: é mais fácil de equilibrar e cabe em config. Falta sua escolha.
+
+### 10. Recalcular cratera em segundo plano: aprovado
+Se não muda o visual, a cratera pode ser calculada aos poucos. **Aprovado.**
+
+### 12. Diário do Restaurar: não aumentar para 32k; usar regeneração
+Conta feita:
+- Uma esfera de raio 16 tem cerca de **17.200 blocos** (4/3 · π · 16³).
+- Duas explosões desse tamanho somam **cerca de 34.300 blocos**, mais que os **32.768** do diário de 32k.
+- Ou seja, o diário de 32k **não cobre** "várias explosões de raio 16 em lugares diferentes". Falha no seu segundo critério.
+
+**Alternativa proposta (híbrido):**
+- **Terreno natural** volta regenerando o mundo a partir da seed, sem limite e quase sem custo de armazenamento. Só guarda a lista de regiões alteradas.
+- **Blocos que jogadores ou magias construíram** continuam no diário, que pode ficar no tamanho atual (4.096).
+
+Isso é mais barato que o diário de 32k e não tem limite de explosões. **Dúvida 12a:** confirmar o híbrido. Ressalva para a implementação: estruturas do mundo (vilas, ruínas) também são regeneradas pela geração, então é preciso confirmar que voltam iguais.
+
+### 13. Uma cratera por vez: não
+Não quer fila. Motivo que deu: "dá uma sensação de injustiça (por que a dele abriu e a minha não?)". Todas as crateras abrem ao mesmo tempo. **Decidido: não.**
+
+### 14. Tabela de afinidades: aprovado
+Aprovada como está (ver resumo na rodada anterior). **Aprovado.**
+
+### 15. Números provisórios de H a N: aprovados por delegação
+Você não conseguiu abrir o arquivo e pediu que eu avaliasse junto com o resto do projeto. **Minha avaliação: aprovar em bloco**, com duas ressalvas:
+- **Limiar "Chuva + Fogo = 1"** (nuvem de vapor): não dispara até a forma Chuva existir. Só ganha efeito depois.
+- **Números do Guardião** (60 HP, janela ×1,5): dependem do portão da Hidra (item 3). Podem ser ajustados depois de medir no Boneco.
+
+Os demais números (Boneco 40 HP, Perseguir, Ricochete, Fragmentar, Arco, Nuvem, voz, maestria) estão dentro de faixas razoáveis e são medidos depois no Boneco. **Aprovado por delegação.** Os valores ficam em `docs/PERGUNTAS.md`, seção "Números provisórios".
+
+### 18. Nuvem e afinidade: aprovado
+**Aprovado.**
+
+### 23. Atraso → Após Segundos: a Potência ainda alcança o grupo
+A Potência continua alcançando o grupo. Como passa a afetar mais de um glifo, **o custo dela também sobe**. Drop de mana: **aprovado**.
+
+**Dúvida 23a:** quanto custa a Potência por glifo afetado? Ex.: +1 de mana por glifo, ou ×1,5 por glifo? Falta o número.
+
+### 24. Carinho: mantém, só o efeito de corações
+Carinho continua existindo e fica **só com o efeito de corações** (cura de 4 HP em animais). **Aprovado.**
+
+### 25. Tags de estado: aprovado, exceto um item
+Aprovado o sistema de tags de estado (`PROPOSTA_TAGS_DE_ESTADO.md`). Everton não gostou do **item 4**, com a justificativa "não quero prender o jogador".
+
+**Dúvida 25a:** eu entendi que o item 4 é **Sincronização** (passo 4 da migração: Petrificar, medo e sono desenhados pelo cliente via tag). Mas "prender" pode se referir a Petrificar (que imobiliza). Confirmar qual era o item. Enquanto isso, o item 4 **não entra** na implementação.
+
+### 27. Zona que vence com o mundo fechado: ela ainda deve disparar
+Quando a zona termina com o mundo fechado (ou o conjurador ausente), o efeito **"Quando a Zona Acabar" ainda dispara**. Hoje ela só some. **Aprovado** como mudança. Ao entrar na zona, quem já estava dentro não conta (como está). A zona pode ter formato de coluna, domo etc. (como está).
+
+### 29. Flutuar como voo: "Isso é bom"
+Flutuar serve de voo, sem glifo "Voo" separado. **Aprovado.**
+
+### 31. Eletrificar e Condutor: dois glifos separados
+Everton quer **dois glifos diferentes**, não um com `mode`:
+- **Eletrificar:** o dano que o alvo leva salta 35% para até 2 criaturas num raio de 4 (como está).
+- **Condutor:** raios que caem a até 24 blocos do alvo caem nele. **Não deve afetar só criaturas**: também atinge blocos e jogadores.
+
+**Dúvida 31a:** qual é o **alvo** do Condutor? O raio cai no próprio alvo (como agora), ou pode ser atraído para um bloco ou um jogador? Falta definir a regra exata.
+
+### 32. Reanimar e Encantar: aprovados
+- **Reanimar:** traz um **jogador** de volta **1 vez**, pelo custo de **metade da vida restante do conjurador**. Precisa de uma Potência para funcionar. **Aprovado.**
+- **Encantar:** **aprovado como temporário** (até 5 min, por 1 a 10 golpes).
+- **Sobrecarga:** aprovada (custa 1 coração).
+
+### 33. Diferença entre Vincular e Elo (explicado)
+- **Elo** (`link`): liga **duas criaturas** (ou você e uma criatura). Metade do dano que uma sofre é transferido para a outra, por até 60 s. É um efeito que **divide dano** entre criaturas.
+- **Vincular** (`bind`): é um **modificador**. Ele prende à sua presença um **efeito de poção** que você pôs em outra criatura (Lentidão, Veneno, Cegar, Velocidade). O efeito acaba se você morrer, sair do mundo ou se afastar mais de 40 blocos. Não serve para efeitos que não são de poção.
+
+Resumo: **Elo divide dano; Vincular amarra um efeito de poção à sua presença.** Não se combinam por padrão.
+
+### 35. Lendário: exige círculo de raio mínimo 16: aprovado
+Ritual lendário exige **no mínimo** um círculo de raio **16**. **Aprovado.**
+
+### 36. Grimório: aprovado, com regras novas
+- **Começa com a Faísca.** Aprovado.
+- **Penalidade de mana** (até recuperar ou 3 dias). Aprovado.
+- **Grimório com dono não pode ser destruído de jeito nenhum.** Nem despawna.
+- **Forma física:** é sempre um item/entidade 3D. Quando é largado, vira uma **entidade parada** no chão, não um item comum.
+- **`/kill` não pode matá-lo.**
+
+**Dúvida 36a:** "de qualquer maneira" inclui **o vazio**? Hoje "só o vazio destrói" o grimório. Falta confirmar se o vazio continua podendo destruir o grimório com dono, ou se esse caso também fica proibido.
+
+### 37. Custo exponencial e 8 páginas: aprovado.
+
+### 38. Cristais e fragmentos: aprovado em princípio, com dúvidas
+Everton descreveu um sistema novo de fragmentos de cristal:
+- **Cristais têm chance de dropar um fragmento.**
+- **Fragmento no chão** (perto de jogadores) ou em **entidades que não são containers** (ex.: moldura de item) concede **1,5× de regeneração de mana e de poder**.
+- **Fragmento no próprio inventário** concede **2×**.
+- **Exposição prolongada** pode dar **efeitos adversos** (quais, ainda não definido).
+- **Cristal obtido com Toque de Seda:** no máximo **16×** (antes 32× naturais), e **concede mana poisoning** conforme a zona. Em resumo, **perde uma zona**.
+
+**Dúvidas 38a (grandes, vão para `DECISIONS.md`):**
+- Qual a **chance** de drop do fragmento?
+- Qual o raio de "perto de jogadores"?
+- Quais **entidades não-container** contam (moldura de item? suporte de armadura?).
+- Quais são os **efeitos adversos** e a partir de quanto tempo de exposição?
+- "Perde uma zona": a zona do cristal de Toque de Seda é **uma a menos** do que a do cristal comum?
+
+### 39. Glifos desconhecidos: fontes de descoberta
+Everton descreveu quando um glifo **unknown** pode aparecer:
+- **Armadilha sem tinta invisível** pode revelar um glifo desconhecido.
+- **Mago conjurando** pode revelar um glifo desconhecido.
+- **Efeitos como veneno** só podem ser "unknown" se **você for atingido** por eles.
+- **Efeitos visuais** como Petrificar, quando **atingem outro no seu campo de visão**, podem revelar o glifo.
+
+**Bug reportado:** Petrificar **não está transformando em pedra visualmente**. Vai para a lista de itens a ver em jogo.
+
+**Dúvida 39a:** qual é o **conjunto exato de glifos** que uma armadilha ou um mago pode revelar? Quer que eu escreva a tabela "efeito × fonte de descoberta"?
+
+### 40. Hidra pegando fogo fica vermelha: "para mim, não"
+Não incomoda. **Aprovado.**
+
+---
+
+## Pendências: o que falta para aprovar ou responder
+
+**Decisões grandes (vão para `docs/DECISIONS.md`):**
+1. **Sinergias do estilo (item 4a):** os 120 pares escritos à mão, ou regra geradora com exceções (recomendo a regra).
+2. **Híbrido do Restaurar (item 12a):** confirmar a regeneração do terreno natural + diário só dos blocos construídos.
+3. **Cristais (item 38a):** chance de drop; raio; entidades que contam; efeitos adversos; zona do Toque de Seda.
+4. **Fontes de descoberta (item 39a):** tabela "efeito × fonte".
+
+**Dúvidas pequenas (uma linha basta):**
+5. **Item 25a:** qual é o "item 4" das tags que você não quer (sincronização ou Petrificar?).
+6. **Item 23a:** custo da Potência por glifo afetado (+1 ou ×1,5?).
+7. **Item 31a:** alvo do Condutor (o raio cai no alvo, ou pode ser atraído a bloco ou jogador?).
+8. **Item 36a:** o vazio ainda destrói grimório com dono?
+
+**Aprovados (serão aplicados no domingo):** Corte B com escala pela vida restante; Chuva com centro do topo e nuvem que desce; Hidra opção C com portão do Guardião e selos destrutíveis depois da onda; cratera sem fila; cratera de recálculo em segundo plano; Carinho só com corações; Flutuar como voo; Eletrificar e Condutor separados; Reanimar e Encantar temporário; Sobrecarga; Bolso e Coro; Lendário com raio 16; grimório inicial com Faísca e regras de dono; custo exponencial; Hidra vermelha; zona disparando mesmo com mundo fechado; tags de estado (menos o item 4).
+
+**Para ver em jogo (não é decisão):** Petrificar não vira pedra visualmente; o letreiro do grimório brilhando nas duas cores; a regra de sinergia quando estiver pronta.

@@ -56,6 +56,10 @@ def main():
     pairs = sorted(p.stem.replace("autotest_sheet_", "") for p in src.glob("autotest_sheet_pair_*.png"))
     if pairs:
         build(pairs, ["projectile"], lambda r, c: r, src, out.with_name("contact_pairs.png"), label_w=170)
+    # Fase M: maestria 0 / 0,5 / 1 (colunas) x elemento e assinatura (linhas)
+    if any(src.glob("autotest_sheet_mastery_*.png")):
+        rows = [f"{e}_sig{s}" for e in ("fire", "frost", "storm") for s in (1, 2)]
+        build(rows, ["m0", "m5", "m10"], lambda r, c: f"mastery_{r}_{c}", src, out.with_name("contact_mastery.png"), label_w=110)
 
 
 if __name__ == "__main__":

@@ -38,11 +38,11 @@ public class VoiceGameTests extends GameTestSupport {
   public static void voiceTravelsInTheFxPacket(GameTestHelper h) {
     var spell = new Inscription(List.of(g("projectile"), g("damage"), g("fire"), g("power"), g("slow"), g("poison"),
         g("weaken"), g("blind"), g("lengthen"), g("swift")));
-    var voice = CastingService.voiceFor(spell, SpellElement.FIRE, false);
+    var voice = CastingService.voiceFor(spell, SpellElement.FIRE, false, 0.5, 0, -1); // maestria media: sem o acorde da Fase M
     var notes = SpellVoice.unpack(voice.notes());
     h.assertTrue(notes.size() == SpellVoice.MAX_NOTES || notes.size() == SpellVoice.MAX_WITH_FLOURISH, "notas: " + notes.size());
     h.assertTrue(SpellVoice.FAMILIES.get(voice.family()).equals("fire"), "familia do fogo");
-    var big = SpellVoice.unpack(CastingService.voiceFor(spell, SpellElement.FIRE, true).notes());
+    var big = SpellVoice.unpack(CastingService.voiceFor(spell, SpellElement.FIRE, true, 0.5, 0, -1).notes());
     h.assertTrue(big.size() == SpellVoice.MAX_WITH_FLOURISH && big.get(big.size() - 1).longTail(), "ritual: floreio com cauda longa");
     var packet = new S2CShapeFxPacket(S2CShapeFxPacket.CAST, new Vec3(1, 2, 3), Vec3.ZERO, 1.5f, 0xFF8C28, 1, 16, voice);
     var buf = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
@@ -53,6 +53,8 @@ public class VoiceGameTests extends GameTestSupport {
     var buf2 = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
     S2CShapeFxPacket.encode(plain, buf2);
     h.assertTrue(S2CShapeFxPacket.decode(buf2).voice() == null, "efeito sem voz continua sem voz");
+    var chord = SpellVoice.unpack(CastingService.voiceFor(spell, SpellElement.FIRE, true, 1.0, 0, -1).notes());
+    h.assertTrue(chord.size() == big.size() + 1, "maestria alta: acorde limpo a mais (" + chord.size() + ")");
     h.assertTrue(buf2.readableBytes() == 0 && buf.readableBytes() == 0, "nada sobra no pacote");
     h.succeed();
   }

@@ -1172,5 +1172,8 @@
   "gui.arcane.options.voice_hover": "Note on grimoire hover: %s",
   "message.arcane.voice.none": "No active spell in the grimoire.",
   "message.arcane.voice.header": "Active spell voice: family %s, %s notes",
-  "subtitles.arcane.voice": "Spell sings"
+  "subtitles.arcane.voice": "Spell sings",
+  "gui.arcane.options.signature_own": "My signature: %s",
+  "gui.arcane.options.signature_others": "Others' signatures: %s",
+  "gui.arcane.options.signature.tip": "A touch of colour and a motif (ring, spiral or dots) from your style. Looks only."
 }

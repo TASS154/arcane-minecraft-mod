@@ -138,7 +138,9 @@ public final class DevAutoTest {
         armed = true;
         t = 0;
         try {
-          contactSheet = Files.readString(flag).toLowerCase(java.util.Locale.ROOT).contains("elementos");
+          String word = Files.readString(flag).toLowerCase(java.util.Locale.ROOT);
+          contactSheet = word.contains("elementos") || word.contains("maestria");
+          DevContactSheet.masteryMode = word.contains("maestria");
         } catch (IOException ignored) {
         }
         log = mc.gameDirectory.toPath().resolve("arcane_autotest.log");

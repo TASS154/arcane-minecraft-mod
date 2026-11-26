@@ -189,16 +189,30 @@ public final class Fx {
 
   /** Como {@link #cast(ServerLevel, Entity, SpellElement, float)}, com a cor sobrescrita ({@code color} -1 = a do elemento). */
   public static void cast(ServerLevel level, Entity caster, SpellElement body, float power, int color) {
+    cast(level, caster, body, power, color, 1.0);
+  }
+
+  /**
+   * Com a maestria da inscricao (Fase M, so aparencia): baixa treme, lava a cor e falha no rastro; 1 e o visual de
+   * sempre. NAO visto em jogo.
+   */
+  public static void cast(ServerLevel level, Entity caster, SpellElement body, float power, int color, double mastery) {
     Vec3 base = caster.position();
     double h = caster.getBbHeight();
     int want = 10 + Math.min(14, (int) (power * 4));
     int n = budget(level, caster.getUUID(), want);
-    var opts = options(body, Role.BODY, 1f, color);
+    int rgb = color >= 0 ? color : body.color();
+    int tinted = mastery >= 1.0 ? color : CastStyle.desaturate(rgb, CastStyle.saturation(mastery));
+    var opts = options(body, Role.BODY, 1f, tinted);
+    double jitter = CastStyle.jitter(mastery);
+    double gaps = CastStyle.gapFraction(mastery);
     for (int i = 0; i < n; i++) {
+      if (gaps > 0 && ((i * 7919) % 100) / 100.0 < gaps) continue; // falhas fixas (nada de sorteio no servidor)
       double f = i / (double) Math.max(1, n);
       double a = f * Math.PI * 4;
       double r = 0.7 - f * 0.25;
-      level.sendParticles(opts, base.x + Math.cos(a) * r, base.y + f * (h + 0.4), base.z + Math.sin(a) * r, 1, 0, 0.02, 0, 0.01);
+      double jx = jitter * Math.sin(i * 12.9898), jz = jitter * Math.cos(i * 78.233);
+      level.sendParticles(opts, base.x + Math.cos(a) * r + jx, base.y + f * (h + 0.4), base.z + Math.sin(a) * r + jz, 1, 0, 0.02, 0, 0.01);
     }
     sound(level, base, body, SoundRole.CAST, power);
   }

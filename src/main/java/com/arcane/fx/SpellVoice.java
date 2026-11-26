@@ -133,6 +133,15 @@ public final class SpellVoice {
         .map(d -> d.cost().mana()).orElse(1);
   }
 
+  /** Maestria alta (Fase M): um acorde limpo (terca da pentatonica) junto da ultima nota. So som. */
+  public static List<Note> withMastery(List<Note> notes, double mastery) {
+    if (notes.isEmpty() || !CastStyle.polished(mastery) || notes.size() >= 12) return notes;
+    List<Note> out = new ArrayList<>(notes);
+    Note last = notes.get(notes.size() - 1);
+    out.add(new Note((last.degree() + 2) % 5, last.octave(), last.delay(), last.volume() * 0.7f, last.longTail()));
+    return out;
+  }
+
   // ------------------------------------------------------------------ empacotar (pacote de efeito)
   /**
    * Cada nota em 15 bits: grau (3), oitava (2), atraso/3 (4), volume em 16 passos (4), cauda (1), mais 1 bit de "ha

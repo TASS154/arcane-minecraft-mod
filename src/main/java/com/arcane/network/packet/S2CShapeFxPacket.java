@@ -79,7 +79,8 @@ public record S2CShapeFxPacket(int type, Vec3 pos, Vec3 dir, float size, int rgb
     ShapeFxRenderer.add(p.type, p.pos, p.dir, p.size, p.rgb, p.element, p.ticks);
     if (p.voice != null && p.voice.family() < com.arcane.fx.SpellVoice.FAMILIES.size()) {
       com.arcane.client.VoicePlayer.play(com.arcane.fx.SpellVoice.FAMILIES.get(p.voice.family()),
-          com.arcane.fx.SpellVoice.unpack(p.voice.notes()), p.pos.x, p.pos.y, p.pos.z);
+          com.arcane.fx.SpellVoice.unpack(p.voice.notes()), p.pos.x, p.pos.y, p.pos.z, p.voice.mastery());
+      if (p.type == CAST) com.arcane.client.CastStyleFx.onCast(p.pos, p.element, p.voice.mastery(), p.voice.signature(), p.voice.caster());
     }
   }
 }

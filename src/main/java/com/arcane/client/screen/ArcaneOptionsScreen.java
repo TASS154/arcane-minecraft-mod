@@ -39,10 +39,14 @@ public class ArcaneOptionsScreen extends Screen {
     addRenderableWidget(Button.builder(volumeLabel(), b -> { ClientPrefs.cycleVoiceVolume(); b.setMessage(volumeLabel()); })
         .bounds(left + 102, y + 96, 98, 20).build());
     addRenderableWidget(Button.builder(flag("gui.arcane.options.voice_hover", ClientPrefs.voiceHover()), b -> { ClientPrefs.flip(ClientPrefs.VOICE_HOVER); b.setMessage(flag("gui.arcane.options.voice_hover", ClientPrefs.voiceHover())); })
-        .bounds(left, y + 120, w, 20).build());
+        .bounds(left, y + 120, 98, 20).build());
+    addRenderableWidget(Button.builder(flag("gui.arcane.options.signature_own", ClientPrefs.signatureOwn()), b -> { ClientPrefs.flip(ClientPrefs.SIGNATURE_OWN); b.setMessage(flag("gui.arcane.options.signature_own", ClientPrefs.signatureOwn())); })
+        .bounds(left + 102, y + 120, 98, 20).tooltip(Tooltip.create(Component.translatable("gui.arcane.options.signature.tip"))).build());
+    addRenderableWidget(Button.builder(flag("gui.arcane.options.signature_others", ClientPrefs.signatureOthers()), b -> { ClientPrefs.flip(ClientPrefs.SIGNATURE_OTHERS); b.setMessage(flag("gui.arcane.options.signature_others", ClientPrefs.signatureOthers())); })
+        .bounds(left, y + 144, w, 20).build());
 
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.close"), b -> onClose())
-        .bounds(width / 2 - 50, y + 146, 100, 20).build());
+        .bounds(width / 2 - 50, y + 170, 100, 20).build());
   }
 
   private static Component volumeLabel() {
@@ -68,7 +72,7 @@ public class ArcaneOptionsScreen extends Screen {
     g.drawCenteredString(font, title, width / 2, height / 2 - 98, 0xFFFFFF);
     g.drawString(font, Component.translatable("gui.arcane.options.player"), width / 2 - 100, height / 2 - 84, 0xB79CFF, false);
     super.render(g, mx, my, pt);
-    g.drawCenteredString(font, Component.translatable("gui.arcane.options.world.hint"), width / 2, height / 2 + 102, 0xA0A0A0);
-    g.drawCenteredString(font, Component.translatable("gui.arcane.options.keys"), width / 2, height / 2 + 116, 0xA0A0A0);
+    g.drawCenteredString(font, Component.translatable("gui.arcane.options.world.hint"), width / 2, height / 2 + 124, 0xA0A0A0);
+    g.drawCenteredString(font, Component.translatable("gui.arcane.options.keys"), width / 2, height / 2 + 136, 0xA0A0A0);
   }
 }

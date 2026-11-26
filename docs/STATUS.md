@@ -111,6 +111,13 @@ Adendo de 25 nov (prompt 2): fases H a N, nesta ordem. Números novos: `docs/PER
   magias grandes ganham quinta, oitava e cauda longa. Uma voz por jogador a cada 0,5 s. Opções: ligar/desligar, volume,
   nota ao passar o mouse no grimório (desligada). A pena da bancada soa na nota do glifo. `/arcane voice debug` e
   `tools/preview_voice.py` (WAVs em `tools/out/`). NÃO ouvido. 289/289.
+- **M (maestria e assinatura, só aparência), 26 nov: feita.** Maestria (0 a 1) = média dos estados de conhecimento
+  dos glifos, pesada pelo custo. Baixa: partículas tremidas, cor lavada, rastro com falhas, voz desafinada; alta:
+  anel de acabamento e acorde limpo; maestria 1 é o visual de antes. Assinatura: semente pelo UUID e pelos dois
+  elementos mais conjurados (contagem só cosmética, `StyleTally`; ver `docs/DECISIONS.md` item 1), motivo anel,
+  espiral ou pontos em até 20% das partículas, paleta de daltonismo própria, desligada pelo Cor, opções para a sua e a
+  dos outros. Vão no campo compacto do pacote de efeito. Teste de regressão: maestria 0 e 1 dão o mesmo dano e a mesma
+  mana. Folha de contato: palavra `maestria` em `run/arcane_autotest.flag` (18 fotos). NÃO visto. 291/291.
 
 - **E (manutenção), 25 nov: feita.** GameTests divididos por área (`GameTestSupport` + 8 classes); poderes, fases e
   morte da Hidra em `HydraPowers`, `HydraPhases`, `HydraDeath`. 267/267.

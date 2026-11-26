@@ -34,6 +34,10 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
   Fogo e a mesma invertida, Gelo em área, Tempestade em ritual, uma magia longa de Vazio). As famílias soam diferentes?
   A melodia cansa se repetida? Depois, no jogo: conjure a mesma magia várias vezes (sempre a mesma melodia?) e monte uma
   magia na bancada (cada glifo soa ao entrar). Opções em Arcane > Voz da magia.
+- [ ] **Folha de contato da maestria (M):** escreva `maestria` em `run/arcane_autotest.flag`, abra o jogo e depois rode
+  `tools/dev/contact_sheet.py`: 18 fotos (maestria 0, 0,5 e 1 × 2 assinaturas × fogo, gelo e tempestade). A maestria
+  baixa parece "mal feita" sem parecer bug? A assinatura fica discreta (o elemento domina)? **Decidir** o item 1 de
+  `docs/DECISIONS.md` (de onde vem o estilo).
 - [ ] **Decidir:** receita do Boneco (placeholder), vida de 40 HP, aparência dos corações (❤ colorido; ½ para o meio;
   "♥×N" acima de 10). Usei o caractere ❤ e não os sprites do jogo (mais simples no letreiro 3D).
 

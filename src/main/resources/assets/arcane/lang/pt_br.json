@@ -1172,5 +1172,8 @@
   "gui.arcane.options.voice_hover": "Nota ao passar o mouse no grimório: %s",
   "message.arcane.voice.none": "Nenhuma magia ativa no grimório.",
   "message.arcane.voice.header": "Voz da magia ativa: família %s, %s notas",
-  "subtitles.arcane.voice": "Magia canta"
+  "subtitles.arcane.voice": "Magia canta",
+  "gui.arcane.options.signature_own": "Minha assinatura: %s",
+  "gui.arcane.options.signature_others": "Assinatura dos outros: %s",
+  "gui.arcane.options.signature.tip": "Um toque de cor e um motivo (anel, espiral ou pontos) que vêm do seu estilo. Só aparência."
 }

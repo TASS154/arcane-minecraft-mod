@@ -262,14 +262,43 @@ public final class CastingService {
         return true;
     }
 
+    /** Dev (folha de contato da maestria): forca a maestria e a assinatura da proxima conjuracao. null = normal. */
+    public static Double devMastery;
+    public static Integer devSignature;
+
+    /** Maestria da inscricao para quem conjura: jogador pelo grimorio; criaturas e suportes, 1 (Fase M, so aparencia). */
+    public static double masteryOf(LivingEntity caster, Inscription inscription) {
+        if (devMastery != null) return devMastery;
+        if (!(caster instanceof net.minecraft.world.entity.player.Player player)) return 1.0;
+        java.util.Map<String, Integer> levels = new java.util.HashMap<>();
+        GrimoireAttachments.get(player).ifPresent(g -> g.knowledge().forEach((id, k) -> levels.put(id.getPath(), k.ordinal())));
+        java.util.List<String> ids = new java.util.ArrayList<>();
+        for (var g : inscription.glyphs()) ids.add(g.glyphId().getPath());
+        return com.arcane.fx.CastStyle.mastery(ids, levels, id -> com.arcane.glyph.GlyphRegistry
+                .get(new net.minecraft.resources.ResourceLocation("arcane", id)).map(d -> d.cost().mana()).orElse(1));
+    }
+
+    /** Semente da assinatura (0 = nenhuma): so jogadores com estilo; o modificador Cor desliga. */
+    public static int signatureOf(LivingEntity caster, boolean colorOverride) {
+        if (devSignature != null) return devSignature;
+        if (colorOverride || !(caster instanceof net.minecraft.world.entity.player.Player player)) return 0;
+        SpellElement[] top = StyleTally.top(player);
+        return top == null ? 0 : com.arcane.fx.CastStyle.seed(player.getUUID(), top[0], top[1]);
+    }
+
     /** Voz da magia: as notas da inscricao, para o pacote de efeito. Rituais e magias grandes ganham o floreio. */
     public static S2CShapeFxPacket.Voice voiceFor(Inscription inscription, SpellElement element, boolean big) {
+        return voiceFor(inscription, element, big, 1.0, 0, -1);
+    }
+
+    public static S2CShapeFxPacket.Voice voiceFor(Inscription inscription, SpellElement element, boolean big,
+                                                  double mastery, int signature, int casterId) {
         java.util.List<String> ids = new java.util.ArrayList<>();
         for (var g : inscription.glyphs()) ids.add(g.glyphId().getPath());
         boolean grand = big || CompiledPlanCache.getOrCompile(inscription).baseManaCost() >= BIG_SPELL_MANA;
-        var notes = com.arcane.fx.SpellVoice.compose(ids, element, 1.0, grand);
+        var notes = com.arcane.fx.SpellVoice.withMastery(com.arcane.fx.SpellVoice.compose(ids, element, 1.0, grand), mastery);
         int family = com.arcane.fx.SpellVoice.FAMILIES.indexOf(com.arcane.fx.SpellVoice.family(element));
-        return new S2CShapeFxPacket.Voice(Math.max(0, family), com.arcane.fx.SpellVoice.pack(notes), 1f, 0, -1);
+        return new S2CShapeFxPacket.Voice(Math.max(0, family), com.arcane.fx.SpellVoice.pack(notes), (float) mastery, signature, casterId);
     }
 
     /** Custo a partir do qual a magia conta como grande para a voz (PROVISORIO, docs/PERGUNTAS.md). */
@@ -281,9 +310,16 @@ public final class CastingService {
         level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
                 com.arcane.registry.ModSounds.SPELL_CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS,
                 0.8f, 0.9f + caster.getRandom().nextFloat() * 0.2f);
-        S2CShapeFxPacket.Voice voice = voiceAllowed(caster.getUUID(), level.getGameTime()) ? voiceFor(inscription, element, big) : null;
+        // Fase M (so aparencia): maestria da inscricao e assinatura de quem conjura
+        double mastery = masteryOf(caster, inscription);
+        int signature = signatureOf(caster, override != -1);
+        if (caster instanceof net.minecraft.world.entity.player.Player player) StyleTally.count(player, element);
+        S2CShapeFxPacket.Voice voice = voiceAllowed(caster.getUUID(), level.getGameTime())
+                ? voiceFor(inscription, element, big, mastery, signature, caster.getId())
+                // sem voz (limite de 0,5 s): o campo vai so com a maestria e a assinatura (nenhuma nota)
+                : new S2CShapeFxPacket.Voice(0, new long[3], (float) mastery, signature, caster.getId());
         ModNetwork.sendShape(level, S2CShapeFxPacket.CAST, caster.position(), net.minecraft.world.phys.Vec3.ZERO, 1.5f, color, element.ordinal(), 16, voice);
-        com.arcane.fx.Fx.cast(level, caster, element, 1f, override);
+        com.arcane.fx.Fx.cast(level, caster, element, 1f, override, mastery);
         var hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.7)).add(0, -0.3, 0);
         com.arcane.fx.Fx.burst(level, caster, hand, element, com.arcane.fx.Fx.Role.IMPACT, 6, 0.1, 0.06, 0.7f, override);
     }

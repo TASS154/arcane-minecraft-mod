@@ -114,6 +114,9 @@ de Treino (`/arcane dummy report` dá os valores exatos em HP). Nenhum número j
 | K | Nuvem: limites | 2 por chunk, 16 por mundo, raio máximo 8 na fusão | idem e `ReactionZones.MAX_RADIUS` | Fundir em vez de empilhar | (desempenho) |
 | L | Magia grande (voz) | custo de mana ≥ 40, ou ritual | `CastingService.BIG_SPELL_MANA` | Só magias caras ganham quinta, oitava e cauda longa | (só som) |
 | L | Ritmo da voz | 3 ticks entre notas; volume padrão 80% | `SpellVoice.STEP_TICKS`, config do cliente `spellVoiceVolume` | 8 notas em 1,2 s: curto o bastante para não cansar | `python tools/preview_voice.py` e ouça `tools/out/` |
+| M | Maestria: tremida, falhas, cor | tremida até 0,18 bloco; falhas até 35% (nenhuma acima de 0,8); saturação 70% a 100%; desafinação até 3% | `fx/CastStyle` | Só aparência: maestria 1 é o visual de antes | Conjure com glifos Identificados e depois Dominados (só olhar) |
+| M | Acabamento e acorde | a partir de maestria 0,85 | `CastStyle.polished` | Prêmio visual para quem domina a magia | (só olhar e ouvir) |
+| M | Assinatura | no máximo 20% das partículas; matiz deslocado até 8% | `CastStyle.SIGNATURE_SHARE`, `MAX_HUE_SHIFT` | O elemento continua dominante | (só olhar) |
 
 ### Modificadores de Projétil (Fase J): dúvidas
 - **Tier e família:** Perseguir, Ricochete e Arco no tier 2 (família força), Fragmentar no tier 3 (força e terra). Entram

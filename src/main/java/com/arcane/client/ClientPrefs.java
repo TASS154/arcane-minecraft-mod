@@ -18,6 +18,8 @@ public final class ClientPrefs {
   public static final ForgeConfigSpec.BooleanValue VOICE;
   public static final ForgeConfigSpec.DoubleValue VOICE_VOLUME;
   public static final ForgeConfigSpec.BooleanValue VOICE_HOVER;
+  public static final ForgeConfigSpec.BooleanValue SIGNATURE_OWN;
+  public static final ForgeConfigSpec.BooleanValue SIGNATURE_OTHERS;
 
   static {
     ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -30,6 +32,8 @@ public final class ClientPrefs {
     VOICE = b.comment("Spell voice: each spell plays a short melody of its glyphs when cast").define("spellVoice", true);
     VOICE_VOLUME = b.comment("Spell voice volume (0 to 1)").defineInRange("spellVoiceVolume", 0.8, 0.0, 1.0);
     VOICE_HOVER = b.comment("Play a glyph's note when hovering it in the grimoire").define("spellVoiceHover", false);
+    SIGNATURE_OWN = b.comment("Show your own spell signature (a small accent and motif on your casts)").define("signatureOwn", true);
+    SIGNATURE_OTHERS = b.comment("Show other players' spell signatures").define("signatureOthers", true);
     SPEC = b.build();
   }
 
@@ -48,6 +52,10 @@ public final class ClientPrefs {
   public static double voiceVolume() { return VOICE_VOLUME.get(); }
 
   public static boolean voiceHover() { return VOICE_HOVER.get(); }
+
+  public static boolean signatureOwn() { return SIGNATURE_OWN.get(); }
+
+  public static boolean signatureOthers() { return SIGNATURE_OTHERS.get(); }
 
   /** Volume da voz em passos de 25% (0 volta ao 100%). */
   public static void cycleVoiceVolume() {

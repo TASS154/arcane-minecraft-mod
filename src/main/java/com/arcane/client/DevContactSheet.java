@@ -68,7 +68,30 @@ final class DevContactSheet {
 
   private static GlyphInstance g(String id) { return new GlyphInstance(new ResourceLocation("arcane", id)); }
 
+  /** Folha da maestria (Fase M): palavra "maestria" no arquivo-gatilho. */
+  static boolean masteryMode;
+  private record Style(double mastery, int signature) {}
+  private static final java.util.Map<String, Style> STYLES = new java.util.HashMap<>();
+
+  private static List<Shot> masteryPlan() {
+    List<Shot> list = new ArrayList<>();
+    java.util.UUID[] people = {new java.util.UUID(1L, 2L), new java.util.UUID(99L, 7L)};
+    SpellElement[] elements = {SpellElement.FIRE, SpellElement.FROST, SpellElement.STORM};
+    for (SpellElement e : elements) {
+      for (int s = 0; s < people.length; s++) {
+        int seed = com.arcane.fx.CastStyle.seed(people[s], e, s == 0 ? SpellElement.VOID : SpellElement.LIFE);
+        for (double m : new double[] {0.0, 0.5, 1.0}) {
+          String name = "mastery_" + e.name().toLowerCase(Locale.ROOT) + "_sig" + (s + 1) + "_m" + (int) Math.round(m * 10);
+          STYLES.put(name, new Style(m, seed));
+          list.add(new Shot(name, List.of(g("self"), g(effectOf(e))), 5));
+        }
+      }
+    }
+    return list;
+  }
+
   private static List<Shot> plan() {
+    if (masteryMode) return masteryPlan();
     List<Shot> list = new ArrayList<>();
     for (SpellElement e : SpellElement.values()) {
       for (Form f : FORMS) {
@@ -137,7 +160,12 @@ final class DevContactSheet {
         stand.moveTo(base.x - 1.5, base.y, base.z + 7.5, -90f, 0f);
         stand.setYRot(-90f);
         stand.setXRot(0f);
+        Style style = STYLES.get(s.name());
+        com.arcane.execution.CastingService.devMastery = style == null ? null : style.mastery();
+        com.arcane.execution.CastingService.devSignature = style == null ? null : style.signature();
         var r = com.arcane.execution.CastingService.tryCast(stand, new Inscription(s.glyphs()), sp.serverLevel());
+        com.arcane.execution.CastingService.devMastery = null;
+        com.arcane.execution.CastingService.devSignature = null;
         if (!r.success()) log.accept("  " + s.name() + ": falhou " + r.message());
       });
     }

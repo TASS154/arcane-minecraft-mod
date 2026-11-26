@@ -33,3 +33,30 @@ para jogadores de verdade.
 
 **Parado esperando:** qualquer mudança na Hidra (`HydraEntity` não foi tocada, além de passar o selo e a fraqueza pelo
 `PhaseGate` sem mudar o comportamento).
+
+## 3. Números do Corte (prompt 3, B4)
+
+**Pergunta.** O Corte passa a ser dano caro, de alvo único e com bônus pela armadura do alvo. Com que números?
+
+**Opções.** Tabela completa em `docs/PERGUNTAS.md`, "Corte: proposta de números". Resumo: (A) dano padrão 6, +4% por
+ponto de armadura do alvo, custo 4; (B) dano 3, +5% por ponto, custo 3; (C) dano 6, ignora metade da armadura, custo 4.
+
+**Recomendação:** (A). Pior que o Dano contra alvo nu (1,5 contra 2 HP por mana), melhor contra netherite (0,77
+contra 0,47). E ligar o "alvo único" junto com os números.
+
+**Parado esperando:** os números e o alvo único do Corte. Nada mudou no código do Corte (ele já não tem raio, então a
+Área não age nele, e não está na lista do Cadeia).
+
+## 4. Forma Chuva (prompt 3, B5)
+
+**Pergunta.** O desenho da forma Chuva está bom para implementar?
+
+**Opções.** O desenho está em `docs/PROPOSTA_FORMA_CHUVA.md` (entrega, "sem teto", tick, Zona e Segurar, custo,
+ritual, reações, exemplos e presença). Os pontos com escolha: teto parcial (cada criatura sozinha pelo centro do topo,
+ou por qualquer canto) e Chuva dentro de casa (a nuvem desce até o teto, ou falha).
+
+**Recomendação:** o desenho como está; teto pelo centro do topo; dentro de casa a nuvem desce.
+
+**Parado esperando:** a forma inteira (glifo `rainfall`, handler, sons, testes). O efeito Chuva já saiu (vira Molhar
+nas magias salvas). A Nuvem de Vapor continua com os outros dois gatilhos; o de "Chuva + Fogo" já aponta para
+`rainfall` e volta a valer quando a forma existir.

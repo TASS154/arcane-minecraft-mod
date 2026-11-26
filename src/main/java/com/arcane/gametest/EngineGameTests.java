@@ -94,7 +94,16 @@ public class EngineGameTests extends GameTestSupport {
   public static void fireOnEmptyPointLightsTheGround(GameTestHelper h) {
     floor(h);
     Pig caster = pig(h, 3, 1);
-    cast(h, caster, g("ray", "range", 4.0), g("fire"));
+    // O Raio nao entrega mais ponto vazio (26 nov): o ponto vem direto ao efeito, como na detonacao do Projetil ou na
+    // marca da Coluna
+    var spell = new com.arcane.inscription.Inscription(List.of(g("self"), g("fire")));
+    var ctx = new com.arcane.execution.ExecutionContext(h.getLevel(), caster, spell,
+        com.arcane.inscription.InscriptionCompiler.compile(spell), com.arcane.execution.EnvironmentalSnapshot.NEUTRAL,
+        com.arcane.execution.PrecisionSnapshot.of(spell), com.arcane.execution.ExecutionContext.TriggerEvent.cast());
+    var fire = new ResourceLocation("arcane", "fire");
+    com.arcane.glyph.GlyphHandlerRegistry.getEffect(fire).orElseThrow().apply(ctx,
+        new com.arcane.execution.EffectCall(fire, fire, java.util.Map.of("duration", 60.0), List.of()),
+        com.arcane.execution.TargetList.ofPoint(h.absoluteVec(new net.minecraft.world.phys.Vec3(3.5, 1.2, 5.5))));
     boolean found = false;
     for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
       if (h.getBlockState(new BlockPos(3 + dx, 1, 5 + dz)).is(Blocks.FIRE)) found = true;

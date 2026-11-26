@@ -75,12 +75,6 @@ public final class CastingService {
             return ExecutionResult.fail(broken);
         }
 
-        // Foco: precisa de uma criatura viva sob a mira; sem ela, falha antes de cobrar qualquer mana.
-        if (com.arcane.execution.handlers.FocusFormHandler.hasFocus(inscription) && com.arcane.execution.handlers.FocusFormHandler.find(
-                player, player.getEyePosition(), player.getLookAngle(), com.arcane.execution.handlers.FocusFormHandler.rangeOf(inscription)) == null) {
-            return ExecutionResult.fail("message.arcane.focus.no_target");
-        }
-
         // Coro: nao dispara sozinho. Entra numa sessao (ou abre uma) e quem paga e dispara e o ChorusService, no fim da janela.
         if (!ChorusService.firing() && ChorusService.isChorus(inscription)) {
             if (free) return ExecutionResult.fail("message.arcane.chorus.nocharge");
@@ -106,12 +100,9 @@ public final class CastingService {
         context.setAreaDial(AreaDial.factorFor(player.getUUID(), plan));
         context.setHoldTicks(CastChannels.holdTicks());
 
-        // Coluna (Pilar): nao se manifesta no ar. Falha antes de cobrar mana.
-        if (DeliverySpec.fromPlan(plan.delivery()).handler().getPath().equals("pillar")) {
-            var spec = DeliverySpec.fromPlan(plan.delivery());
-            double radius = Math.max(1.0, spec.parameters().getOrDefault("radius", 2.0));
-            if (!Region.mayManifest(context, spec, radius)) return ExecutionResult.fail("message.arcane.pillar.needs_ground");
-        }
+        // Foco sem criatura, Coluna sem chao, Raio no vazio, Mais Proximo sem ninguem: falha antes de cobrar mana.
+        String formFail = formFailure(context);
+        if (formFail != null) return ExecutionResult.fail(formFail);
 
         ManaState mana = GrimoireAttachments.getManaOrCreate(player);
         if (!free && !mana.trySpend(manaCost)) {
@@ -201,10 +192,6 @@ public final class CastingService {
         }
         if (Phase4State.active(caster, Phase4State.SILENCE)) return ExecutionResult.fail("message.arcane.silenced");
         if (ChorusService.isChorus(inscription)) return ExecutionResult.fail("message.arcane.chorus.players_only");
-        if (com.arcane.execution.handlers.FocusFormHandler.hasFocus(inscription) && com.arcane.execution.handlers.FocusFormHandler.find(
-                caster, caster.getEyePosition(), caster.getLookAngle(), com.arcane.execution.handlers.FocusFormHandler.rangeOf(inscription)) == null) {
-            return ExecutionResult.fail("message.arcane.focus.no_target");
-        }
         String broken = Vows.violation(caster, inscription);
         if (broken != null) return ExecutionResult.fail(broken);
         CompiledExecutionPlan plan = CompiledPlanCache.getOrCompile(inscription);
@@ -218,6 +205,8 @@ public final class CastingService {
                 PrecisionSnapshot.of(inscription),
                 ExecutionContext.TriggerEvent.cast()
         );
+        String formFail = formFailure(context);
+        if (formFail != null) return ExecutionResult.fail(formFail);
         if (com.arcane.execution.handlers.LoreEffects.Counterspell.intercept(caster, plan.baseManaCost())) {
             return ExecutionResult.fail("message.arcane.counterspell.countered");
         }
@@ -227,6 +216,61 @@ public final class CastingService {
             if (!Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()), inscription, false);
         }
         return result;
+    }
+
+    /**
+     * Falhas de forma conferidas ANTES de cobrar mana, todas no mesmo padrao (prompt de 26 nov, A2): a forma nao tem o
+     * que entregar. Devolve a chave da mensagem, ou null se a forma pode sair.
+     * <ul>
+     *   <li>Foco sem criatura viva na mira (ou, com Mais Proximo, sem ninguem por perto).</li>
+     *   <li>Coluna sem chao debaixo do ponto (ou da criatura mais proxima).</li>
+     *   <li>Raio que nao pega criatura nem bloco (o Raio nao age no ar vazio). Se a magia so tem efeitos que nao
+     *       dependem de alvo (Salto, Bolso...), o Raio vazio nao impede.</li>
+     *   <li>Raio ou Toque com Mais Proximo sem criatura visivel no alcance.</li>
+     * </ul>
+     * Projetil, Aura e Onda nunca falham aqui: o orbe pode errar e o volume pode sair vazio.
+     */
+    public static String formFailure(ExecutionContext context) {
+        DeliverySpec spec = DeliverySpec.fromPlan(context.plan().delivery());
+        String form = spec.formId().getPath();
+        String handler = spec.handler().getPath();
+        boolean seek = Seek.on(spec);
+        if (form.equals("focus")) {
+            return com.arcane.execution.handlers.FocusFormHandler.lock(context, spec) == null
+                ? (seek ? "message.arcane.seek.no_target" : "message.arcane.focus.no_target") : null;
+        }
+        if (handler.equals("pillar")) {
+            if (seek) {
+                var target = com.arcane.execution.handlers.PillarFormHandler.seekTarget(context);
+                if (target == null) return "message.arcane.seek.no_target";
+                boolean ok = Seek.aimedAt(context, target, () -> Region.mayManifest(context, spec,
+                    com.arcane.execution.handlers.PillarFormHandler.radiusFor(context, spec)));
+                return ok ? null : "message.arcane.pillar.needs_ground";
+            }
+            return Region.mayManifest(context, spec, com.arcane.execution.handlers.PillarFormHandler.radiusFor(context, spec))
+                ? null : "message.arcane.pillar.needs_ground";
+        }
+        if (form.equals("ray") || form.equals("touch")) {
+            boolean trail = form.equals("ray");
+            if (!seek && !trail) return null; // Toque sem alvo: como antes (so o Raio falha no vazio)
+            if (onlyIndependentEffects(context.plan())) return null;
+            TargetList hit = com.arcane.execution.handlers.RayFormHandler.probe(context, spec, trail);
+            if (hit.entities().isEmpty() && hit.blocks().isEmpty()) {
+                return seek ? "message.arcane.seek.no_target" : "message.arcane.ray.miss";
+            }
+        }
+        return null;
+    }
+
+    private static boolean onlyIndependentEffects(CompiledExecutionPlan plan) {
+        boolean any = false;
+        for (var segment : plan.segments()) {
+            for (var effect : segment.effects()) {
+                any = true;
+                if (!EffectReach.independent(effect.glyphId().getPath())) return false;
+            }
+        }
+        return any;
     }
 
     /** Som e particulas de conjuracao, visiveis para todos por perto. */

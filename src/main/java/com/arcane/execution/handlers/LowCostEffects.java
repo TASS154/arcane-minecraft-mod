@@ -62,47 +62,6 @@ public final class LowCostEffects {
     }
     return out;
   }
-
-  // ------------------------------------------------------------ Chuva
-  /** Chuva local: molha quem estiver na area, apaga fogo, rega plantacoes. Nao muda o clima (isso e o ritual Clima). */
-  public static class Rain implements EffectHandler {
-    @Override
-    public void apply(ExecutionContext context, EffectCall call, TargetList targets) {
-      double radius = Math.min(Math.min(ExecutionContext.cap(48.0), Math.max(10.0, 10.0 * context.areaFactor())), p(context, call, "radius", 4.0) * context.areaFactor());
-      int wet = (int) Math.min(Wetness.MAX_TICKS, p(context, call, "duration", 400.0));
-      List<Vec3> centers = centers(targets);
-      for (LivingEntity e : near(context, centers, radius, true)) Wetness.soak(context.level(), e, wet);
-      for (Vec3 center : centers) {
-        context.level().sendParticles(ParticleTypes.RAIN, center.x, center.y + 3.0, center.z, 60, radius * 0.5, 0.2, radius * 0.5, 0.0);
-        context.level().sendParticles(ParticleTypes.CLOUD, center.x, center.y + 3.5, center.z, 8, radius * 0.4, 0.1, radius * 0.4, 0.0);
-        context.level().playSound(null, center.x, center.y, center.z, SoundEvents.WEATHER_RAIN, SoundSource.WEATHER, 0.8f, 1.0f);
-      }
-      if (!Targeting.mayAlterWorld(context)) return;
-      int changed = 0;
-      for (Vec3 center : centers) {
-        BlockPos base = BlockPos.containing(center);
-        int r = (int) Math.ceil(radius);
-        for (int x = -r; x <= r && changed < 24; x++) {
-          for (int z = -r; z <= r && changed < 24; z++) {
-            if (x * x + z * z > r * r) continue;
-            for (int y = -1; y <= 1 && changed < 24; y++) {
-              BlockPos pos = base.offset(x, y, z);
-              var state = context.level().getBlockState(pos);
-              if (state.is(Blocks.FIRE)) {
-                context.level().removeBlock(pos, false);
-                changed++;
-              } else if (state.is(Blocks.FARMLAND)
-                  && state.getValue(net.minecraft.world.level.block.FarmBlock.MOISTURE) < 7) {
-                context.level().setBlockAndUpdate(pos, state.setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, 7));
-                changed++;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
   // ------------------------------------------------------------ Investida
   /** Investida: voce avanca em linha reta contra o alvo (ou para onde olha) ferindo quem estiver no caminho. */
   public static class Charge implements EffectHandler {

@@ -22,34 +22,6 @@ class Phase3GrammarTest {
   }
 
   @Test
-  void invertMarksOnlyThePreviousEffect() {
-    CompiledExecutionPlan plan = InscriptionCompiler.compile(new Inscription(List.of(g("self"), g("damage"), g("invert"), g("push"))));
-    var effects = plan.allEffectsInOrder();
-    assertTrue(Inversion.inverted(effects.get(0).parameters()), "Dano foi invertido");
-    assertFalse(Inversion.inverted(effects.get(1).parameters()), "Empurrao nao");
-  }
-
-  @Test
-  void inversionPairsAreSymmetricAndPointToRealGlyphs() {
-    for (String id : List.of("damage", "heal", "push", "attract", "slow", "speed", "fire", "freeze", "levitate", "gravity",
-        "lifesteal", "life_transfer", "blind", "invisible", "fear", "taunt")) {
-      String other = Inversion.opposite(id).orElseThrow(() -> new AssertionError("sem par: " + id));
-      assertEquals(id, Inversion.opposite(other).orElseThrow(), "simetrico: " + id);
-      assertTrue(com.arcane.glyph.GlyphRegistry.get(new ResourceLocation("arcane", other)).isPresent(), "glifo existe: " + other);
-    }
-    assertFalse(Inversion.hasOpposite("glide"));
-  }
-
-  @Test
-  void resolveSwapsOnlyWhenInverted() {
-    var plain = new EffectCall(new ResourceLocation("arcane", "damage"), new ResourceLocation("arcane", "damage"), Map.of("amount", 3.0), List.of());
-    assertEquals("damage", Inversion.resolve(plain).glyphId().getPath());
-    var inverted = new EffectCall(plain.glyphId(), plain.handler(), Map.of("amount", 3.0, "invert", 1.0), List.of());
-    assertEquals("heal", Inversion.resolve(inverted).glyphId().getPath());
-    assertEquals("heal", Inversion.resolve(inverted).handler().getPath());
-  }
-
-  @Test
   void newTriggersOpenAConditionSegmentWithTheirDefaults() {
     for (String trigger : List.of("on_kill", "on_fall", "on_jump")) {
       CompiledExecutionPlan plan = InscriptionCompiler.compile(new Inscription(List.of(g("self"), g(trigger), g("heal"))));
@@ -72,7 +44,7 @@ class Phase3GrammarTest {
 
   @Test
   void newEffectsValidateAfterAForm() {
-    for (String effect : List.of("rain", "charge", "glide", "taunt", "fear", "sleep", "rumble", "darkness", "wet", "lifesteal", "life_transfer", "read_item")) {
+    for (String effect : List.of("charge", "taunt", "fear", "sleep", "rumble", "darkness", "wet", "lifesteal", "life_transfer", "read_item")) {
       var result = InscriptionValidator.validate(new Inscription(List.of(g("self"), g(effect))));
       assertTrue(result.valid(), effect + ": " + result.message().getString());
     }

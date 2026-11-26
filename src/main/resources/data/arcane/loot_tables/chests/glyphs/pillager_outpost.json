@@ -286,17 +286,6 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 20,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{glyph:\"arcane:wounded\"}"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "arcane:glyph_note",
           "weight": 12,
           "functions": [
             {
@@ -313,17 +302,6 @@
             {
               "function": "minecraft:set_nbt",
               "tag": "{glyph:\"arcane:more_range\"}"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "arcane:glyph_note",
-          "weight": 5,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{glyph:\"arcane:delay\"}"
             }
           ]
         },
@@ -682,33 +660,11 @@
         {
           "type": "minecraft:item",
           "name": "arcane:glyph_note",
-          "weight": 5,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{glyph:\"arcane:rain\"}"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "arcane:glyph_note",
           "weight": 20,
           "functions": [
             {
               "function": "minecraft:set_nbt",
               "tag": "{glyph:\"arcane:charge\"}"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "arcane:glyph_note",
-          "weight": 20,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{glyph:\"arcane:glide\"}"
             }
           ]
         },
@@ -797,17 +753,6 @@
             {
               "function": "minecraft:set_nbt",
               "tag": "{glyph:\"arcane:read_item\"}"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "arcane:glyph_note",
-          "weight": 5,
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{glyph:\"arcane:invert\"}"
             }
           ]
         },

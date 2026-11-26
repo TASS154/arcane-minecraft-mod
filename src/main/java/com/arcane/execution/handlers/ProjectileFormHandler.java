@@ -17,7 +17,13 @@ public class ProjectileFormHandler implements FormHandler {
         ArcaneProjectileEntity projectile = new ArcaneProjectileEntity(ModEntities.ARCANE_PROJECTILE.get(), context.level());
         projectile.setOwner(context.caster());
         projectile.setPos(context.origin().x, context.origin().y, context.origin().z);
-        projectile.shoot(context.look().x, context.look().y, context.look().z,
+        // Mais Proximo logo depois da forma: o orbe sai na direcao da criatura mais proxima (pode errar; nao teletransporta)
+        net.minecraft.world.phys.Vec3 aim = context.look();
+        if (com.arcane.execution.Seek.on(spec)) {
+            var target = com.arcane.execution.Seek.nearest(context, com.arcane.execution.Seek.PROJECTILE_RANGE, true);
+            if (target != null) aim = com.arcane.execution.Seek.aimPoint(target).subtract(context.origin()).normalize();
+        }
+        projectile.shoot(aim.x, aim.y, aim.z,
                 (float) Math.max(0.5, Math.min(4.0, spec.parameters().getOrDefault("speed", 1.5))),
                 0.5F);
         projectile.setInscription(context.inscription());

@@ -14,7 +14,7 @@ public final class EffectReach {
 
   private static final Map<String, Integer> FORMS = Map.ofEntries(
       Map.entry("self", ENTITY), Map.entry("touch", ENTITY | BLOCK), Map.entry("projectile", ENTITY | BLOCK),
-      Map.entry("ray", ALL), Map.entry("focus", ENTITY), Map.entry("aura", ENTITY), Map.entry("wave", ENTITY),
+      Map.entry("ray", ENTITY | BLOCK), Map.entry("focus", ENTITY), Map.entry("aura", ENTITY), Map.entry("wave", ENTITY),
       Map.entry("pillar", ALL), Map.entry("barrier", ENTITY | BLOCK),
       Map.entry("summon_wolves", ENTITY), Map.entry("summon_golem", ENTITY));
 
@@ -26,7 +26,7 @@ public final class EffectReach {
       Map.entry("thunder", ALL), Map.entry("explode", ALL), Map.entry("freeze", ALL),
       Map.entry("blast", ALL), Map.entry("dig", BLOCK), Map.entry("gravity", ENTITY | BLOCK), Map.entry("attract", ENTITY), Map.entry("mark", ENTITY),
       Map.entry("float", ENTITY), Map.entry("telekinesis", ENTITY | BLOCK),
-      Map.entry("rain", ALL), Map.entry("charge", ALL), Map.entry("glide", ENTITY), Map.entry("taunt", ENTITY),
+      Map.entry("charge", ALL), Map.entry("taunt", ENTITY),
       Map.entry("fear", ENTITY), Map.entry("sleep", ENTITY), Map.entry("rumble", ALL), Map.entry("darkness", ALL),
       Map.entry("satellites", ENTITY), Map.entry("link", ENTITY), Map.entry("trail", ENTITY), Map.entry("hook", ALL),
       Map.entry("climb", ENTITY), Map.entry("phase", ALL), Map.entry("recall", ALL), Map.entry("imbue", ENTITY),

@@ -212,20 +212,6 @@ public class CoreSpellGameTests extends GameTestSupport {
   }
 
   @GameTest(template = "empty")
-  public static void woundedFilterOnlyAffectsCreaturesBelowHalfHealth(GameTestHelper h) {
-    floor(h);
-    Pig caster = pig(h, 3, 1);
-    Pig hurt = pig(h, 3, 3);
-    Pig healthy = pig(h, 3, 4);
-    hurt.setHealth(3.0f);
-    float hh = healthy.getHealth();
-    cast(h, caster, g("aura", "radius", 6.0), g("wounded"), g("damage", "amount", 1.0));
-    assertHurt(h, hurt, 3.0f, "o ferido");
-    assertUnhurt(h, healthy, hh, "o saudavel");
-    h.succeed();
-  }
-
-  @GameTest(template = "empty")
   public static void notSelfFilterRemovesTheCaster(GameTestHelper h) {
     floor(h);
     Pig caster = pig(h, 3, 3);
@@ -292,11 +278,11 @@ public class CoreSpellGameTests extends GameTestSupport {
   }
 
   @GameTest(template = "empty", timeoutTicks = 100)
-  public static void delayPostponesTheNextSegment(GameTestHelper h) {
+  public static void afterSecondsPostponesTheNextSegment(GameTestHelper h) {
     floor(h);
     Pig caster = pig(h, 3, 3);
     float before = caster.getHealth();
-    cast(h, caster, g("self"), g("heal", "amount", 1.0), g("delay", "seconds", 1.0), g("damage", "amount", 3.0));
+    cast(h, caster, g("self"), g("heal", "amount", 1.0), g("after_seconds", "seconds", 1.0), g("damage", "amount", 3.0));
     h.runAfterDelay(5, () -> assertUnhurt(h, caster, before, "o conjurador antes do atraso"));
     h.succeedWhen(() -> assertHurt(h, caster, before, "o conjurador depois do atraso"));
   }

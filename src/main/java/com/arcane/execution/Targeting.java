@@ -71,11 +71,14 @@ public final class Targeting {
           .add(right.scale(Math.cos(ang) * rad))
           .add(upAxis.scale(Math.max(-0.3, Math.sin(ang) * rad)));
       SpellElement element = SpellElement.of(ctx.plan());
-      com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.IMPACT, hitPoint,
-          look.scale(-1), 0.9f, element.color(), element.ordinal(), 12);
-      com.arcane.fx.Fx.impact(level, caster, hitPoint, null, element, SpellElement.trailOf(ctx.plan()), 1f);
-      WorldScars.leave(ctx, hitPoint);
-      com.arcane.network.ModNetwork.sendBeam(level, beamStart, hitPoint, element.color(), element.ordinal(), 14);
+      boolean miss = entity == null && block.getType() == HitResult.Type.MISS;
+      if (!miss) { // no ar vazio o feixe so se apaga: sem impacto, sem cicatriz (o Raio nao detona no ar)
+        com.arcane.network.ModNetwork.sendShape(level, com.arcane.network.packet.S2CShapeFxPacket.IMPACT, hitPoint,
+            look.scale(-1), 0.9f, element.color(), element.ordinal(), 12);
+        com.arcane.fx.Fx.impact(level, caster, hitPoint, null, element, SpellElement.trailOf(ctx.plan()), 1f);
+        WorldScars.leave(ctx, hitPoint);
+      }
+      com.arcane.network.ModNetwork.sendBeam(level, beamStart, hitPoint, element.color(), element.ordinal(), miss ? 6 : 14);
     }
     return new RayResult(targets, hitPoint);
   }

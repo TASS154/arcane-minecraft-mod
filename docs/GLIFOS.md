@@ -2,7 +2,7 @@
 
 Gerado por `tools/gen_glyph_docs.py` a partir de `tools/glyph_table.py`. **Não edite à mão.**
 
-São **211 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
+São **205 glifos** em 6 categorias. Parâmetros aparecem como `padrão (mín–máx)`; o servidor sempre limita os valores a esse intervalo.
 
 ## Como compor
 
@@ -40,18 +40,18 @@ Como o feitiço chega ao alvo. **Todo feitiço começa por uma Forma** (a única
 | Glifo | Id | Mana | Nível | Especialidade | Parâmetros | O que faz |
 |-------|----|------|-------|---------------|------------|-----------|
 | **Eu** | `arcane:self` | 1 | 1 | Terra | — | Forma: o feitiço acontece em você. |
-| **Toque** | `arcane:touch` | 2 | 1 | Terra | `range` 3 (1–6) | Forma: afeta o que estiver na sua mira, bem perto (3 blocos). |
-| **Projétil** | `arcane:projectile` | 3 | 1 | Terra | `speed` 1.5 (0.5–3) | Forma: dispara um orbe que aplica o feitiço onde acertar (criatura ou bloco). |
-| **Raio** | `arcane:ray` | 3 | 2 | Tempestade | `range` 48 (4–48) | Forma: um feixe instantâneo que acerta a primeira criatura ou bloco na mira, a qualquer distância (reduza o alcance para limitar). |
+| **Toque** | `arcane:touch` | 2 | 1 | Terra | `range` 3 (1–6) | Forma: contato. Afeta o que você toca bem perto (3 blocos). O contato deixa os efeitos 25% mais fortes, e ao tocar uma criatura a mão chega também ao bloco logo atrás dela. |
+| **Projétil** | `arcane:projectile` | 3 | 1 | Terra | `speed` 1.5 (0.5–3) | Forma: dispara uma carga que voa e aplica o feitiço onde acertar (criatura ou bloco). Pode errar; se não acertar nada em 10 s, detona onde estiver. |
+| **Raio** | `arcane:ray` | 3 | 2 | Tempestade | `range` 48 (4–48) | Forma: um feixe instantâneo que acerta agora a primeira criatura ou bloco na mira, a qualquer distância (reduza o alcance para limitar). No ar vazio não faz nada: a magia falha sem gastar mana. |
 | **Aura** | `arcane:aura` | 4 | 3 | Força | `radius` 5 (2–12) | Forma: afeta todas as criaturas ao seu redor (menos você). |
 | **Onda** | `arcane:wave` | 3 | 2 | Força | `range` 8 (2–16) | Forma: uma onda em cone a sua frente, afetando todas as criaturas que ela alcança. |
-| **Pilar** | `arcane:pillar` | 4 | 3 | Tempestade | `range` 24 (4–48), `radius` 2 (1–6) | Forma: uma coluna vertical no ponto que você mira (criaturas e o bloco atingido). |
+| **Pilar** | `arcane:pillar` | 4 | 3 | Tempestade | `range` 24 (4–48), `radius` 2 (1–6) | Forma: marca o chão no ponto mirado (ou sob a criatura mirada) e ergue uma coluna até o céu: atinge todas as criaturas no fuste, em qualquer altura, e o terreno da coluna. Sem chão, falha sem gastar mana. |
 | **Barreira** | `arcane:barrier` | 4 | 3 | Terra | `duration` 200 (40–600), `radius` 3 (2–12) | Forma: ergue uma parede de energia a sua frente (3x3 com raio 3; Area e raio ampliam). Com Domo, Esfera ou Anel vira uma casca em volta do centro. Os glifos seguintes atingem os blocos e quem estiver dentro ou encostado. |
 | **Invocar Lobos** | `arcane:summon_wolves` | 4 | 2 | Terra | `count` 3 (1–6), `size` 1 (1–3), `duration` 1200 (200–6000) | Forma de RITUAL (menor): invoca Lobos Espectrais domesticados que lutam por você por um tempo. Número (count) e tamanho (size 1–3) são escolha sua: maiores têm outro modelo (Alfa, Fenrir) e mais vida e dano. Os lobos são os alvos do que vem depois. |
 | **Invocar Golem** | `arcane:summon_golem` | 6 | 3 | Terra | `size` 1 (1–3), `duration` 2400 (400–12000) | Forma de RITUAL (médio): ergue um Golem Rúnico que protege você por um tempo. Um golem só, e você escolhe o tamanho (size 1–3: Guardião, Colosso, Titã, cada um com modelo próprio): quanto maior e mais duradouro, mais mana. O golem é o alvo do que vem depois. |
-| **Foco** | `arcane:focus` | 2 | 2 | Arcano | `range` 24 (4–48) | Forma: entrega só a criatura viva sob a sua mira (até 24 blocos, não atravessa paredes). Não toca blocos nem pontos vazios e não faz efeito próprio: serve para Atrair, Marcar, Elo e outros que só fazem sentido com uma criatura. Sem criatura na mira, a magia falha e não gasta mana. |
+| **Foco** | `arcane:focus` | 2 | 2 | Arcano | `range` 24 (4–48) | Forma: entrega só a criatura viva sob a sua mira (até 24 blocos, não atravessa paredes). Não toca blocos nem pontos vazios e não faz efeito próprio: serve para Atrair, Marcar, Elo e outros que só fazem sentido com uma criatura. Sem criatura na mira, a magia falha e não gasta mana. Combina com Segurar ou Alternar (canal). Foco mira o que está na sua mira; para o que está mais perto de você, use Foco seguido de Mais Próximo. |
 
-## Filtros (16)
+## Filtros (15)
 
 Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para os trechos seguintes.
 
@@ -64,8 +64,7 @@ Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para
 | **Animais** | `arcane:animals` | 1 | 2 | Vida | — | Filtro: só afeta animais. |
 | **Mortos-vivos** | `arcane:undead` | 1 | 2 | Sangue | — | Filtro: só afeta mortos-vivos (zumbis, esqueletos...). |
 | **Exceto Eu** | `arcane:not_self` | 0 | 1 | Vazio | — | Filtro: tira você do alvo. |
-| **Mais Próximo** | `arcane:nearest` | 1 | 2 | Conhecimento | — | Filtro: só a criatura mais próxima de você. |
-| **Ferido** | `arcane:wounded` | 1 | 2 | Sangue | — | Filtro: só criaturas com menos da metade da vida. |
+| **Mais Próximo** | `arcane:nearest` | 1 | 2 | Conhecimento | — | Filtro: logo depois da forma, a forma mira sozinha a criatura viva mais perto de você (Raio, Toque, Foco e Projétil apontam para ela; o Pilar assenta sob ela; Aura e Onda só a atingem). Depois de outro filtro, só fica a mais perto entre as já atingidas. |
 | **Marcados** | `arcane:marked` | 1 | 1 | Conhecimento | — | Filtro: só criaturas que foram Marcadas. |
 | **Não Marcados** | `arcane:unmarked` | 1 | 1 | Conhecimento | — | Filtro: só criaturas que NÃO foram Marcadas. |
 | **Aliados** | `arcane:allies` | 1 | 2 | Vida | — | Filtro: jogadores, animais domesticados, aldeões e golens de ferro. |
@@ -74,7 +73,7 @@ Escolhem quem é afetado. Valem para os efeitos do trecho em que aparecem e para
 | **Nomeados** | `arcane:named` | 1 | 2 | Conhecimento | — | Filtro: só criaturas com nome (etiqueta de nome). |
 | **Aéreos** | `arcane:aerial` | 1 | 2 | Força | — | Filtro: só quem está no ar: criaturas voadoras e quem está pulando, caindo ou planando. |
 
-## Efeitos (114)
+## Efeitos (111)
 
 O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro principal (o dobro do dano custa o dobro).
 
@@ -120,17 +119,15 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Explosão Destrutiva** | `arcane:blast` | 8 | 4 | Fogo | `radius` 3 (1–6) | Efeito: explode no alvo DESTRUINDO blocos (como TNT, com queda de itens) e ferindo quem está perto. Você é imune. Raio 1–6. Respeita as configs do servidor contra destruição de blocos. |
 | **Flutuar** | `arcane:float` | 5 | 4 | Força | `duration` 200 (40–1200), `speed` 0.6 (0.3–3), `glide` 0 (0–1) | Efeito: o alvo paira e voa com suavidade na direção do olhar, como se fosse erguido pela cabeça (a cabeça vai primeiro, as pernas seguem). W avança, Espaço sobe, Shift desce, Ctrl acelera; sem comandos, ele paira parado. Velocidade de 0,3 a 3 blocos por tick, duração em ticks e planagem (0 a 1: sem comandos, o corpo plana adiante como numa elytra e cai devagar em vez de parar). Custa mana a cada tick enquanto voa (mais em velocidade alta) e acaba sem mana; a primeira queda depois do voo não causa dano. No Grimório, o modo Segurar ou Alternar mantém o voo enquanto você canaliza. |
 | **Telecinese** | `arcane:telekinesis` | 6 | 4 | Força | `duration` 100 (20–400), `distance` 6 (2–16), `sphere` 0 (0–6), `same_type` 0 (0–1) | Efeito: segura criaturas e blocos com a mente e os leva pairando diante da mira. O grupo de blocos é definido ao conjurar: um bloco; uma esfera (Esfera 1–6) ao redor do bloco mirado; ou, com Mesmo tipo, os blocos conectados do mesmo material (até 120), opcionalmente limitados pela esfera. Ao soltar, tudo cai com o embalo. Distância 2–16, duração até 20 s. |
-| **Chuva** | `arcane:rain` | 2 | 2 | Gelo, Tempestade | `radius` 4 (1.5–10), `duration` 400 (40–1200) | Efeito: uma chuva local cai sobre o alvo: molha quem está na área (raio 1,5–10), apaga fogo e rega plantações. Não muda o clima do mundo (isso é o ritual Clima). |
 | **Investida** | `arcane:charge` | 3 | 2 | Força | `distance` 8 (3–16), `damage` 3 (0–12) | Efeito: você avança em linha reta contra o alvo (ou para onde olha), até 16 blocos, ferindo quem estiver no caminho. Diferente de Empurrão em si mesmo, que só dá um impulso, e de Salto, que teleporta. |
-| **Planar** | `arcane:glide` | 2 | 2 | Força | `duration` 200 (20–1200) | Efeito: o alvo cai devagar por um tempo (queda lenta), sem dano de queda. É a versão passiva; para voar de verdade, use Flutuar. |
 | **Provocar** | `arcane:taunt` | 1 | 1 | Força | — | Efeito: criaturas hostis passam a perseguir você, largando outro alvo e acordando do Sono ou do Medo. Não afeta jogadores. |
 | **Medo** | `arcane:fear` | 2 | 2 | Vazio | `duration` 100 (20–400) | Efeito: a criatura larga o alvo e foge de você; enquanto dura, não escolhe você como alvo (1 a 20 s). Jogadores ficam fracos e com as mãos pesadas. |
 | **Sono** | `arcane:sleep` | 3 | 3 | Vazio | `duration` 100 (20–600) | Efeito: a criatura larga o alvo e adormece, imóvel e fraca, por até 30 s. Qualquer dano a acorda. |
 | **Estrondo** | `arcane:rumble` | 3 | 2 | Tempestade, Força | `radius` 3 (1–8), `damage` 2 (0–12) | Efeito: um trovão seco no alvo: fere de leve, empurra para fora (raio 1–8) e deixa as criaturas zonzas por 1,5 s. Não quebra blocos nem causa fogo. |
 | **Escuridão** | `arcane:darkness` | 2 | 2 | Vazio | `duration` 200 (20–600) | Efeito: o alvo fica envolto em escuridão pulsante (efeito Escuridão do jogo): a visão some aos poucos e volta. Mais suave que Cegar. |
 | **Molhar** | `arcane:wet` | 1 | 1 | Gelo, Tempestade | `duration` 200 (40–1200) | Efeito: deixa a criatura molhada por até 60 s e apaga o fogo dela. Molhado: Trovão e Raio ferem mais, Gelo congela mais rápido e mais forte, e Fogo nem pega (vira vapor). As regras estão em data/arcane/interactions. |
-| **Roubo de Vida** | `arcane:lifesteal` | 3 | 2 | Sangue | `amount` 3 (1–16), `ratio` 0.6 (0.1–1) | Efeito: fere o alvo e devolve a você 60% do dano que realmente causou. Não funciona em si mesmo. Invertido, vira Transferir Vida. |
-| **Transferir Vida** | `arcane:life_transfer` | 2 | 2 | Sangue | `amount` 4 (1–16) | Efeito: você passa vida ao alvo (1–16), sem nunca cair abaixo de 1 coração. Invertido, vira Roubo de Vida. |
+| **Roubo de Vida** | `arcane:lifesteal` | 3 | 2 | Sangue | `amount` 3 (1–16), `ratio` 0.6 (0.1–1) | Efeito: fere o alvo e devolve a você 60% do dano que realmente causou. Não funciona em si mesmo. |
+| **Transferir Vida** | `arcane:life_transfer` | 2 | 2 | Sangue | `amount` 4 (1–16) | Efeito: você passa vida ao alvo (1–16), sem nunca cair abaixo de 1 coração. |
 | **Ler Item** | `arcane:read_item` | 1 | 1 | Conhecimento | — | Efeito: mostra no chat o item que a criatura segura (ou o item solto no chão): nome, quantidade, durabilidade e encantamentos. Só informa; não muda nada. |
 | **Satélites** | `arcane:satellites` | 4 | 3 | Força | `count` 2 (1–4), `duration` 200 (40–600), `damage` 2 (0.5–8) | Efeito: orbes giram ao redor do alvo (1–4, 2 blocos de raio) ferindo quem encostar neles, menos o dono. Duração até 30 s. |
 | **Elo** | `arcane:link` | 3 | 3 | Vazio | `duration` 300 (40–1200) | Efeito: liga as duas primeiras criaturas alvo (ou você e o alvo): metade do dano que uma sofre passa para a outra, por até 60 s. |
@@ -179,7 +176,6 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Secar** | `arcane:dry` | 1 | 1 | Fogo | `radius` 2 (1–6) | Efeito: seca as criaturas alvo (tira o molhado e o fogo); perto dos alvos, esponja molhada seca e lama vira terra. |
 | **Colheita** | `arcane:harvest` | 2 | 1 | Vida | `radius` 5 (1–16) | Efeito: colhe as plantações maduras em volta dos alvos (raio até 16) e replanta. |
 | **Pastorear** | `arcane:herd` | 2 | 1 | Vida | `duration` 400 (100–1200) | Efeito: os animais alvo seguem você por um tempo (até 1 min). |
-| **Carinho** | `arcane:pet` | 1 | 1 | Vida | — | Efeito: o animal alvo ganha corações e recupera um pouco de vida. |
 | **Eco** | `arcane:echo` | 2 | 1 | Conhecimento | `radius` 20 (4–32) | Efeito: um pulso mostra, só para você, o contorno das cavernas em volta (pontos de luz nas paredes escondidas), num raio de até 32. |
 | **Prospecção** | `arcane:prospect` | 2 | 1 | Terra | `radius` 12 (4–24) | Efeito: dá uma dica vaga dos minérios em volta (poucos, alguns, muitos), qual é o mais comum e para que lado fica o maior veio. |
 | **Lembrar** | `arcane:remember` | 1 | 1 | Conhecimento | — | Efeito: mostra onde você morreu e onde dormiu pela última vez, e os pontos que marcou. |
@@ -195,7 +191,7 @@ O que acontece com o alvo. A mana de um efeito cresce com o seu parâmetro princ
 | **Melodia** | `arcane:melody` | 1 | 1 | Vida | `duration` 64 (32–400) | Efeito: uma melodia curta de harpa toca no alvo. |
 | **Ilusão** | `arcane:illusion` | 7 | 4 | Vazio | `duration` 300 (60–1200), `count` 3 (1–5) | Efeito: cria 3 clones seus (só visuais, até 15 s) que imitam a sua intenção: andam e correm com você, atacam com outras armas do seu inventário quando você ataca e fingem outras magias quando você conjura. Não ferem nem tocam em nada; um golpe os desfaz. Criaturas que miram você podem escolher um clone. |
 
-## Modificadores (39)
+## Modificadores (37)
 
 Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 
@@ -203,7 +199,6 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 |-------|----|------|-------|---------------|------------|-----------|
 | **Área** | `arcane:area` | 2 | 1 | Força | — | Modificador: dobra o raio da forma e do efeito anteriores (Aura, Explosão). |
 | **Alcance** | `arcane:more_range` | 1 | 1 | Terra | — | Modificador: aumenta em 50% o alcance da forma (Toque, Raio, Salto). |
-| **Atraso** | `arcane:delay` | 1 | 2 | Conhecimento | `seconds` 2 (0.5–30) | Modificador: o que vem depois só acontece alguns segundos mais tarde. |
 | **Potência** | `arcane:power` | 2 | 1 | Força | — | Modificador: +50% de força no efeito anterior (dano, cura, empurrão, nível). |
 | **Duração** | `arcane:lengthen` | 1 | 2 | Conhecimento | — | Modificador: dobra o tempo do efeito anterior (fogo, lentidão, veneno...). |
 | **Velocidade do Projétil** | `arcane:swift` | 1 | 2 | Terra | — | Modificador: o projétil voa 50% mais rápido. |
@@ -230,12 +225,11 @@ Alteram o glifo vizinho. Funcionam antes ou depois do efeito que modificam.
 | **Zona** | `arcane:zone` | 3 | 3 | Conhecimento | `seconds` 10 (2–60), `interval` 1 (0.5–5) | Torna a forma persistente: ela se repete do mesmo lugar a cada intervalo, durante o tempo escolhido, reaplicando os efeitos em quem está dentro (Aura + Fogo vira um campo em chamas; Barreira vira parede contínua; Projétil vira torre). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). No máximo 2 zonas suas ao mesmo tempo. Invocações ignoram a Zona. |
 | **Domínio** | `arcane:domain` | 4 | 3 | Arcano | `seconds` 30 (5–60), `interval` 1 (0.5–5) | Modificador de Barreira: fecha um domo e o mantém. Tudo que está dentro recebe os efeitos da magia continuamente (a cada intervalo) até o domo quebrar: ele acaba quando perde cerca de 10% dos blocos da casca, ou quando passa o tempo. A casca não se refaz e não some sozinha enquanto o Domínio dura; quebrar um pedaço dela o encerra (e dispara "Quando a zona acabar"). Use com Barreira + Domo (ou Esfera) + um efeito (Cura, Dano, Lentidão...). Parâmetros: segundos (até 60) e intervalo (mín. 0,5 s). Conta como Zona (mesmo limite de 2 por conjurador). |
 | **Cadeia** | `arcane:chain` | 3 | 3 | Força | — | Modificador: o efeito anterior se propaga de criatura em criatura. Explosão e Explosão Destrutiva detonam de novo, menores, em quem estava perto (até 3 saltos, 8 extras); Dano salta em arco para a mais próxima, com 60% do dano a cada salto. Outros efeitos ignoram a Cadeia (a prévia avisa). |
-| **Inverter** | `arcane:invert` | 1 | 2 | Vazio | — | Modificador: troca o efeito anterior pelo seu oposto, com a mesma magnitude. Pares: Dano e Cura, Empurrão e Atrair, Lentidão e Velocidade, Fogo e Congelar, Levitação e Gravidade, Roubo e Transferir Vida, Cegar e Invisibilidade, Medo e Provocar. Efeito sem par ignora o Inverter. |
 | **Persistência** | `arcane:persistence` | 3 | 3 | Conhecimento | — | Modificador: o desenho não se desfaz ao disparar. Sem ele, uma inscrição no mundo (armadilha, runa) some depois de disparar uma vez. |
 | **Furtivo** | `arcane:stealth` | 2 | 2 | Vazio | — | Modificador: a magia deixa menos rastro: o resíduo no mundo dura 1/4 do tempo e a conjuração não faz som nem partículas. Não esconde o efeito em si. |
 | **Falso Rastro** | `arcane:false_trace` | 2 | 2 | Vazio | — | Modificador: o resíduo no mundo leva uma assinatura falsa (que não é a sua) e a magia deixa um segundo resíduo isca a até 10 blocos. Quem analisa o resíduo é enganado. |
 | **Sobrecarga** | `arcane:overcharge` | 3 | 3 | Sangue | — | Modificador: dobra a força do efeito anterior (dano, cura, empurrão, raio, potência) e 50% de duração, mas você sofre 1 coração de dano mágico a cada efeito sobrecarregado (nunca fatal: só se você tiver mais de 1,5 coração). Mais forte que Potência, com preço. |
-| **Vincular** | `arcane:bind` | 2 | 2 | Vazio | — | Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular. |
+| **Vincular** | `arcane:bind` | 2 | 2 | Vazio | — | Modificador: prende à sua presença o efeito de poção anterior (Lentidão, Veneno, Cegar, Velocidade...) posto em outra criatura: ele acaba quando você morre, sai do mundo ou fica a mais de 40 blocos dela. Em você mesmo e em efeitos que não são de poção, o Vincular não faz nada. |
 | **Coro** | `arcane:chorus` | 2 | 3 | Vida | `min` 2 (2–4) | Modificador: a magia só dispara se 2–4 jogadores a conjurarem juntos, dentro do círculo que aparece no chão ao redor de quem começa (raio 8, 3 s para os outros). Todos precisam ter a mesma magia. A força sobe 35% por participante extra (máx. x2,4) e a mana é dividida entre eles. Sem gente suficiente, nada acontece e ninguém paga. |
 | **Perfurar** | `arcane:pierce` | 8 | 4 | Sangue | — | Modificador: +20% do dano do efeito anterior vira perfurante, que ignora armadura, encantamentos de proteção, Resistência, a redução do Petrificar e a dureza de chefes. Empilha sem limite (5 camadas = 100%), mas cada Perfurar a mais na mesma magia custa o dobro do anterior. |
 | **Aleatório** | `arcane:random` | 1 | 2 | Vazio | — | Modificador: a força do efeito anterior (dano, cura, raio, duração...) é sorteada a cada conjuração, de metade ao dobro. |

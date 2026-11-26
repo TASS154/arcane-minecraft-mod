@@ -25,6 +25,7 @@ public class GlyphNoteItem extends Item {
     ItemStack stack = player.getItemInHand(hand);
     if (!level.isClientSide && stack.hasTag() && stack.getTag().contains("glyph")) {
       ResourceLocation glyph = com.arcane.glyph.GlyphAliases.resolve(new ResourceLocation(stack.getTag().getString("glyph")));
+      if (com.arcane.glyph.GlyphAliases.DROPPED.equals(glyph)) return InteractionResultHolder.pass(stack); // glifo cortado
       DiscoveryService.learnFromLoot(player, glyph);
       stack.shrink(1);
       return InteractionResultHolder.success(stack);

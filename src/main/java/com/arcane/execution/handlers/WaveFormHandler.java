@@ -20,6 +20,8 @@ public class WaveFormHandler implements FormHandler {
     com.arcane.execution.Region region = com.arcane.execution.Region.of(context, spec, com.arcane.execution.ShapeGeometry.CONE, range);
     List<Entity> found = region.entities(context.level(), context.caster(), false);
     region.playFx(context);
+    // Mais Proximo logo depois da forma: so o mais perto de voce dentro do cone
+    if (com.arcane.execution.Seek.on(spec)) return DeliveryResult.of(com.arcane.execution.Seek.closestOf(context, found));
     return DeliveryResult.of(new TargetList(found, region.exposedBlocks(context.level(), 1500)));
   }
 }

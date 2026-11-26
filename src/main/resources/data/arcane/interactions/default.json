@@ -18,7 +18,7 @@
       "triggers": [
         { "type": "reaction_count", "reaction": "steam", "count": 3 },
         { "type": "blocks_in_radius", "element": "fire", "block": "minecraft:water", "count": 6, "radius": 3 },
-        { "type": "form_element", "form": "rain", "element": "fire" }
+        { "type": "form_element", "form": "rainfall", "element": "fire" }
       ],
       "radius": 4.0,
       "seconds": 15,

@@ -75,8 +75,8 @@ class MassReactionTests {
     assertNull(MassReactions.firstFiring(SpellElement.FIRE, "projectile", Map.of(), (b, r) -> 5), "5 blocos de agua: abaixo de 6");
     assertNotNull(MassReactions.firstFiring(SpellElement.FIRE, "projectile", Map.of(), (b, r) -> 6), "6 blocos de agua no raio");
     assertNull(MassReactions.firstFiring(SpellElement.FROST, "projectile", Map.of(), (b, r) -> 99), "agua so conta com fogo");
-    assertNotNull(MassReactions.firstFiring(SpellElement.FIRE, "rain", Map.of(), (b, r) -> 0), "Chuva + Fogo");
-    assertNull(MassReactions.firstFiring(SpellElement.STORM, "rain", Map.of(), (b, r) -> 0));
+    assertNotNull(MassReactions.firstFiring(SpellElement.FIRE, "rainfall", Map.of(), (b, r) -> 0), "Chuva + Fogo");
+    assertNull(MassReactions.firstFiring(SpellElement.STORM, "rainfall", Map.of(), (b, r) -> 0));
   }
 
   @Test

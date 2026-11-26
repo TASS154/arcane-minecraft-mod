@@ -111,8 +111,7 @@ public final class SpellPipeline {
 
     private void applyEffects(ExecutionContext context, ExecutionSegment segment, TargetList targets) {
         for (EffectCallCompiled effectCompiled : segment.effects()) {
-            // Inverter troca o efeito pelo oposto (Dano <-> Cura, Empurrao <-> Atrair...).
-            EffectCall call = Inversion.resolve(EffectCall.fromCompiled(effectCompiled));
+            EffectCall call = EffectCall.fromCompiled(effectCompiled);
             // Aleatorio: a forca do efeito sorteia de 50% a 200% a cada conjuracao.
             if (call.parameters().getOrDefault("random", 0.0) > 0.0) call = randomize(context, call);
             EffectHandler handler = GlyphHandlerRegistry.getEffect(call.handler()).orElse(null);

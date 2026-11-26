@@ -21,8 +21,11 @@ import java.util.Optional;
  *  - Grupo / Fim do Grupo: um modificador logo depois de Fim do Grupo vale para TODOS os efeitos do grupo.
  *  - Repeticao: duplica o efeito anterior (cada copia custa mana de novo).
  *  - Filtro: vale para o segmento aberto e para os seguintes.
+ *  - Mais Proximo como PRIMEIRO filtro logo depois da forma (so modificadores no meio): vira entrega da forma
+ *    ({@link com.arcane.execution.Seek}), nao filtro. Depois de outro filtro, continua filtro.
  *  - Condicao: abre um segmento novo que so roda se a condicao passar; "Apos Segundos" tambem o atrasa.
- *  - Atraso (modificador next_segment): abre um segmento novo que roda alguns segundos depois.
+ *  - Modificador next_segment: abre um segmento novo que roda alguns segundos depois (nenhum glifo usa hoje: o Atraso
+ *    foi cortado em 26 nov e virou Apos Segundos).
  *  - Modificador "delivery": altera a forma; "all": efeito anterior e forma.
  *  - O custo total cresce exponencialmente com o numero de glifos (SpellLimits).
  */
@@ -63,8 +66,12 @@ public final class InscriptionCompiler {
         double effectMana = 0; // efeitos: repetem a cada pulso de uma zona
         GlyphDefinition formDef = null;
         int pierces = 0; // Perfurar: cada camada a mais na mesma magia custa o dobro da anterior
+        int seekIndex = com.arcane.execution.Seek.firstAfterForm(inscription.glyphs());
+        boolean seek = false;
+        int index = -1;
 
         for (GlyphInstance instance : inscription.glyphs()) {
+            index++;
             GlyphDefinition def = GlyphRegistry.getOrThrow(instance.glyphId());
             double glyphCost = def.manaCost(instance.parameters()) * def.formFactor(instance.parameters());
             if (instance.glyphId().getPath().equals("pierce")) glyphCost *= Math.pow(2, Math.min(20, pierces++));
@@ -91,6 +98,11 @@ public final class InscriptionCompiler {
                     allEffects.add(new Slot(current, current.effects.size() - 1));
                 }
                 case FILTER -> {
+                    if (index == seekIndex && delivery != null
+                            && com.arcane.execution.Seek.FORMS.contains(delivery.formId().getPath())) {
+                        seek = true; // a forma mira sozinha o mais proximo: nao entra como filtro
+                        break;
+                    }
                     CompiledExecutionPlan.FilterSpec spec = new CompiledExecutionPlan.FilterSpec(instance.glyphId(), def.behavior().handler());
                     if (!filters.contains(spec)) filters.add(spec);
                 }
@@ -156,6 +168,11 @@ public final class InscriptionCompiler {
                     new ResourceLocation("arcane", "self"), new ResourceLocation("arcane", "self"), Map.of(), 3.0);
         }
         delivery = ModifierApplicator.applyDeliveryModifiers(delivery, deliveryModifiers);
+        if (seek) {
+            Map<String, Double> withSeek = new java.util.HashMap<>(delivery.parameters());
+            withSeek.put(com.arcane.execution.Seek.KEY, 1.0);
+            delivery = new ModifierApplicator.DeliverySpecCompiled(delivery.formId(), delivery.handler(), Map.copyOf(withSeek), delivery.range());
+        }
 
         List<CompiledExecutionPlan.ExecutionSegment> segments = new ArrayList<>();
         for (SegmentBuilder b : built) {

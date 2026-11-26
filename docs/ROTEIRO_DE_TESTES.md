@@ -192,8 +192,8 @@ Use mobs de teste com `NoAI:1b` salvo onde indicado.
 - **Investida** (`Eu, Investida`, dist. 8, dano 3): mire num zumbi a 6 blocos.
   - [ ] Você avança em linha reta, **fere** quem está no caminho (~3) e para junto da parede se houver.
   - [ ] Diferença para Salto: você **anda** no caminho, não teletransporta.
-- **Planar** (`Eu, Planar`), em survival: `/tp @s ~ ~40 ~` e conjure antes de cair.
-  - [ ] Queda **lenta** e **sem dano** na aterrissagem. Passado o tempo (10 s) a queda volta ao normal.
+- **Pena** (`Eu, Pena`), em survival: `/tp @s ~ ~40 ~` e conjure antes de cair. (Planar foi cortado em 26 nov: vira Pena.)
+  - [ ] Queda **lenta** e **sem dano** na aterrissagem. Passado o tempo (30 s no padrão) a queda volta ao normal.
 
 ### 4.3 Controle de mobs (precisa de IA real)
 Use `/time set midnight` e `/summon zombie ~ ~ ~8` (com capacete se queimar).
@@ -204,7 +204,6 @@ Use `/time set midnight` e `/summon zombie ~ ~ ~8` (com capacete se queimar).
   - [ ] Em jogador: ele fica **Fraco** e com as mãos pesadas.
 - **Sono** (`Raio, Sono`, 5 s):
   - [ ] O zumbi fica **parado e fraco**. **Qualquer dano acorda**. (Compare com Petrificar, que não acorda.)
-- **Inverter + Medo**: `Raio, Medo, Inverter` vira **Provocar** no alvo.
 
 ### 4.4 Vida
 Em survival: `/damage @s 10`.
@@ -212,22 +211,24 @@ Em survival: `/damage @s 10`.
   - [ ] Você recupera ~60% do dano que realmente causou (dano 3: ~1,8). Em `Eu, Roubo de Vida` **não funciona**.
 - **Transferir Vida** (`Raio, Transferir Vida`) num porco ferido:
   - [ ] O porco ganha vida (até 4) e você perde o mesmo, **nunca abaixo de 1 coração**.
-- **Inverter** em Roubo de Vida vira Transferir e vice-versa.
 
 ### 4.5 Ler Item
 - Zumbi com item: `/summon zombie ~ ~ ~5 {NoAI:1b,HandItems:[{id:"minecraft:iron_sword",Count:1b,tag:{Damage:50,Enchantments:[{id:"minecraft:sharpness",lvl:3s}]}},{}]}`
 - [ ] `Raio, Ler Item`: o chat mostra **nome, quantidade, durabilidade e encantamentos**.
 - [ ] Também funciona num **item solto** no chão e informa "nada para ler" se mirar no vazio.
 
-### 4.6 Inverter (tabela de pares)
-Monte `Eu, X, Inverter` para cada par e confirme o oposto:
-- [ ] Dano → Cura (você ganha vida).
-- [ ] Empurrão → Atrair.
-- [ ] Lentidão → Velocidade.
-- [ ] Fogo → Congelar.
-- [ ] Levitação → Gravidade.
-- [ ] Cegar → Invisibilidade.
-- [ ] Efeito sem par (ex.: Marcar) **ignora** o Inverter sem erro.
+### 4.6 Verbo das formas e Mais Próximo (26 nov)
+- [ ] `Raio, Mais Próximo, Dano` com um porco atrás de você e outro na mira, mais longe: leva o de **trás** (o feixe vira
+  sozinho). `Raio, Hostis, Mais Próximo, Dano`: só o que está **na mira** (o Mais Próximo só filtra).
+- [ ] `Raio, Fogo` mirando o céu: a magia **falha** ("o raio não pegou nada") e a mana **não** cai. O feixe não detona no ar.
+- [ ] `Projétil, Explosão` para o céu: em 10 s o orbe **estoura** onde estiver (antes sumia sem nada).
+- [ ] `Pilar, Dano` mirando uma vaca com uma galinha voando por cima: **as duas** levam dano. Mirando o céu: falha sem mana.
+- [ ] `Toque, Dano 4` numa vaca: o Boneco mostra **5** (contato +25%). `Toque, Cavar` numa vaca encostada na parede: fere
+  a vaca **e** cava o bloco atrás dela.
+- [ ] Na bancada, a prévia de cada forma diz o verbo dela e, com Mais Próximo, "mira automática" ou "só o mais próximo
+  entre os atingidos".
+- [ ] Uma magia salva antes de 26 nov com Planar, Atraso, Ferido, Inverter, Chuva ou Carinho abre sem erro (ver o mapa de
+  aliases em `docs/AUDITORIA_GLIFOS.md`).
 
 ### 4.7 Gatilhos (armam a magia; disparam uma vez; vencem em 60 s)
 - **Ao Matar:** `Eu, Ao Matar, Cura`. Conjure e mate um mob com a espada.

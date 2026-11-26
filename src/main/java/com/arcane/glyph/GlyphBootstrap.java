@@ -100,9 +100,7 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("invisible"), new com.arcane.execution.handlers.LifeEffects.ArcaneInvisibility());
 
         // Fase 3: efeitos baratos
-        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("rain"), new com.arcane.execution.handlers.LowCostEffects.Rain());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("charge"), new com.arcane.execution.handlers.LowCostEffects.Charge());
-        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("glide"), new PotionEffectHandler(MobEffects.SLOW_FALLING, 1200));
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("taunt"), new com.arcane.execution.handlers.LowCostEffects.Taunt());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("fear"), new com.arcane.execution.handlers.LowCostEffects.Fear());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("sleep"), new com.arcane.execution.handlers.LowCostEffects.Sleep());
@@ -156,7 +154,6 @@ public final class GlyphBootstrap {
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("dry"), new com.arcane.execution.handlers.LifeEffects.Dry());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("harvest"), new com.arcane.execution.handlers.LifeEffects.Harvest());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("herd"), new com.arcane.execution.handlers.LifeEffects.Herd());
-        GlyphHandlerRegistry.registerEffect(ArcaneIds.of("pet"), new com.arcane.execution.handlers.LifeEffects.Pet());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("echo"), new com.arcane.execution.handlers.LifeEffects.Echo());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("prospect"), new com.arcane.execution.handlers.LifeEffects.Prospect());
         GlyphHandlerRegistry.registerEffect(ArcaneIds.of("remember"), new com.arcane.execution.handlers.LifeEffects.Remember());
@@ -195,8 +192,6 @@ public final class GlyphBootstrap {
             new PredicateFilter((c, e) -> e instanceof LivingEntity l && l.getMobType() == MobType.UNDEAD));
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("not_self"), new PredicateFilter((c, e) -> e != c.caster()));
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("nearest"), new NearestFilter());
-        GlyphHandlerRegistry.registerFilter(ArcaneIds.of("wounded"),
-            new PredicateFilter((c, e) -> e instanceof LivingEntity l && l.getHealth() < l.getMaxHealth() * 0.5f));
 
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("marked"), new PredicateFilter((c, e) -> com.arcane.execution.Marks.isMarked(e)));
         GlyphHandlerRegistry.registerFilter(ArcaneIds.of("unmarked"), new PredicateFilter((c, e) -> !com.arcane.execution.Marks.isMarked(e)));

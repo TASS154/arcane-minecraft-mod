@@ -206,7 +206,10 @@ public class GameTestSupport {
       if (!validation.valid()) return name + ": invalida (" + validation.message().getString() + ")";
       com.arcane.execution.SpellPreview.describe(inscription);
       var result = CastingService.tryCast(caster, inscription, h.getLevel());
-      if (!result.success() && !(result.message().contains("requires_ritual") || result.message().contains("mana"))) {
+      // falhas de forma sem alvo (Mais Proximo sem ninguem, Raio no ar, Coluna sem chao, Foco sem criatura) sao regra, nao defeito
+      boolean formMiss = result.message().contains("seek.no_target") || result.message().contains("ray.miss")
+          || result.message().contains("pillar.needs_ground") || result.message().contains("focus.no_target");
+      if (!result.success() && !(result.message().contains("requires_ritual") || result.message().contains("mana") || formMiss)) {
         return name + ": falhou (" + result.message() + ")";
       }
     } catch (RuntimeException e) {

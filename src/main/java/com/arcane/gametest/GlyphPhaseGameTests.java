@@ -281,21 +281,6 @@ public class GlyphPhaseGameTests extends GameTestSupport {
   }
 
   @GameTest(template = "empty")
-  public static void rainSoaksPutsOutFireAndWatersFarmland(GameTestHelper h) {
-    floor(h);
-    h.setBlock(new BlockPos(5, 0, 3), Blocks.FARMLAND);
-    Pig caster = pig(h, 3, 3);
-    var cow = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 4));
-    cow.setSecondsOnFire(10);
-    cast(h, caster, g("self"), g("rain", "radius", 4.0));
-    h.assertTrue(com.arcane.execution.Wetness.isSoaked(caster) && com.arcane.execution.Wetness.isSoaked(cow), "a chuva molha quem esta na area");
-    h.assertTrue(!cow.isOnFire(), "a chuva apaga o fogo");
-    int moisture = h.getLevel().getBlockState(h.absolutePos(new BlockPos(5, 0, 3))).getValue(net.minecraft.world.level.block.FarmBlock.MOISTURE);
-    h.assertTrue(moisture == 7, "a chuva rega a plantacao (umidade " + moisture + ")");
-    h.succeed();
-  }
-
-  @GameTest(template = "empty")
   public static void wetStatusFeedsTheJsonInteractionRules(GameTestHelper h) {
     floor(h);
     Pig wet = pig(h, 2, 3);
@@ -319,25 +304,6 @@ public class GlyphPhaseGameTests extends GameTestSupport {
   }
 
   @GameTest(template = "empty")
-  public static void invertSwapsEffectsForTheirOpposites(GameTestHelper h) {
-    floor(h);
-    Pig p = pig(h, 3, 3);
-    p.setHealth(5.0f);
-    cast(h, p, g("self"), g("damage", "amount", 3.0), g("invert"));
-    h.assertTrue(p.getHealth() > 5.0f, "Dano invertido cura (vida " + p.getHealth() + ")");
-    float before = p.getHealth();
-    cast(h, p, g("self"), g("heal", "amount", 3.0), g("invert"));
-    h.assertTrue(p.getHealth() < before, "Cura invertida fere");
-    cast(h, p, g("self"), g("slow"), g("invert"));
-    h.assertTrue(p.hasEffect(MobEffects.MOVEMENT_SPEED) && !p.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "Lentidao invertida vira Velocidade");
-    cast(h, p, g("self"), g("blind"));
-    h.assertTrue(p.hasEffect(MobEffects.BLINDNESS), "sem Inverter, Cegar cega");
-    cast(h, p, g("self"), g("glide"), g("invert"));
-    h.assertTrue(p.hasEffect(MobEffects.SLOW_FALLING), "efeito sem par ignora o Inverter");
-    h.succeed();
-  }
-
-  @GameTest(template = "empty")
   public static void lifeStealHealsTheCasterAndTransferGivesLifeAway(GameTestHelper h) {
     floor(h);
     Pig caster = pig(h, 3, 3);
@@ -355,12 +321,6 @@ public class GlyphPhaseGameTests extends GameTestSupport {
     cow.setHealth(4.0f);
     cast(h, caster, g("aura", "radius", 3.0), g("life_transfer", "amount", 8.0));
     h.assertTrue(caster.getHealth() >= com.arcane.execution.handlers.LowCostEffects.LifeTransfer.KEEP - 0.01f, "nunca derruba abaixo de 1 coracao (vida " + caster.getHealth() + ")");
-    caster.setHealth(8.0f);
-    cow.setHealth(10.0f);
-    float casterBefore = caster.getHealth();
-    cow.invulnerableTime = 0; // o golpe anterior dela ainda vale na mesma tick
-    cast(h, caster, g("aura", "radius", 3.0), g("life_transfer", "amount", 3.0), g("invert"));
-    h.assertTrue(cow.getHealth() < 10.0f && caster.getHealth() > casterBefore, "Transferir invertido e Roubo de Vida");
     h.succeed();
   }
 
@@ -413,12 +373,12 @@ public class GlyphPhaseGameTests extends GameTestSupport {
   }
 
   @GameTest(template = "empty")
-  public static void glideAndDarknessApplyTheirEffects(GameTestHelper h) {
+  public static void featherAndDarknessApplyTheirEffects(GameTestHelper h) {
     floor(h);
     Pig p = pig(h, 3, 3);
-    cast(h, p, g("self"), g("glide", "duration", 100.0));
+    cast(h, p, g("self"), g("feather", "duration", 100.0));
     cast(h, p, g("self"), g("darkness", "duration", 100.0));
-    h.assertTrue(p.hasEffect(MobEffects.SLOW_FALLING), "Planar: queda lenta");
+    h.assertTrue(p.hasEffect(MobEffects.SLOW_FALLING), "Pena: queda lenta");
     h.assertTrue(p.hasEffect(MobEffects.DARKNESS), "Escuridao");
     h.succeed();
   }
@@ -886,6 +846,7 @@ public class GlyphPhaseGameTests extends GameTestSupport {
       var all = com.arcane.execution.WorldScars.all(level);
       return all.stream().filter(sc -> sc.pos().distanceToSqr(pig.position()) < 900.0).toList();
     };
+    for (int x = 0; x < 7; x++) h.setBlock(new BlockPos(x, 1, 6), Blocks.STONE); // o Raio precisa pegar algo (no ar ele falha)
     int base = mine.apply(plain).size();
     cast(h, plain, g("ray", "range", 8.0), g("damage"));
     cast(h, sneaky, g("ray", "range", 8.0), g("damage"), g("stealth"));
@@ -922,6 +883,35 @@ public class GlyphPhaseGameTests extends GameTestSupport {
     caster.hurt(h.getLevel().damageSources().genericKill(), 1000.0f);
     h.assertTrue(!cow.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "o conjurador morreu: o efeito vinculado acabou");
     h.succeed();
+  }
+
+  /**
+   * Vincular (uma frase): prende um efeito de poção que você pôs em outra criatura à sua presença; ele acaba quando você
+   * morre, some do mundo ou fica a mais de 40 blocos dela. Sem Vincular, o mesmo efeito dura o tempo todo.
+   */
+  @GameTest(template = "empty", timeoutTicks = 100, batch = "bind_distance")
+  public static void bindEndsPotionEffectsWhenTheCasterMovesAway(GameTestHelper h) {
+    floor(h);
+    Pig caster = pig(h, 3, 1);
+    var bound = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(3, 1, 3));
+    var free = h.spawnWithNoFreeWill(EntityType.COW, new BlockPos(6, 1, 1));
+    // Raio: so a vaca na mira (a Aura tambem deixaria nuvens de Lentidao no chao, que reaplicam o efeito)
+    cast(h, caster, g("ray", "range", 6.0), g("slow", "duration", 1200.0), g("bind"));
+    free.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 1200), caster); // sem vinculo
+    h.assertTrue(bound.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && free.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "lentidao nas duas");
+    h.runAfterDelay(10, () -> {
+      h.assertTrue(bound.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "perto: o vinculo segura o efeito");
+      // para cima (os testes vizinhos ficam ao lado): 60 blocos, parado no ar
+      caster.setNoGravity(true);
+      caster.teleportTo(caster.getX(), caster.getY() + 60.0, caster.getZ());
+    });
+    h.runAfterDelay(55, () -> { // o vinculo e conferido a cada 20 ticks
+      h.assertTrue(!bound.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "a mais de 40 blocos: o efeito vinculado acabou (distancia "
+          + Math.sqrt(caster.distanceToSqr(bound)) + ", vinculos " + com.arcane.execution.Phase4Service.boundCount()
+          + ")");
+      h.assertTrue(free.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "o efeito sem vinculo continua");
+      h.succeed();
+    });
   }
 
   @GameTest(template = "empty")

@@ -6,6 +6,7 @@ public class ArcaneConfig {
   public static final ForgeConfigSpec SPEC;
   public static final ForgeConfigSpec.BooleanValue AFFINITIES_ENABLED;
   public static final ForgeConfigSpec.DoubleValue AFFINITY_MAX_TOTAL;
+  public static final ForgeConfigSpec.DoubleValue TOUCH_POWER_BONUS;
   public static final ForgeConfigSpec.IntValue PROJECTILE_MAX_TRIGGERS;
   public static final ForgeConfigSpec.DoubleValue HOMING_DEGREES_PER_LEVEL;
   public static final ForgeConfigSpec.DoubleValue HOMING_CONE_DEGREES;
@@ -190,6 +191,8 @@ public class ArcaneConfig {
         .define("affinitiesEnabled", true);
     AFFINITY_MAX_TOTAL = builder.comment("Ceiling of affinity x element reaction bonus on one hit (2 = at most double damage from both together). Only limits bonuses (PROVISIONAL)")
         .defineInRange("affinityMaxTotal", 2.0, 1.0, 10.0);
+    TOUCH_POWER_BONUS = builder.comment("Touch form: contact multiplies the strength of the spell's effects (damage, heal, duration...) by this (PROVISIONAL, docs/PERGUNTAS.md)")
+        .defineInRange("touchPowerBonus", 1.25, 1.0, 2.0);
     PROJECTILE_MAX_TRIGGERS = builder.comment("Projectile modifiers: most hits (final hit + bounces + fragments) one projectile may trigger; extra fragments, then bounces, are dropped (PROVISIONAL)")
         .defineInRange("projectileMaxTriggers", 8, 1, 32);
     HOMING_DEGREES_PER_LEVEL = builder.comment("Homing: degrees the projectile may turn per tick, per level of the glyph (PROVISIONAL)")

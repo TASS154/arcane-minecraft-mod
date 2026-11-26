@@ -204,6 +204,41 @@ public record Region(int shape, Vec3 center, double radius, double height, Vec3 
   }
 
   /**
+   * Terreno do fuste de uma coluna: blocos expostos dentro do circulo da coluna, do chao (2 abaixo da marca) ate
+   * {@code up} blocos acima, dos mais baixos e proximos do eixo para os demais. E o que a Coluna entrega como blocos.
+   */
+  public List<TargetList.BlockTarget> columnBlocks(ServerLevel level, int up, int max) {
+    BlockPos base = BlockPos.containing(center);
+    int n = (int) Math.ceil(radius);
+    int top = (int) Math.min(height, up);
+    List<BlockPos> found = new ArrayList<>();
+    for (int dy = -2; dy <= top; dy++) {
+      for (int dx = -n; dx <= n; dx++) {
+        for (int dz = -n; dz <= n; dz++) {
+          if (dx * dx + dz * dz > radius * radius) continue;
+          BlockPos pos = base.offset(dx, dy, dz);
+          if (!level.hasChunkAt(pos) || level.getBlockState(pos).isAir()) continue;
+          boolean exposed = false;
+          for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+            if (level.getBlockState(pos.relative(d)).isAir()) { exposed = true; break; }
+          }
+          if (exposed) found.add(pos);
+        }
+      }
+    }
+    found.sort(java.util.Comparator.comparingDouble((BlockPos p) -> p.getY()).thenComparingDouble(p -> {
+      double dx = p.getX() + 0.5 - center.x, dz = p.getZ() + 0.5 - center.z;
+      return dx * dx + dz * dz;
+    }));
+    List<TargetList.BlockTarget> out = new ArrayList<>();
+    for (BlockPos p : found) {
+      if (out.size() >= max) break;
+      out.add(new TargetList.BlockTarget(p, level.getBlockState(p)));
+    }
+    return out;
+  }
+
+  /**
    * Blocos expostos (com ao menos uma face para o ar) dentro da regiao, dos mais proximos do centro para os mais
    * distantes. Alcance de busca limitado a 20 blocos para nao varrer volumes enormes.
    */

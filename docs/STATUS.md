@@ -6,9 +6,9 @@ lista de glifos, em `docs/GLIFOS.md` (gerada). O que precisa de olho, ouvido ou 
 
 ## Números
 
-- **211 glifos** (fonte: `tools/glyph_table.py`): 11 formas, 16 filtros, 30 condições, 114 efeitos, 39 modificadores e
-  1 ativador. Tiers 1 a 4, mais 7 glifos originais de tier 5 (só ao derrotar uma Hidra).
-- Testes: JUnit (`src/test/java`) e 296 GameTests obrigatórios (`src/main/java/com/arcane/gametest`).
+- **205 glifos** (fonte: `tools/glyph_table.py`): 11 formas, 15 filtros, 30 condições, 111 efeitos, 37 modificadores e
+  1 ativador (26 nov: saíram Planar, Atraso, Ferido, Inverter, o efeito Chuva e Carinho, com aliases). Tiers 1 a 4, mais 7 glifos originais de tier 5 (só ao derrotar uma Hidra).
+- Testes: JUnit (`src/test/java`) e 306 GameTests obrigatórios (`src/main/java/com/arcane/gametest`).
   Comando: `.\gradlew.bat test runGameTestServer --offline` com JDK 17.
 - Até 10 glifos por magia; custo cresce com fator 1,3 a partir do 4º glifo.
 
@@ -81,6 +81,20 @@ F balanço por simulação; G proposta de tags de estado. Andamento por fase no 
 
 ## Andamento das fases
 
+Prompt 3 de 26 nov (formas, Mais Próximo, poda de glifos, contrato de presença):
+
+- **Feito, 26 nov.** Mapa de aliases com caso "dropado" (`GlyphAliases`, `RemovedGlyphMigrationTest`); cortes de
+  Planar, Atraso, Ferido, Inverter (sem tocar em Inversão da Gravidade), efeito Chuva e Carinho, com loot, idioma,
+  ícones, handlers e testes; Vincular com uma frase e GameTest de distância. **Mais Próximo** logo depois da forma vira
+  entrega (`Seek`): Raio, Toque e Foco miram a criatura mais perto, o Pilar assenta sob ela, o Projétil sai na direção
+  dela, Aura e Onda ficam só com ela; depois de outro filtro, continua filtro. Prévia diz qual dos dois. **Raio** não
+  entrega ponto vazio e falha sem mana no ar. **Projétil** detona no fim da vida. **Coluna** pega todas as criaturas do
+  fuste e o terreno da coluna. **Toque** +25% (config) e alcança o bloco atrás da criatura. Falhas de forma antes da
+  mana num lugar só (`CastingService.formFailure`). Presença: feixe que se apaga no ar e estouro do orbe; NÃO vistos.
+  306/306.
+- **Parado esperando Everton:** números do Corte (`docs/DECISIONS.md` item 3) e forma Chuva (item 4,
+  `docs/PROPOSTA_FORMA_CHUVA.md`).
+
 Adendo de 25 nov (prompt 2): fases H a N, nesta ordem. Números novos: `docs/PERGUNTAS.md`, "Números provisórios".
 
 - **H (Boneco de Treino Arcano), 25 nov: feita.** Entidade `training_dummy` (nunca morre, volta ao máximo após 5 s sem
@@ -144,8 +158,7 @@ Adendo de 25 nov (prompt 2): fases H a N, nesta ordem. Números novos: `docs/PER
   humano. 261/261.
 
 - **B (auditoria de glifos), 25 nov: B1 a B3 feitas; B4 aguarda aprovação.** Relatório em `docs/AUDITORIA_GLIFOS.md`
-  (marque `[x]`). Inverter ignora o conhecimento do glifo oposto (GameTests opcionais `GlyphAuditGameTests` falham de
-  propósito até a correção ser aprovada). Aliases de glifo prontos (`GlyphAliases`, `GlyphAliasesTest`). 259/259.
+  (marque `[x]`). Em 26 nov o Inverter foi cortado e os GameTests opcionais do furo saíram junto. Aliases de glifo prontos (`GlyphAliases`, `GlyphAliasesTest`). 259/259.
 
 - **A (higiene), 25 nov: feita.** CLAUDE.md, este STATUS, log movido para CHANGELOG_DEV, documento antigo arquivado,
   descrição do Ativar corrigida, CI consertado (o `gradlew` estava sem permissão de execução: as 19 últimas execuções

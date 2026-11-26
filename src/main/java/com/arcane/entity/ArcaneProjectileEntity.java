@@ -149,9 +149,55 @@ public class ArcaneProjectileEntity extends ThrowableProjectile {
       modTrails();
     } else if (!isRemoved()) {
       steerServer();
-      if (tickCount > maxLife) discard();
+      if (tickCount > maxLife) expire();
     }
   }
+
+  /** Tempo de vida do orbe em ticks (10 s; os cacos do Fragmentar, 1,5 s). */
+  public int maxLife() { return maxLife; }
+
+  /**
+   * Fim da vida (prompt de 26 nov, A2): o orbe que nao acertou nada DETONA no ponto onde esta, em vez de sumir sem efeito.
+   * Os efeitos recebem esse ponto como alvo (efeitos de ponto agem ali; os que pedem criatura ou bloco nao tem o que
+   * pegar). Trechos com "Ao Atingir" ou "Ao Bater" nao disparam: nao houve acerto. Os cacos do Fragmentar so somem.
+   */
+  void expire() {
+    if (shard || plan == null || !(getOwner() instanceof LivingEntity caster) || !(level() instanceof ServerLevel server)) {
+      discard();
+      return;
+    }
+    // so detona com o entorno carregado: um efeito de area na borda do mundo carregado geraria chunks no meio do tick
+    var at = blockPosition();
+    if (!server.hasChunksAt(at.offset(-EXPIRE_LOADED_RADIUS, 0, -EXPIRE_LOADED_RADIUS), at.offset(EXPIRE_LOADED_RADIUS, 0, EXPIRE_LOADED_RADIUS))) {
+      discard();
+      return;
+    }
+    long started = System.nanoTime();
+    ExecutionContext context = context(new ExecutionContext.TriggerEvent("expire", java.util.Optional.empty(), java.util.Optional.empty()));
+    context.setResolvedTargets(TargetList.ofPoint(position()));
+    float fxPower = (float) Math.max(0.3, Math.min(1.0, powerScale));
+    // presenca: o orbe estoura no ar (anel de impacto virado para cima, decal do elemento, som de acerto mais grave)
+    server.playSound(null, getX(), getY(), getZ(), com.arcane.registry.ModSounds.SPELL_HIT.get(),
+        net.minecraft.sounds.SoundSource.PLAYERS, 0.8f * fxPower, 0.75f);
+    com.arcane.network.ModNetwork.sendShape(server, com.arcane.network.packet.S2CShapeFxPacket.IMPACT, position(),
+        new net.minecraft.world.phys.Vec3(0, 1, 0), fxPower, trailElement().color(), trailElement().ordinal(), 12);
+    com.arcane.fx.Fx.impact(server, caster, position(), null, element(), trailElement(), fxPower);
+    com.arcane.execution.WorldScars.leave(context, position());
+    triggers++;
+    expired = true;
+    SpellPipeline.INSTANCE.runSegments(context);
+    discard();
+    long ms = (System.nanoTime() - started) / 1_000_000L;
+    if (ms > 200) com.mojang.logging.LogUtils.getLogger().warn("Arcane: detonacao de fim de vida do projetil levou {} ms em {} ({})", ms, at, inscription);
+  }
+
+  /** Raio em blocos que precisa estar carregado em volta do orbe para ele detonar no fim da vida. */
+  public static final int EXPIRE_LOADED_RADIUS = 32;
+
+  /** Se o orbe detonou por fim de vida (para testes). */
+  public boolean expired() { return expired; }
+
+  private boolean expired;
 
   /** Rastro proprio de cada modificador (NAO visto em jogo): espiral (Perseguir), faisca (Ricochete), cacos (Fragmentar). */
   private void modTrails() {

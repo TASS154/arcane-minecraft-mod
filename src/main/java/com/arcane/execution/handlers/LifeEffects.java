@@ -326,18 +326,6 @@ public final class LifeEffects {
       }, null);
     }
   }
-
-  /** Carinho: o animal ganha coracoes e recupera um pouco de vida. */
-  public static class Pet implements EffectHandler {
-    @Override public void apply(ExecutionContext c, EffectCall call, TargetList t) {
-      for (LivingEntity l : living(t)) {
-        if (!(l instanceof Animal) && !(l instanceof net.minecraft.world.entity.TamableAnimal)) continue;
-        l.heal(4f);
-        c.level().sendParticles(ParticleTypes.HEART, l.getX(), l.getY() + l.getBbHeight() + 0.3, l.getZ(), 5, 0.3, 0.2, 0.3, 0.0);
-      }
-    }
-  }
-
   /** Eco: um pulso mostra so para quem conjurou o contorno das cavernas em volta (pontos de luz nas paredes). */
   public static class Echo implements EffectHandler {
     @Override public void apply(ExecutionContext c, EffectCall call, TargetList t) {

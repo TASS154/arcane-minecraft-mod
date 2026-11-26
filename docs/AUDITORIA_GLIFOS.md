@@ -1,6 +1,34 @@
-# Auditoria de glifos (25 nov 2026)
+# Auditoria de glifos (25 nov 2026; decisões aplicadas em 26 nov)
 
-Relatório da Fase B. **Nada foi cortado nem fundido ainda.** Para aprovar, troque `[ ]` por `[x]` na proposta que quiser
+## Aplicado em 26 nov (prompt 3 de Everton)
+
+As decisões de Everton de 26 nov **substituem** as caixas desta auditoria. O que foi feito:
+
+| Glifo | Decisão | Resultado |
+|---|---|---|
+| Pena (`feather`) | manter | igual |
+| Planar (`glide`) | remover | cortado; alias → Pena (a duração escrita fica) |
+| Após Segundos (`after_seconds`) | manter | igual |
+| Atraso (`delay`) | remover | cortado; alias → Após Segundos (mesmo `seconds`) |
+| Ferido (`wounded`) | remover | cortado; **dropado** (sai da inscrição salva) |
+| Incendiar (`ignite`) | manter | igual (Fogo e Incendiar seguem separados; ver 1.4) |
+| Carinho (`pet`) | cortar/fundir | cortado; alias → Cura com `amount` 4 (o que o Carinho curava) |
+| Inverter (`invert`) | remover | cortado; **dropado**. `Inversion.java`, o gancho no `SpellPipeline` e os GameTests opcionais do furo (seção 3) saíram. **Inversão da Gravidade (`gravity_inversion`) não foi tocada.** |
+| Chuva (`rain`, efeito) | remover; nasce a forma Chuva | efeito cortado; alias → Molhar (o `radius` é descartado). A forma está só no desenho: `docs/PROPOSTA_FORMA_CHUVA.md` |
+| Ativar (`activate`), Ler Item (`read_item`) | manter | iguais |
+| Vincular (`bind`) | manter, com uma frase e GameTest | descrição reescrita; GameTests de morte (já havia) e de distância (novo) |
+| Corte (`cut`) | redesenho | **só proposta de números** (`docs/PERGUNTAS.md`); nada mudou no código |
+
+Também saíram do jogo: os JSON de glifo, os ícones, as chaves de idioma, as entradas de loot dos baús (só as linhas dos
+ids cortados; o resto das tabelas ficou como estava), os handlers (`LowCostEffects.Rain`, `LifeEffects.Pet`, os registros
+no `GlyphBootstrap`) e os testes de cada um. 211 → 205 glifos. Os pares de Aquecer e Secar deixam de importar (seção 2):
+os dois são glifos independentes.
+
+O resto deste arquivo é o relatório de 25 nov, mantido como histórico.
+
+---
+
+Relatório da Fase B (25 nov). Para aprovar, troque `[ ]` por `[x]` na proposta que quiser
 (ou escreva outra ao lado). Só o que estiver marcado será aplicado, com alias para o id antigo (grimórios e inscrições
 salvos continuam válidos; ver "Aliases" no fim). Custos e tiers abaixo vêm de `tools/glyph_table.py`; o comportamento,
 do código.
@@ -185,4 +213,22 @@ conhecimento do grimório (fica o maior nível entre id antigo e novo), notas de
 `/arcane know`. Ao regravar, sai o id atual. Teste: `GlyphAliasesTest` (JUnit, 5 casos: inscrição salva, sem alias
 quebra, fusão com `kind` sem sobrescrever o escrito, cadeia, conhecimento).
 
-O mapa `APPROVED` está **vazio** até você marcar as propostas acima.
+Em 26 nov o mapa `APPROVED` ganhou as decisões de Everton (ver "Mapa de aliases" abaixo).
+
+## 5. Mapa de aliases (26 nov)
+
+Gravação antiga → o que a inscrição vira ao carregar (grimório, inscrições no mundo, itens, altares, pergaminhos). Ao
+regravar, sai só o id novo. **Nunca reusar um id desta lista para um glifo novo.**
+
+| Id antigo | Vira | Parâmetros | Conhecimento do grimório |
+|---|---|---|---|
+| `glide` | `feather` | `duration` mantida | vale para Pena (o maior nível) |
+| `delay` | `after_seconds` | `seconds` mantido | vale para Após Segundos |
+| `rain` | `wet` | `duration` mantida; `radius` descartado | vale para Molhar |
+| `pet` | `heal` | `amount` = 4 se não houver | vale para Cura |
+| `wounded` | **dropado** | o glifo sai; o resto fica na mesma ordem | descartado |
+| `invert` | **dropado** | o glifo sai; o efeito anterior fica como foi escrito | descartado |
+
+Dropado: `GlyphAliases.DROPPED` (`arcane:dropped_glyph`). `Inscription.CODEC` retira esses glifos da lista ao ler; uma
+nota de glifo de um id dropado não ensina nada. Teste de migração: `RemovedGlyphMigrationTest` (JUnit, 10 casos: cada id,
+regravação, conhecimento, magia que fica só com a forma, alias que aponta para glifo inexistente).

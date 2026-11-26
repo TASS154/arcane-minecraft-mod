@@ -59,8 +59,8 @@ class CompilerSemanticsTest {
   }
 
   @Test
-  void delayOpensANewDelayedSegment() {
-    CompiledExecutionPlan p = plan(g("self"), g("damage"), g("delay", "seconds", 3.0), g("fire"));
+  void afterSecondsOpensANewDelayedSegment() {
+    CompiledExecutionPlan p = plan(g("self"), g("damage"), g("after_seconds", "seconds", 3.0), g("fire"));
     assertEquals(2, p.segments().size());
     assertEquals(0, p.segments().get(0).delayTicks());
     assertEquals(60, p.segments().get(1).delayTicks());

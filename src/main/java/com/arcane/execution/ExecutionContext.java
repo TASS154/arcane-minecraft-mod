@@ -43,6 +43,20 @@ public class ExecutionContext {
         this.trigger = trigger;
         this.origin = caster.getEyePosition();
         this.look = caster.getLookAngle();
+        this.contactBonus = "touch".equals(plan.delivery().formId().getPath()) ? touchPowerBonus() : 1.0;
+    }
+
+    /** Toque: o contato fortalece os efeitos (config touchPowerBonus, provisorio). 1 nas outras formas. */
+    private final double contactBonus;
+
+    public double contactBonus() { return contactBonus; }
+
+    public static double touchPowerBonus() {
+        try {
+            return com.arcane.config.ArcaneConfig.TOUCH_POWER_BONUS.get();
+        } catch (IllegalStateException notLoaded) { // JUnit, sem config carregada
+            return com.arcane.config.ArcaneConfig.TOUCH_POWER_BONUS.getDefault();
+        }
     }
 
     public ServerLevel level() { return level; }
@@ -57,6 +71,8 @@ public class ExecutionContext {
     public Vec3 position() { return anchor != null ? anchor : caster.position(); }
     /** Congela origem, olhar e posicao (usado pelas zonas para repetir a magia sempre do mesmo lugar). */
     public void freeze(Vec3 origin, Vec3 look, Vec3 position) { this.origin = origin; this.look = look; this.anchor = position; }
+    /** Vira o olhar so durante a entrega (Mais Proximo como entrega: {@link Seek#aimedAt}). */
+    public void setLook(Vec3 look) { this.look = look; }
     public Object zone() { return zone; }
     public void setZone(Object zone) { this.zone = zone; }
     public TriggerEvent trigger() { return trigger; }
@@ -121,13 +137,13 @@ public class ExecutionContext {
         if (holdTicks > 0 && key.equals("duration")) {
             // mantida: o efeito dura so ate o proximo pulso, entao acaba logo depois de soltar
             return Math.min(holdTicks, !magnitudeKeys.isEmpty() && !magnitudeKeys.contains(key) ? value
-                    : value * environment.potencyMultiplier() * precision.powerMultiplier() * geometryBonus * scaleFactor / areaDial);
+                    : value * environment.potencyMultiplier() * precision.powerMultiplier() * geometryBonus * scaleFactor * contactBonus / areaDial);
         }
         if (!magnitudeKeys.isEmpty() && !magnitudeKeys.contains(key)) {
             return value;
         }
         return value * environment.potencyMultiplier() * precision.powerMultiplier()
-                * geometryBonus * scaleFactor / areaDial;
+                * geometryBonus * scaleFactor * contactBonus / areaDial;
     }
 
     public record TriggerEvent(String type, Optional<net.minecraft.world.entity.Entity> entity,

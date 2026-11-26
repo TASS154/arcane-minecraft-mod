@@ -94,7 +94,7 @@ EXAMPLES = {
     "bola_de_fogo_invertida": (["projectile", "fire", "damage", "power"], "fire", False),
     "gelo_em_area": (["aura", "freeze", "slow", "area"], "frost", False),
     "tempestade_ritual": (["aura", "thunder", "wet", "power", "area", "lengthen"], "storm", True),
-    "vazio_longo": (["ray", "hostile", "drain_mana", "blind", "weaken", "curse", "power", "delay", "silence", "swift"], "void", False),
+    "vazio_longo": (["ray", "hostile", "drain_mana", "blind", "weaken", "curse", "power", "after_seconds", "silence", "swift"], "void", False),
 }
 
 

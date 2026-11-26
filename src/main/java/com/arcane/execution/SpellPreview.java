@@ -47,7 +47,27 @@ public final class SpellPreview {
     CompiledExecutionPlan plan = InscriptionCompiler.compile(inscription);
     String form = path(plan.delivery().formId());
     int reach = EffectReach.ofForm(form);
+    Seek.Mode seek = Seek.mode(inscription.glyphs(), form);
+    if (seek == Seek.Mode.DELIVERY && !form.equals("pillar")) reach &= EffectReach.ENTITY; // mira uma criatura
     lines.add(Component.translatable("gui.arcane.preview.form", name(plan.delivery().formId()), reachText(reach)).withStyle(ChatFormatting.AQUA));
+    // O verbo da forma (prompt de 26 nov, A2): o que so ela faz e como ela erra
+    String verb = switch (form) {
+      case "ray" -> "gui.arcane.preview.ray.no_air";
+      case "focus" -> "gui.arcane.preview.focus.hint";
+      case "pillar" -> "gui.arcane.preview.pillar.hint";
+      case "projectile" -> "gui.arcane.preview.projectile.hint";
+      default -> null;
+    };
+    if (verb != null) lines.add(Component.translatable(verb).withStyle(ChatFormatting.GRAY));
+    if (form.equals("touch")) {
+      lines.add(Component.translatable("gui.arcane.preview.touch.hint",
+          Math.round((ExecutionContext.touchPowerBonus() - 1.0) * 100)).withStyle(ChatFormatting.GRAY));
+    }
+    if (seek == Seek.Mode.DELIVERY) {
+      lines.add(Component.translatable("gui.arcane.preview.seek.delivery").withStyle(ChatFormatting.AQUA));
+    } else if (seek == Seek.Mode.FILTER) {
+      lines.add(Component.translatable("gui.arcane.preview.seek.filter").withStyle(ChatFormatting.GRAY));
+    }
 
     var params = plan.delivery().parameters();
     boolean customRegion = params.containsKey("shape") || params.containsKey("origin");
@@ -61,6 +81,9 @@ public final class SpellPreview {
     }
 
     List<Component> warnings = new ArrayList<>();
+    if (seek == Seek.Mode.IGNORED_BY_FORM) {
+      warnings.add(Component.translatable("gui.arcane.preview.warn.seek_ignored", name(plan.delivery().formId())).withStyle(ChatFormatting.GOLD));
+    }
     // Fase J: modificadores de Projetil fora da forma Projetil nao fazem nada; na forma, o orcamento pode cortar
     if (ProjectileMods.present(params)) {
       if (!"projectile".equals(form)) {

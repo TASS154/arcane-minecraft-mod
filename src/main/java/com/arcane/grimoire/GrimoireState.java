@@ -174,6 +174,7 @@ public class GrimoireState {
             for (String key : knowledgeTag.getAllKeys()) {
                 // id antigo (glifo renomeado ou fundido): vale para o atual, ficando com o maior nivel entre os dois
                 ResourceLocation id = com.arcane.glyph.GlyphAliases.resolve(new ResourceLocation(key));
+                if (com.arcane.glyph.GlyphAliases.DROPPED.equals(id)) continue; // glifo cortado sem substituto
                 GlyphKnowledge level = GlyphKnowledge.fromLevel(knowledgeTag.getInt(key));
                 knowledge.merge(id, level, (a, b) -> a.ordinal() >= b.ordinal() ? a : b);
             }

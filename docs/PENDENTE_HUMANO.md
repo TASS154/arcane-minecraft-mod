@@ -1,13 +1,16 @@
 # Pendente de olho, ouvido ou mão humana
 
-Tudo que o código e os testes não conseguem confirmar (atualizado em 25 nov, depois das Fases A a G). Ordem: prioridade (o que mais arrisca a experiência primeiro).
+Tudo que o código e os testes não conseguem confirmar (atualizado em 26 nov, depois do prompt 3: formas, Mais Próximo e poda de glifos). Ordem: prioridade (o que mais arrisca a experiência primeiro).
 Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao lado. Comandos exigem cheats.
 
 ## P0: decisões que só você pode tomar (travam trabalho)
 
-- [ ] **Auditoria de glifos:** marque `[x]` nas propostas de `docs/AUDITORIA_GLIFOS.md` (Pena/Planar, Atraso/Após
-  Segundos, Fogo/Incendiar, Velocidade do Projétil, Inverter). Sem isso a Fase B4 (aplicar cortes com alias) fica parada.
-- [ ] **Furo do Inverter:** aprovar a correção (exigir conhecer o glifo oposto). Hoje Dano + Inverter cura sem conhecer Cura.
+- [ ] **Números do Corte** (`docs/DECISIONS.md` item 3, tabela em `docs/PERGUNTAS.md`): escolher A, B ou C. Parado.
+- [ ] **Forma Chuva** (`docs/DECISIONS.md` item 4, desenho em `docs/PROPOSTA_FORMA_CHUVA.md`): aprovar. Parado.
+- [ ] **Bônus do Toque** (+25%, config `touchPowerBonus`): confirmar ou subir até 1,5.
+- [ ] O que sobrou da auditoria de 25 nov sem decisão: Velocidade do Projétil (`swift`), modificadores passando do teto,
+  Explosão × Explosão Destrutiva, Olhos Noturnos (ver `docs/AUDITORIA_GLIFOS.md`). Planar, Atraso, Ferido, Carinho,
+  Inverter e o efeito Chuva já foram cortados em 26 nov.
 - [ ] **Carga do servidor** (`docs/CARGA.md`): calcular a cratera aos poucos? Teto de raio 64 no "Sem limites"? Teto do
   diário do Restaurar?
 - [ ] **Balanço** (`docs/BALANCO_AUTO.md`, `docs/PERGUNTAS.md`): Explosão rende 10 a 13x a mediana de dano por mana;
@@ -112,6 +115,6 @@ Visto só nas fotos do roteiro automático (folha de contato em `run/screenshots
 
 ## P5: sensação e multijogador
 
-- [ ] Investida, Gancho, Atravessar, Planar: distância e sensação.
+- [ ] Investida, Gancho, Atravessar: distância e sensação. (Planar foi cortado; a Pena faz a queda lenta.)
 - [ ] Coro com dois clientes e latência real; voo em rede.
 - [ ] Medo, Sono, Chamariz e Reanimar com mobs de IA real.

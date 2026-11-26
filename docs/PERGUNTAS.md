@@ -147,3 +147,78 @@ de Treino (`/arcane dummy report` dá os valores exatos em HP). Nenhum número j
   Queimar e veneno que vêm depois não passam pela afinidade. Confirmar.
 - **Teto:** só limita bônus (fraqueza); se a reação sozinha já passa do teto, a afinidade fica neutra e a reação fica
   como era (não mexi em número existente).
+
+## Redesign de formas, Mais Próximo e poda de glifos (prompt 3, 26 nov 2026)
+
+### Números provisórios novos
+
+| Número | Valor | Onde | Motivo | Como medir no Boneco |
+|---|---|---|---|---|
+| Bônus de contato do Toque | ×1,25 nos efeitos (parâmetros de magnitude: dano, cura, duração...) | config `touchPowerBonus` (1 a 2) | O pedido diz 1,25 a 1,5; comecei pelo menor para o Toque não engolir o Raio a 3 blocos | Boneco a 2 blocos: `Toque → Dano 4` marca 5 HP no relatório; `Raio → Dano 4`, 4 HP |
+| Alcance da busca do Mais Próximo como entrega | até 48 blocos (o alcance da forma, se menor); Projétil 32 | `Seek.MAX_RANGE`, `Seek.PROJECTILE_RANGE` | O Raio "sem limite" (512) e o Pilar não podem varrer o mundo atrás de criaturas | Boneco a 40 e a 50 blocos com `Raio → Mais Próximo → Dano`: só o de 40 |
+| Blocos do fuste da Coluna | até 32 blocos acima da marca no chão | `PillarFormHandler.SHAFT_BLOCK_HEIGHT` | O fuste visual vai ao céu; varrer blocos até o limite do mundo custaria caro | (mundo) |
+| Detonação de fim de vida | só com 32 blocos carregados em volta do orbe | `ArcaneProjectileEntity.EXPIRE_LOADED_RADIUS` | Não gerar chunks no meio do tick (segurança do servidor, não balanço) | (desempenho) |
+
+### Decisões pequenas que tomei
+
+- **Ordem do Mais Próximo:** "logo após a forma" ignora qualquer modificador (de entrega ou de efeito) no meio; um
+  filtro, efeito, condição ou ativador antes dele o devolve ao papel de filtro. Formas que não miram (Eu, Barreira,
+  Invocar) mantêm o filtro e a prévia avisa.
+- **Mais Próximo como entrega inclui aliados e bichos** (como o filtro sempre fez). Suportes de armadura não contam.
+  Para mirar só inimigos: `Raio → Hostis → Mais Próximo` (filtro) ou `Raio → Mais Próximo → Hostis` (entrega, depois
+  filtro: se o mais perto for um aliado, nada acontece).
+- **Falhas de forma antes da mana, num lugar só** (`CastingService.formFailure`): Foco sem criatura, Coluna sem chão,
+  Raio que não pega criatura nem bloco, e Mais Próximo sem ninguém à vista. Vale para jogador e para criaturas que
+  conjuram. Inscrições no mundo, zonas e magias armadas não passam por ali: nelas a forma só entrega vazio.
+- **Raio vazio com efeitos que não dependem de alvo** (só Salto, Bolso, Clima...): não falha, como antes.
+- **Toque sem alvo continua gastando mana** (só o Raio falha no vazio, como o pedido diz). Se quiser o mesmo padrão no
+  Toque, é uma linha em `formFailure`.
+- **Privilégio do Toque:** ao tocar uma criatura, a mão chega também ao bloco logo atrás dela na mesma linha (dentro dos
+  3 blocos). Escolhi este entre os três sugeridos porque é o único que o Raio não pode copiar (ele para no primeiro).
+- **Projétil:** o orbe que vence o tempo de vida detona no ponto onde está (efeitos de ponto agem ali); "Ao Atingir" e
+  "Ao Bater" não disparam, porque não houve acerto. Os cacos do Fragmentar só somem.
+- **Coluna:** os blocos entregues são o terreno exposto dentro do círculo, do chão até 32 blocos acima, de baixo para
+  cima. Cavar quebra no máximo 4 por conjuração, como sempre: numa Coluna, os de baixo primeiro.
+- **Aliases** (`GlyphAliases.APPROVED`, tabela em `docs/AUDITORIA_GLIFOS.md`): Planar → Pena; Atraso → Após Segundos;
+  efeito Chuva → Molhar (perde o raio); Carinho → Cura com 4 de vida (Carinho só curava animais; a Cura vale para
+  qualquer criatura); Ferido e Inverter saem da inscrição (dropados). Uma magia salva com `Aura → Ferido → Dano` passa a
+  ferir todos na aura; uma com `Dano → Inverter` volta a ferir em vez de curar. Não achei substituto honesto para
+  nenhum dos dois.
+- **Atraso → Após Segundos:** a magia antiga fica 1 de mana mais barata, e um Grupo aberto antes do atraso deixa de ser
+  alcançado por um modificador depois dele (a condição fecha o grupo). Caso raro, registrado na auditoria de 25 nov.
+- **Vincular** (uma frase): prende à sua presença um efeito de poção que você pôs em outra criatura; ele acaba quando
+  você morre, sai do mundo ou fica a mais de 40 blocos dela.
+
+### Corte: proposta de números (B4). PARADO esperando aprovação
+
+O desenho aprovado: dano caro, alvo único, sem Área nem Cadeia, bônus proporcional à armadura do alvo. **Nenhum número
+foi mudado no código.** A regra que não pede número já vale: o Corte **não tem raio** (Área não age nele) e **não está
+na lista do Cadeia** (`EffectReach.CHAINABLE` = Dano, Explosão, Explosão Destrutiva). O "alvo único" (numa Aura, só a
+criatura mais perto de você leva o Corte) eu **não** liguei: muda o que magias salvas fazem hoje e é parte do mesmo
+pacote; entra junto com os números.
+
+Conta feita com a fórmula de armadura do Minecraft 1.20.1 (`CombatRules.getDamageAfterAbsorb`: armadura e resistência
+da armadura; ferro 15/0, diamante 20/8, netherite 20/12). Não rodei o Boneco: os valores são exatos pela fórmula, e o
+relatório do Boneco deve bater com eles (`/arcane dummy report`, clique para trocar a armadura).
+
+Dano efetivo (HP) por conjuração:
+
+| Magia | Mana | Sem armadura | Ferro | Diamante | Netherite |
+|---|---|---|---|---|---|
+| Dano 4 (hoje) | 2 | 4,00 | 1,92 | 0,96 | 0,93 |
+| Corte 3 (hoje) | 2 | 3,00 | 1,38 | 0,69 | 0,67 |
+| **Proposta A:** Corte 6, +4% por ponto de armadura do alvo, custo 4 | 4 | 6,00 | 5,68 | 3,33 | 3,09 |
+| Proposta B: Corte 3, +5% por ponto, custo 3 | 3 | 3,00 | 2,65 | 1,56 | 1,49 |
+| Proposta C: Corte 6, ignora metade da armadura, custo 4 | 4 | 6,00 | 4,92 | 3,96 | 3,89 |
+
+- O bônus de A e B multiplica o dano **antes** da armadura: `dano × (1 + k × armadura)`, com armadura de 0 a 20 (teto
+  ×1,8 em A). A armadura ainda reduz; o Corte só chega mais perto do dano escrito.
+- C é mais forte que A contra diamante e netherite e quase igual contra ferro; é "perfurar", não "proporcional à
+  armadura" como o desenho pede.
+- **Recomendação: A.** Contra alvo sem armadura o Corte rende 1,5 HP por mana (o Dano rende 2): pior. Contra netherite,
+  0,77 HP por mana (o Dano, 0,47): melhor. Isso dá ao Corte um nicho claro ("abre armadura") sem virar o novo Dano. Alvo
+  único e sem Área impedem Aura + Corte de limpar uma sala.
+- O padrão do parâmetro `amount` passaria de 3 para 6 (intervalo 1 a 16, igual), e o custo do glifo de 2 para 4. O `k`
+  ficaria na config (`cutArmorBonusPerPoint`, provisório).
+- Perguntas: (1) A, B, C ou outra? (2) Ligar o alvo único junto? (3) O bônus vale contra a armadura natural de mobs
+  (zumbi tem 2)? Recomendo sim: é o mesmo atributo `ARMOR` que a armadura vestida soma.

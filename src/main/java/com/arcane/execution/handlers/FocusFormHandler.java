@@ -46,10 +46,19 @@ public class FocusFormHandler implements FormHandler {
     return hit != null && hit.getEntity() instanceof LivingEntity living ? living : null;
   }
 
+  /**
+   * A criatura que o Foco trava nesta conjuracao: a da mira ou, com Mais Proximo logo depois da forma, a criatura viva
+   * mais proxima de quem conjura (sem atravessar parede). Null = nenhuma (a conjuracao falha antes de cobrar mana).
+   */
+  public static LivingEntity lock(ExecutionContext context, DeliverySpec spec) {
+    double range = Math.max(4.0, Math.min(48.0, spec.range() > 0 ? spec.range() : spec.parameters().getOrDefault("range", 24.0)));
+    if (com.arcane.execution.Seek.on(spec)) return com.arcane.execution.Seek.nearest(context, range, true);
+    return find(context.caster(), context.origin(), context.look(), range);
+  }
+
   @Override
   public DeliveryResult deliver(ExecutionContext context, DeliverySpec spec) {
-    double range = Math.max(4.0, Math.min(48.0, spec.range() > 0 ? spec.range() : spec.parameters().getOrDefault("range", 24.0)));
-    LivingEntity target = find(context.caster(), context.origin(), context.look(), range);
+    LivingEntity target = lock(context, spec);
     return DeliveryResult.of(target == null ? new TargetList(java.util.List.of(), java.util.List.of()) : TargetList.ofEntities(target));
   }
 }

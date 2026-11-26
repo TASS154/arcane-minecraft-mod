@@ -17,7 +17,8 @@ public record Inscription(
     public static final int CURRENT_VERSION = 1;
     public static final Codec<Inscription> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT.optionalFieldOf("v", CURRENT_VERSION).forGetter(Inscription::version),
-            GlyphInstance.CODEC.listOf().fieldOf("glyphs").forGetter(Inscription::glyphs),
+            GlyphInstance.CODEC.listOf().xmap(com.arcane.glyph.GlyphAliases::migrateAll, l -> l)
+                    .fieldOf("glyphs").forGetter(Inscription::glyphs),
             InscriptionMetadata.CODEC.optionalFieldOf("meta", InscriptionMetadata.DEFAULT).forGetter(Inscription::metadata),
             Codec.STRING.xmap(UUID::fromString, UUID::toString).optionalFieldOf("uuid", UUID.randomUUID()).forGetter(Inscription::id)
     ).apply(instance, Inscription::new));

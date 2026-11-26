@@ -30,18 +30,18 @@ glyph("self", "form", 1,
       ("Self", "Form: the spell happens on you."),
       ["..####..", ".#....#.", "#..##..#", "#.#..#.#", "#.#..#.#", "#..##..#", ".#....#.", "..####.."], comp=FORM_COMP)
 glyph("touch", "form", 2,
-      ("Toque", "Forma: afeta o que estiver na sua mira, bem perto (3 blocos)."),
-      ("Touch", "Form: affects whatever you aim at, up close (3 blocks)."),
+      ("Toque", "Forma: contato. Afeta o que você toca bem perto (3 blocos). O contato deixa os efeitos 25% mais fortes, e ao tocar uma criatura a mão chega também ao bloco logo atrás dela."),
+      ("Touch", "Form: contact. Affects whatever you touch up close (3 blocks). Contact makes the effects 25% stronger, and touching a creature also reaches the block right behind it."),
       ["..#.#...", "..#.#.#.", "..#.#.#.", "#.#####.", "#######.", ".######.", "..####..", "..####.."],
       params={"range": (3.0, 1.0, 6.0, "float")}, comp=FORM_COMP)
 glyph("projectile", "form", 3,
-      ("Projétil", "Forma: dispara um orbe que aplica o feitiço onde acertar (criatura ou bloco)."),
-      ("Projectile", "Form: fires an orb that applies the spell where it lands (creature or block)."),
+      ("Projétil", "Forma: dispara uma carga que voa e aplica o feitiço onde acertar (criatura ou bloco). Pode errar; se não acertar nada em 10 s, detona onde estiver."),
+      ("Projectile", "Form: fires a charge that flies and applies the spell where it lands (creature or block). It can miss; if it hits nothing in 10 s, it detonates where it is."),
       ["........", "....#...", "....##..", "########", "########", "....##..", "....#...", "........"],
       params={"speed": (1.5, 0.5, 3.0, "float")}, magnitude=["speed"], comp=FORM_COMP)
 glyph("ray", "form", 3,
-      ("Raio", "Forma: um feixe instantâneo que acerta a primeira criatura ou bloco na mira, a qualquer distância (reduza o alcance para limitar)."),
-      ("Ray", "Form: an instant beam that hits the first creature or block you aim at, at any distance (lower the range to limit it)."),
+      ("Raio", "Forma: um feixe instantâneo que acerta agora a primeira criatura ou bloco na mira, a qualquer distância (reduza o alcance para limitar). No ar vazio não faz nada: a magia falha sem gastar mana."),
+      ("Ray", "Form: an instant beam that hits the first creature or block you aim at right now, at any distance (lower the range to limit it). On thin air it does nothing: the spell fails without spending mana."),
       ["......##", "....###.", "...###..", "..###...", ".###....", "###.....", "##......", "#......."],
       params={"range": (48.0, 4.0, 48.0, "float")}, comp=FORM_COMP)
 glyph("aura", "form", 4,
@@ -219,13 +219,9 @@ glyph("not_self", "filter", 0,
       ("Not Me", "Filter: removes you from the targets."),
       [".######.", "#......#", "#.....##", "#....#.#", "#...#..#", "#..#...#", "##.....#", ".######."])
 glyph("nearest", "filter", 1,
-      ("Mais Próximo", "Filtro: só a criatura mais próxima de você."),
-      ("Nearest", "Filter: only the creature closest to you."),
+      ("Mais Próximo", "Filtro: logo depois da forma, a forma mira sozinha a criatura viva mais perto de você (Raio, Toque, Foco e Projétil apontam para ela; o Pilar assenta sob ela; Aura e Onda só a atingem). Depois de outro filtro, só fica a mais perto entre as já atingidas."),
+      ("Nearest", "Filter: right after the form, the form aims by itself at the living creature closest to you (Ray, Touch, Focus and Projectile point at it; Pillar settles under it; Aura and Wave hit only it). After another filter, it only keeps the closest of those already hit."),
       ["...##...", "...##...", "...##...", "###..###", "###..###", "...##...", "...##...", "...##..."])
-glyph("wounded", "filter", 1,
-      ("Ferido", "Filtro: só criaturas com menos da metade da vida."),
-      ("Wounded", "Filter: only creatures below half health."),
-      [".##..##.", "####.###", "###.####", "####.###", ".###.##.", "..####..", "...##...", "........"])
 
 # ------------------------------------------------------------------ MODIFICADORES
 glyph("area", "modifier", 2,
@@ -239,12 +235,6 @@ glyph("more_range", "modifier", 1,
       ["........", "#...#...", ".#...#..", "..#...#.", "..#...#.", ".#...#..", "#...#...", "........"],
       scope={"target": "all", "kind": "form", "mutate": {"range": {"op": "multiply", "value": 1.5},
                                                          "distance": {"op": "multiply", "value": 1.5}}})
-glyph("delay", "modifier", 1,
-      ("Atraso", "Modificador: o que vem depois só acontece alguns segundos mais tarde."),
-      ("Delay", "Modifier: what follows only happens a few seconds later."),
-      ["########", ".#....#.", "..#..#..", "...##...", "...##...", "..#..#..", ".#.##.#.", "########"],
-      params={"seconds": (2.0, 0.5, 30.0, "float")},
-      scope={"target": "next_segment", "kind": "segment", "wrap": True, "delay_param": "seconds"})
 glyph("power", "modifier", 2,
       ("Potência", "Modificador: +50% de força no efeito anterior (dano, cura, empurrão, nível)."),
       ("Power", "Modifier: +50% strength on the previous effect (damage, heal, push, level)."),
@@ -331,8 +321,8 @@ glyph("wave", "form", 3,
       ["..#..#..", ".#....#.", "#..##..#", "........", "#..##..#", ".#....#.", "..#..#..", "........"],
       params={"range": (8.0, 2.0, 16.0, "float")}, comp=FORM_COMP)
 glyph("pillar", "form", 4,
-      ("Pilar", "Forma: uma coluna vertical no ponto que você mira (criaturas e o bloco atingido)."),
-      ("Pillar", "Form: a vertical column at the point you aim at (creatures and the block hit)."),
+      ("Pilar", "Forma: marca o chão no ponto mirado (ou sob a criatura mirada) e ergue uma coluna até o céu: atinge todas as criaturas no fuste, em qualquer altura, e o terreno da coluna. Sem chão, falha sem gastar mana."),
+      ("Pillar", "Form: marks the ground at the aimed point (or under the aimed creature) and raises a column to the sky: it hits every creature in the shaft, at any height, and the column's terrain. With no ground, it fails without spending mana."),
       ["..####..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", "..#..#..", ".######."],
       params={"range": (24.0, 4.0, 48.0, "float"), "radius": (2.0, 1.0, 6.0, "float")}, comp=FORM_COMP)
 glyph("barrier", "form", 4,
@@ -590,21 +580,11 @@ glyph("telekinesis", "effect", 6,
 
 
 # ================================================================== FASE 3: glifos de custo baixo
-glyph("rain", "effect", 2,
-      ("Chuva", "Efeito: uma chuva local cai sobre o alvo: molha quem está na área (raio 1,5–10), apaga fogo e rega plantações. Não muda o clima do mundo (isso é o ritual Clima)."),
-      ("Rain", "Effect: a local rain falls on the target: wets everyone in the area (radius 1.5-10), puts out fire and waters crops. It does not change the world weather (that is the Weather ritual)."),
-      ["..####..", ".######.", "########", "........", ".#.#.#.#", "#.#.#.#.", ".#.#.#.#", "#.#.#.#."],
-      params={"radius": (4.0, 1.5, 10.0, "float"), "duration": (400.0, 40.0, 1200.0, "int")}, magnitude=["duration"])
 glyph("charge", "effect", 3,
       ("Investida", "Efeito: você avança em linha reta contra o alvo (ou para onde olha), até 16 blocos, ferindo quem estiver no caminho. Diferente de Empurrão em si mesmo, que só dá um impulso, e de Salto, que teleporta."),
       ("Charge", "Effect: you rush in a straight line at the target (or where you look), up to 16 blocks, hurting whoever is in the way. Unlike Push on yourself, which is only an impulse, and Blink, which teleports."),
       ["#.......", "##......", "###.##..", "########", "########", "###.##..", "##......", "#......."],
       params={"distance": (8.0, 3.0, 16.0, "float"), "damage": (3.0, 0.0, 12.0, "float")}, magnitude=["damage"])
-glyph("glide", "effect", 2,
-      ("Planar", "Efeito: o alvo cai devagar por um tempo (queda lenta), sem dano de queda. É a versão passiva; para voar de verdade, use Flutuar."),
-      ("Glide", "Effect: the target falls slowly for a while (slow falling), with no fall damage. This is the passive version; to really fly, use Float."),
-      ["...##...", "..####..", ".######.", "########", "#..##..#", "...##...", "..#..#..", ".#....#."],
-      params={"duration": (200.0, 20.0, 1200.0, "int")}, magnitude=["duration"])
 glyph("taunt", "effect", 1,
       ("Provocar", "Efeito: criaturas hostis passam a perseguir você, largando outro alvo e acordando do Sono ou do Medo. Não afeta jogadores."),
       ("Taunt", "Effect: hostile creatures start chasing you, dropping any other target and waking from Sleep or Fear. Does not affect players."),
@@ -635,24 +615,19 @@ glyph("wet", "effect", 1,
       ["...##...", "...##...", "..####..", ".######.", "########", "########", ".######.", "..####.."],
       params={"duration": (200.0, 40.0, 1200.0, "int")}, magnitude=["duration"])
 glyph("lifesteal", "effect", 3,
-      ("Roubo de Vida", "Efeito: fere o alvo e devolve a você 60% do dano que realmente causou. Não funciona em si mesmo. Invertido, vira Transferir Vida."),
-      ("Life Steal", "Effect: hurts the target and gives you back 60% of the damage actually dealt. Does not work on yourself. Inverted, it becomes Life Transfer."),
+      ("Roubo de Vida", "Efeito: fere o alvo e devolve a você 60% do dano que realmente causou. Não funciona em si mesmo."),
+      ("Life Steal", "Effect: hurts the target and gives you back 60% of the damage actually dealt. Does not work on yourself."),
       ["..#..#..", ".######.", "########", "########", ".######.", "..####..", "...##...", "........"],
       params={"amount": (3.0, 1.0, 16.0, "float"), "ratio": (0.6, 0.1, 1.0, "float")}, magnitude=["amount"])
 glyph("life_transfer", "effect", 2,
-      ("Transferir Vida", "Efeito: você passa vida ao alvo (1–16), sem nunca cair abaixo de 1 coração. Invertido, vira Roubo de Vida."),
-      ("Life Transfer", "Effect: you pass health to the target (1-16), never dropping below 1 heart. Inverted, it becomes Life Steal."),
+      ("Transferir Vida", "Efeito: você passa vida ao alvo (1–16), sem nunca cair abaixo de 1 coração."),
+      ("Life Transfer", "Effect: you pass health to the target (1-16), never dropping below 1 heart."),
       ["........", "..#..#..", ".######.", "########", ".######.", "..####..", "...##...", "........"],
       params={"amount": (4.0, 1.0, 16.0, "float")}, magnitude=["amount"])
 glyph("read_item", "effect", 1,
       ("Ler Item", "Efeito: mostra no chat o item que a criatura segura (ou o item solto no chão): nome, quantidade, durabilidade e encantamentos. Só informa; não muda nada."),
       ("Read Item", "Effect: shows in chat the item the creature is holding (or the dropped item): name, count, durability and enchantments. Informational only; changes nothing."),
       ["..####..", ".#....#.", "#..##..#", "#.#..#.#", "#.#..#.#", "#..##..#", ".#....#.", "..####.."])
-glyph("invert", "modifier", 1,
-      ("Inverter", "Modificador: troca o efeito anterior pelo seu oposto, com a mesma magnitude. Pares: Dano e Cura, Empurrão e Atrair, Lentidão e Velocidade, Fogo e Congelar, Levitação e Gravidade, Roubo e Transferir Vida, Cegar e Invisibilidade, Medo e Provocar. Efeito sem par ignora o Inverter."),
-      ("Invert", "Modifier: swaps the previous effect for its opposite, with the same magnitude. Pairs: Damage and Heal, Push and Attract, Slow and Speed, Fire and Freeze, Levitate and Gravity, Life Steal and Transfer, Blind and Invisibility, Fear and Taunt. An effect with no pair ignores Invert."),
-      ["#......#", "##....##", "#.#..#.#", "#..##..#", "#..##..#", "#.#..#.#", "##....##", "#......#"],
-      scope={"target": "previous_effect", "kind": "effect", "mutate": {"invert": {"op": "put", "value": 1.0}}})
 
 glyph("on_kill", "condition", 0,
       ("Ao Matar", "Condição: arma a magia em você: o que vem depois só acontece quando você matar uma criatura (uma vez, por até 60 s). Com forma Eu, age em você."),
@@ -849,8 +824,8 @@ _g("overcharge", "modifier", 3,
                      "power": {"op": "multiply", "value": 2.0}, "radius": {"op": "multiply", "value": 1.5},
                      "duration": {"op": "multiply", "value": 1.5}, "overcharge": {"op": "put", "value": 1.0}}})
 _g("bind", "modifier", 2,
-   ("Vincular", "Modificador: prende o efeito anterior a você: se for um efeito de poção (Lentidão, Veneno, Cegar, Velocidade...) em outra criatura, ele acaba quando você morrer ou se afastar mais de 40 blocos. Efeitos de outros tipos ignoram o Vincular."),
-   ("Bind", "Modifier: ties the previous effect to you: if it is a potion-type effect (Slow, Poison, Blind, Speed...) on another creature, it ends when you die or move more than 40 blocks away. Other effect types ignore Bind."),
+   ("Vincular", "Modificador: prende à sua presença o efeito de poção anterior (Lentidão, Veneno, Cegar, Velocidade...) posto em outra criatura: ele acaba quando você morre, sai do mundo ou fica a mais de 40 blocos dela. Em você mesmo e em efeitos que não são de poção, o Vincular não faz nada."),
+   ("Bind", "Modifier: ties the previous potion-type effect (Slow, Poison, Blind, Speed...) on another creature to your presence: it ends when you die, leave the world or are more than 40 blocks away from it. On yourself and on non-potion effects, Bind does nothing."),
    ["..####..", ".#....#.", ".#....#.", "########", "########", ".#....#.", ".#....#.", "..####.."],
    scope={"target": "previous_effect", "kind": "effect", "mutate": {"bind": {"op": "put", "value": 1.0}}})
 
@@ -860,8 +835,8 @@ _g("pocket", "effect", 2,
    ("Arcane Pocket", "Effect: opens your Arcane Pocket, a 13-item space only yours (like an Ender Chest) that stays with you when you die. It will not open during recent combat nor accept shulkers, the grimoire or pages."),
    ["..####..", ".#....#.", "..####..", ".######.", "##.##.##", "##.##.##", ".######.", "..####.."])
 _g("focus", "form", 2,
-   ("Foco", "Forma: entrega só a criatura viva sob a sua mira (até 24 blocos, não atravessa paredes). Não toca blocos nem pontos vazios e não faz efeito próprio: serve para Atrair, Marcar, Elo e outros que só fazem sentido com uma criatura. Sem criatura na mira, a magia falha e não gasta mana."),
-   ("Focus", "Form: delivers only the living creature under your aim (up to 24 blocks, never through walls). It does not touch blocks or empty points and has no effect of its own: made for Attract, Mark, Link and others that only make sense on a creature. With no creature in your aim the spell fails and costs no mana."),
+   ("Foco", "Forma: entrega só a criatura viva sob a sua mira (até 24 blocos, não atravessa paredes). Não toca blocos nem pontos vazios e não faz efeito próprio: serve para Atrair, Marcar, Elo e outros que só fazem sentido com uma criatura. Sem criatura na mira, a magia falha e não gasta mana. Combina com Segurar ou Alternar (canal). Foco mira o que está na sua mira; para o que está mais perto de você, use Foco seguido de Mais Próximo."),
+   ("Focus", "Form: delivers only the living creature under your aim (up to 24 blocks, never through walls). It does not touch blocks or empty points and has no effect of its own: made for Attract, Mark, Link and others that only make sense on a creature. With no creature in your aim the spell fails and costs no mana. Pairs with Hold or Toggle (channel). Focus takes what is under your aim; for whatever is closest to you, use Focus followed by Nearest."),
    ["...##...", "..#..#..", ".#.##.#.", "##.##.##", "##.##.##", ".#.##.#.", "..#..#..", "...##..."],
    params={"range": (24.0, 4.0, 48.0, "float")}, comp=FORM_COMP)
 _g("restore", "effect", 4,
@@ -985,10 +960,6 @@ _g('herd', 'effect', 2,
    ('Herd', 'Effect: the target animals follow you for a while (up to 1 min).'),
    ['......#.', '.....##.', '..####..', '.#####..', '.#...#..', '........', '#..#..#.', '#..#..#.'],
    params={'duration': (400.0, 100.0, 1200.0, 'int')}, magnitude=['duration'])
-_g('pet', 'effect', 1,
-   ('Carinho', 'Efeito: o animal alvo ganha corações e recupera um pouco de vida.'),
-   ('Pet', 'Effect: the target animal gets hearts and recovers a little health.'),
-   ['.##.##..', '#######.', '#######.', '.#####..', '..###...', '...#....', '........', '........'])
 _g('echo', 'effect', 2,
    ('Eco', 'Efeito: um pulso mostra, só para você, o contorno das cavernas em volta (pontos de luz nas paredes escondidas), num raio de até 32.'),
    ('Echo', 'Effect: a pulse shows, only to you, the outline of the caves around you (dots of light on hidden walls), within up to 32 blocks.'),
@@ -1090,10 +1061,10 @@ TIERS = {
     1: ["self", "projectile", "damage", "heal", "push", "fire", "hostile", "self_filter", "blocks", "area", "more_range",
         "on_hit_entity", "touch", "ignite", "cut", "marked", "unmarked", "not_self", "wood", "power", "group", "end_group",
         "taunt", "wet", "read_item", "sense", "emit_signal", "light", "feather"],
-    2: ["focus", "slow", "poison", "speed", "players", "animals", "undead", "nearest", "wounded", "allies", "delay", "lengthen",
+    2: ["focus", "slow", "poison", "speed", "players", "animals", "undead", "nearest", "allies", "lengthen",
         "weaken", "swift", "homing", "ricochet", "arc", "after_seconds", "on_hit_block", "sneaking", "night", "in_water", "mark", "blind", "attract",
         "ray", "dig", "shield", "shape_dome", "shape_ring", "shape_cone", "shape_wall", "standing_still", "low_mana", "wave",
-        "rain", "charge", "glide", "fear", "rumble", "darkness", "lifesteal", "life_transfer", "invert", "on_jump",
+        "charge", "fear", "rumble", "darkness", "lifesteal", "life_transfer", "on_jump",
         "target_health", "region", "holding", "raining",
         "grow", "water_walk", "breathe", "night_eye",
         "hook", "climb", "arcane_sight", "reveal", "decoy", "drain_mana", "stealth", "false_trace", "bind", "on_signal", "on_near"],
@@ -1105,14 +1076,14 @@ TIERS = {
 }
 FAMILIES = {
     "fire": ["fire", "ignite", "explode", "blast"],
-    "ice": ["water_walk", "slow", "freeze", "shield", "wet", "rain", "petrify"],
-    "storm": ["thunder", "ray", "pillar", "rain", "rumble", "raining", "wet", "electrify", "on_signal", "emit_signal"],
-    "blood": ["pierce", "damage", "poison", "wither", "cut", "wounded", "hostile", "undead", "lifesteal", "life_transfer", "on_kill", "acid", "curse", "reanimate", "contagion", "overcharge", "after_hits"],
+    "ice": ["water_walk", "slow", "freeze", "shield", "wet", "petrify"],
+    "storm": ["thunder", "ray", "pillar", "rumble", "raining", "wet", "electrify", "on_signal", "emit_signal"],
+    "blood": ["pierce", "damage", "poison", "wither", "cut", "hostile", "undead", "lifesteal", "life_transfer", "on_kill", "acid", "curse", "reanimate", "contagion", "overcharge", "after_hits"],
     "life": ["grow", "breathe", "chorus", "heal", "shield", "speed", "allies", "players", "animals"],
-    "force": ["feather", "hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "glide", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat", "homing", "ricochet", "arc"],
-    "knowledge": ["light", "night_eye", "pocket", "mark", "marked", "unmarked", "nearest", "delay", "after_seconds", "on_hit_entity", "on_hit_block",
+    "force": ["feather", "hook", "climb", "satellites", "imbue", "reflect", "trail", "charge", "taunt", "rumble", "on_fall", "on_jump", "float", "telekinesis", "chain", "shape_dome", "shape_sphere", "shape_ring", "push", "attract", "gravity", "levitate", "wave", "aura", "area", "power", "repeat", "homing", "ricochet", "arc"],
+    "knowledge": ["light", "night_eye", "pocket", "mark", "marked", "unmarked", "nearest", "after_seconds", "on_hit_entity", "on_hit_block",
                   "group", "end_group", "lengthen", "weaken", "persistence", "on_near", "night", "in_water", "sneaking", "standing_still", "low_mana", "vow_stillness", "vow_daylight", "zone", "on_zone_end", "on_barrier_break", "read_item", "target_health", "region", "holding", "sense", "arcane_sight", "reveal", "dispel"],
-    "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "invert", "phase", "recall", "swap", "link", "silence", "drain_mana", "decoy", "stealth", "false_trace", "bind"],
+    "void": ["vow_oath", "vow_blood", "on_death", "warp", "weather", "blink", "invisible", "blind", "on_hurt", "low_health", "activate", "not_self", "self_filter", "fear", "sleep", "darkness", "phase", "recall", "swap", "link", "silence", "drain_mana", "decoy", "stealth", "false_trace", "bind"],
     "earth": ["restore", "summon_wolves", "summon_golem", "dig", "barrier", "blocks", "wood", "more_range", "swift", "fragment", "origin_aim", "origin_self", "touch", "projectile", "self"],
 }
 for _tier, _ids in TIERS.items():
@@ -1142,7 +1113,6 @@ G['cook']["tier"] = 1; G['cook'].setdefault("families", []).extend(['fire'])
 G['dry']["tier"] = 1; G['dry'].setdefault("families", []).extend(['fire'])
 G['harvest']["tier"] = 1; G['harvest'].setdefault("families", []).extend(['life'])
 G['herd']["tier"] = 1; G['herd'].setdefault("families", []).extend(['life'])
-G['pet']["tier"] = 1; G['pet'].setdefault("families", []).extend(['life'])
 G['echo']["tier"] = 1; G['echo'].setdefault("families", []).extend(['knowledge'])
 G['prospect']["tier"] = 1; G['prospect'].setdefault("families", []).extend(['earth'])
 G['remember']["tier"] = 1; G['remember'].setdefault("families", []).extend(['knowledge'])

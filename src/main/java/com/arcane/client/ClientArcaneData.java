@@ -264,6 +264,20 @@ public final class ClientArcaneData {
     return spells.stream().filter(s -> s.id().equals(active)).findFirst();
   }
 
+  // ---- Diario de descobertas (Fase K)
+  private static List<com.arcane.network.packet.S2CReactionJournalPacket.Def> reactionCatalog = List.of();
+  private static List<com.arcane.execution.ReactionJournal.Entry> reactionsFound = List.of();
+
+  public static void setReactions(List<com.arcane.network.packet.S2CReactionJournalPacket.Def> catalog,
+                                  List<com.arcane.execution.ReactionJournal.Entry> found) {
+    reactionCatalog = List.copyOf(catalog);
+    reactionsFound = List.copyOf(found);
+  }
+
+  public static List<com.arcane.network.packet.S2CReactionJournalPacket.Def> reactionCatalog() { return reactionCatalog; }
+
+  public static List<com.arcane.execution.ReactionJournal.Entry> reactionsFound() { return reactionsFound; }
+
   // ---- previa da bancada (calculada pelo servidor)
   private static List<net.minecraft.network.chat.Component> preview = List.of();
 

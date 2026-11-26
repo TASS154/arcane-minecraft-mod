@@ -360,5 +360,13 @@
       "arcane:element/reaction_shatter_2",
       "arcane:element/reaction_shatter_3"
     ]
+  },
+  "reaction.vapor": {
+    "subtitle": "subtitles.arcane.reaction.vapor",
+    "sounds": [
+      "arcane:element/reaction_vapor_1",
+      "arcane:element/reaction_vapor_2",
+      "arcane:element/reaction_vapor_3"
+    ]
   }
 }

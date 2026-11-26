@@ -25,7 +25,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-  private static final String PROTOCOL = "8";
+  private static final String PROTOCOL = "9";
   public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       new ResourceLocation(ArcaneMod.MODID, "main"),
       () -> PROTOCOL,
@@ -118,9 +118,20 @@ public final class ModNetwork {
     CHANNEL.messageBuilder(com.arcane.network.packet.S2CChannelPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(com.arcane.network.packet.S2CChannelPacket::encode).decoder(com.arcane.network.packet.S2CChannelPacket::decode)
         .consumerMainThread(com.arcane.network.packet.S2CChannelPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.S2CReactionJournalPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(com.arcane.network.packet.S2CReactionJournalPacket::encode).decoder(com.arcane.network.packet.S2CReactionJournalPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.S2CReactionJournalPacket::handle).add();
+    CHANNEL.messageBuilder(com.arcane.network.packet.S2CVaporPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(com.arcane.network.packet.S2CVaporPacket::encode).decoder(com.arcane.network.packet.S2CVaporPacket::decode)
+        .consumerMainThread(com.arcane.network.packet.S2CVaporPacket::handle).add();
     CHANNEL.messageBuilder(C2SJournalNotePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(C2SJournalNotePacket::encode).decoder(C2SJournalNotePacket::decode)
         .consumerMainThread(C2SJournalNotePacket::handle).add();
+  }
+
+  /** Nuvem de Vapor: o jogador esta dentro (o cliente desenha o veu). */
+  public static void sendVapor(ServerPlayer player, int ticks) {
+    CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new com.arcane.network.packet.S2CVaporPacket(ticks));
   }
 
   /** Estado de canalizacao (runas de carga/manter) so para o proprio jogador. */

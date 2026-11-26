@@ -25,6 +25,11 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
 - [ ] **Modificadores de Projétil (J):** Projétil + Perseguir no Boneco fora da linha: a espiral em volta do orbe mostra a
   curva? Ricochete numa parede: faísca a cada quique, som mais agudo, golpe mais fraco no relatório? Fragmentar: cacos
   visíveis e pequenos? Arco: o orbe passa por cima de um muro e cai no Boneco? Na bancada, Raio + Perseguir dá aviso dourado.
+- [ ] **Nuvem de Vapor (K):** molhe três Bonecos (Eu + Molhar neles, ou chuva) e conjure Aura + Fogo. A nuvem é branca e
+  cinza, grande e suave? Dentro dela, a tela fica velada (e com "reduzir clarões", só as bordas)? O chiado é agradável
+  (`reaction_vapor_1..3.ogg`)? Some em ~15 s? Duas nuvens perto viram uma maior?
+- [ ] **Diário de descobertas (K):** a aba "Descobertas" do Grimório cabe na tela (4 abas agora)? "???" nas que faltam,
+  "X de Y reações descobertas" no alto. O aviso "Descoberta: Vapor" acima da barra é discreto o bastante?
 - [ ] **Decidir:** receita do Boneco (placeholder), vida de 40 HP, aparência dos corações (❤ colorido; ½ para o meio;
   "♥×N" acima de 10). Usei o caractere ❤ e não os sprites do jogo (mais simples no letreiro 3D).
 

@@ -34,7 +34,37 @@ import java.util.function.BiPredicate;
 public final class InteractionRules {
   private static final Logger LOG = LogUtils.getLogger();
 
-  public record Rule(SpellElement element, List<String> when, double damageAdd, String after, int freezeAdd) {}
+  /**
+   * Uma reacao elemento x ambiente. {@code id}, {@code nameKey} e {@code hintKey} (Fase K) sao opcionais no JSON: sem
+   * eles, o id sai do elemento e das condicoes ({@code fire_wet_steam}) e as chaves de texto seguem o id.
+   */
+  public record Rule(String id, String nameKey, String hintKey, SpellElement element, List<String> when, double damageAdd,
+                     String after, int freezeAdd) {
+    public Rule(SpellElement element, List<String> when, double damageAdd, String after, int freezeAdd) {
+      this(defaultId(element, when, after), "", "", element, when, damageAdd, after, freezeAdd);
+    }
+
+    public Rule {
+      if (id == null || id.isBlank()) id = defaultId(element, when, after);
+      if (nameKey == null || nameKey.isBlank()) nameKey = "reaction.arcane." + id;
+      if (hintKey == null || hintKey.isBlank()) hintKey = "reaction.arcane." + id + ".hint";
+    }
+  }
+
+  /** Id gerado quando o JSON nao tem: elemento, condicoes e acao ({@code fire_wet_steam}). */
+  public static String defaultId(SpellElement element, List<String> when, String after) {
+    StringBuilder b = new StringBuilder(element.name().toLowerCase(Locale.ROOT));
+    for (String c : when) b.append('_').append(c.replace(':', '_').replace('/', '_'));
+    if (after != null && !after.isEmpty()) b.append('_').append(after);
+    return b.toString();
+  }
+
+  /** Reacoes distintas por id, na ordem em que foram lidas (o Diario de descobertas lista estas). */
+  public static List<Rule> distinct() {
+    java.util.LinkedHashMap<String, Rule> out = new java.util.LinkedHashMap<>();
+    for (Rule r : rules) out.putIfAbsent(r.id(), r);
+    return List.copyOf(out.values());
+  }
 
   private static volatile List<Rule> rules = List.of();
   private static volatile List<String> problems = List.of();
@@ -116,7 +146,12 @@ public final class InteractionRules {
       String after = o.has("after") ? o.get("after").getAsString() : "";
       if (!after.isEmpty() && !after.equals("extinguish") && !after.equals("steam")) { problemsOut.add("regra " + index + ": acao desconhecida '" + after + "'"); ok = false; }
       int freezeAdd = o.has("freeze_add") ? Math.max(0, Math.min(400, o.get("freeze_add").getAsInt())) : 0;
-      if (ok) out.add(new Rule(element, List.copyOf(when), o.has("damage_add") ? o.get("damage_add").getAsDouble() : 0.0, after, freezeAdd));
+      String id = o.has("id") ? o.get("id").getAsString() : "";
+      if (!id.isEmpty() && !id.matches("[a-z0-9_]{1,48}")) { problemsOut.add("regra " + index + ": id invalido '" + id + "'"); ok = false; }
+      String nameKey = o.has("name_key") ? o.get("name_key").getAsString() : "";
+      String hintKey = o.has("hint_key") ? o.get("hint_key").getAsString() : "";
+      if (ok) out.add(new Rule(id, nameKey, hintKey, element, List.copyOf(when),
+          o.has("damage_add") ? o.get("damage_add").getAsDouble() : 0.0, after, freezeAdd));
     }
     return out;
   }
@@ -134,6 +169,9 @@ public final class InteractionRules {
           local.forEach(p -> issues.add(entry.getKey() + ": " + p));
         }
         rules = List.copyOf(loaded);
+        List<String> massIssues = new ArrayList<>();
+        MassReactions.load(files, massIssues);
+        issues.addAll(massIssues);
         problems = List.copyOf(issues);
         issues.forEach(p -> LOG.warn("Regra de interacao ignorada em {}", p));
         LOG.info("Carregadas {} regras de interacao.", rules.size());

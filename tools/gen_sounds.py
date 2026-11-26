@@ -371,9 +371,14 @@ def element_sound(element, role, variant):
 
 
 def reaction_sound(kind, variant):
-    r = np.random.default_rng(4242 + variant * 17 + (0 if kind == "steam" else 1000))
-    tt = t(0.6 if kind == "steam" else 0.35)
+    r = np.random.default_rng(4242 + variant * 17 + {"steam": 0, "shatter": 1000, "vapor": 2000}[kind])
+    tt = t({"steam": 0.6, "shatter": 0.35, "vapor": 1.6}[kind])
     n = len(tt)
+    if kind == "vapor":  # Nuvem de Vapor (Fase K): chiado longo e largo, sobe devagar, ondula e some (NAO ouvido)
+        x = _bandnoise(n, r, 0.55, 0.12) * 0.8 + _bandnoise(n, r, 0.85, 0.5) * 0.35
+        swell = np.sin(np.pi * np.clip(tt / tt[-1], 0, 1)) ** 0.7
+        wobble = 0.8 + 0.2 * np.sin(2 * np.pi * (1.3 + variant * 0.4) * tt)
+        return reverb(x * swell * wobble * env(n, 0.25, 0.6), decay=0.45)
     if kind == "steam":  # chiado: ruido agudo que sobe e some
         x = _bandnoise(n, r, 0.7, 0.3) * env(n, 0.02, 0.4) * (0.6 + 0.4 * tt / tt[-1])
         return reverb(x * 1.4, decay=0.3)
@@ -404,7 +409,7 @@ def element_sounds_main():
                 sf.write(edir / f"{name}.ogg", x, SR, format="OGG", subtype="VORBIS")
                 names.append(f"arcane:element/{name}")
             data[f"element.{element}.{role}"] = {"subtitle": f"subtitles.arcane.element.{role}", "sounds": names}
-    for kind in ("steam", "shatter"):
+    for kind in ONLY_REACTIONS or ("steam", "shatter", "vapor"):
         names = []
         for v in range(3):
             x = norm(reaction_sound(kind, v).astype(np.float64), peak=0.7).astype(np.float32)
@@ -416,9 +421,33 @@ def element_sounds_main():
     print(f"   {len(ELEMENT_RECIPES) * 6 + 6} sons de elemento em {edir}")
 
 
+ONLY_REACTIONS = ()
+
+
+def reactions_only_main(kinds):
+    """So os sons de reacao pedidos (ex.: --reaction vapor), sem regravar os outros arquivos."""
+    import json
+    sounds_json = OUT.parent / "sounds.json"
+    data = json.loads(sounds_json.read_text(encoding="utf-8"))
+    edir = OUT / "element"
+    edir.mkdir(parents=True, exist_ok=True)
+    for kind in kinds:
+        names = []
+        for v in range(3):
+            x = norm(reaction_sound(kind, v).astype(np.float64), peak=0.7).astype(np.float32)
+            name = f"reaction_{kind}_{v + 1}"
+            sf.write(edir / f"{name}.ogg", x, SR, format="OGG", subtype="VORBIS")
+            names.append(f"arcane:element/{name}")
+            print(f"   {name}.ogg  ({len(x) / SR:.2f}s)")
+        data[f"reaction.{kind}"] = {"subtitle": f"subtitles.arcane.reaction.{kind}", "sounds": names}
+    sounds_json.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
 if __name__ == "__main__":
     import sys as _sys
-    if "--elements" in _sys.argv:  # so os sons de elemento e das reacoes
+    if "--reaction" in _sys.argv:  # so um som de reacao (ex.: --reaction vapor)
+        reactions_only_main(_sys.argv[_sys.argv.index("--reaction") + 1:])
+    elif "--elements" in _sys.argv:  # so os sons de elemento e das reacoes
         element_sounds_main()
     else:
         main()

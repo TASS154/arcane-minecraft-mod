@@ -97,6 +97,13 @@ Adendo de 25 nov (prompt 2): fases H a N, nesta ordem. Números novos: `docs/PER
   filtro, nunca você, aliados ou bichos. Ricochete conta cada quique como um acerto e perde força. Fragmentar parte
   em cacos fracos que nunca fragmentam. Arco cai no ponto mirado e Perseguir só curva na descida. Os quatro juntos
   degradam até caber em `projectileMaxTriggers` (8), sem erro. Rastros próprios (espiral, faísca, cacos) NÃO vistos. 283/283.
+- **K (reações em massa, Nuvem de Vapor e Diário), 26 nov: feita.** As regras de `interactions/*.json` ganharam `id`,
+  `name_key` e `hint_key` (opcionais; o formato antigo continua valendo). `mass_reactions` é uma estrutura genérica de
+  limiar para zona; a única hoje é a Nuvem de Vapor (3 molhados queimados, 6 blocos de água no raio ou Chuva + Fogo):
+  apaga fogo, molha, fere 0,25 ❤/s e some em 15 s, funde com as vizinhas, teto por chunk e por mundo, respeita
+  `worldAlteringSpells`. Véu na tela só para quem está dentro (mais fraco com "reduzir clarões") e chiado novo
+  (`reaction_vapor_*.ogg`), NÃO vistos nem ouvidos. Diário de descobertas por jogador (salvo no mundo), aba
+  "Descobertas" no Grimório com "???" e "X de Y", aviso discreto e o som de glifo aprendido mais agudo. 287/287 (o teste da nuvem com 3 molhados falhou em 2 de 4 rodadas antes de esperar a conjuração; passou nas 2 últimas: vigiar).
 
 - **E (manutenção), 25 nov: feita.** GameTests divididos por área (`GameTestSupport` + 8 classes); poderes, fases e
   morte da Hidra em `HydraPowers`, `HydraPhases`, `HydraDeath`. 267/267.

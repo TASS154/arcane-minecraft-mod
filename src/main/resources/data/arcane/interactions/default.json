@@ -1,13 +1,30 @@
 {
-  "_comment": "Regras de interacao elemento x ambiente. Cada regra: elemento, 'when' (todas as condicoes valem), damage_add (somado ao multiplicador de dano, vezes a forca da config) e/ou after (acao depois de acertar). Condicoes: raining, wet, frozen, on_fire, hot_biome, lush_biome, biome_tag:<id>. Acoes: extinguish (apaga o fogo do alvo) e steam (apaga o fogo e seca quem foi molhado; o Fogo nem pega). freeze_add: ticks de gelo extras (o Congelar). 'wet' vale na agua, na chuva e no status do glifo Molhar. Para mudar o equilibrio, sobrescreva este arquivo num datapack.",
+  "_comment": "Regras de interacao elemento x ambiente. Cada regra: elemento, 'when' (todas as condicoes valem), damage_add (somado ao multiplicador de dano, vezes a forca da config) e/ou after (acao depois de acertar). Condicoes: raining, wet, frozen, on_fire, hot_biome, lush_biome, biome_tag:<id>. Acoes: extinguish (apaga o fogo do alvo) e steam (apaga o fogo e seca quem foi molhado; o Fogo nem pega). freeze_add: ticks de gelo extras (o Congelar). 'wet' vale na agua, na chuva e no status do glifo Molhar. Fase K (opcionais): id (minusculas, numeros e _), name_key e hint_key (chaves de texto do Diario de descobertas; sem elas, reaction.arcane.<id> e reaction.arcane.<id>.hint). 'mass_reactions': reacoes em massa, de limiar para zona (ver MassReactions). Para mudar o equilibrio, sobrescreva este arquivo num datapack.",
   "rules": [
-    { "element": "storm", "when": ["raining"], "damage_add": 0.5 },
-    { "element": "storm", "when": ["wet"], "damage_add": 0.5 },
-    { "element": "fire", "when": ["wet"], "damage_add": -0.4, "after": "steam" },
-    { "element": "frost", "when": ["wet"], "freeze_add": 120 },
-    { "element": "fire", "when": ["frozen"], "damage_add": 0.25 },
-    { "element": "frost", "when": ["hot_biome"], "damage_add": -0.3 },
-    { "element": "frost", "when": ["on_fire"], "after": "extinguish" },
-    { "element": "venom", "when": ["lush_biome"], "damage_add": 0.3 }
+    { "id": "charged_rain", "element": "storm", "when": ["raining"], "damage_add": 0.5 },
+    { "id": "conduction", "element": "storm", "when": ["wet"], "damage_add": 0.5 },
+    { "id": "steam", "element": "fire", "when": ["wet"], "damage_add": -0.4, "after": "steam" },
+    { "id": "flash_freeze", "element": "frost", "when": ["wet"], "freeze_add": 120 },
+    { "id": "shatter", "element": "fire", "when": ["frozen"], "damage_add": 0.25 },
+    { "id": "thaw", "element": "frost", "when": ["hot_biome"], "damage_add": -0.3 },
+    { "id": "hiss", "element": "frost", "when": ["on_fire"], "after": "extinguish" },
+    { "id": "bloom", "element": "venom", "when": ["lush_biome"], "damage_add": 0.3 }
+  ],
+  "mass_reactions": [
+    {
+      "id": "vapor_cloud",
+      "zone": "vapor_cloud",
+      "_comment": "Nuvem de Vapor. Qualquer gatilho basta. Numeros PROVISORIOS (docs/PERGUNTAS.md).",
+      "triggers": [
+        { "type": "reaction_count", "reaction": "steam", "count": 3 },
+        { "type": "blocks_in_radius", "element": "fire", "block": "minecraft:water", "count": 6, "radius": 3 },
+        { "type": "form_element", "form": "rain", "element": "fire" }
+      ],
+      "radius": 4.0,
+      "seconds": 15,
+      "damage_hearts_per_second": 0.25,
+      "max_per_chunk": 2,
+      "max_per_world": 16
+    }
   ]
 }

@@ -42,7 +42,8 @@ public class GrimoireScreen extends Screen {
   private static final int GRID_ROWS = 7;
   private static final int CELL = 20;
 
-  private enum Tab { SPELLS, GLYPHS, JOURNAL }
+  private enum Tab { SPELLS, GLYPHS, JOURNAL, DISCOVERIES }
+  private int discoveryScroll;
 
   private int left;
   private int top;
@@ -69,11 +70,13 @@ public class GrimoireScreen extends Screen {
     left = (width - W) / 2;
     top = (height - H) / 2;
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.tab.spells"), b -> setTab(Tab.SPELLS))
-        .bounds(left + 14, top + 2, 70, 18).build());
+        .bounds(left + 14, top + 2, 52, 18).build());
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.tab.glyphs"), b -> setTab(Tab.GLYPHS))
-        .bounds(left + 86, top + 2, 70, 18).build());
+        .bounds(left + 68, top + 2, 52, 18).build());
     addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.tab.journal"), b -> setTab(Tab.JOURNAL))
-        .bounds(left + 158, top + 2, 70, 18).build());
+        .bounds(left + 122, top + 2, 52, 18).build());
+    addRenderableWidget(Button.builder(Component.translatable("gui.arcane.grimoire.tab.discoveries"), b -> setTab(Tab.DISCOVERIES))
+        .bounds(left + 176, top + 2, 54, 18).build());
     deleteButton = addRenderableWidget(Button.builder(Component.literal("✖"), b -> delete())
         .bounds(left + 222, top + 176, 20, 20).tooltip(net.minecraft.client.gui.components.Tooltip.create(
             Component.translatable("gui.arcane.grimoire.delete"))).build());
@@ -351,6 +354,7 @@ public class GrimoireScreen extends Screen {
     switch (tab) {
       case SPELLS -> turnPage(step);
       case JOURNAL -> logScroll = Math.max(0, Math.min(logScroll + step * LIST_ROWS, Math.max(0, ClientArcaneData.log().size() - 1)));
+      case DISCOVERIES -> discoveryScroll = Math.max(0, Math.min(discoveryScroll + step, Math.max(0, ClientArcaneData.reactionCatalog().size() - 1)));
       case GLYPHS -> {
         int rows = (slotCount() + COLS - 1) / COLS;
         glyphScroll = Math.max(0, Math.min(glyphScroll + step, Math.max(0, rows - GRID_ROWS)));
@@ -385,6 +389,7 @@ public class GrimoireScreen extends Screen {
       case SPELLS -> renderSpells(g, mouseX, mouseY);
       case GLYPHS -> renderGlyphs(g, mouseX, mouseY);
       case JOURNAL -> renderJournal(g);
+      case DISCOVERIES -> renderDiscoveries(g);
     }
     com.arcane.client.ClientStatus.render(g, font, left + W / 2, top + H + 6);
   }
@@ -557,6 +562,43 @@ public class GrimoireScreen extends Screen {
     }
     if (log.size() > LIST_ROWS * 2) {
       g.drawString(font, Component.translatable("gui.arcane.grimoire.scroll_hint"), left + 18, top + 162, 0x9488BE, false);
+    }
+  }
+
+  /** Aba Descobertas (Fase K): contador "X de Y", descobertas com nome, dica, dia e trecho; o resto como "???". */
+  private void renderDiscoveries(GuiGraphics g) {
+    var rows = com.arcane.client.DiscoveryView.rows(ClientArcaneData.reactionCatalog(), ClientArcaneData.reactionsFound());
+    int known = com.arcane.client.DiscoveryView.known(rows);
+    g.drawString(font, Component.translatable("gui.arcane.discoveries.count", known, rows.size()), left + 18, top + 26, 0xE6D9A8, false);
+    if (known == 0) {
+      g.drawWordWrap(font, Component.translatable("gui.arcane.discoveries.empty"), left + 18, top + 40, 102, 0xB6AADC);
+    }
+    // duas colunas (uma por pagina do livro), 4 linhas cada; a roda rola de uma em uma
+    int perPage = 4;
+    for (int r = 0; r < perPage * 2; r++) {
+      int index = discoveryScroll + r;
+      if (index >= rows.size()) break;
+      var row = rows.get(index);
+      int x = left + (r < perPage ? 18 : 138);
+      int y = top + (known == 0 && r < perPage ? 92 : 40) + (r % perPage) * 32;
+      if (known == 0 && r < perPage && y > top + 150) continue;
+      if (!row.known()) {
+        g.fill(x, y, x + 100, y + 26, 0x40221A33);
+        g.drawString(font, Component.translatable("gui.arcane.discoveries.unknown"), x + 4, y + 9, 0x6E6488, false);
+        continue;
+      }
+      g.drawString(font, ellipsize(Component.translatable(row.nameKey()).getString(), 100), x, y, 0xF0E2B0, false);
+      g.drawString(font, ellipsize(Component.translatable(row.hintKey()).getString(), 100), x, y + 10, 0xB6AADC, false);
+      StringBuilder glyphs = new StringBuilder();
+      for (String id : row.excerpt()) {
+        if (glyphs.length() > 0) glyphs.append(" · ");
+        glyphs.append(ArcaneWorkbenchScreen.glyphName(new ResourceLocation("arcane", id)).getString());
+      }
+      String line = Component.translatable("gui.arcane.discoveries.day", row.day()).getString() + (glyphs.length() > 0 ? " · " + glyphs : "");
+      g.drawString(font, ellipsize(line, 100), x, y + 20, 0x8A7FB0, false);
+    }
+    if (rows.size() > perPage * 2) {
+      g.drawString(font, Component.translatable("gui.arcane.grimoire.scroll_hint"), left + 18, top + 172, 0x9488BE, false);
     }
   }
 

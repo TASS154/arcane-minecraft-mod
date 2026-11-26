@@ -155,6 +155,20 @@ public final class Fx {
    * Retorno da afinidade (Fase I), sem texto no chat: fraqueza explorada = anel de impacto maior e tom mais agudo;
    * resistencia ou imunidade = tom abafado (mais baixo e mais grave).
    */
+  /**
+   * Nuvem de Vapor (Fase K): sprites grandes e suaves, brancos e cinzas, espalhados pelo raio. {@code count} vem de
+   * {@code ReactionZones.density} (linear no raio, entao sub-linear na area). NAO visto em jogo.
+   */
+  public static int vapor(ServerLevel level, Vec3 center, double radius, int count) {
+    int n = budget(level, "vapor", count);
+    if (n <= 0) return 0;
+    int white = n / 2 + n % 2, gray = n / 2;
+    double spread = Math.max(0.5, radius * 0.55);
+    level.sendParticles(options(SpellElement.WATER, Role.REACTION, 3.2f, 0xF2F5F8), center.x, center.y, center.z, white, spread, spread * 0.45, spread, 0.004);
+    if (gray > 0) level.sendParticles(options(SpellElement.WATER, Role.REACTION, 2.6f, 0xB4BAC2), center.x, center.y, center.z, gray, spread, spread * 0.45, spread, 0.004);
+    return n;
+  }
+
   public static void affinity(ServerLevel level, Entity target, SpellElement e, double multiplier) {
     Vec3 at = target.position().add(0, target.getBbHeight() * 0.5, 0);
     var v = e.visual();

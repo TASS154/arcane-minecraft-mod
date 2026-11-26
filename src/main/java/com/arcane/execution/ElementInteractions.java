@@ -22,7 +22,10 @@ public final class ElementInteractions {
     if (!enabled()) return 1.0;
     double strength = ArcaneConfig.ELEMENT_INTERACTION_STRENGTH.get();
     double m = 1.0;
-    for (InteractionRules.Rule rule : InteractionRules.matching(level, element, target)) m += rule.damageAdd() * strength;
+    for (InteractionRules.Rule rule : InteractionRules.matching(level, element, target)) {
+      m += rule.damageAdd() * strength;
+      if (rule.damageAdd() != 0) CastScope.noteReaction(level, rule.id(), rule.nameKey(), target);
+    }
     m = Math.max(0.1, m);
     com.arcane.affinity.AffinityContext.noteReaction(target, m); // teto da afinidade acumulada (Fase I)
     return m;
@@ -32,6 +35,7 @@ public final class ElementInteractions {
   public static void afterHit(ServerLevel level, SpellElement element, Entity target) {
     if (!enabled()) return;
     for (InteractionRules.Rule rule : InteractionRules.matching(level, element, target)) {
+      if (!rule.after().isEmpty() || rule.when().contains("frozen")) CastScope.noteReaction(level, rule.id(), rule.nameKey(), target);
       if (rule.after().equals("steam")) {
         // Fogo em alvo molhado: vira vapor, apaga o fogo e seca a criatura.
         target.clearFire();
@@ -55,7 +59,10 @@ public final class ElementInteractions {
     if (!enabled()) return 0;
     double strength = ArcaneConfig.ELEMENT_INTERACTION_STRENGTH.get();
     int bonus = 0;
-    for (InteractionRules.Rule rule : InteractionRules.matching(level, element, target)) bonus += (int) Math.round(rule.freezeAdd() * strength);
+    for (InteractionRules.Rule rule : InteractionRules.matching(level, element, target)) {
+      bonus += (int) Math.round(rule.freezeAdd() * strength);
+      if (rule.freezeAdd() > 0) CastScope.noteReaction(level, rule.id(), rule.nameKey(), target);
+    }
     return bonus;
   }
 

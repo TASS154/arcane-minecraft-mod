@@ -130,6 +130,7 @@ public class ClientSetup {
     event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "mana", new ManaHudOverlay());
     event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "spell_bar", new com.arcane.client.hud.SpellBarOverlay());
     event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "cast_flash", new com.arcane.client.hud.CastFlashOverlay());
+    event.registerBelow(VanillaGuiOverlay.HOTBAR.id(), "vapor", new com.arcane.client.hud.VaporOverlay());
   }
 
   @SubscribeEvent

@@ -27,6 +27,13 @@ public final class DamageMeterEvents {
     }
   }
 
+  /** Reacao em massa (Fase K): os Bonecos no raio anotam (aparece em /arcane dummy report). */
+  public static void massReaction(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, String id) {
+    for (var d : level.getEntitiesOfClass(com.arcane.entity.ArcaneDummyEntity.class, new net.minecraft.world.phys.AABB(at, at).inflate(8))) {
+      reaction(d, id);
+    }
+  }
+
   /** Reacao elemental disparada em {@code target} (chamado pelas interacoes elementais). */
   public static void reaction(Object target, String id) {
     DamageMeter meter = DamageMeter.of(target);

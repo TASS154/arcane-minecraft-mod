@@ -106,6 +106,12 @@ de Treino (`/arcane dummy report` dá os valores exatos em HP). Nenhum número j
 | J | Cacos vivos por mundo | 64 | config `fragmentsPerWorld` | Proteção contra lag; o excesso não nasce | (desempenho) |
 | J | Arco | gravidade 0,05 bloco/tick²; altura 1 a 12 (padrão 4); mira até 48 blocos | `ProjectileMods.ARC_GRAVITY`, glifo `arc` | O orbe cai no ponto mirado; a velocidade do glifo Projétil não vale no Arco | Mire num Boneco atrás de um muro de 3 blocos com altura 4 |
 | J | Custo de mana dos glifos | Perseguir 2, Ricochete 2, Fragmentar 3, Arco 2 | `tools/glyph_table.py` | No padrão de Velocidade (1) e Potência (2) | Mana da última conjuração no letreiro do Boneco |
+| K | Limiar da Nuvem: alvos molhados queimados | 3 no mesmo efeito | `interactions/default.json` (`mass_reactions`) | "Muitos" sem precisar de uma multidão | Três Bonecos molhados (Molhar) e Aura + Fogo: o relatório mostra "vapor_cloud" |
+| K | Limiar da Nuvem: água no raio | 6 blocos de água a até 3 blocos do ponto | idem | Fogo jogado num lago, não numa poça | Projétil + Fogo na beira de um lago |
+| K | Limiar da Nuvem: Chuva + Fogo | 1 (qualquer efeito de fogo na forma Chuva) | idem | Combinação óbvia, sempre dispara | Chuva + Fogo sobre os Bonecos |
+| K | Nuvem: raio, duração | 4 blocos; 15 s (preso entre 10 e 20) | idem | Some antes de virar parede permanente | Cronometre do chiado até sumir |
+| K | Nuvem: dano | 0,25 coração por segundo (0,5 HP) | idem | Leve: a nuvem atrapalha, não mata | Boneco dentro da nuvem: "Média" perto de 0,3 ❤/s |
+| K | Nuvem: limites | 2 por chunk, 16 por mundo, raio máximo 8 na fusão | idem e `ReactionZones.MAX_RADIUS` | Fundir em vez de empilhar | (desempenho) |
 
 ### Modificadores de Projétil (Fase J): dúvidas
 - **Tier e família:** Perseguir, Ricochete e Arco no tier 2 (família força), Fragmentar no tier 3 (força e terra). Entram
@@ -113,6 +119,17 @@ de Treino (`/arcane dummy report` dá os valores exatos em HP). Nenhum número j
 - **Cacos:** saem do ponto de acerto em leque, voam 1,5 s e não acertam a criatura que o orbe atingiu. Não herdam
   Perseguir, Ricochete nem Arco.
 - **Ricochete em criatura:** não quica; o acerto em criatura é o final (e aí Fragmentar parte).
+
+### Reações em massa e Diário (Fase K): dúvidas
+- **"Mesma conjuração":** o limiar é contado por efeito de uma conjuração (Aura + Fogo em 3 molhados = 3 vapores). Dois
+  efeitos de fogo na mesma magia não somam. Confirmar.
+- **Zonas:** a Nuvem não entra na lista de zonas das magias (`Zones`), porque essas contam no limite de 2 zonas por
+  conjurador e a Nuvem apagaria a zona do jogador. Usei um gerenciador próprio com o mesmo padrão de pulso
+  (`ReactionZones`). Decisão pequena, fácil de mudar.
+- **Diário:** salvo no mundo (`arcane_reaction_journal`), por jogador. As reações antigas ganharam ids e nomes
+  (Chuva Carregada, Condução, Vapor, Congelamento Súbito, Estilhaço, Degelo, Chiado, Florada). Os nomes são meus.
+- **Quem descobre:** só quem conjurou a magia que causou a reação. Reação sem conjuração (fogo que já estava queimando)
+  não conta para ninguém.
 
 ### Afinidades (Fase I): dúvidas
 - **Elemento do efeito:** usei o de `effects.json` (por glifo), como pede o adendo. Isso faz Dano e Explosão contarem

@@ -126,10 +126,12 @@ public final class SpellPipeline {
                 // Controle (Petrificar, Sono...) respeita o nivel de cada criatura contra a forca da magia.
                 // Afinidade (Fase I): o dano dentro deste efeito usa o elemento de gameplay dele (effects.json).
                 com.arcane.affinity.AffinityContext.push(SpellElement.ofGlyph(call.glyphId().getPath()));
+                CastScope.push(context, SpellElement.ofGlyph(call.glyphId().getPath()), effective); // Fase K: diario e reacoes em massa
                 try {
                     if (CreatureLevels.isControl(call.glyphId().getPath())) CreatureLevels.apply(context, call, effective, handler);
                     else handler.apply(context, call, effective);
                 } finally {
+                    CastScope.pop();
                     com.arcane.affinity.AffinityContext.pop();
                 }
                 // Sobrecarga: o excesso de forca cobra seu preco (nunca mata: so ate sobrar 1,5 coracao).

@@ -177,6 +177,20 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
     });
   }
 
+  /** Voz da magia (Fase L): o traco da pena soa na nota do glifo (grau pelo id, oitava pela categoria). NAO ouvido. */
+  static void penNote(KnownGlyph glyph) {
+    if (!com.arcane.client.ClientPrefs.voiceEnabled()) return;
+    var kind = switch (glyph.category()) {
+      case "form" -> com.arcane.fx.SpellVoice.Kind.FORM;
+      case "modifier" -> com.arcane.fx.SpellVoice.Kind.MODIFIER;
+      default -> com.arcane.fx.SpellVoice.Kind.EFFECT;
+    };
+    var note = new com.arcane.fx.SpellVoice.Note(com.arcane.fx.SpellVoice.degreeOf(glyph.id().getPath()),
+        com.arcane.fx.SpellVoice.octaveOf(kind), 0, 0.7f, false);
+    net.minecraft.client.Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+        com.arcane.registry.ModSounds.PEN_STROKE.get(), note.pitch(), (float) (0.6 * com.arcane.client.ClientPrefs.voiceVolume())));
+  }
+
   private void move(int dir) {
     if (selected < 0 || selected >= composition.size()) return;
     int target = selected + dir;
@@ -212,6 +226,7 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
       KnownGlyph glyph = glyphAt(mouseX, mouseY);
       if (glyph != null && composition.size() < ClientArcaneData.maxGlyphs()) {
         composition.add(new Slot(glyph.id()));
+        penNote(glyph);
         selected = composition.size() - 1;
         ensureVisible();
         return true;

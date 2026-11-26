@@ -1165,5 +1165,12 @@
   "reaction.arcane.bloom": "Florada",
   "reaction.arcane.bloom.hint": "Veneno em mata e pântano fere mais.",
   "reaction.arcane.vapor_cloud": "Nuvem de Vapor",
-  "reaction.arcane.vapor_cloud.hint": "Muito fogo com muita água de uma vez levanta uma nuvem que cega, molha e queima de leve."
+  "reaction.arcane.vapor_cloud.hint": "Muito fogo com muita água de uma vez levanta uma nuvem que cega, molha e queima de leve.",
+  "gui.arcane.options.voice": "Voz da magia: %s",
+  "gui.arcane.options.voice.tip": "Cada magia toca uma melodia curta dos seus glifos ao ser conjurada (a mesma magia, a mesma melodia).",
+  "gui.arcane.options.voice_volume": "Volume da voz: %s%%",
+  "gui.arcane.options.voice_hover": "Nota ao passar o mouse no grimório: %s",
+  "message.arcane.voice.none": "Nenhuma magia ativa no grimório.",
+  "message.arcane.voice.header": "Voz da magia ativa: família %s, %s notas",
+  "subtitles.arcane.voice": "Magia canta"
 }

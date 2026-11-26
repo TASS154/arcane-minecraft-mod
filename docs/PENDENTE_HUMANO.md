@@ -30,6 +30,10 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
   (`reaction_vapor_1..3.ogg`)? Some em ~15 s? Duas nuvens perto viram uma maior?
 - [ ] **Diário de descobertas (K):** a aba "Descobertas" do Grimório cabe na tela (4 abas agora)? "???" nas que faltam,
   "X de Y reações descobertas" no alto. O aviso "Descoberta: Vapor" acima da barra é discreto o bastante?
+- [ ] **Ouvir a voz da magia (L):** rode `python tools/preview_voice.py` e ouça os 6 WAVs em `tools/out/` (Faísca, Bola de
+  Fogo e a mesma invertida, Gelo em área, Tempestade em ritual, uma magia longa de Vazio). As famílias soam diferentes?
+  A melodia cansa se repetida? Depois, no jogo: conjure a mesma magia várias vezes (sempre a mesma melodia?) e monte uma
+  magia na bancada (cada glifo soa ao entrar). Opções em Arcane > Voz da magia.
 - [ ] **Decidir:** receita do Boneco (placeholder), vida de 40 HP, aparência dos corações (❤ colorido; ½ para o meio;
   "♥×N" acima de 10). Usei o caractere ❤ e não os sprites do jogo (mais simples no letreiro 3D).
 

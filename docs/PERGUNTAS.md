@@ -112,6 +112,8 @@ de Treino (`/arcane dummy report` dá os valores exatos em HP). Nenhum número j
 | K | Nuvem: raio, duração | 4 blocos; 15 s (preso entre 10 e 20) | idem | Some antes de virar parede permanente | Cronometre do chiado até sumir |
 | K | Nuvem: dano | 0,25 coração por segundo (0,5 HP) | idem | Leve: a nuvem atrapalha, não mata | Boneco dentro da nuvem: "Média" perto de 0,3 ❤/s |
 | K | Nuvem: limites | 2 por chunk, 16 por mundo, raio máximo 8 na fusão | idem e `ReactionZones.MAX_RADIUS` | Fundir em vez de empilhar | (desempenho) |
+| L | Magia grande (voz) | custo de mana ≥ 40, ou ritual | `CastingService.BIG_SPELL_MANA` | Só magias caras ganham quinta, oitava e cauda longa | (só som) |
+| L | Ritmo da voz | 3 ticks entre notas; volume padrão 80% | `SpellVoice.STEP_TICKS`, config do cliente `spellVoiceVolume` | 8 notas em 1,2 s: curto o bastante para não cansar | `python tools/preview_voice.py` e ouça `tools/out/` |
 
 ### Modificadores de Projétil (Fase J): dúvidas
 - **Tier e família:** Perseguir, Ricochete e Arco no tier 2 (família força), Fragmentar no tier 3 (força e terra). Entram

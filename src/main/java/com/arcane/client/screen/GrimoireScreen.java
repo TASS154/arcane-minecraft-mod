@@ -44,6 +44,7 @@ public class GrimoireScreen extends Screen {
 
   private enum Tab { SPELLS, GLYPHS, JOURNAL, DISCOVERIES }
   private int discoveryScroll;
+  private ResourceLocation lastHoverNote;
 
   private int left;
   private int top;
@@ -469,6 +470,12 @@ public class GrimoireScreen extends Screen {
   }
 
   private void renderGlyphs(GuiGraphics g, int mouseX, int mouseY) {
+    if (com.arcane.client.ClientPrefs.voiceHover()) {
+      KnownGlyph hover = glyphAt(mouseX, mouseY);
+      ResourceLocation id = hover == null ? null : hover.id();
+      if (id != null && !id.equals(lastHoverNote)) ArcaneWorkbenchScreen.penNote(hover);
+      lastHoverNote = id;
+    }
     List<KnownGlyph> glyphs = ClientArcaneData.glyphs();
     int total = slotCount();
     long identified = glyphs.stream().filter(KnownGlyph::usable).count();

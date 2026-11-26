@@ -368,5 +368,89 @@
       "arcane:element/reaction_vapor_2",
       "arcane:element/reaction_vapor_3"
     ]
+  },
+  "voice.arcane": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/arcane"
+    ]
+  },
+  "voice.arcane.long": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/arcane_long"
+    ]
+  },
+  "voice.fire": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/fire"
+    ]
+  },
+  "voice.fire.long": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/fire_long"
+    ]
+  },
+  "voice.frost": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/frost"
+    ]
+  },
+  "voice.frost.long": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/frost_long"
+    ]
+  },
+  "voice.storm": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/storm"
+    ]
+  },
+  "voice.storm.long": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/storm_long"
+    ]
+  },
+  "voice.life": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/life"
+    ]
+  },
+  "voice.life.long": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/life_long"
+    ]
+  },
+  "voice.earth": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/earth"
+    ]
+  },
+  "voice.earth.long": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/earth_long"
+    ]
+  },
+  "voice.void": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/void"
+    ]
+  },
+  "voice.void.long": {
+    "subtitle": "subtitles.arcane.voice",
+    "sounds": [
+      "arcane:voice/void_long"
+    ]
   }
 }

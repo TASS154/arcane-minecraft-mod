@@ -131,7 +131,7 @@ public final class CastingService {
             if (!silent) {
                 PlayerAnims.onCast(player, plan);
                 ModNetwork.sendToPlayer(player, new S2CSpellFxPacket(inscription.id(), plan.fingerprint(), SpellElement.of(plan).ordinal()));
-                if (!Traces.stealthy(inscription)) castFx((ServerLevel) player.level(), player, SpellElement.of(plan), inscription);
+                if (!Traces.stealthy(inscription)) castFx((ServerLevel) player.level(), player, SpellElement.of(plan), inscription, false);
             }
         }
         return new ExecutionResult(result.success(), result.message(), manaCost);
@@ -178,7 +178,7 @@ public final class CastingService {
         context.setRitualLevel(bonus.level());
         if (bonus.radius() > 0 && bonus.center() != null) context.setRitual(bonus.radius(), bonus.center());
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
-        if (result.success() && !Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()), inscription);
+        if (result.success() && !Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()), inscription, true);
         return result;
     }
 
@@ -224,7 +224,7 @@ public final class CastingService {
         ExecutionResult result = SpellPipeline.INSTANCE.execute(context);
         if (result.success()) {
             Vows.pay(caster, inscription);
-            if (!Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()), inscription);
+            if (!Traces.stealthy(inscription)) castFx(level, caster, SpellElement.of(context.plan()), inscription, false);
         }
         return result;
     }
@@ -249,13 +249,40 @@ public final class CastingService {
      * Conjuracao: circulo de runas (pacote de forma), som do mod, espiral e faiscas do elemento ({@link com.arcane.fx.Fx}).
      * O glifo Cor troca a cor do circulo e das particulas.
      */
-    private static void castFx(ServerLevel level, LivingEntity caster, SpellElement element, Inscription inscription) {
+    /** Ultima voz de cada jogador (Fase L): no maximo 1 a cada 0,5 s; fora disso, so o som simples. */
+    private static final java.util.Map<java.util.UUID, Long> LAST_VOICE = new java.util.HashMap<>();
+    public static final int VOICE_GAP_TICKS = 10;
+
+    /** A voz pode tocar agora para este conjurador? (registra se sim) */
+    public static boolean voiceAllowed(java.util.UUID caster, long now) {
+        Long last = LAST_VOICE.get(caster);
+        if (last != null && now - last < VOICE_GAP_TICKS && now >= last) return false;
+        LAST_VOICE.put(caster, now);
+        if (LAST_VOICE.size() > 512) LAST_VOICE.clear();
+        return true;
+    }
+
+    /** Voz da magia: as notas da inscricao, para o pacote de efeito. Rituais e magias grandes ganham o floreio. */
+    public static S2CShapeFxPacket.Voice voiceFor(Inscription inscription, SpellElement element, boolean big) {
+        java.util.List<String> ids = new java.util.ArrayList<>();
+        for (var g : inscription.glyphs()) ids.add(g.glyphId().getPath());
+        boolean grand = big || CompiledPlanCache.getOrCompile(inscription).baseManaCost() >= BIG_SPELL_MANA;
+        var notes = com.arcane.fx.SpellVoice.compose(ids, element, 1.0, grand);
+        int family = com.arcane.fx.SpellVoice.FAMILIES.indexOf(com.arcane.fx.SpellVoice.family(element));
+        return new S2CShapeFxPacket.Voice(Math.max(0, family), com.arcane.fx.SpellVoice.pack(notes), 1f, 0, -1);
+    }
+
+    /** Custo a partir do qual a magia conta como grande para a voz (PROVISORIO, docs/PERGUNTAS.md). */
+    public static final double BIG_SPELL_MANA = 40.0;
+
+    private static void castFx(ServerLevel level, LivingEntity caster, SpellElement element, Inscription inscription, boolean big) {
         int color = spellColor(inscription, element);
         int override = color == element.color() ? -1 : color;
         level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
                 com.arcane.registry.ModSounds.SPELL_CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS,
                 0.8f, 0.9f + caster.getRandom().nextFloat() * 0.2f);
-        ModNetwork.sendShape(level, S2CShapeFxPacket.CAST, caster.position(), net.minecraft.world.phys.Vec3.ZERO, 1.5f, color, element.ordinal(), 16);
+        S2CShapeFxPacket.Voice voice = voiceAllowed(caster.getUUID(), level.getGameTime()) ? voiceFor(inscription, element, big) : null;
+        ModNetwork.sendShape(level, S2CShapeFxPacket.CAST, caster.position(), net.minecraft.world.phys.Vec3.ZERO, 1.5f, color, element.ordinal(), 16, voice);
         com.arcane.fx.Fx.cast(level, caster, element, 1f, override);
         var hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.7)).add(0, -0.3, 0);
         com.arcane.fx.Fx.burst(level, caster, hand, element, com.arcane.fx.Fx.Role.IMPACT, 6, 0.1, 0.06, 0.7f, override);

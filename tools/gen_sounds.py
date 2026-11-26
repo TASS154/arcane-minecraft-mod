@@ -443,9 +443,60 @@ def reactions_only_main(kinds):
     sounds_json.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
+# ================================================================== voz da magia (Fase L)
+# Uma amostra sustentada por familia, em Do4 (~261,6 Hz): o jogo muda o tom de 0,5 a 2,0 para tocar cada nota.
+# "_long" e a mesma com cauda longa (rituais e magias grandes). NAO ouvido em jogo.
+VOICE_BASE_HZ = 261.63
+VOICE_RECIPES = {
+    # (harmonicos (multiplo, peso), vibrato Hz, ruido de sopro, brilho do ataque)
+    "arcane": ([(1, 1.0), (2, 0.35), (3, 0.18), (5, 0.08)], 5.0, 0.02, 0.6),   # sino suave
+    "fire": ([(1, 1.0), (2, 0.6), (3, 0.45), (4, 0.3), (5, 0.2)], 6.0, 0.05, 0.4),  # quente, quase serra
+    "frost": ([(1, 1.0), (2.76, 0.4), (5.4, 0.2)], 3.0, 0.01, 0.9),            # vidro (parciais inarmonicos)
+    "storm": ([(1, 1.0), (3, 0.5), (5, 0.35), (7, 0.2)], 9.0, 0.04, 0.7),      # zumbido de onda quadrada
+    "life": ([(1, 1.0), (2, 0.25)], 4.5, 0.06, 0.2),                           # flauta
+    "earth": ([(0.5, 0.5), (1, 1.0), (2, 0.4)], 2.0, 0.03, 0.3),               # grave e encorpado
+    "void": ([(1, 1.0), (1.5, 0.3), (2.01, 0.25)], 1.5, 0.08, 0.1),            # escuro, batimento lento
+}
+
+
+def voice_sample(family, long=False):
+    harm, vib, breath, bright = VOICE_RECIPES[family]
+    dur = 3.2 if long else 1.3
+    tt = t(dur)
+    n = len(tt)
+    r = np.random.default_rng(777 + list(VOICE_RECIPES).index(family))
+    phase = 2 * np.pi * VOICE_BASE_HZ * (tt + 0.0025 * np.sin(2 * np.pi * vib * tt) / (2 * np.pi * vib))
+    x = np.zeros(n)
+    for mult, w in harm:
+        x += w * np.sin(phase * mult) * np.exp(-tt * (0.6 + mult * 0.4))
+    x += lowpass(r.normal(0, 1, n), 0.2) * breath
+    x += np.sin(phase * 4) * np.exp(-tt * 30) * bright * 0.3
+    e = env(n, 0.02, 1.8 if long else 0.6)
+    out = x * e
+    return reverb(out, decay=0.55 if long else 0.35)
+
+
+def voice_main():
+    import json
+    sounds_json = OUT.parent / "sounds.json"
+    data = json.loads(sounds_json.read_text(encoding="utf-8"))
+    vdir = OUT / "voice"
+    vdir.mkdir(parents=True, exist_ok=True)
+    for family in VOICE_RECIPES:
+        for long in (False, True):
+            x = norm(voice_sample(family, long).astype(np.float64), peak=0.7).astype(np.float32)
+            name = f"{family}_long" if long else family
+            sf.write(vdir / f"{name}.ogg", x, SR, format="OGG", subtype="VORBIS")
+            data[f"voice.{family}" + (".long" if long else "")] = {"subtitle": "subtitles.arcane.voice", "sounds": [f"arcane:voice/{name}"]}
+            print(f"   voice/{name}.ogg  ({len(x) / SR:.2f}s)")
+    sounds_json.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
 if __name__ == "__main__":
     import sys as _sys
-    if "--reaction" in _sys.argv:  # so um som de reacao (ex.: --reaction vapor)
+    if "--voice" in _sys.argv:  # so as amostras da voz da magia
+        voice_main()
+    elif "--reaction" in _sys.argv:  # so um som de reacao (ex.: --reaction vapor)
         reactions_only_main(_sys.argv[_sys.argv.index("--reaction") + 1:])
     elif "--elements" in _sys.argv:  # so os sons de elemento e das reacoes
         element_sounds_main()

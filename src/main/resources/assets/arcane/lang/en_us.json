@@ -1165,5 +1165,12 @@
   "reaction.arcane.bloom": "Bloom",
   "reaction.arcane.bloom.hint": "Venom in forests and swamps hurts more.",
   "reaction.arcane.vapor_cloud": "Vapor Cloud",
-  "reaction.arcane.vapor_cloud.hint": "Lots of fire meeting lots of water at once raises a cloud that blinds, soaks and burns lightly."
+  "reaction.arcane.vapor_cloud.hint": "Lots of fire meeting lots of water at once raises a cloud that blinds, soaks and burns lightly.",
+  "gui.arcane.options.voice": "Spell voice: %s",
+  "gui.arcane.options.voice.tip": "Each spell plays a short melody of its glyphs when cast (same spell, same melody).",
+  "gui.arcane.options.voice_volume": "Voice volume: %s%%",
+  "gui.arcane.options.voice_hover": "Note on grimoire hover: %s",
+  "message.arcane.voice.none": "No active spell in the grimoire.",
+  "message.arcane.voice.header": "Active spell voice: family %s, %s notes",
+  "subtitles.arcane.voice": "Spell sings"
 }

@@ -15,6 +15,9 @@ public final class ClientPrefs {
   public static final ForgeConfigSpec.BooleanValue LATCH_KEYS;
   public static final ForgeConfigSpec.BooleanValue COLORBLIND;
   public static final ForgeConfigSpec.BooleanValue REDUCE_FLASHES;
+  public static final ForgeConfigSpec.BooleanValue VOICE;
+  public static final ForgeConfigSpec.DoubleValue VOICE_VOLUME;
+  public static final ForgeConfigSpec.BooleanValue VOICE_HOVER;
 
   static {
     ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -24,6 +27,9 @@ public final class ClientPrefs {
         .define("toggleInsteadOfHold", false);
     COLORBLIND = b.comment("Accessibility: colour-blind friendly palette (blue/orange/yellow) plus letters on glyph categories").define("colorblind", false);
     REDUCE_FLASHES = b.comment("Accessibility: weaker and shorter screen flashes when casting").define("reduceFlashes", false);
+    VOICE = b.comment("Spell voice: each spell plays a short melody of its glyphs when cast").define("spellVoice", true);
+    VOICE_VOLUME = b.comment("Spell voice volume (0 to 1)").defineInRange("spellVoiceVolume", 0.8, 0.0, 1.0);
+    VOICE_HOVER = b.comment("Play a glyph's note when hovering it in the grimoire").define("spellVoiceHover", false);
     SPEC = b.build();
   }
 
@@ -36,6 +42,19 @@ public final class ClientPrefs {
   public static boolean colorblind() { return COLORBLIND.get(); }
 
   public static boolean reduceFlashes() { return REDUCE_FLASHES.get(); }
+
+  public static boolean voiceEnabled() { return VOICE.get(); }
+
+  public static double voiceVolume() { return VOICE_VOLUME.get(); }
+
+  public static boolean voiceHover() { return VOICE_HOVER.get(); }
+
+  /** Volume da voz em passos de 25% (0 volta ao 100%). */
+  public static void cycleVoiceVolume() {
+    double v = Math.round(voiceVolume() * 4) / 4.0 - 0.25;
+    VOICE_VOLUME.set(v < -0.01 ? 1.0 : Math.max(0.0, v));
+    SPEC.save();
+  }
 
   public static void cycleMode() {
     UseMode[] all = UseMode.values();

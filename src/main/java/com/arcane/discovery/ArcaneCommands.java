@@ -54,6 +54,30 @@ public class ArcaneCommands {
                   ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.guest.list", set.size(), String.join(", ", names)), false);
                   return set.size();
                 })))
+        .then(Commands.literal("voice")
+            .then(Commands.literal("debug").executes(ctx -> {
+              ServerPlayer player = ctx.getSource().getPlayerOrException();
+              var spell = com.arcane.grimoire.GrimoireAttachments.get(player).flatMap(g -> g.activeInscriptionId().flatMap(g::getInscription));
+              if (spell.isEmpty()) {
+                ctx.getSource().sendFailure(Component.translatable("message.arcane.voice.none"));
+                return 0;
+              }
+              var inscription = spell.get();
+              var plan = com.arcane.inscription.CompiledPlanCache.getOrCompile(inscription);
+              var element = com.arcane.execution.SpellElement.of(plan);
+              var voice = com.arcane.execution.CastingService.voiceFor(inscription, element, false);
+              var notes = com.arcane.fx.SpellVoice.unpack(voice.notes());
+              ctx.getSource().sendSuccess(() -> Component.translatable("message.arcane.voice.header",
+                  com.arcane.fx.SpellVoice.family(element), notes.size()), false);
+              StringBuilder b = new StringBuilder();
+              for (var n : notes) {
+                b.append(String.format(java.util.Locale.ROOT, "[grau %d, oitava %d, +%dt, tom %.3f, vol %.2f%s] ",
+                    n.degree(), n.octave(), n.delay(), n.pitch(), n.volume(), n.longTail() ? ", cauda" : ""));
+              }
+              String text = b.toString();
+              ctx.getSource().sendSuccess(() -> Component.literal(text), false);
+              return notes.size();
+            })))
         .then(Commands.literal("dummy")
             .then(Commands.literal("report").executes(ctx -> {
               var src = ctx.getSource();

@@ -104,6 +104,13 @@ Adendo de 25 nov (prompt 2): fases H a N, nesta ordem. Números novos: `docs/PER
   `worldAlteringSpells`. Véu na tela só para quem está dentro (mais fraco com "reduzir clarões") e chiado novo
   (`reaction_vapor_*.ogg`), NÃO vistos nem ouvidos. Diário de descobertas por jogador (salvo no mundo), aba
   "Descobertas" no Grimório com "???" e "X de Y", aviso discreto e o som de glifo aprendido mais agudo. 287/287 (o teste da nuvem com 3 molhados falhou em 2 de 4 rodadas antes de esperar a conjuração; passou nas 2 últimas: vigiar).
+- **L (voz da magia), 26 nov: feita.** `SpellVoice.compose` é pura e determinística (FNV-1a do id escolhe o grau da
+  pentatônica, a categoria escolhe a oitava, no máximo 8 notas guardando a primeira, a última e as mais caras, tom
+  entre 0,5 e 2,0). O servidor compõe e manda as notas num campo compacto do pacote de efeito de conjuração; o cliente
+  toca por uma fila por tick (`VoicePlayer`), com uma amostra sustentada por família (7, em `sounds/voice/`). Rituais e
+  magias grandes ganham quinta, oitava e cauda longa. Uma voz por jogador a cada 0,5 s. Opções: ligar/desligar, volume,
+  nota ao passar o mouse no grimório (desligada). A pena da bancada soa na nota do glifo. `/arcane voice debug` e
+  `tools/preview_voice.py` (WAVs em `tools/out/`). NÃO ouvido. 289/289.
 
 - **E (manutenção), 25 nov: feita.** GameTests divididos por área (`GameTestSupport` + 8 classes); poderes, fases e
   morte da Hidra em `HydraPowers`, `HydraPhases`, `HydraDeath`. 267/267.

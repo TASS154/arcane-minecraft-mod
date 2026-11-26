@@ -25,7 +25,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-  private static final String PROTOCOL = "9";
+  private static final String PROTOCOL = "10";
   public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       new ResourceLocation(ArcaneMod.MODID, "main"),
       () -> PROTOCOL,
@@ -151,6 +151,14 @@ public final class ModNetwork {
   }
 
   /** Efeito de forma/impacto/ritual visivel num raio de 96 blocos. */
+  /** Efeito de forma com o campo da voz (Fase L). */
+  public static void sendShape(net.minecraft.server.level.ServerLevel level, int type, net.minecraft.world.phys.Vec3 pos,
+                               net.minecraft.world.phys.Vec3 dir, float size, int rgb, int element, int ticks,
+                               com.arcane.network.packet.S2CShapeFxPacket.Voice voice) {
+    CHANNEL.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(pos.x, pos.y, pos.z, 96.0, level.dimension())),
+        new com.arcane.network.packet.S2CShapeFxPacket(type, pos, dir, size, rgb, element, ticks, voice));
+  }
+
   public static void sendShape(net.minecraft.server.level.ServerLevel level, int type, net.minecraft.world.phys.Vec3 pos,
                                net.minecraft.world.phys.Vec3 dir, float size, int rgb, int element, int ticks) {
     CHANNEL.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(pos.x, pos.y, pos.z, 96.0, level.dimension())),

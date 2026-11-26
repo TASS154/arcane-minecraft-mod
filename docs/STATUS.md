@@ -87,6 +87,10 @@ Adendo de 25 nov (prompt 2): fases H a N, nesta ordem. Números novos: `docs/PER
   dano), letreiro em corações (barra, último golpe, média por segundo, tags de estado, mana da última conjuração),
   armadura e perfil de afinidade por clique, `/arcane dummy report` em HP exato. `DamageMeter` é o mesmo medidor da
   simulação de balanço. NÃO visto em jogo. 272/272.
+- **I (afinidades elementais), 25 nov: feita.** `data/arcane/affinities/*.json` (6 perfis conservadores, provisórios),
+  datapack sobrescreve por id, JSON inválido só gera aviso. O dano dentro de um efeito usa o elemento de gameplay dele
+  (`effects.json`), uma vez por golpe, com teto `affinityMaxTotal` junto das reações. Retorno: anel maior e tom agudo na
+  fraqueza, tom abafado na resistência (NÃO visto nem ouvido). Hidra sem perfil (inalterada). 276/276.
 
 - **E (manutenção), 25 nov: feita.** GameTests divididos por área (`GameTestSupport` + 8 classes); poderes, fases e
   morte da Hidra em `HydraPowers`, `HydraPhases`, `HydraDeath`. 267/267.

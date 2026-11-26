@@ -1124,5 +1124,11 @@
   "message.arcane.dummy.none": "Nenhum Boneco de Treino a até 16 blocos.",
   "message.arcane.dummy.report": "Boneco: vida %s/%s HP · %s golpes · total %s HP · último %s HP · %s HP/s (5 s) · mana da última conjuração: %s · armadura: %s · perfil: %s",
   "message.arcane.dummy.reactions": "Reações: %s",
-  "message.arcane.dummy.hit": "  %s ticks atrás: %s HP (%s)"
+  "message.arcane.dummy.hit": "  %s ticks atrás: %s HP (%s)",
+  "affinity.arcane.fire_creatures": "Criaturas de fogo",
+  "affinity.arcane.frost_creatures": "Criaturas do gelo",
+  "affinity.arcane.aquatic": "Aquáticos",
+  "affinity.arcane.undead": "Mortos-vivos",
+  "affinity.arcane.arthropods": "Artrópodes",
+  "affinity.arcane.end_creatures": "Criaturas do End"
 }

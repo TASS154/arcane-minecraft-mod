@@ -1124,5 +1124,11 @@
   "message.arcane.dummy.none": "No Training Dummy within 16 blocks.",
   "message.arcane.dummy.report": "Dummy: health %s/%s HP · %s hits · total %s HP · last %s HP · %s HP/s (5 s) · last cast mana: %s · armor: %s · profile: %s",
   "message.arcane.dummy.reactions": "Reactions: %s",
-  "message.arcane.dummy.hit": "  %s ticks ago: %s HP (%s)"
+  "message.arcane.dummy.hit": "  %s ticks ago: %s HP (%s)",
+  "affinity.arcane.fire_creatures": "Fire creatures",
+  "affinity.arcane.frost_creatures": "Frost creatures",
+  "affinity.arcane.aquatic": "Aquatic",
+  "affinity.arcane.undead": "Undead",
+  "affinity.arcane.arthropods": "Arthropods",
+  "affinity.arcane.end_creatures": "End creatures"
 }

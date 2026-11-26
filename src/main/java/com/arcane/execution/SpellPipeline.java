@@ -124,8 +124,14 @@ public final class SpellPipeline {
                     effective = new TargetList(targets.entities().stream().filter(e -> e != context.caster()).toList(), targets.blocks(), targets.points());
                 }
                 // Controle (Petrificar, Sono...) respeita o nivel de cada criatura contra a forca da magia.
-                if (CreatureLevels.isControl(call.glyphId().getPath())) CreatureLevels.apply(context, call, effective, handler);
-                else handler.apply(context, call, effective);
+                // Afinidade (Fase I): o dano dentro deste efeito usa o elemento de gameplay dele (effects.json).
+                com.arcane.affinity.AffinityContext.push(SpellElement.ofGlyph(call.glyphId().getPath()));
+                try {
+                    if (CreatureLevels.isControl(call.glyphId().getPath())) CreatureLevels.apply(context, call, effective, handler);
+                    else handler.apply(context, call, effective);
+                } finally {
+                    com.arcane.affinity.AffinityContext.pop();
+                }
                 // Sobrecarga: o excesso de forca cobra seu preco (nunca mata: so ate sobrar 1,5 coracao).
                 if (call.parameters().getOrDefault("overcharge", 0.0) > 0.0 && context.caster().getHealth() > 3.0f) {
                     context.caster().hurt(context.level().damageSources().magic(), 2.0f);

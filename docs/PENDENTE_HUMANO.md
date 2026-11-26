@@ -20,6 +20,8 @@ Cada item diz como ver. Marque `[x]` quando conferir e escreva o que achou ao la
   coloque-o e conjure nele. O letreiro sobre a cabeça é legível de dia e de noite? Barra de 10 corações, "Último:" com
   ❤ e ½, "Média: X ❤/s", tags (Molhado, Queimando...), "Mana: N". Clique de mão vazia troca a armadura (ferro, diamante,
   netherita); agachado + clique troca o perfil; agachado + soco recolhe. `/arcane dummy report` bate com o que você viu?
+- [ ] **Afinidades (I):** no Boneco, perfil "Criaturas de fogo" e magia de gelo com dano: anel de impacto maior e som
+  mais agudo? Com fogo: som abafado e nenhum dano? Sem texto no chat. **Decidir** a tabela (`data/arcane/affinities/`).
 - [ ] **Decidir:** receita do Boneco (placeholder), vida de 40 HP, aparência dos corações (❤ colorido; ½ para o meio;
   "♥×N" acima de 10). Usei o caractere ❤ e não os sprites do jogo (mais simples no letreiro 3D).
 

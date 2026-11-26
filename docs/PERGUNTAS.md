@@ -90,4 +90,18 @@ de Treino (`/arcane dummy report` dá os valores exatos em HP). Nenhum número j
 |---|---|---|---|---|---|
 | H | Vida do Boneco | 40 HP (20 corações) | `ArcaneDummyEntity.MAX_HEALTH` | Barra legível de 10 corações (cada um = 4 HP); o Boneco nunca morre, então a vida só define a escala da barra | Bata até a barra esvaziar: ela para em 1 HP e o relatório soma o dano inteiro |
 | H | Volta ao máximo | 5 s sem dano | `ArcaneDummyEntity.RESET_TICKS` (pedido do adendo) | Fecha a "sessão" de medida | Pare de bater; em 5 s a barra enche e a sessão fecha |
+| I | Teto afinidade × reação | 2,0 | config `affinityMaxTotal` | Fraqueza + reação não passam do dobro | Perfil com fraqueza num alvo molhado (Tempestade): o relatório mostra no máximo 2x o dano escrito |
+| I | Criaturas de fogo | imune a fogo; gelo e água ×1,5 | `affinities/fire_creatures.json` | Imunidade só no óbvio (blaze, ghast, magma cube, strider) | Perfil "Criaturas de fogo" no Boneco, conjure Congelar com dano e compare com "Neutro" |
+| I | Criaturas do gelo | gelo ×0,5; fogo ×1,5 | `affinities/frost_creatures.json` | Stray, golem de neve, urso-polar | Idem com o perfil do gelo |
+| I | Aquáticos | tempestade ×1,5; fogo ×0,75; água ×0,5 | `affinities/aquatic.json` | Peixes, afogados, guardiões | Idem |
+| I | Mortos-vivos | luz ×1,5; sombra ×0,75; veneno ×0,5 | `affinities/undead.json` | Zumbis, esqueletos (tag), fantasma | Idem |
+| I | Artrópodes | veneno ×0,75; fogo ×1,25 | `affinities/arthropods.json` | Aranhas, traça, abelha | Idem |
+| I | Criaturas do End | vazio ×0,5; água ×1,5 | `affinities/end_creatures.json` | Enderman, shulker | Idem |
 | H | Receita do Boneco | fardo de feno + 4 gravetos (" H ", "SSS", " S ") | `tools/gen_data.py` | Barata e simples, placeholder | (decisão de design) |
+
+### Afinidades (Fase I): dúvidas
+- **Elemento do efeito:** usei o de `effects.json` (por glifo), como pede o adendo. Isso faz Dano e Explosão contarem
+  como arcano e fogo; o Fogo (que só acende) não fere dentro do efeito, então a imunidade só pega o que fere na hora.
+  Queimar e veneno que vêm depois não passam pela afinidade. Confirmar.
+- **Teto:** só limita bônus (fraqueza); se a reação sozinha já passa do teto, a afinidade fica neutra e a reação fica
+  como era (não mexi em número existente).

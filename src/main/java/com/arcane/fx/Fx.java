@@ -151,6 +151,22 @@ public final class Fx {
     }
   }
 
+  /**
+   * Retorno da afinidade (Fase I), sem texto no chat: fraqueza explorada = anel de impacto maior e tom mais agudo;
+   * resistencia ou imunidade = tom abafado (mais baixo e mais grave).
+   */
+  public static void affinity(ServerLevel level, Entity target, SpellElement e, double multiplier) {
+    Vec3 at = target.position().add(0, target.getBbHeight() * 0.5, 0);
+    var v = e.visual();
+    ResourceLocation impact = ResourceLocation.tryParse(v.impactSound());
+    if (multiplier > 1.0) {
+      ring(level, null, at, 0.9 + 0.6 * Math.min(2.0, multiplier - 1.0) + target.getBbWidth(), e, Role.IMPACT, 9.0);
+      if (impact != null) sound(level, at, impact, 0.8f, 1.55f);
+    } else if (impact != null) {
+      sound(level, at, impact, multiplier <= 0 ? 0.3f : 0.4f, 0.55f);
+    }
+  }
+
   // ------------------------------------------------------------------ composicao (conjuracao e impacto)
   /** Conjuracao: espiral e faiscas do elemento 1 em volta de quem conjura, e o som de conjuracao. */
   public static void cast(ServerLevel level, Entity caster, SpellElement body, float power) {

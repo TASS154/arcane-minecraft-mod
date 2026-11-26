@@ -1,0 +1,16 @@
+{
+  "_doc": "PROVISORIO (docs/PERGUNTAS.md, Numeros provisorios). Multiplicador por elemento de GAMEPLAY do efeito (data/arcane/elements/effects.json); 'immune' zera o dano. Sobrescreva com um arquivo de mesmo id num datapack.",
+  "entities": [
+    "minecraft:blaze",
+    "minecraft:magma_cube",
+    "minecraft:ghast",
+    "minecraft:strider"
+  ],
+  "immune": [
+    "fire"
+  ],
+  "multipliers": {
+    "frost": 1.5,
+    "water": 1.5
+  }
+}

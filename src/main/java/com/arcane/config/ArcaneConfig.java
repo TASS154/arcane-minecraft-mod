@@ -4,6 +4,8 @@ import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ArcaneConfig {
   public static final ForgeConfigSpec SPEC;
+  public static final ForgeConfigSpec.BooleanValue AFFINITIES_ENABLED;
+  public static final ForgeConfigSpec.DoubleValue AFFINITY_MAX_TOTAL;
   public static final ForgeConfigSpec.DoubleValue MAX_AMBIENT_POTENCY;
   public static final ForgeConfigSpec.IntValue MAX_RITUAL_SIZE;
   public static final ForgeConfigSpec.IntValue MAX_GLYPHS;
@@ -176,6 +178,10 @@ public class ArcaneConfig {
         .defineInRange("spellMaxDepth", 8, 2, 64);
     SPELL_MAX_EXECUTIONS_PER_TICK = builder.comment("Spell segments the whole server may run per tick; the rest of that tick is dropped (protects against feedback loops)")
         .defineInRange("spellMaxExecutionsPerTick", 512, 32, 100000);
+    AFFINITIES_ENABLED = builder.comment("Creatures have elemental affinities (data/arcane/affinities/*.json): weaknesses, resistances and immunities to the element of the effect that hurts them")
+        .define("affinitiesEnabled", true);
+    AFFINITY_MAX_TOTAL = builder.comment("Ceiling of affinity x element reaction bonus on one hit (2 = at most double damage from both together). Only limits bonuses (PROVISIONAL)")
+        .defineInRange("affinityMaxTotal", 2.0, 1.0, 10.0);
     SPEC = builder.build();
   }
 }

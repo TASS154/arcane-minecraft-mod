@@ -1,0 +1,14 @@
+{
+  "_doc": "PROVISORIO (docs/PERGUNTAS.md, Numeros provisorios). Multiplicador por elemento de GAMEPLAY do efeito (data/arcane/elements/effects.json); 'immune' zera o dano. Sobrescreva com um arquivo de mesmo id num datapack.",
+  "entities": [
+    "minecraft:spider",
+    "minecraft:cave_spider",
+    "minecraft:silverfish",
+    "minecraft:endermite",
+    "minecraft:bee"
+  ],
+  "multipliers": {
+    "venom": 0.75,
+    "fire": 1.25
+  }
+}

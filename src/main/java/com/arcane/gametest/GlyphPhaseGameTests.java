@@ -689,7 +689,8 @@ public class GlyphPhaseGameTests extends GameTestSupport {
   public static void acidIgnoresArmorAndCorrodesIt(GameTestHelper h) {
     floor(h);
     Pig caster = pig(h, 3, 1);
-    var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+    // Vindicador: sem perfil de afinidade (o zumbi e morto-vivo e resiste a veneno desde a Fase I; o teste e de armadura)
+    var zombie = h.spawnWithNoFreeWill(EntityType.VINDICATOR, new BlockPos(3, 1, 3));
     var plate = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_CHESTPLATE);
     zombie.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, plate);
     float before = zombie.getHealth();

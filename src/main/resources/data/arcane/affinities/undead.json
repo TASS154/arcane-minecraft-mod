@@ -1,0 +1,19 @@
+{
+  "_doc": "PROVISORIO (docs/PERGUNTAS.md, Numeros provisorios). Multiplicador por elemento de GAMEPLAY do efeito (data/arcane/elements/effects.json); 'immune' zera o dano. Sobrescreva com um arquivo de mesmo id num datapack.",
+  "entities": [
+    "minecraft:zombie",
+    "minecraft:husk",
+    "minecraft:zombie_villager",
+    "minecraft:phantom",
+    "minecraft:zoglin",
+    "minecraft:zombified_piglin"
+  ],
+  "tags": [
+    "minecraft:skeletons"
+  ],
+  "multipliers": {
+    "light": 1.5,
+    "shadow": 0.75,
+    "venom": 0.5
+  }
+}

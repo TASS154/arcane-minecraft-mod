@@ -81,7 +81,7 @@ public class ArcaneDummyRenderer extends HumanoidMobRenderer<ArcaneDummyEntity, 
     if (d.syncedMana() >= 0) out.add(Component.translatable("gui.arcane.dummy.mana", d.syncedMana()).withStyle(ChatFormatting.AQUA));
     String profile = d.affinityProfile();
     out.add(Component.translatable("gui.arcane.dummy.armor." + ArcaneDummyEntity.ARMOR_NAMES[Math.floorMod(d.armorTier(), 4)])
-        .append(" · ").append(profile.isEmpty() ? Component.translatable("affinity.arcane.neutral") : Component.translatable("affinity." + profile.replace(':', '.')))
+        .append(" · ").append(profile.isEmpty() ? Component.translatable("affinity.arcane.neutral") : Component.translatableWithFallback("affinity." + profile.replace(':', '.'), profile))
         .withStyle(ChatFormatting.DARK_GRAY));
     return out;
   }

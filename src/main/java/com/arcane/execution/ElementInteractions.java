@@ -23,7 +23,9 @@ public final class ElementInteractions {
     double strength = ArcaneConfig.ELEMENT_INTERACTION_STRENGTH.get();
     double m = 1.0;
     for (InteractionRules.Rule rule : InteractionRules.matching(level, element, target)) m += rule.damageAdd() * strength;
-    return Math.max(0.1, m);
+    m = Math.max(0.1, m);
+    com.arcane.affinity.AffinityContext.noteReaction(target, m); // teto da afinidade acumulada (Fase I)
+    return m;
   }
 
   /** Efeitos colaterais depois de acertar (hoje: gelo apaga o fogo do alvo). */

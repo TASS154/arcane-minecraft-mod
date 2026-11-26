@@ -57,7 +57,7 @@ public class ArcaneDummyEntity extends Mob {
   public static final String[] ARMOR_NAMES = {"none", "iron", "diamond", "netherite"};
 
   /** Perfis de afinidade na ordem do clique agachado ("" = neutro). A Fase I liga a tabela de afinidades aqui. */
-  public static Supplier<List<String>> PROFILES = () -> List.of("");
+  public static Supplier<List<String>> PROFILES = com.arcane.affinity.Affinities::dummyCycle;
 
   private DamageMeter meter;
 

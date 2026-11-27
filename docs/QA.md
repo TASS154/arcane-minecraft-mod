@@ -347,3 +347,107 @@ Não incomoda. **Aprovado.**
 **Aprovados (serão aplicados no domingo):** Corte B com escala pela vida restante; Chuva com centro do topo e nuvem que desce; Hidra opção C com portão do Guardião e selos destrutíveis depois da onda; cratera sem fila; cratera de recálculo em segundo plano; Carinho só com corações; Flutuar como voo; Eletrificar e Condutor separados; Reanimar e Encantar temporário; Sobrecarga; Bolso e Coro; Lendário com raio 16; grimório inicial com Faísca e regras de dono; custo exponencial; Hidra vermelha; zona disparando mesmo com mundo fechado; tags de estado (menos o item 4).
 
 **Para ver em jogo (não é decisão):** Petrificar não vira pedra visualmente; o letreiro do grimório brilhando nas duas cores; a regra de sinergia quando estiver pronta.
+
+---
+
+## Rodada 3 (27 nov): respostas e esboços
+
+Continua valendo o congelamento: nada disto foi aplicado ao código. Só design.
+
+### 1. Sinergias do estilo: prós e contras (ainda sem decisão)
+
+Pares possíveis: 16 elementos → **120 pares** (sem contar o elemento consigo mesmo, que seria o bônus do dominante).
+
+**A. Regra geradora** (família de efeito × par, com tabela só para exceções)
+- Prós:
+  - Cobre os 120 pares de uma vez, com coerência entre eles.
+  - Equilibrar é mudar a regra em um lugar, não 120 entradas.
+  - Adicionar um elemento novo gera automaticamente os pares novos.
+  - Cabe em config/JSON, como o resto dos números provisórios.
+- Contras:
+  - Pares da mesma família ficam parecidos (dois elementos de "dano em área" soam iguais), o que briga com "cada um diferente".
+  - Para a sinergia ser realmente única, a família e o par precisam se combinar de forma que nenhum par repita o mesmo texto e o mesmo efeito. Isso é verificável por teste, mas exige cuidado no desenho.
+  - Erros de geração são menos óbvios que um JSON escrito à mão.
+
+**B. Escrever os 120 à mão**
+- Prós:
+  - Cada combinação pode ter identidade própria, com a melhor ideia de cada par.
+  - Fácil de explicar e de ler em qualquer sessão.
+- Contras:
+  - 120 entradas para escrever, revisar e testar. É muito trabalho antes de qualquer jogo real.
+  - Ajustar um número de balanço exige mexer em muitas entradas.
+  - Alto risco de um par ficar desequilibrado sem perceber.
+
+**Recomendação: híbrido.** Regra geradora para os 120 pares (cada par ganha um efeito derivado da combinação de família com o par, com teste de que nenhum repete) e uma lista de **~20 exceções escritas à mão** para os pares de maior identidade (fogo + gelo, luz + sombra, vida + vazio...). Assim cada par é único e a manutenção continua pequena. Decisão ainda sua.
+
+### 2. Restaurar: híbrido confirmado
+Terreno natural volta pela geração do mundo a partir da seed, sem limite. Só os blocos construídos por jogadores ou magias ficam no diário, no tamanho atual (4.096). **Confirmado.** Entra em `DECISIONS.md` como decisão aprovada.
+
+### 3. Esboço: cristais e fragmentos (para aprovar ou ajustar)
+
+**Drop:**
+- Cristal de mana tem uma **chance de soltar um fragmento** (valor provisório: 10%, em config).
+- Toque de Seda não solta fragmento: solta o cristal inteiro, com teto de 16× (ver abaixo).
+
+**Efeito do fragmento:**
+- **No chão, perto de jogadores** (raio provisório: 8 blocos) ou **em entidade que não é container** (moldura de item): regeneração de mana ×1,5 e poder ×1,5 para quem está perto.
+- **No inventário de quem carrega:** ×2.
+- Container (baú, barril, shulker) não conta, para não virar estoque escondido.
+
+**Exposição prolongada (efeito adverso, escalonado):**
+- Depois de um tempo com o fragmento perto ou no inventário (provisório: 5 min), aplica **Fraqueza I**.
+- Depois de 15 min, **mana poisoning na zona 1**.
+- Acima disso, sobe um nível de zona a cada 10 min.
+- Largar o fragmento ou se afastar zera o contador.
+
+**Toque de Seda:** cristal com teto de **16×** (antes 32×) e **mana poisoning conforme a zona** menos uma (perde uma zona).
+
+**Perguntas para fechar:**
+- A chance de 10% e o raio de 8 blocos estão bons?
+- Os tempos de exposição (5, 15 e 10 min) e os efeitos (Fraqueza, zona 1) estão bons?
+- Quais entidades não-container contam além da moldura de item?
+
+### 4. Esboço: fontes de descoberta de glifos
+
+| Fonte | O que pode revelar | Quando |
+|---|---|---|
+| Armadilha sem tinta invisível | glifos da magia da armadilha | ao disparar, para quem for atingido |
+| Mago conjurando | glifos da magia que ele conjura | ao ser atingido ou ao ver a conjuração |
+| Efeito de poção (veneno etc.) | glifo do efeito | só se você for atingido por ele |
+| Efeito visual (ex.: Petrificar) | glifo do efeito | quando atinge outro dentro do seu campo de visão |
+
+**Regra geral proposta:** a descoberta vai para quem **sofreu** ou **viu** o efeito, nunca para quem só estava por perto sem ver. Glifo descoberto assim entra como "identificado" no grimório, com o mesmo aviso discreto da aba Descobertas. Sem recompensa mecânica.
+
+**Perguntas para fechar:**
+- A regra "sofreu ou viu" está boa?
+- Quer que eu escreva a tabela completa (glifo por glifo) ou só as famílias?
+
+### 5. Item 4 dos estilos: elementos opostos penalizam um ao outro
+Confirmado: **elementos opostos pesam um contra o outro**. Fogo alto reduz gelo, por exemplo. Isso faz o estilo ser uma escolha, não só acúmulo.
+
+**Pergunta:** quais são os pares opostos? Sugestão: fogo × gelo, luz × sombra, vida × vazio, terra × tempestade (ar). O resto (água, força, sangue, tempo, natureza, som) fica sem oposto. Confirma ou ajusta?
+
+### 6. Potência por glifo afetado: ×1,5
+Confirmado: **cada glifo afetado pela Potência multiplica o custo dela por 1,5**. A Potência continua alcançando o grupo.
+
+### 7. Condutor: atrai para onde o condutor foi colocado
+
+**Regra:** o raio que cai dentro da área do Condutor é atraído para o **ponto onde ele foi colocado**, seja uma criatura, um bloco ou um jogador.
+
+**Desfazer com Dispel:** o Dispel remove o Condutor. Everton quer que o Dispel **também desfaça escrituras** (inscrições no mundo), para dar aos jogadores alguma chance contra armadilhas em ruínas.
+
+**Dúvida 7a:** não entendi a parte "para não substituir o pó". É sobre a tinta/pó arcano que a escritura usa, ou outra coisa? Preciso saber para desenhar a regra de que o Dispel apaga a escritura sem apagar o pó.
+
+### 8. Vazio destruindo grimório com dono
+Confirmado: **pode destruir o grimório com dono**, na teoria, mas a recuperação é **muito difícil** (praticamente não se recupera). Não é proibido, só muito difícil de reverter.
+
+**Dúvida 8a:** "muito difícil" quer dizer que existe uma forma de recuperar, mesmo que cara e rara? Ou o grimório destruído pelo vazio se perde de vez? Isso muda a implementação.
+
+---
+
+## Pendências desta rodada
+
+- **Decisão grande:** item 1 (regra geradora, híbrido recomendado: **respondido sem escolha ainda**).
+- **Esboços para ajustar:** item 3 (cristais) e item 4 (fontes de descoberta).
+- **Dúvidas pequenas:** 5 (pares opostos), 7a (o que é "pó"), 8a (recuperação do grimório pelo vazio).
+- **Já confirmados:** 2 (híbrido do Restaurar), 6 (×1,5 por glifo afetado), 8 (vazio pode destruir, recuperação difícil).

@@ -451,3 +451,98 @@ Confirmado: **pode destruir o grimório com dono**, na teoria, mas a recuperaç�
 - **Esboços para ajustar:** item 3 (cristais) e item 4 (fontes de descoberta).
 - **Dúvidas pequenas:** 5 (pares opostos), 7a (o que é "pó"), 8a (recuperação do grimório pelo vazio).
 - **Já confirmados:** 2 (híbrido do Restaurar), 6 (×1,5 por glifo afetado), 8 (vazio pode destruir, recuperação difícil).
+
+---
+
+## Rodada 4 (27 nov): decisões e esboço da planilha
+
+Continua valendo o congelamento: nada disto foi aplicado ao código. Só design.
+
+### Correção de uma rodada anterior: o item 4 rejeitado era dos estilos
+Eu tinha entendido que o "item 4" que Everton não quis era o da proposta de **tags de estado** (sincronização). Não era.
+O item rejeitado é o item 4 dos **estilos**: elementos opostos penalizam um ao outro. Ele **não gostou dessa penalidade**.
+Logo, **as tags de estado ficam aprovadas inteiras**, incluindo a sincronização com o cliente.
+
+### 1. Sinergias do estilo: escrita à mão (decidido)
+Os 120 pares serão escritos **à mão**. Motivo dado por Everton: com exceções, a regra geradora produziria pares
+"melhores" que outros. Consequência: cada par é escrito e revisado individualmente. É mais trabalho, mas nenhum par sai
+favorecido por uma regra. **Decidido.** Entra em `DECISIONS.md` como decisão aprovada.
+
+### 3. Cristais: chance de 20%, e o contador sobe e desce em ritmos diferentes (aprovado)
+- **Chance de drop de fragmento: 20%** (aprovado).
+- **O contador de exposição não reseta sozinho.** Ele **sobe** devagar e **desce 4× mais rápido**. Exemplo dado:
+  se leva 10 min para subir até o efeito pleno, leva ~2,5 min para descer até zero.
+- Os limiares continuam provisórios: Fraqueza I aos 5 min de subida; mana poisoning da zona 1 aos 15 min; subir uma
+  zona a cada 10 min.
+- Largar o fragmento ou se afastar **não zera** o contador: ele só desce no ritmo de descida.
+
+**Dúvida 3a (pequena):** o contador de 5 min para Fraqueza é de subida, então ao descer para zero some em ~75 s?
+Confirmo que é isso.
+
+### 4. Planilha de descoberta: o que revela o quê (esboço)
+
+Cada efeito de glifo cai em uma das três colunas, conforme **quem é afetado** (e quem vê):
+
+| Coluna | Como o glifo é descoberto | Exemplos (esboço) |
+|---|---|---|
+| **Só vendo** | Você só assiste ao efeito, sem ser atingido. Vale se o efeito cai dentro do seu campo de visão. | Petrificar (vira pedra), Luz, Invisibilidade vista de longe, Fogos Arcanos, Estrondo sobre outro |
+| **Afetando os outros** | Você atinge outra criatura ou jogador com o efeito. | Dano, Cegar, Lentidão, Atrair, Empurrão, Congelar, Veneno aplicado num alvo |
+| **Afetando você mesmo** | O efeito atinge você (como alvo de si mesmo, ou pelo que o mago/armadilha te joga). | Veneno (quando você é atingido), Fogo que te queima, Lentidão em você, Cura, Escudo em você |
+
+**Regra geral:** a descoberta vai para **quem está sendo afetado ou vê** o efeito. Quem só estava por perto e não viu
+não descobre. Glifo descoberto entra como "identificado" no grimório, com o aviso discreto da aba Descobertas.
+
+**Observação:** Petrificar hoje não vira pedra visualmente (bug já registrado). Para a coluna "só vendo" funcionar,
+o efeito precisa aparecer.
+
+**Pergunta 4a:** quer a planilha completa (todos os 114 efeitos classificados nas três colunas) ou basta a lista de
+exemplos acima para fechar a regra?
+
+### 5. Pares opostos: rejeitado
+Não haverá penalidade entre elementos opostos. **Rejeitado.** O estilo não penaliza os elementos que o jogador não usa.
+
+### 7. Dispel não desfaz escrituras (decidido)
+Hoje o **pó solvente** é o item que desfaz escrituras. Se o Dispel também desfizer escrituras, o solvente perde o
+propósito. **Decidido:** o Dispel **não afeta escrituras**. Ele continua removendo efeitos, e o Condutor é removido pelo
+Dispel (como combinado). Para dar chance ao jogador contra armadilhas de ruína, a saída é o próprio solvente, que
+continua disponível.
+
+**Pergunta 7a:** isso fecha o item? Se sim, a armadilha de ruína fica desarmável só com o solvente.
+
+### 8. Como perder um grimório no vazio: cenários decentes (para escolher)
+
+**Fato do jogo:** hoje, um item cai no vazio (abaixo do fundo do mundo) e some. Como o grimório com dono não pode
+despawnar, ele precisa de uma regra própria aí. Três cenários que dão perda real **sem** ser injusta:
+
+**A. Esfera de vazio com janela de recuperação (recomendado)**
+- Um efeito de vazio (ex.: Buraco Negro do Eclipse, ou a armadilha de vazio de uma ruína) puxa o grimório para dentro
+  da esfera.
+- Se alguém **não tirar** o grimório de dentro dela em **até 60 s**, ele é "engolido" e vai para um ponto marcado no
+  vazio.
+- Para recuperar: o dono pode usar **Rastrear Posse** (já existe, aponta para o grimório perdido) e **Retorno** (já
+  existe) para ir até o ponto. Recuperável, mas caro e arriscado.
+- Perda definitiva só se o ponto for destruído (por exemplo, a esfera ser fechada por um Dispel do dono).
+
+**B. Queda no vazio do mundo (sem efeito de glifo)**
+- Se o grimório cai abaixo do mundo, ele **volta ao último ponto seguro do dono** (cama ou spawn).
+- Não há perda. Isso garante que a regra "não despawna" nunca destrói o grimório por acidente.
+- Vantagem: justo e sem surpresa. Desvantagem: não há risco real.
+
+**C. Perda permanente pelo vazio (não recomendado)**
+- O grimório some de vez se cair no vazio do mundo.
+- Viola a regra de "não despawna", e o jogador perde tudo sem chance de recuperar. Recomendo não usar.
+
+**Recomendação:** **A** para o vazio de glifo (perda com janela e recuperação), e **B** para a queda acidental. Assim
+existe perda real e recuperável, e nenhum jogador perde o grimório por acidente.
+
+**Pergunta 8a:** A (recomendado), B, C, ou combinação A+B? E a janela de 60 s está boa?
+
+---
+
+## Pendências desta rodada
+
+- **Decidido:** sinergias à mão (1); 20% de chance e contador que sobe e desce em ritmos diferentes (3); Dispel não
+  afeta escrituras (7); elementos opostos rejeitados (5); tags de estado aprovadas inteiras.
+- **Esboço para fechar:** planilha de descoberta (4): completa ou só exemplos (4a).
+- **Escolha:** cenário do vazio (8a).
+- **Confirmar:** contador de Fraqueza descendo em ~75 s (3a); Dispel fechado e solvente como única forma (7a).
